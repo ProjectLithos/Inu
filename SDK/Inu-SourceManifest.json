@@ -1,5 +1,5 @@
 {
-  "version": "0.0.55",
+  "version": "0.0.56",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -383,7 +383,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "e7da5c8df7cada3d30e7f9296dbbc8cb19d878d48debcf89c698397673a4d4fe"
+      "sha256": "4d64d06683f29c5aa099f530edb0db91d5fb085aaae789ce850d0138616be8ec"
     },
     {
       "path": "Directory.Build.targets",
@@ -415,7 +415,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "5c1d5b03c914d002656466b0ff3c35ecbb7629996b8e8e95c067f9cc16f52685"
+      "sha256": "3a5f2fe66916fac1359ff441aa3da83b59613620df5ab4b264806551e3788c6e"
     },
     {
       "path": "Inu-Package.bat",
@@ -447,7 +447,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "c47d175ef9db63df6df520dd5d287cef1613cf528113f13025a6bbb7fc9ce893"
+      "sha256": "63c280b1c2fbfcda4e644c52182fab92188d4d6029c5debe3f37dc4f33f752ee"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -987,7 +987,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "e284c557bfeb1be415eaedb53c474c615adf4f09b39a72ab07a9cd68491c6c46"
+      "sha256": "f14f793ae627559bfc26fd93897254d1eaf2a1050dd847285435eaf15a41dc86"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1363,7 +1363,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "be47895b4b894cd75fba1b28f497a101c3267194dd5a2333dfab1bb5ca40032e"
+      "sha256": "2a50f2fec0fd3191d7f52698c4c4edefe812740281b2090a011305e86b404661"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -2211,7 +2211,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "a14604e17c818e5203ce17fb7c79b3b2c6c748116ed9698951241c6b0d8ad75c"
+      "sha256": "ef269312549fb525df34795398135c7f02460c2614e4c217bead08136a6873a1"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -2567,7 +2567,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-      "sha256": "4f98da162788289dab08a79517ae4467823bba19fde0207084de008febcf855d"
+      "sha256": "61f8e58f85f7b9a7965d832114e02852f79fd9baf5e6757258028a0944f879ef"
     },
     {
       "path": "src/Inu.Kernel.Console/BitmapFont.cs",

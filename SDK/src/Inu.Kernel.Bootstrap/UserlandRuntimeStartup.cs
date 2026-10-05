@@ -103,11 +103,17 @@ public static unsafe class UserlandRuntimeStartup
             UInt64 childId=_pendingProcessId;
             if(childId==0UL)
             {
-                // The shell should only complete to hand a successful spawn to the supervisor.
-                // Treat any other completion as a shell failure instead of silently rebuilding it.
-                if(KernelProcesses.TryGetProcess(shell.Id,out KernelProcessInfo shellDone))
-                    KernelProcesses.TryTerminate(shell.Id,shellDone.ExitCode);
-                return false;
+                // A microkernel shell may return cleanly to its supervisor without having queued
+                // a child. Keep the already-loaded shell resident and resume it instead of treating
+                // that hand-off as a fatal kernel return. Faulted/non-completed shells still fail.
+                if(!KernelProcesses.TryGetProcess(shell.Id,out KernelProcessInfo shellDone) ||
+                   shellDone.State!=KernelProcessState.Completed ||
+                   !KernelProcessRecordStore.ReactivateCompleted(shell.Id))
+                {
+                    KernelProcesses.TryTerminate(shell.Id,-1L);
+                    return false;
+                }
+                continue;
             }
 
             _pendingProcessId=0UL;
