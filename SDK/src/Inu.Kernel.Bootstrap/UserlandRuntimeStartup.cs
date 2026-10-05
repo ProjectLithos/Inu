@@ -57,6 +57,8 @@ public static unsafe class UserlandRuntimeStartup
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileOpen,&FileOpenGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileRead,&FileReadGet)||
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileWrite,&FileWriteSet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileCreate,&FileCreateSet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileDelete,&FileDeleteSet)||
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.FileClose,&FileCloseEvent))return false;
         if(!KernelSystemCalls.RegisterGet("system.device.inspect",&DeviceInspectGet))return false;
         _initialized=true;return true;
@@ -311,6 +313,24 @@ public static unsafe class UserlandRuntimeStartup
         if(handle==0UL)return (Int64)KernelSystemCallError.NotPermitted;
         return KernelVfs.Write(new KernelFileHandle((UInt32)handle),buffer,requested,out UInt32 written)?
             written:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 FileCreateSet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>PathCapacity)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* path=stackalloc Byte[(Int32)frame->NativeMessage.DataLength];
+        if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)path,frame->NativeMessage.DataLength))return (Int64)KernelSystemCallError.Fault;
+        return KernelVfs.CreateFileAscii(KernelVfs.DefaultNamespace,path,(UInt32)frame->NativeMessage.DataLength,frame->NativeMessage.Value0!=0UL)?
+            0L:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 FileDeleteSet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>PathCapacity)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* path=stackalloc Byte[(Int32)frame->NativeMessage.DataLength];
+        if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)path,frame->NativeMessage.DataLength))return (Int64)KernelSystemCallError.Fault;
+        return KernelVfs.DeleteFileAscii(KernelVfs.DefaultNamespace,path,(UInt32)frame->NativeMessage.DataLength)?
+            0L:(Int64)KernelSystemCallError.Fault;
     }
 
     private static Int64 FileCloseEvent(KernelSystemCallFrame* frame)

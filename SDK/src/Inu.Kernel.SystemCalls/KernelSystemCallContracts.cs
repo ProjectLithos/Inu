@@ -57,6 +57,8 @@ public static class KernelSystemCallMessages
     public const String FileOpen = "file.open";
     public const String FileRead = "file.read";
     public const String FileWrite = "file.write";
+    public const String FileCreate = "file.create";
+    public const String FileDelete = "file.delete";
     public const String FileClose = "file.close";
 }
 

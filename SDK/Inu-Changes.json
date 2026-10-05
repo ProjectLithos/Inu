@@ -1,12 +1,14 @@
 {
-  "baseVersion": "0.0.60",
-  "version": "0.0.61",
+  "baseVersion": "0.0.61",
+  "version": "0.0.62",
   "changedFiles": [
     "Inu.ApiContract.json",
     "docs/Public-API-Rules.md",
-    "src/Inu.Freestanding.CoreLib/CoreLib.cs",
-    "src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs"
+    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
+    "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
+    "src/Inu.Userland.Runtime/IO.cs",
+    "src/Inu.Userland.Runtime/UserlandRuntime.cs"
   ],
   "removedFiles": [],
-  "summary": "Adds the first explicit freestanding System.Text SDK surface: StringBuilder, Encoding, ASCIIEncoding and UTF8Encoding, with managed-string materialisation and runtime conformance checks."
+  "summary": "Adds the first explicit freestanding System.IO userland surface with File.Exists, whole-file read/write text/bytes, delete, and Inu-owned I/O exceptions over the existing Get/Set/Event syscall model."
 }

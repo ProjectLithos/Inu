@@ -139,5 +139,7 @@ public static unsafe class UserlandFile
     public static Int64 OpenAscii(Byte* path,UInt32 pathLength,UInt32 access)=>UserlandSystem.Call(UserlandOperation.Get,"file.open",path,pathLength,null,0UL,access);
     public static Int64 Read(UInt64 handle,Byte* output,UInt32 count)=>UserlandSystem.Call(UserlandOperation.Get,"file.read",null,0UL,output,count,handle,count);
     public static Int64 Write(UInt64 handle,Byte* input,UInt32 count)=>UserlandSystem.Call(UserlandOperation.Set,"file.write",input,count,null,0UL,handle,count);
+    public static Int64 CreateAscii(Byte* path,UInt32 pathLength,Boolean overwrite)=>UserlandSystem.Call(UserlandOperation.Set,"file.create",path,pathLength,null,0UL,overwrite?1UL:0UL);
+    public static Int64 DeleteAscii(Byte* path,UInt32 pathLength)=>UserlandSystem.Call(UserlandOperation.Set,"file.delete",path,pathLength,null,0UL);
     public static Int64 Close(UInt64 handle)=>UserlandSystem.Call(UserlandOperation.Event,"file.close",null,0UL,null,0UL,handle);
 }
