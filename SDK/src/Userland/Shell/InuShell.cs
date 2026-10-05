@@ -11,17 +11,16 @@ public static unsafe class InuShell
 {
     private const UInt32 MaximumLineBytes = 1024U;
     private const UInt32 MaximumPathBytes = 1536U;
-    private const String Prompt = "> ";
-
     /// <summary>Runs the ordinary ring-3 shell process.</summary>
-    public static Int32 Run()
+    public static Int32 Run(String prompt)
     {
+        if(prompt==null)return 7;
         Byte* line=stackalloc Byte[(Int32)MaximumLineBytes];
         Byte* path=stackalloc Byte[(Int32)MaximumPathBytes];
         if(UserlandSystem.ProcessId()==0UL)return 1;
         for(;;)
         {
-            if(!UserlandConsole.Write(Prompt))return 2;
+            if(!UserlandConsole.Write(prompt))return 2;
             Int32 length=UserlandConsole.ReadLineAscii(line,MaximumLineBytes);if(length<0)return 3;
             UInt32 start=0U,end=(UInt32)length;while(start<end&&line[start]==' ')start++;while(end>start&&line[end-1U]==' ')end--;
             if(start==end)continue;

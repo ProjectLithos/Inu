@@ -2,7 +2,7 @@
 
 Inu's framebuffer console accepts decoded keyboard input from PS/2 and USB HID devices and feeds it into the freestanding `Inu.Kernel.CommandLine` service.
 
-The command line provides a 256-byte editable input buffer, printable ASCII echo, Backspace, Enter submission, case-insensitive command matching, and a `Inu> ` prompt. Up/Down remain scrollback controls. Ctrl+1/2/3 force framebuffer buffering modes; Alt+1/2/3 force font-size presets, leaving ordinary digits available for command arguments.
+The command line provides a 256-byte editable input buffer, printable ASCII echo, Backspace, Enter submission, case-insensitive command matching, and a coder-defined prompt from `Userland/<OSName>/Shell.cs`. Up/Down remain scrollback controls. Ctrl+1/2/3 force framebuffer buffering modes; Alt+1/2/3 force font-size presets, leaving ordinary digits available for command arguments.
 
 Built-in control commands are available immediately after boot:
 

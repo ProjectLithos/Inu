@@ -52,7 +52,8 @@ static int MainEntry(string[] args)
         string shellRuntime=Path.Combine(projectRoot,"Userland","Provided","Shell","InuShell.cs");
         if(!File.Exists(shellRuntime))shellRuntime=Path.Combine(sdkRoot,"src","Userland","Shell","InuShell.cs");
         string shellType=FindTypeWithMethod(shellSource,"Configure")??returnFail($"Could not find Shell.Configure in {shellSource}");
-        rc=CompileApp("Shell",[shellRuntime,shellSource],$"global::{shellType}.Configure(); return global::Inu.Userland.Shell.InuShell.Run();",Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
+        if(!HasPromptMember(shellSource))return Fail($"Coder-owned shell source must define a Prompt string: {shellSource}");
+        rc=CompileApp("Shell",[shellRuntime,shellSource],$"global::{shellType}.Configure(); return global::Inu.Userland.Shell.InuShell.Run(global::{shellType}.Prompt);",Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
         if(rc!=0)return rc;
     }
 
@@ -133,6 +134,7 @@ static string? FindTypeWithMethod(string file,string method)
     string s=File.ReadAllText(file);Match ns=Regex.Match(s,@"\bnamespace\s+([A-Za-z_][A-Za-z0-9_.]*)\s*[;{]");MatchCollection types=Regex.Matches(s,@"\b(?:public\s+)?static\s+(?:(?:unsafe|partial)\s+)*class\s+([A-Za-z_][A-Za-z0-9_]*)");foreach(Match type in types){int pos=type.Index+type.Length;if(Regex.IsMatch(s[pos..],$@"\b{Regex.Escape(method)}\s*\("))return (ns.Success?ns.Groups[1].Value+".":"")+type.Groups[1].Value;}return null;
 }
 static bool HasStringArrayMain(string file,string type)=>Regex.IsMatch(File.ReadAllText(file),@"\bMain\s*\(\s*(?:string|String)\s*\[\s*\]\s+[A-Za-z_]");
+static bool HasPromptMember(string file)=>Regex.IsMatch(File.ReadAllText(file),@"\b(?:const\s+)?(?:string|String)\s+Prompt\b");
 static string Sanitize(string value)=>Regex.Replace(value,@"[^A-Za-z0-9_.-]","_");
 static string Esc(string value)=>value.Replace("&","&amp;").Replace("\"","&quot;");
 static string? GetOption(string[] args,string name){for(int i=0;i+1<args.Length;i++)if(string.Equals(args[i],name,StringComparison.OrdinalIgnoreCase))return args[i+1];return null;}

@@ -1,6 +1,6 @@
 {
-  "baseVersion": "0.0.55",
-  "version": "0.0.56",
+  "baseVersion": "0.0.56",
+  "version": "0.0.57",
   "changedFiles": [],
   "removedFiles": [],
   "summary": "Kath now treats each operating system's exact user-chosen project path as its sole location identity. It no longer scans remembered or legacy root folders. Instance suffixes are determined only by collisions in the parent folder selected for the current OS creation."
