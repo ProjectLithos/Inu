@@ -1,22 +1,12 @@
 {
-  "baseVersion": "0.0.50",
-  "version": "0.0.51",
+  "baseVersion": "0.0.51",
+  "version": "0.0.52",
   "changedFiles": [
-    "Inu.ApiContract.json",
+    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
+    "src/Inu.Kernel.Processes/KernelProcessRecordStore.cs",
     "Inu.SdkManifest.json",
-    "docs/Command-Line-SDK.md",
-    "docs/Public-API-Rules.md",
-    "docs/site-content/Command-Line-SDK.md",
-    "src/Inu.DocumentationGenerator/PublicApiCollector.cs",
-    "src/Inu.DocumentationGenerator/HtmlSiteWriter.cs",
-    "src/Inu.DocumentationGenerator/Program.cs",
     "src/Inu.Core/InuSdkContract.cs"
   ],
-  "removedFiles": [
-    "Inu.ApiBaseline.json",
-    "Compare-InuApiCompatibility.ps1",
-    "inu.ps1",
-    "docs/Public-API-Baseline.md"
-  ],
-  "summary": "Reset the SDK API to the actual canonical Inu command surface and require explicit export markers for coding API documentation."
+  "removedFiles": [],
+  "summary": "Keep the interactive shell process resident across command launches so returning from short ring-3 commands such as Echo does not reload SHELL.EXE."
 }

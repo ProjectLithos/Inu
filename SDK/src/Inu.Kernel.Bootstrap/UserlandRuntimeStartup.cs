@@ -88,17 +88,27 @@ public static unsafe class UserlandRuntimeStartup
         UInt32 shellLength=CopyLiteral("SYSTEM/SHELL/SHELL.EXE",shellPath,22U);
         if(shellLength==0U)return false;
 
+        // Load the interactive shell once and keep its address space resident. A command spawn
+        // still leaves ring 3 so the child can run in its own isolated process, but returning to
+        // the prompt no longer reparses and remaps SHELL.EXE after every command.
+        if(!TryCreateExecutable(shellPath,shellLength,KernelProcessOwnership.Foreground,out KernelProcessInfo shell))return false;
+        _shellProcessId=shell.Id;
+
         for(;;)
         {
-            if(!TryCreateExecutable(shellPath,shellLength,KernelProcessOwnership.Foreground,out KernelProcessInfo shell))return false;
             SetCurrentContext(null,0U,null,0U);
-            _shellProcessId=shell.Id;_shellOutputWritten=false;
+            _shellOutputWritten=false;
             if(!KernelProcesses.TryStart(shell.Id,0UL)){KernelProcesses.TryTerminate(shell.Id,-1L);return false;}
-            if(KernelProcesses.TryGetProcess(shell.Id,out KernelProcessInfo shellDone))
-                KernelProcesses.TryTerminate(shell.Id,shellDone.ExitCode);
 
             UInt64 childId=_pendingProcessId;
-            if(childId==0UL)continue;
+            if(childId==0UL)
+            {
+                // The shell should only complete to hand a successful spawn to the supervisor.
+                // Treat any other completion as a shell failure instead of silently rebuilding it.
+                if(KernelProcesses.TryGetProcess(shell.Id,out KernelProcessInfo shellDone))
+                    KernelProcesses.TryTerminate(shell.Id,shellDone.ExitCode);
+                return false;
+            }
 
             _pendingProcessId=0UL;
             PromotePendingContext();
@@ -106,11 +116,13 @@ public static unsafe class UserlandRuntimeStartup
             {
                 KernelProcesses.TryTerminate(childId,-1L);
                 ClearCurrentContext();
+                if(!KernelProcessRecordStore.ReactivateCompleted(shell.Id)){KernelProcesses.TryTerminate(shell.Id,-1L);return false;}
                 continue;
             }
             if(KernelProcesses.TryGetProcess(childId,out KernelProcessInfo childDone))
                 KernelProcesses.TryTerminate(childId,childDone.ExitCode);
             ClearCurrentContext();
+            if(!KernelProcessRecordStore.ReactivateCompleted(shell.Id)){KernelProcesses.TryTerminate(shell.Id,-1L);return false;}
         }
     }
 

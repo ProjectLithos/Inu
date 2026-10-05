@@ -91,6 +91,15 @@ internal static unsafe class KernelProcessRecordStore
     {
         if(!Acquire())return false;ProcessRecord* r=Record(handle);if(r==null){Release();return false;}if(r->State==(UInt32)KernelProcessState.Running)r->State=(UInt32)KernelProcessState.Ready;Release();return true;
     }
+    /// <summary>Restarts a completed resident process without rebuilding its address space.</summary>
+    internal static Boolean ReactivateCompleted(UInt64 processId)
+    {
+        if(processId==0UL||!Acquire())return false;
+        if(!TryFind(processId,false,out KernelProcessRecordHandle handle)){Release();return false;}
+        ProcessRecord* r=Record(handle);
+        if(r==null||r->State!=(UInt32)KernelProcessState.Completed){Release();return false;}
+        r->ExitCode=0L;r->KillRequested=0UL;r->State=(UInt32)KernelProcessState.Ready;Release();return true;
+    }
     internal static Boolean TryBeginTermination(UInt64 processId,out KernelProcessRecordHandle handle,out KernelProcessState state,out Int64 exitCode)
     {
         handle=default;state=KernelProcessState.Unused;exitCode=0L;if(!Acquire())return false;if(!TryFind(processId,true,out handle)){Release();return false;}ProcessRecord* r=Record(handle);state=(KernelProcessState)r->State;exitCode=r->ExitCode;
