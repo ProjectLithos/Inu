@@ -1,5 +1,5 @@
 {
-  "version": "0.0.58",
+  "version": "0.0.59",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -380,114 +380,6 @@
     {
       "path": "Build-InuDocumentation.ps1",
       "sha256": "704e007ece118c1a1b328029d22704522a4ba868f3db1fc5c734386f4cc79a4f"
-    },
-    {
-      "path": "Directory.Build.props",
-      "sha256": "8850d1bbc28f19d89323b4c476dc0203e761e274c56348bf7b0df06db77fdb02"
-    },
-    {
-      "path": "Directory.Build.targets",
-      "sha256": "1f594e304c67cc3d958de12b12e0b1c081bc7ecf34101936d9ab86922d6548fa"
-    },
-    {
-      "path": "Install-InuCli.bat",
-      "sha256": "2b83a22a5c50293d295d1739f6423423d84d725ef0ace50f620a6b99e12e6625"
-    },
-    {
-      "path": "Install-InuCli.ps1",
-      "sha256": "b410d4181dd147b0b9d0170180f686002eab6eddcf3f13654843cc94bbce5efb"
-    },
-    {
-      "path": "Install-InuFonts.bat",
-      "sha256": "bc42a446d439eccfcc1dda4554cf879e473fe1fd91790110ea2faf8cd31fb7e9"
-    },
-    {
-      "path": "Install-InuFonts.ps1",
-      "sha256": "90acf8ea8738cd37199f7d3d1be1d5219c7790e40f4013af7b7adcbba8a1ff97"
-    },
-    {
-      "path": "Install-InuToolchain.bat",
-      "sha256": "4fe7cc96e5e6cf896b6ccb87034130b2c911920fcd9fc564fbd33cbb4329ffc0"
-    },
-    {
-      "path": "Install-InuToolchain.ps1",
-      "sha256": "f166536865dc2ded5cb33612fa55e4ed42f663752ada4ea953db3e77fcd1c9f2"
-    },
-    {
-      "path": "Inu-Changes.json",
-      "sha256": "601682b0e99bd10455ae0725e829978f9685069c1ab97cadc093afa3e8f5d1bb"
-    },
-    {
-      "path": "Inu-Package.bat",
-      "sha256": "b2f1f1fb55fbbf744fce00acf3936cdc7642ab9017308dcde248bdf08c34e63b"
-    },
-    {
-      "path": "Inu.ApiContract.json",
-      "sha256": "31c761bcdeaf95cab22ca8012c1d19eec03e4f757677096fe3b175a413bcbdc9"
-    },
-    {
-      "path": "Inu.ArchitectureBoundaries.json",
-      "sha256": "4bb3bfb272e996854f367ba7b47ba725be86008e5d24c968891c5d156c9258a5"
-    },
-    {
-      "path": "Inu.BuildProvenance.schema.json",
-      "sha256": "bc02028b1d77e6b956a8cb5e9ebbb5c2f670251cbb99a958c5d364dc6917a449"
-    },
-    {
-      "path": "Inu.CrashDump.schema.json",
-      "sha256": "176072c815c374170bab8347a9d44c3a5e2a09197d5f9396aa0d275ffcf824f3"
-    },
-    {
-      "path": "Inu.DriverPackage.schema.json",
-      "sha256": "010908433cf8cb9018ab5ea8f29d0a45fdcb131adb434af75ac0c9a0b5fdf7b4"
-    },
-    {
-      "path": "Inu.Package.schema.json",
-      "sha256": "1f76b41d84b51396a5f93f1ead4f4e77133aa710c471b051b681247280c30859"
-    },
-    {
-      "path": "Inu.SdkManifest.json",
-      "sha256": "63a07f87a2d3de86487e662c0f5080b5db2d457897d9fcc6b3cdd94e0818da13"
-    },
-    {
-      "path": "Inu.SubsystemContracts.json",
-      "sha256": "3b1c471624c6fd9d4d1f050ad873eae92caf52212d9b142e36cbce0793dcad91"
-    },
-    {
-      "path": "Pack-InuDriver.bat",
-      "sha256": "9d9967929512f0df937749432538783aab46e5a4e7cfab76b945b29d8de119dc"
-    },
-    {
-      "path": "Pack-InuDriver.ps1",
-      "sha256": "553f3ef00df9c3b10eaac1f51833c9aa49332c6b71bb230623db695f09c9d260"
-    },
-    {
-      "path": "Pack-InuPackage.bat",
-      "sha256": "b43bfa4e5363320bcdcd328596d204c4bd71efbfdfdaed2756dca80a7cc71677"
-    },
-    {
-      "path": "README.md",
-      "sha256": "f719eed235d9d26de34fa86b39d9f898a698f38d53a3ecdcaee9bcffec7b9aad"
-    },
-    {
-      "path": "Run-InuDotNetConformance.bat",
-      "sha256": "7c80fbd391ea9b57e828e269f493bf18593655c6a4b809071e26314edf7e10e5"
-    },
-    {
-      "path": "Run-InuQemuMatrix.bat",
-      "sha256": "e8dc27b3c703429b978a6553dc07e0131d1d1ffde9570e5a00a676894e484b85"
-    },
-    {
-      "path": "Run-InuQemuMatrix.ps1",
-      "sha256": "fb116ccaed88473e258810e3d988d97fe83c8710bd252911f648c11dbc8cb160"
-    },
-    {
-      "path": "THIRD-PARTY-NOTICES.md",
-      "sha256": "5df2f5d78693aa36bac7afaedcdab3d64ffd5e392b7ffa2a43cf2633e4ee3638"
-    },
-    {
-      "path": "components/Inu.ComponentCatalog.json",
-      "sha256": "9e1e053437df575a540b6fcf8f5eac1344c8f93c8166bd862263fcf838d1f548"
     },
     {
       "path": "components/definitions/Boot.AcpiRootPointer.json",
@@ -898,6 +790,18 @@
       "sha256": "8cfb89bbc5da3e85868215d606e9b126ca4b232bd4f3ccb96ed21e89f07ee7f2"
     },
     {
+      "path": "components/Inu.ComponentCatalog.json",
+      "sha256": "9e1e053437df575a540b6fcf8f5eac1344c8f93c8166bd862263fcf838d1f548"
+    },
+    {
+      "path": "Directory.Build.props",
+      "sha256": "64204a0f2798074b9ecf3001af0f4184474c2b3fec1f6c291dbd9f3515143410"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "sha256": "1f594e304c67cc3d958de12b12e0b1c081bc7ecf34101936d9ab86922d6548fa"
+    },
+    {
       "path": "docs/ACPI-Hardware-Discovery.md",
       "sha256": "78e5650d3c3266e12b285b5d7fa8bd36178f4cdf5cdd2ce378a77c714b281bc9"
     },
@@ -912,6 +816,14 @@
     {
       "path": "docs/Architecture.md",
       "sha256": "62a8c314f2c7300453332ddd5aa058eece2d1afdd3f77de2e8cba001d1e7e121"
+    },
+    {
+      "path": "docs/assets/Inu-Mono-32px.png",
+      "sha256": "737949063fde9da46e9e449bf8993875b3483cef6cddede66cd20bb86552b048"
+    },
+    {
+      "path": "docs/assets/Inu-Mono-8x16.png",
+      "sha256": "ff3b9a6e37db0da719fda10b306ce416e02a2e4d7079a9add79f194ca9aa36b6"
     },
     {
       "path": "docs/Boot-Capability-Interfaces.md",
@@ -987,7 +899,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "0bdbdbb70bc710fdec43db6f1650a1edcbf56309a07f6524d5cd979e8fcf7a2d"
+      "sha256": "bce7fdda8a508739064684049c8444305c492f36afeb5887f731c35dee5f333c"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1030,10 +942,6 @@
       "sha256": "00002b0e4649849146f73bdb1155f1e6845ccda56602c2b6e70854b4f666f0a2"
     },
     {
-      "path": "docs/NVMe-and-AHCI.md",
-      "sha256": "8267f615404e2208a1a18a42008a94913a7c6dac2a6d14201c4903594aa6f673"
-    },
-    {
       "path": "docs/Network-Adapters.md",
       "sha256": "8f20130ad1f73a4113db427e4f097df1b9ffb4a546fd7eaef10cf24fbc24cb9c"
     },
@@ -1046,16 +954,16 @@
       "sha256": "2b56d7c2c8a96d75f7f0b9b60603fb2d6ec5c88e27a266a7e60466d71543dd79"
     },
     {
-      "path": "docs/PCI-and-VirtIO.md",
-      "sha256": "c2d8c819f36bd2b4d720890c2678b857744f0a20bc9824a27f95138e16573470"
-    },
-    {
-      "path": "docs/PS2.md",
-      "sha256": "dd73db9392dbe462daec6f5aea4c720a7baf4800e2bdb3a62f7468cab27c72d6"
+      "path": "docs/NVMe-and-AHCI.md",
+      "sha256": "8267f615404e2208a1a18a42008a94913a7c6dac2a6d14201c4903594aa6f673"
     },
     {
       "path": "docs/Package-Manager-Format.md",
       "sha256": "a2b696a21fc16f7ca1ce681cb05fc594bf9f65390a7cd0e17b88ebb19d44fb2c"
+    },
+    {
+      "path": "docs/PCI-and-VirtIO.md",
+      "sha256": "c2d8c819f36bd2b4d720890c2678b857744f0a20bc9824a27f95138e16573470"
     },
     {
       "path": "docs/Physical-Memory-Management.md",
@@ -1082,8 +990,12 @@
       "sha256": "c5cad801ee2bdb31c4f0f788aaae6d2109e3581677c86e7542f0f6e5941a819c"
     },
     {
+      "path": "docs/PS2.md",
+      "sha256": "dd73db9392dbe462daec6f5aea4c720a7baf4800e2bdb3a62f7468cab27c72d6"
+    },
+    {
       "path": "docs/Public-API-Rules.md",
-      "sha256": "48c71fa4480ff252179ad2001657b65418ed4af5ca47b6bc096bd9993002efcb"
+      "sha256": "32f813dd46608ac302b9015141a8520cc21feb8770a27375e65357b44d6ef72d"
     },
     {
       "path": "docs/Release-0.0.18.md",
@@ -1282,76 +1194,100 @@
       "sha256": "fe24b0329dcf2c26177c5c7fe051f8863c020bcd62a6bb8d5edfbd04262203f6"
     },
     {
-      "path": "docs/SDK-Samples.md",
-      "sha256": "43eb3468c703fe838bce8a7a4399d4c4d5cb812bca1443a9727f48b25af488f3"
-    },
-    {
-      "path": "docs/SMP-and-Per-CPU-State.md",
-      "sha256": "4c9b912056e92d00145c01ae77321fa71b80f5f715fbcb710fe37de23f7494c5"
-    },
-    {
       "path": "docs/Scheduler-and-Threads.md",
       "sha256": "0d9af5aa5cbce1591dcfff5c5ca997c31141651b855bbb2c5b45eaf764311a07"
+    },
+    {
+      "path": "docs/SDK-Samples.md",
+      "sha256": "43eb3468c703fe838bce8a7a4399d4c4d5cb812bca1443a9727f48b25af488f3"
     },
     {
       "path": "docs/Serial.md",
       "sha256": "22c00f946b835f84e9b9f5b1ac1e46473fe1ebcfa2dcb8fdcc55c8ffa9de9195"
     },
     {
-      "path": "docs/Storage-and-Filesystems.md",
-      "sha256": "d2cc35defe5496677caf48f826b38cc70c5e5c579b09b35a95b7191c1a1f78e7"
+      "path": "docs/site-content/Boot-Capability-Interfaces.md",
+      "sha256": "15164e685c18b167fc3cc835c19384e9d7cdd7db27ead58b311c6241c287aec4"
     },
     {
-      "path": "docs/Structured-Kernel-Telemetry.md",
-      "sha256": "ae833ee5e417648507d7a5a45c9dd7a3e8925b4a75675266a1032d3d115ae0c6"
+      "path": "docs/site-content/Command-Line-SDK.md",
+      "sha256": "f7990ea57a96020304c9a1095d87ce39119b7ed3ed1ec5f09d2399f6b8fee3de"
     },
     {
-      "path": "docs/Synchronization-Primitives.md",
+      "path": "docs/site-content/Console-Subsystem-Run-API.md",
+      "sha256": "6bdc7e53c007192e21526ab0e08489d06750c14ce5fe645aae6140b610a726ff"
+    },
+    {
+      "path": "docs/site-content/Documentation-Authoring.md",
+      "sha256": "04cac76805cfb42d014d6b94c88d6db25703cd9485a8b60f7a92be2500a18d58"
+    },
+    {
+      "path": "docs/site-content/Executable-Application-Format.md",
+      "sha256": "d3d37fd3ac414c116e11cef65c78d04baccd5e9af19d9c2b610182c680fba71c"
+    },
+    {
+      "path": "docs/site-content/Filesystem-VFS-Contract.md",
+      "sha256": "ff71cc83e430bcb783824d98cc8a1158029722c874a710ae7a00b53f298ace25"
+    },
+    {
+      "path": "docs/site-content/Framebuffer-Font.md",
+      "sha256": "30b617b2b64c385c567dd9b8d92ba99da414252ae7e2bee9680f0c20941c7f47"
+    },
+    {
+      "path": "docs/site-content/Getting-Started.md",
+      "sha256": "8f5fee7a25368af0b4e7fb38895c35c6314f6e8ef232f02e20f120146156ad49"
+    },
+    {
+      "path": "docs/site-content/Memory-Diagnostics.md",
+      "sha256": "00002b0e4649849146f73bdb1155f1e6845ccda56602c2b6e70854b4f666f0a2"
+    },
+    {
+      "path": "docs/site-content/Network-Stack-API.md",
+      "sha256": "adf760d96db477fdc5f30d626abc3e184d1d63c7a15a72a97c6e174b27dae674"
+    },
+    {
+      "path": "docs/site-content/Next-Steps.md",
+      "sha256": "a0ec9fc97b8636ec0f85b1cc981da3c488e244b912c389bd9fe624be3b4bfab6"
+    },
+    {
+      "path": "docs/site-content/Package-Manager-Format.md",
+      "sha256": "a2b696a21fc16f7ca1ce681cb05fc594bf9f65390a7cd0e17b88ebb19d44fb2c"
+    },
+    {
+      "path": "docs/site-content/Physical-Memory.md",
+      "sha256": "92415c1641299802731404898bdc6a35f13c9fce5c778a58c6da44097ad16828"
+    },
+    {
+      "path": "docs/site-content/Power-Management.md",
+      "sha256": "f4aa44f75e6450d38dc73b8e8cde095033312888945018d4f911b2829e209399"
+    },
+    {
+      "path": "docs/site-content/Process-Isolation-Security.md",
+      "sha256": "a81b5f8ce98f63a5c4503b66b57a2f947e1e1b5ccf1ca833baec8cd7ec36f16a"
+    },
+    {
+      "path": "docs/site-content/Public-API-Quality.md",
+      "sha256": "797a28a4271da1c606daff71b3da47564ba76b8e378e3e00faab4927cf4766ef"
+    },
+    {
+      "path": "docs/site-content/SDK-Samples.md",
+      "sha256": "00d38bebd80ec0fe44a5cd84c5ba1eefc3ed4b190f86a27be5fa78c955b984f9"
+    },
+    {
+      "path": "docs/site-content/Synchronization-Primitives.md",
       "sha256": "32e3637e0d0028bdf2162df94cc51552e701c3da97bc46dbad555092646e52bb"
     },
     {
-      "path": "docs/System-Calls.md",
-      "sha256": "a7b1c5cd60c0a40da7837660125a4030635a4bbbd62021c69e5fcc3cff9d3740"
+      "path": "docs/site-content/Timekeeping-Framework.md",
+      "sha256": "0f00065d6e0967410d4611008faa912bb193091a192601859c9703e5b5eb920d"
     },
     {
-      "path": "docs/Timekeeping-Framework.md",
-      "sha256": "464e40050e63b0894f8ed5305231c87b2b11861aa9b37be7eb62e5a649666883"
+      "path": "docs/site-content/TrueType-Renderer.md",
+      "sha256": "dacb2bdd1f7a7cd5151fca78f93769c3699ab442fb9b3d448be64493ed1f3420"
     },
     {
-      "path": "docs/Timers-and-Clocks.md",
-      "sha256": "7f280486108afcf4f61fc9216f4730c380a8b5f9b0a770dd88979cef7f813300"
-    },
-    {
-      "path": "docs/TrueType-Renderer.md",
-      "sha256": "6110a9bd94f4691ba52ca8f42f6d330bd2e354f47dae82a03c1b27d01deaafc3"
-    },
-    {
-      "path": "docs/USB.md",
-      "sha256": "dded2dfe253febf8b4c7e870a7319b14b492127fed0717f6987225a9ff494400"
-    },
-    {
-      "path": "docs/Unified-Device-Model.md",
-      "sha256": "5f3bbd4189e3e402e6f5556e1e592cf2dabf46ae9512cc15bd7313bcb90738cf"
-    },
-    {
-      "path": "docs/User-Kernel-Separation.md",
-      "sha256": "7d6939b9cf4549158e8574e94edb4ec76f5719bf5fa6f323f4b8c867c68cf389"
-    },
-    {
-      "path": "docs/Userland-Structure.md",
-      "sha256": "f93172dd695ce8cc1d362298b4b487142c8f2c48626e720a448bcddc7754b820"
-    },
-    {
-      "path": "docs/Virtual-Memory-Management.md",
-      "sha256": "aba64407b02d8c56f4407d2aecc76b1863338851b00b8fe760af700a4fab30fe"
-    },
-    {
-      "path": "docs/assets/Inu-Mono-32px.png",
-      "sha256": "737949063fde9da46e9e449bf8993875b3483cef6cddede66cd20bb86552b048"
-    },
-    {
-      "path": "docs/assets/Inu-Mono-8x16.png",
-      "sha256": "ff3b9a6e37db0da719fda10b306ce416e02a2e4d7079a9add79f194ca9aa36b6"
+      "path": "docs/site-content/Virtual-Memory.md",
+      "sha256": "007ca04545dfbe1c32939bb6a829d69b9f5ef38177eaa5d5563190fc2b3285a2"
     },
     {
       "path": "docs/site/assets/search-index.js",
@@ -1363,7 +1299,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "babe687c23210288e2f8e446b437607a930bcb062a345c5b96c2da940f5b284e"
+      "sha256": "6038faefce809180825a7137f05ccd80c196f44ea7310ec8cdcfb5bec7c35f01"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -1396,6 +1332,10 @@
     {
       "path": "docs/site/guides/Getting-Started.html",
       "sha256": "6f1d5dcd9f6b4a6025fb4c69c9039a62792e6078dc1abb0b1c07150960ffd1da"
+    },
+    {
+      "path": "docs/site/guides/index.html",
+      "sha256": "e2870e94e1cc0236c6d69b36609692be0e11fa6ffff3e08f5771a963c6fa10b6"
     },
     {
       "path": "docs/site/guides/Kernel-Subsystem-Contracts.html",
@@ -1432,30 +1372,6 @@
     {
       "path": "docs/site/guides/Public-API-Quality.html",
       "sha256": "fdbc3ba379ed2ff524f6a4e19fe6cef3f4ae01a166c391df0faf5485d920f794"
-    },
-    {
-      "path": "docs/site/guides/SDK-Samples.html",
-      "sha256": "4ed29dc7a0a6b17ee2d53fcc475e41808d96abf22c92cb0a6475bda1799b829c"
-    },
-    {
-      "path": "docs/site/guides/Synchronization-Primitives.html",
-      "sha256": "c93f078bf93386e03758c530cff552a3f15de1487e67e1b38c69f7deac9931e3"
-    },
-    {
-      "path": "docs/site/guides/Timekeeping-Framework.html",
-      "sha256": "404a5f7c67bf6d574f1d918fc2299c2290b56d0f502ec287ffb365f69ab06604"
-    },
-    {
-      "path": "docs/site/guides/TrueType-Renderer.html",
-      "sha256": "dacdab0472b6d9c02bd0569879aed8d5b04cc2670ab5f1da65ad09757e3bd69c"
-    },
-    {
-      "path": "docs/site/guides/Virtual-Memory.html",
-      "sha256": "e5e883fc428a091d2272576915a2955f3d7ff39940a5a7b71f0374c623f2929e"
-    },
-    {
-      "path": "docs/site/guides/index.html",
-      "sha256": "e2870e94e1cc0236c6d69b36609692be0e11fa6ffff3e08f5771a963c6fa10b6"
     },
     {
       "path": "docs/site/guides/reference-ACPI-Hardware-Discovery.html",
@@ -1546,10 +1462,6 @@
       "sha256": "947e02f06d1847e8b1054286b4c867c24320ec60341e68b2a5c49c172607ec28"
     },
     {
-      "path": "docs/site/guides/reference-NVMe-and-AHCI.html",
-      "sha256": "aa94b1f94505275e732857d05cbd2dd493fd39aba0e6429a7f00485160ceb92b"
-    },
-    {
       "path": "docs/site/guides/reference-Network-Adapters.html",
       "sha256": "68485f90055c8b63095f510507aa02f8b06d7ca15671188d15f27b7b34af9bba"
     },
@@ -1558,12 +1470,12 @@
       "sha256": "aaa79bca1e2074cff580d4659715b7f6242bde3607c77a95ae4357719c62f5b9"
     },
     {
-      "path": "docs/site/guides/reference-PCI-and-VirtIO.html",
-      "sha256": "bc8142e5c14529d03aba7c8717fc928aae4a0d347a00483279d2139977f21316"
+      "path": "docs/site/guides/reference-NVMe-and-AHCI.html",
+      "sha256": "aa94b1f94505275e732857d05cbd2dd493fd39aba0e6429a7f00485160ceb92b"
     },
     {
-      "path": "docs/site/guides/reference-PS2.html",
-      "sha256": "771b6e775b30ca162196ff1702ec5665b220cbf8d6bf33672b4782b2275a738e"
+      "path": "docs/site/guides/reference-PCI-and-VirtIO.html",
+      "sha256": "bc8142e5c14529d03aba7c8717fc928aae4a0d347a00483279d2139977f21316"
     },
     {
       "path": "docs/site/guides/reference-Physical-Memory-Management.html",
@@ -1582,12 +1494,12 @@
       "sha256": "647ac41a57e15a561a2610cdc92a0b3e4d07e540d0830e199614616a8b0ad22a"
     },
     {
-      "path": "docs/site/guides/reference-Public-API-Rules.html",
-      "sha256": "33a95673c4f8899b65d53161b195560efd2994b0b8ac03946dfa2ec72328700e"
+      "path": "docs/site/guides/reference-PS2.html",
+      "sha256": "771b6e775b30ca162196ff1702ec5665b220cbf8d6bf33672b4782b2275a738e"
     },
     {
-      "path": "docs/site/guides/reference-SMP-and-Per-CPU-State.html",
-      "sha256": "f0360e06f140beeed89be9de323f2c6b8de06c131fd977157f7901d26673fcf4"
+      "path": "docs/site/guides/reference-Public-API-Rules.html",
+      "sha256": "33a95673c4f8899b65d53161b195560efd2994b0b8ac03946dfa2ec72328700e"
     },
     {
       "path": "docs/site/guides/reference-Scheduler-and-Threads.html",
@@ -1596,6 +1508,10 @@
     {
       "path": "docs/site/guides/reference-Serial.html",
       "sha256": "0fef0f9f27c3355ee22195a6971f8199cce613382d55dfba87b0226827082d09"
+    },
+    {
+      "path": "docs/site/guides/reference-SMP-and-Per-CPU-State.html",
+      "sha256": "f0360e06f140beeed89be9de323f2c6b8de06c131fd977157f7901d26673fcf4"
     },
     {
       "path": "docs/site/guides/reference-Storage-and-Filesystems.html",
@@ -1614,12 +1530,12 @@
       "sha256": "7525e64de30c21a14811877c7c64f1af18ed3721fd86e9ea5e5be57dd9525e14"
     },
     {
-      "path": "docs/site/guides/reference-USB.html",
-      "sha256": "faeff10188216942bcdb431d39094d58f27d2d76ab2ee175fefafe60cfedab3a"
-    },
-    {
       "path": "docs/site/guides/reference-Unified-Device-Model.html",
       "sha256": "fff9b78526053df0a946d9404d22cfa6826c352471f5dc5b0792f7020b302919"
+    },
+    {
+      "path": "docs/site/guides/reference-USB.html",
+      "sha256": "faeff10188216942bcdb431d39094d58f27d2d76ab2ee175fefafe60cfedab3a"
     },
     {
       "path": "docs/site/guides/reference-User-Kernel-Separation.html",
@@ -1634,6 +1550,26 @@
       "sha256": "ae6e399f7fe6772ad507f805b37b29c29f4a3d9abace1979b6c8cf56df07f086"
     },
     {
+      "path": "docs/site/guides/SDK-Samples.html",
+      "sha256": "4ed29dc7a0a6b17ee2d53fcc475e41808d96abf22c92cb0a6475bda1799b829c"
+    },
+    {
+      "path": "docs/site/guides/Synchronization-Primitives.html",
+      "sha256": "c93f078bf93386e03758c530cff552a3f15de1487e67e1b38c69f7deac9931e3"
+    },
+    {
+      "path": "docs/site/guides/Timekeeping-Framework.html",
+      "sha256": "404a5f7c67bf6d574f1d918fc2299c2290b56d0f502ec287ffb365f69ab06604"
+    },
+    {
+      "path": "docs/site/guides/TrueType-Renderer.html",
+      "sha256": "dacdab0472b6d9c02bd0569879aed8d5b04cc2670ab5f1da65ad09757e3bd69c"
+    },
+    {
+      "path": "docs/site/guides/Virtual-Memory.html",
+      "sha256": "e5e883fc428a091d2272576915a2955f3d7ff39940a5a7b71f0374c623f2929e"
+    },
+    {
       "path": "docs/site/index.html",
       "sha256": "6d0f30fef2aa1df47d512f95192b8377f00f0b2ed0b511630c31d189332c532c"
     },
@@ -1642,88 +1578,56 @@
       "sha256": "3bd6c363e92d60711b4a709164b6cfbbf5d5cb9bfc81443762aefa229880f4e4"
     },
     {
-      "path": "docs/site-content/Boot-Capability-Interfaces.md",
-      "sha256": "15164e685c18b167fc3cc835c19384e9d7cdd7db27ead58b311c6241c287aec4"
+      "path": "docs/SMP-and-Per-CPU-State.md",
+      "sha256": "4c9b912056e92d00145c01ae77321fa71b80f5f715fbcb710fe37de23f7494c5"
     },
     {
-      "path": "docs/site-content/Command-Line-SDK.md",
-      "sha256": "f7990ea57a96020304c9a1095d87ce39119b7ed3ed1ec5f09d2399f6b8fee3de"
+      "path": "docs/Storage-and-Filesystems.md",
+      "sha256": "d2cc35defe5496677caf48f826b38cc70c5e5c579b09b35a95b7191c1a1f78e7"
     },
     {
-      "path": "docs/site-content/Console-Subsystem-Run-API.md",
-      "sha256": "6bdc7e53c007192e21526ab0e08489d06750c14ce5fe645aae6140b610a726ff"
+      "path": "docs/Structured-Kernel-Telemetry.md",
+      "sha256": "ae833ee5e417648507d7a5a45c9dd7a3e8925b4a75675266a1032d3d115ae0c6"
     },
     {
-      "path": "docs/site-content/Documentation-Authoring.md",
-      "sha256": "04cac76805cfb42d014d6b94c88d6db25703cd9485a8b60f7a92be2500a18d58"
-    },
-    {
-      "path": "docs/site-content/Executable-Application-Format.md",
-      "sha256": "d3d37fd3ac414c116e11cef65c78d04baccd5e9af19d9c2b610182c680fba71c"
-    },
-    {
-      "path": "docs/site-content/Filesystem-VFS-Contract.md",
-      "sha256": "ff71cc83e430bcb783824d98cc8a1158029722c874a710ae7a00b53f298ace25"
-    },
-    {
-      "path": "docs/site-content/Framebuffer-Font.md",
-      "sha256": "30b617b2b64c385c567dd9b8d92ba99da414252ae7e2bee9680f0c20941c7f47"
-    },
-    {
-      "path": "docs/site-content/Getting-Started.md",
-      "sha256": "8f5fee7a25368af0b4e7fb38895c35c6314f6e8ef232f02e20f120146156ad49"
-    },
-    {
-      "path": "docs/site-content/Memory-Diagnostics.md",
-      "sha256": "00002b0e4649849146f73bdb1155f1e6845ccda56602c2b6e70854b4f666f0a2"
-    },
-    {
-      "path": "docs/site-content/Network-Stack-API.md",
-      "sha256": "adf760d96db477fdc5f30d626abc3e184d1d63c7a15a72a97c6e174b27dae674"
-    },
-    {
-      "path": "docs/site-content/Next-Steps.md",
-      "sha256": "a0ec9fc97b8636ec0f85b1cc981da3c488e244b912c389bd9fe624be3b4bfab6"
-    },
-    {
-      "path": "docs/site-content/Package-Manager-Format.md",
-      "sha256": "a2b696a21fc16f7ca1ce681cb05fc594bf9f65390a7cd0e17b88ebb19d44fb2c"
-    },
-    {
-      "path": "docs/site-content/Physical-Memory.md",
-      "sha256": "92415c1641299802731404898bdc6a35f13c9fce5c778a58c6da44097ad16828"
-    },
-    {
-      "path": "docs/site-content/Power-Management.md",
-      "sha256": "f4aa44f75e6450d38dc73b8e8cde095033312888945018d4f911b2829e209399"
-    },
-    {
-      "path": "docs/site-content/Process-Isolation-Security.md",
-      "sha256": "a81b5f8ce98f63a5c4503b66b57a2f947e1e1b5ccf1ca833baec8cd7ec36f16a"
-    },
-    {
-      "path": "docs/site-content/Public-API-Quality.md",
-      "sha256": "797a28a4271da1c606daff71b3da47564ba76b8e378e3e00faab4927cf4766ef"
-    },
-    {
-      "path": "docs/site-content/SDK-Samples.md",
-      "sha256": "00d38bebd80ec0fe44a5cd84c5ba1eefc3ed4b190f86a27be5fa78c955b984f9"
-    },
-    {
-      "path": "docs/site-content/Synchronization-Primitives.md",
+      "path": "docs/Synchronization-Primitives.md",
       "sha256": "32e3637e0d0028bdf2162df94cc51552e701c3da97bc46dbad555092646e52bb"
     },
     {
-      "path": "docs/site-content/Timekeeping-Framework.md",
-      "sha256": "0f00065d6e0967410d4611008faa912bb193091a192601859c9703e5b5eb920d"
+      "path": "docs/System-Calls.md",
+      "sha256": "a7b1c5cd60c0a40da7837660125a4030635a4bbbd62021c69e5fcc3cff9d3740"
     },
     {
-      "path": "docs/site-content/TrueType-Renderer.md",
-      "sha256": "dacb2bdd1f7a7cd5151fca78f93769c3699ab442fb9b3d448be64493ed1f3420"
+      "path": "docs/Timekeeping-Framework.md",
+      "sha256": "464e40050e63b0894f8ed5305231c87b2b11861aa9b37be7eb62e5a649666883"
     },
     {
-      "path": "docs/site-content/Virtual-Memory.md",
-      "sha256": "007ca04545dfbe1c32939bb6a829d69b9f5ef38177eaa5d5563190fc2b3285a2"
+      "path": "docs/Timers-and-Clocks.md",
+      "sha256": "7f280486108afcf4f61fc9216f4730c380a8b5f9b0a770dd88979cef7f813300"
+    },
+    {
+      "path": "docs/TrueType-Renderer.md",
+      "sha256": "6110a9bd94f4691ba52ca8f42f6d330bd2e354f47dae82a03c1b27d01deaafc3"
+    },
+    {
+      "path": "docs/Unified-Device-Model.md",
+      "sha256": "5f3bbd4189e3e402e6f5556e1e592cf2dabf46ae9512cc15bd7313bcb90738cf"
+    },
+    {
+      "path": "docs/USB.md",
+      "sha256": "dded2dfe253febf8b4c7e870a7319b14b492127fed0717f6987225a9ff494400"
+    },
+    {
+      "path": "docs/User-Kernel-Separation.md",
+      "sha256": "7d6939b9cf4549158e8574e94edb4ec76f5719bf5fa6f323f4b8c867c68cf389"
+    },
+    {
+      "path": "docs/Userland-Structure.md",
+      "sha256": "f93172dd695ce8cc1d362298b4b487142c8f2c48626e720a448bcddc7754b820"
+    },
+    {
+      "path": "docs/Virtual-Memory-Management.md",
+      "sha256": "aba64407b02d8c56f4407d2aecc76b1863338851b00b8fe760af700a4fab30fe"
     },
     {
       "path": "examples/MinimalKernel/InuProject.json",
@@ -1734,32 +1638,96 @@
       "sha256": "b132d105648c7dbe49f2c391fe0b9898027e470ddc7cfd4d7239af5df63401fa"
     },
     {
+      "path": "Install-InuCli.bat",
+      "sha256": "2b83a22a5c50293d295d1739f6423423d84d725ef0ace50f620a6b99e12e6625"
+    },
+    {
+      "path": "Install-InuCli.ps1",
+      "sha256": "b410d4181dd147b0b9d0170180f686002eab6eddcf3f13654843cc94bbce5efb"
+    },
+    {
+      "path": "Install-InuFonts.bat",
+      "sha256": "bc42a446d439eccfcc1dda4554cf879e473fe1fd91790110ea2faf8cd31fb7e9"
+    },
+    {
+      "path": "Install-InuFonts.ps1",
+      "sha256": "90acf8ea8738cd37199f7d3d1be1d5219c7790e40f4013af7b7adcbba8a1ff97"
+    },
+    {
+      "path": "Install-InuToolchain.bat",
+      "sha256": "4fe7cc96e5e6cf896b6ccb87034130b2c911920fcd9fc564fbd33cbb4329ffc0"
+    },
+    {
+      "path": "Install-InuToolchain.ps1",
+      "sha256": "f166536865dc2ded5cb33612fa55e4ed42f663752ada4ea953db3e77fcd1c9f2"
+    },
+    {
+      "path": "Inu-Changes.json",
+      "sha256": "0746d14c9596413332037472a3b478d34d5c76d4fab70c2de62a24624b9ed49c"
+    },
+    {
+      "path": "Inu-Package.bat",
+      "sha256": "b2f1f1fb55fbbf744fce00acf3936cdc7642ab9017308dcde248bdf08c34e63b"
+    },
+    {
+      "path": "Inu.ApiContract.json",
+      "sha256": "e28bad0b8da68f976845e0a3a88a6d8580b0635f1f65c2104e07133270eaf559"
+    },
+    {
+      "path": "Inu.ArchitectureBoundaries.json",
+      "sha256": "4bb3bfb272e996854f367ba7b47ba725be86008e5d24c968891c5d156c9258a5"
+    },
+    {
+      "path": "Inu.BuildProvenance.schema.json",
+      "sha256": "bc02028b1d77e6b956a8cb5e9ebbb5c2f670251cbb99a958c5d364dc6917a449"
+    },
+    {
       "path": "inu.cmd",
       "sha256": "8d43017109d4381e4cad78e0cea3e0e8481d9c76d3762eadbae34d2033405474"
+    },
+    {
+      "path": "Inu.CrashDump.schema.json",
+      "sha256": "176072c815c374170bab8347a9d44c3a5e2a09197d5f9396aa0d275ffcf824f3"
+    },
+    {
+      "path": "Inu.DriverPackage.schema.json",
+      "sha256": "010908433cf8cb9018ab5ea8f29d0a45fdcb131adb434af75ac0c9a0b5fdf7b4"
+    },
+    {
+      "path": "Inu.Package.schema.json",
+      "sha256": "1f76b41d84b51396a5f93f1ead4f4e77133aa710c471b051b681247280c30859"
+    },
+    {
+      "path": "Inu.SdkManifest.json",
+      "sha256": "ca8d4d12eba0c3096c6ace6cee21b0151e45ae67d4b0c8d14fe6552715ae580e"
+    },
+    {
+      "path": "Inu.SubsystemContracts.json",
+      "sha256": "3b1c471624c6fd9d4d1f050ad873eae92caf52212d9b142e36cbce0793dcad91"
     },
     {
       "path": "native/x64/BootLoader.c",
       "sha256": "7ad5c9a714dda06ea77451fa069d391d5faeead10de2c7fbc312fdba16250bf2"
     },
     {
-      "path": "native/x64/Cpu.S",
-      "sha256": "91d5ace4f6c9ad56de581054b789e96752bb02b8baaa81e9605a49cd338ba806"
-    },
-    {
       "path": "native/x64/Cpu.asm",
       "sha256": "96dd5883df456f1c66d8ba688b8f81540bd5a0d7adbb7598241b77b286676a84"
+    },
+    {
+      "path": "native/x64/Cpu.S",
+      "sha256": "91d5ace4f6c9ad56de581054b789e96752bb02b8baaa81e9605a49cd338ba806"
     },
     {
       "path": "native/x64/Descriptors.asm",
       "sha256": "05c9b523786722caabd0fd158829aea54e1c0102769f832932b2b6eea2e390ba"
     },
     {
-      "path": "native/x64/Entry.S",
-      "sha256": "5ad70ef7b0e23d23ad6a01420072ebb4db6bc84540ae0ca77aa577095fb5c4c3"
-    },
-    {
       "path": "native/x64/Entry.asm",
       "sha256": "e7a31f2a23554aca9f9c8ce597f6f205c93b95218bf8b0de3fb78578ec9cd0e9"
+    },
+    {
+      "path": "native/x64/Entry.S",
+      "sha256": "5ad70ef7b0e23d23ad6a01420072ebb4db6bc84540ae0ca77aa577095fb5c4c3"
     },
     {
       "path": "native/x64/ExceptionHandling.asm",
@@ -1772,6 +1740,10 @@
     {
       "path": "native/x64/Interrupts.asm",
       "sha256": "5c4cad881ad3d18621534ac756fdf92fb0075b19473fb8515199aed17a65fa40"
+    },
+    {
+      "path": "native/x64/kernel.ld",
+      "sha256": "e5bc003d53a944d345674f932095cfa65cb1d2352b361f45244b0fba636e1580"
     },
     {
       "path": "native/x64/Paging.asm",
@@ -1794,8 +1766,32 @@
       "sha256": "6d05cd6d8b457935868e13248a3612bebcf8ae80e12032e9b964196cc467cfa3"
     },
     {
-      "path": "native/x64/kernel.ld",
-      "sha256": "e5bc003d53a944d345674f932095cfa65cb1d2352b361f45244b0fba636e1580"
+      "path": "Pack-InuDriver.bat",
+      "sha256": "9d9967929512f0df937749432538783aab46e5a4e7cfab76b945b29d8de119dc"
+    },
+    {
+      "path": "Pack-InuDriver.ps1",
+      "sha256": "553f3ef00df9c3b10eaac1f51833c9aa49332c6b71bb230623db695f09c9d260"
+    },
+    {
+      "path": "Pack-InuPackage.bat",
+      "sha256": "b43bfa4e5363320bcdcd328596d204c4bd71efbfdfdaed2756dca80a7cc71677"
+    },
+    {
+      "path": "README.md",
+      "sha256": "f719eed235d9d26de34fa86b39d9f898a698f38d53a3ecdcaee9bcffec7b9aad"
+    },
+    {
+      "path": "Run-InuDotNetConformance.bat",
+      "sha256": "7c80fbd391ea9b57e828e269f493bf18593655c6a4b809071e26314edf7e10e5"
+    },
+    {
+      "path": "Run-InuQemuMatrix.bat",
+      "sha256": "e8dc27b3c703429b978a6553dc07e0131d1d1ffde9570e5a00a676894e484b85"
+    },
+    {
+      "path": "Run-InuQemuMatrix.ps1",
+      "sha256": "fb116ccaed88473e258810e3d988d97fe83c8710bd252911f648c11dbc8cb160"
     },
     {
       "path": "samples/Build-Samples.bat",
@@ -2006,22 +2002,6 @@
       "sha256": "bc50bb8ceb726403c7cbbbe7f2e93ce2f2939ca284cf4ef5f11bc2e149612ec9"
     },
     {
-      "path": "src/Inu.Architecture.X64/CPU.cs",
-      "sha256": "4b48631ef4ffe33810d6b382064e0c548201f51f47eebe91402ea2a3996a87b6"
-    },
-    {
-      "path": "src/Inu.Architecture.X64/Inu.Architecture.X64.csproj",
-      "sha256": "1cfbcade335164dfb8f6455f25f8b413c19f10fa72cd573ebbfa6a9805a9c1b4"
-    },
-    {
-      "path": "src/Inu.Architecture.X64/NativeMethods.cs",
-      "sha256": "624536b0be58336a75e28cedb64695ed9c8b7aaf0772086aa189b83c65e588c0"
-    },
-    {
-      "path": "src/Inu.Architecture.X64/X64Architecture.cs",
-      "sha256": "77871ac14f1e46a62207fbb5f1d0f03a1d23d3ce661574ddeb2ddc94b3879def"
-    },
-    {
       "path": "src/Inu.Architecture.X64.Descriptors/Inu.Architecture.X64.Descriptors.csproj",
       "sha256": "070ed960dcbd4773c3d203d12b916453fbf187cbdc94e83bfb1ccd1ecfb91678"
     },
@@ -2056,6 +2036,22 @@
     {
       "path": "src/Inu.Architecture.X64.Interrupts/X64InterruptVectorAllocator.cs",
       "sha256": "d71e839fcc968295a0c4d26018587c16839ca5dd1625ab70f5e3f882724d1fda"
+    },
+    {
+      "path": "src/Inu.Architecture.X64/CPU.cs",
+      "sha256": "4b48631ef4ffe33810d6b382064e0c548201f51f47eebe91402ea2a3996a87b6"
+    },
+    {
+      "path": "src/Inu.Architecture.X64/Inu.Architecture.X64.csproj",
+      "sha256": "1cfbcade335164dfb8f6455f25f8b413c19f10fa72cd573ebbfa6a9805a9c1b4"
+    },
+    {
+      "path": "src/Inu.Architecture.X64/NativeMethods.cs",
+      "sha256": "624536b0be58336a75e28cedb64695ed9c8b7aaf0772086aa189b83c65e588c0"
+    },
+    {
+      "path": "src/Inu.Architecture.X64/X64Architecture.cs",
+      "sha256": "77871ac14f1e46a62207fbb5f1d0f03a1d23d3ce661574ddeb2ddc94b3879def"
     },
     {
       "path": "src/Inu.Boot.Contracts/BootProtocol.cs",
@@ -2094,12 +2090,12 @@
       "sha256": "3b13590b28f3fc21280c583b064b5dd491bf47007a22be20b16768f40c99191c"
     },
     {
-      "path": "src/Inu.Boot.Contracts/IUefiMemoryMapKey.cs",
-      "sha256": "f497fac5f4856d5a19941b4ac608a4b5f8277afa963befebf50a67468c2f2c39"
-    },
-    {
       "path": "src/Inu.Boot.Contracts/Inu.Boot.Contracts.csproj",
       "sha256": "582c23c75cdd6781e3d3e6464c96ea29062fc2072e20b913d178d0ca1e097c84"
+    },
+    {
+      "path": "src/Inu.Boot.Contracts/IUefiMemoryMapKey.cs",
+      "sha256": "f497fac5f4856d5a19941b4ac608a4b5f8277afa963befebf50a67468c2f2c39"
     },
     {
       "path": "src/Inu.Boot.Memory/FinalUefiMemoryMap.cs",
@@ -2130,6 +2126,10 @@
       "sha256": "8f0d37aadfeaa4cf0c2970f9dd0d5ef5d3a4c0f8351afacb25cda9bf160b2e97"
     },
     {
+      "path": "src/Inu.Bus.Usb/KernelUsbBus.cs",
+      "sha256": "8d7d29b58df2232469be03106c1428e8ad072bf74efaad1bd5f5f78817b809a7"
+    },
+    {
       "path": "src/Inu.Bus.Usb/KernelUsbBus.Devices.cs",
       "sha256": "b787bfe413f00e3d316c530f90173ac658ff7e25a5b9b3487e60343249305069"
     },
@@ -2148,10 +2148,6 @@
     {
       "path": "src/Inu.Bus.Usb/KernelUsbBus.Transfers.cs",
       "sha256": "16061057a80fe4bb1d63b377fb75c3e186dfd6fb40f3cee4dcd0e1866c97ec77"
-    },
-    {
-      "path": "src/Inu.Bus.Usb/KernelUsbBus.cs",
-      "sha256": "8d7d29b58df2232469be03106c1428e8ad072bf74efaad1bd5f5f78817b809a7"
     },
     {
       "path": "src/Inu.Bus.Usb/KernelUsbEnumeration.cs",
@@ -2211,7 +2207,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "cf07e11a39109fe2acffbaec8b35aa6a485b9982ff1e50332c03068b9fdeb2bb"
+      "sha256": "dcbaee3934a8ce449122dd76d362bd45b1782efb596956d98296621aa1a8b25e"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -2258,6 +2254,10 @@
       "sha256": "cf1f51e11121be0f0c1b9bdd191c2d9c6231870a3c5d9bd6a617b0a60408a1ac"
     },
     {
+      "path": "src/Inu.Filesystem.FatFs/FatFs.cs",
+      "sha256": "a1fa797bbd2acdb5764e43a2d3652c1950b06e02a2b472ff89a289ba1fad287d"
+    },
+    {
       "path": "src/Inu.Filesystem.FatFs/FatFs.FileIo.cs",
       "sha256": "24218c2f003bc9a4ef966a5f771e76b7421acedc1ab774160f8297c77b357855"
     },
@@ -2272,10 +2272,6 @@
     {
       "path": "src/Inu.Filesystem.FatFs/FatFs.NamesAndDirectories.cs",
       "sha256": "7de6b3a633b8d21f8510632b66cb78dcdcd663b7520f4a2f135f8eb8bd6b774d"
-    },
-    {
-      "path": "src/Inu.Filesystem.FatFs/FatFs.cs",
-      "sha256": "a1fa797bbd2acdb5764e43a2d3652c1950b06e02a2b472ff89a289ba1fad287d"
     },
     {
       "path": "src/Inu.Filesystem.FatFs/Inu.Filesystem.FatFs.csproj",
@@ -2366,6 +2362,10 @@
       "sha256": "0370cfc19b309067afc9e01c99f5ea27616237f83687357a5871b3d39f6543f2"
     },
     {
+      "path": "src/Inu.Kernel.Acpi/KernelAcpi.cs",
+      "sha256": "7c288b37d4e60378f9ab0e4ed23dc4e6212861207fa0668add87db3dbc529b30"
+    },
+    {
       "path": "src/Inu.Kernel.Acpi/KernelAcpi.Discovery.cs",
       "sha256": "a00a4d0a0b32e344f242a519351a7e74c8434c48d4520dfe29b6e46a5549e1e4"
     },
@@ -2380,10 +2380,6 @@
     {
       "path": "src/Inu.Kernel.Acpi/KernelAcpi.Validation.cs",
       "sha256": "54f5586153549d8fb7d009ec892470ed6d9fc6e85d7c03848a865f8ae98e6c3e"
-    },
-    {
-      "path": "src/Inu.Kernel.Acpi/KernelAcpi.cs",
-      "sha256": "7c288b37d4e60378f9ab0e4ed23dc4e6212861207fa0668add87db3dbc529b30"
     },
     {
       "path": "src/Inu.Kernel.Acpi/KernelAcpiEcProvider.cs",
@@ -2482,6 +2478,10 @@
       "sha256": "480b865d7699fb7f5f5e7729766052fb2dd91f5faffd99511cbf3905f1e3bf27"
     },
     {
+      "path": "src/Inu.Kernel.Ahci/KernelAhci.cs",
+      "sha256": "1e7f19e30b146c00867e3e469f43448eab4a597541fcbbd233f6b9485c501523"
+    },
+    {
       "path": "src/Inu.Kernel.Ahci/KernelAhci.DiskDiscovery.cs",
       "sha256": "6478f1ff7e0fda15e508037e7beea8c5d1a8b0e9fa21b9bf45ff80dfb3f55c5f"
     },
@@ -2496,10 +2496,6 @@
     {
       "path": "src/Inu.Kernel.Ahci/KernelAhci.Storage.cs",
       "sha256": "72ff7f4fcbb7152cb1b51fec2e51bddd292216189a19363cd3f28ed0ca93a7fc"
-    },
-    {
-      "path": "src/Inu.Kernel.Ahci/KernelAhci.cs",
-      "sha256": "1e7f19e30b146c00867e3e469f43448eab4a597541fcbbd233f6b9485c501523"
     },
     {
       "path": "src/Inu.Kernel.Architecture/Inu.Kernel.Architecture.csproj",
@@ -2538,16 +2534,16 @@
       "sha256": "1123c792a3be33299c18560337da0f58040071a4061ba7f3aa1088fe0d6c4f4b"
     },
     {
+      "path": "src/Inu.Kernel.Bootstrap/Kernel.cs",
+      "sha256": "5c9cf286a4f36b45a3f03ff2e7dd9fc6a1210b042f67297445617ce126a96a5f"
+    },
+    {
       "path": "src/Inu.Kernel.Bootstrap/Kernel.Graphics.cs",
       "sha256": "c3002a9060a439b4f27a6a42d9132df95272962e35fa188f4c95398e5911df29"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/Kernel.Networking.cs",
       "sha256": "71854d81fa21090361e366761f85266e5d0b8c65a6c3e22d90dac2f152013cc8"
-    },
-    {
-      "path": "src/Inu.Kernel.Bootstrap/Kernel.cs",
-      "sha256": "5c9cf286a4f36b45a3f03ff2e7dd9fc6a1210b042f67297445617ce126a96a5f"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/KernelPanicTransport.cs",
@@ -2582,6 +2578,10 @@
       "sha256": "53496cb267b66cb597627fd6affff5f405d4b900e90ce4d6592be71e72b23c79"
     },
     {
+      "path": "src/Inu.Kernel.Console/BootContext.cs",
+      "sha256": "c54ae2547770de5678eb6a7f545dedd9eb0d612dcf64e58b4b8baf7d92d6718a"
+    },
+    {
       "path": "src/Inu.Kernel.Console/BootContext.FinalMemoryMapBuffer.cs",
       "sha256": "dc9702468d5813f3662b8ad7c4b105b3c19450d6e4f37070f738d5e40d055800"
     },
@@ -2614,10 +2614,6 @@
       "sha256": "02480c28d9595ec6646041a6c7c2f013e38110fc8c3d0a1cc4a363bdf19b065c"
     },
     {
-      "path": "src/Inu.Kernel.Console/BootContext.cs",
-      "sha256": "c54ae2547770de5678eb6a7f545dedd9eb0d612dcf64e58b4b8baf7d92d6718a"
-    },
-    {
       "path": "src/Inu.Kernel.Console/ConsoleFont.cs",
       "sha256": "e75195f2da61c65608085c0f69e3c7e491a47418fbefdee34b630995722bc287"
     },
@@ -2628,6 +2624,10 @@
     {
       "path": "src/Inu.Kernel.Console/FramebufferBuffering.cs",
       "sha256": "3ccda24df8127e5e17c21bfb7ea80c12c8db16d429fdedcb5cc0474a48c7e3b0"
+    },
+    {
+      "path": "src/Inu.Kernel.Console/FramebufferConsole.cs",
+      "sha256": "72584d538f95dc8c78e89ee7782eacf8a386b7fe99e0448c4b3256efdf3449fc"
     },
     {
       "path": "src/Inu.Kernel.Console/FramebufferConsole.History.cs",
@@ -2652,10 +2652,6 @@
     {
       "path": "src/Inu.Kernel.Console/FramebufferConsole.TextEditing.cs",
       "sha256": "44b6ff9b8ee284294efd7a999c1352718cdf721fb438fae610d9e95d1fcadf4f"
-    },
-    {
-      "path": "src/Inu.Kernel.Console/FramebufferConsole.cs",
-      "sha256": "72584d538f95dc8c78e89ee7782eacf8a386b7fe99e0448c4b3256efdf3449fc"
     },
     {
       "path": "src/Inu.Kernel.Console/IAcpiRootPointerContext.cs",
@@ -2690,6 +2686,10 @@
       "sha256": "9985659f6463d8fe52e9729a2bc9a8c04d0245723d15db2d210446161c7d190f"
     },
     {
+      "path": "src/Inu.Kernel.Console/Inu.Kernel.Console.csproj",
+      "sha256": "8fd494eec034773ea97f61f8e21e75190633166e9b684a7e8e48e13559691bf6"
+    },
+    {
       "path": "src/Inu.Kernel.Console/ISystemAssetBundleContext.cs",
       "sha256": "e62f97a6ab667db9b8b265c622549def43a44226b59bbc614ed3864e70fd8a01"
     },
@@ -2698,16 +2698,16 @@
       "sha256": "54a156ef7e7d8bcd7ee77db918f285d1c10c7e803f39254801827b5d80a160b7"
     },
     {
-      "path": "src/Inu.Kernel.Console/Inu.Kernel.Console.csproj",
-      "sha256": "8fd494eec034773ea97f61f8e21e75190633166e9b684a7e8e48e13559691bf6"
-    },
-    {
       "path": "src/Inu.Kernel.Console/KernelConsole.Ascii.cs",
       "sha256": "c8e24dae8392e60c3bcb511558b3dec57125f44fdddb9f8f51dc7239fb5079ac"
     },
     {
       "path": "src/Inu.Kernel.Console/KernelConsole.Configuration.cs",
       "sha256": "a26eb7dc2662ca799999102279b057eef14d1c32fbafac44b25349198ef9466f"
+    },
+    {
+      "path": "src/Inu.Kernel.Console/KernelConsole.cs",
+      "sha256": "44716430ccb6547f7a3f8959e76442fd31fc954c72e13dfa730ad695bc6513ab"
     },
     {
       "path": "src/Inu.Kernel.Console/KernelConsole.Framebuffer.cs",
@@ -2732,10 +2732,6 @@
     {
       "path": "src/Inu.Kernel.Console/KernelConsole.Transport.cs",
       "sha256": "587615647ec601c98a493a8f56d6dbbccdf5e78225fa678d988e56e57d48ed62"
-    },
-    {
-      "path": "src/Inu.Kernel.Console/KernelConsole.cs",
-      "sha256": "44716430ccb6547f7a3f8959e76442fd31fc954c72e13dfa730ad695bc6513ab"
     },
     {
       "path": "src/Inu.Kernel.Console/SystemAssetCatalog.cs",
@@ -2766,6 +2762,10 @@
       "sha256": "7882fda178eea259482645ca64b6966b14baeb0acce28af83984c2f5a5f88fa0"
     },
     {
+      "path": "src/Inu.Kernel.Drivers/KernelDrivers.cs",
+      "sha256": "a6e64f52ee0e3498bd51f3519ea3d1cf2e51a65d51d6f4a07e3a6342efc52d3e"
+    },
+    {
       "path": "src/Inu.Kernel.Drivers/KernelDrivers.Inspection.cs",
       "sha256": "97e2e2c8c7024fc062cb6744bb191ec61931ee6be549f90bf921c2d15d4050cd"
     },
@@ -2786,10 +2786,6 @@
       "sha256": "c8d7520ba0de4e0e06a9b67f0449c3cdaf5fea706bb3c575efd8a9afc0e7bd1a"
     },
     {
-      "path": "src/Inu.Kernel.Drivers/KernelDrivers.cs",
-      "sha256": "a6e64f52ee0e3498bd51f3519ea3d1cf2e51a65d51d6f4a07e3a6342efc52d3e"
-    },
-    {
       "path": "src/Inu.Kernel.Drivers/SubsystemLifecycle.cs",
       "sha256": "029e87c61fea8fbd82e8c84764da86c7aa5275946aba8ed0db6b8d9d1468068f"
     },
@@ -2806,6 +2802,10 @@
       "sha256": "af8bf27b97edd8dccd346cd893807e87ce150f001e5bd1e9d4dc65cc1e68b55d"
     },
     {
+      "path": "src/Inu.Kernel.E1000/KernelE1000.cs",
+      "sha256": "4a983b959dd544b7396c05409090bb6f8c2b1a70a7350ccf81cb385407d2f42e"
+    },
+    {
       "path": "src/Inu.Kernel.E1000/KernelE1000.DriverLifecycle.cs",
       "sha256": "cc7dea40b8dd2073379fb3624d08fac8048e7412ce7588c994b8d23e96d995cd"
     },
@@ -2820,10 +2820,6 @@
     {
       "path": "src/Inu.Kernel.E1000/KernelE1000.StorageAndMmio.cs",
       "sha256": "293a5da584e1ef809b6713dd7fc86a7525231d0ed704aa76376d7aed31eed517"
-    },
-    {
-      "path": "src/Inu.Kernel.E1000/KernelE1000.cs",
-      "sha256": "4a983b959dd544b7396c05409090bb6f8c2b1a70a7350ccf81cb385407d2f42e"
     },
     {
       "path": "src/Inu.Kernel.Entry.X64/Inu.Kernel.Entry.X64.csproj",
@@ -2846,6 +2842,10 @@
       "sha256": "013ac30da7ba48f5c8af4f547094ee98685abbe07cbced668eb2a994db912a72"
     },
     {
+      "path": "src/Inu.Kernel.Graphics/KernelGraphics.cs",
+      "sha256": "093baf4cb465f4043888d716a4bb020595a4d05b27099ad71eff1f8c7bf73419"
+    },
+    {
       "path": "src/Inu.Kernel.Graphics/KernelGraphics.ModesAndPresentation.cs",
       "sha256": "ba4c60bdedcdb3105dd3eab84359a33e090fa40f75c58769b4f9fcb25a883046"
     },
@@ -2856,10 +2856,6 @@
     {
       "path": "src/Inu.Kernel.Graphics/KernelGraphics.Storage.cs",
       "sha256": "e05d888b66e5b4be402f8a2e8219dd6bfef7e7e763b05f64d71426ab76d48ad3"
-    },
-    {
-      "path": "src/Inu.Kernel.Graphics/KernelGraphics.cs",
-      "sha256": "093baf4cb465f4043888d716a4bb020595a4d05b27099ad71eff1f8c7bf73419"
     },
     {
       "path": "src/Inu.Kernel.Graphics/SimpleFramebuffer.cs",
@@ -2882,6 +2878,10 @@
       "sha256": "a6ed1e88de305026350d8fceeaeec2c53459712eac3c4d3b8f4253a59904b368"
     },
     {
+      "path": "src/Inu.Kernel.Gui/KernelGui.cs",
+      "sha256": "910614f6e3b2100b29d3bbeb2b937a969a20a782c6088350a9cb0239cd0ce691"
+    },
+    {
       "path": "src/Inu.Kernel.Gui/KernelGui.EventsAndStorage.cs",
       "sha256": "3aa6c9ebcaa92bc0d1b0c2278224e81a58af4c594bf43091f1db61534c43e7da"
     },
@@ -2898,10 +2898,6 @@
       "sha256": "8e7b327eda840d1ef8f20aa4054a0fbdf43bc5e7ccd729f7d7621d17f41caeda"
     },
     {
-      "path": "src/Inu.Kernel.Gui/KernelGui.cs",
-      "sha256": "910614f6e3b2100b29d3bbeb2b937a969a20a782c6088350a9cb0239cd0ce691"
-    },
-    {
       "path": "src/Inu.Kernel.Heap/Inu.Kernel.Heap.csproj",
       "sha256": "88cd04b22adffdd852481f3805276b26f3453ebb4ab7ae6f74baaa1326ed3b72"
     },
@@ -2912,6 +2908,10 @@
     {
       "path": "src/Inu.Kernel.Heap/KernelHeap.Allocation.cs",
       "sha256": "834a8257f650a689b108b4243efe60cf56ba1e4c0e1a9e67f1beb86820730f5f"
+    },
+    {
+      "path": "src/Inu.Kernel.Heap/KernelHeap.cs",
+      "sha256": "eea199d6dbf7b1e0b8265da301e579ba99fa666c2e9b029eac8b7cd2dda7bbdc"
     },
     {
       "path": "src/Inu.Kernel.Heap/KernelHeap.DiagnosticMetadata.cs",
@@ -2934,16 +2934,16 @@
       "sha256": "db440e842e44a89c1868cc84b5978633f244b7b8032985f0d923953ad1053dcb"
     },
     {
-      "path": "src/Inu.Kernel.Heap/KernelHeap.cs",
-      "sha256": "eea199d6dbf7b1e0b8265da301e579ba99fa666c2e9b029eac8b7cd2dda7bbdc"
-    },
-    {
       "path": "src/Inu.Kernel.InterruptBroker/Inu.Kernel.InterruptBroker.csproj",
       "sha256": "478ccd44fedd579558804dd0245134f4fdc92b6b2297c076682cb79d2708fbe1"
     },
     {
       "path": "src/Inu.Kernel.InterruptBroker/KernelInterruptBroker.Affinity.cs",
       "sha256": "07126e7fbf1a56bed28734f5b71d526d7a959fe2c32296ac81647e92be24f14b"
+    },
+    {
+      "path": "src/Inu.Kernel.InterruptBroker/KernelInterruptBroker.cs",
+      "sha256": "20be111313573272369228b0fc9b744cbdc45501a3333104631f63382394a352"
     },
     {
       "path": "src/Inu.Kernel.InterruptBroker/KernelInterruptBroker.IoApic.cs",
@@ -2962,10 +2962,6 @@
       "sha256": "6d9d1e69ccbf67c47d0b2bba45cf6f423c320e498fd279a902370e4392621deb"
     },
     {
-      "path": "src/Inu.Kernel.InterruptBroker/KernelInterruptBroker.cs",
-      "sha256": "20be111313573272369228b0fc9b744cbdc45501a3333104631f63382394a352"
-    },
-    {
       "path": "src/Inu.Kernel.InterruptBroker/KernelInterruptBrokerContracts.cs",
       "sha256": "40a40e2ad72f4aeab2a89e04af37b9884e798e6f59f8b2aded721fa8b23bd7b9"
     },
@@ -2980,6 +2976,10 @@
     {
       "path": "src/Inu.Kernel.InterruptDispatch/Inu.Kernel.InterruptDispatch.csproj",
       "sha256": "1f0694c8b7d7fb5fefa995b7641fd0dd8ee0ba2e9b18146da8e2e1a19fe28e94"
+    },
+    {
+      "path": "src/Inu.Kernel.InterruptDispatch/KernelInterruptDispatch.cs",
+      "sha256": "0563d7e4065141e3cf4475f5e5e57301602e272967d914b5d7312cab53a5675c"
     },
     {
       "path": "src/Inu.Kernel.InterruptDispatch/KernelInterruptDispatch.DeferredWork.cs",
@@ -2998,8 +2998,12 @@
       "sha256": "426135fc8c71f1e8aba52891854f059aff9a30f515b4d28249f9525c2d2c8844"
     },
     {
-      "path": "src/Inu.Kernel.InterruptDispatch/KernelInterruptDispatch.cs",
-      "sha256": "0563d7e4065141e3cf4475f5e5e57301602e272967d914b5d7312cab53a5675c"
+      "path": "src/Inu.Kernel.Memory.Diagnostics/Inu.Kernel.Memory.Diagnostics.csproj",
+      "sha256": "3221a89052e32002f42c139152da18d30f05d5477c30495df204eee91251bdcc"
+    },
+    {
+      "path": "src/Inu.Kernel.Memory.Diagnostics/KernelMemoryDiagnostics.cs",
+      "sha256": "82684c99bf888fa1c4aa1f04c6023ec848b6a1d9cb8731dfbf48d9cb124276a6"
     },
     {
       "path": "src/Inu.Kernel.Memory/Inu.Kernel.Memory.csproj",
@@ -3014,6 +3018,10 @@
       "sha256": "4f1e4cd040adce5f6431da14fe7d43d00ee10658ece528d0926dd5cb817a7ed3"
     },
     {
+      "path": "src/Inu.Kernel.Memory/KernelPhysicalMemory.cs",
+      "sha256": "4817ca8fd1032ce0450eaa12deaf083b64cc1bccd67ce0a27cea1afd35752007"
+    },
+    {
       "path": "src/Inu.Kernel.Memory/KernelPhysicalMemory.Extents.cs",
       "sha256": "6d8d0e7f84f51e03bfbb6d117a100088d967bbce4b0151343c059ada6b1672b3"
     },
@@ -3024,18 +3032,6 @@
     {
       "path": "src/Inu.Kernel.Memory/KernelPhysicalMemory.Records.cs",
       "sha256": "98fc84a1542413c455017fc5a6e172bb07f127163d35ac7b15f397e9162d5620"
-    },
-    {
-      "path": "src/Inu.Kernel.Memory/KernelPhysicalMemory.cs",
-      "sha256": "4817ca8fd1032ce0450eaa12deaf083b64cc1bccd67ce0a27cea1afd35752007"
-    },
-    {
-      "path": "src/Inu.Kernel.Memory.Diagnostics/Inu.Kernel.Memory.Diagnostics.csproj",
-      "sha256": "3221a89052e32002f42c139152da18d30f05d5477c30495df204eee91251bdcc"
-    },
-    {
-      "path": "src/Inu.Kernel.Memory.Diagnostics/KernelMemoryDiagnostics.cs",
-      "sha256": "82684c99bf888fa1c4aa1f04c6023ec848b6a1d9cb8731dfbf48d9cb124276a6"
     },
     {
       "path": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
@@ -3090,6 +3086,30 @@
       "sha256": "1bd062016bca9eeb8cc3d76b9d765090791e705b741772b42a42ecb8bb1f019b"
     },
     {
+      "path": "src/Inu.Kernel.Networking/KernelNetworking.cs",
+      "sha256": "6429a8d74940f67dc55045deee7f41514371934c86ecb157a7bb74204d35e463"
+    },
+    {
+      "path": "src/Inu.Kernel.Networking/KernelNetworking.Frames.cs",
+      "sha256": "68df1488290ba0c1610a66e681bfd49e5dfb8e48d050044bfd69fe8fa4a14c33"
+    },
+    {
+      "path": "src/Inu.Kernel.Networking/KernelNetworking.Interfaces.cs",
+      "sha256": "44fa7e5b620a0f0ec72db3f0fe022f811b02a428a7bc909f0dcbae6bb8b4ac34"
+    },
+    {
+      "path": "src/Inu.Kernel.Networking/KernelNetworking.Neighbors.cs",
+      "sha256": "3892c74f16be891446845b2dbd875e193a02929ce9f3d72c0637dc21948acb63"
+    },
+    {
+      "path": "src/Inu.Kernel.Networking/KernelNetworking.Routes.cs",
+      "sha256": "f767f1c29a02cdc042ff673cdd8fbcd258709692647929d30928e0e02e5e574a"
+    },
+    {
+      "path": "src/Inu.Kernel.Networking/KernelNetworking.Storage.cs",
+      "sha256": "6a1f6ce244778b4235a18cb99e26332841d14a6f3a44403d1b23aad34dce96f7"
+    },
+    {
       "path": "src/Inu.Kernel.Networking/KernelNetworkInterfaceRegistryContract.cs",
       "sha256": "deefd4d1b187573d9bf1d181a119b088dbd3f8e1f72ee7e3e7553932e0b07812"
     },
@@ -3114,40 +3134,16 @@
       "sha256": "f0f72fb771629e81821fef60cb5272e3abccf91ea43e6a0b5c8b2f6303800d09"
     },
     {
-      "path": "src/Inu.Kernel.Networking/KernelNetworking.Frames.cs",
-      "sha256": "68df1488290ba0c1610a66e681bfd49e5dfb8e48d050044bfd69fe8fa4a14c33"
-    },
-    {
-      "path": "src/Inu.Kernel.Networking/KernelNetworking.Interfaces.cs",
-      "sha256": "44fa7e5b620a0f0ec72db3f0fe022f811b02a428a7bc909f0dcbae6bb8b4ac34"
-    },
-    {
-      "path": "src/Inu.Kernel.Networking/KernelNetworking.Neighbors.cs",
-      "sha256": "3892c74f16be891446845b2dbd875e193a02929ce9f3d72c0637dc21948acb63"
-    },
-    {
-      "path": "src/Inu.Kernel.Networking/KernelNetworking.Routes.cs",
-      "sha256": "f767f1c29a02cdc042ff673cdd8fbcd258709692647929d30928e0e02e5e574a"
-    },
-    {
-      "path": "src/Inu.Kernel.Networking/KernelNetworking.Storage.cs",
-      "sha256": "6a1f6ce244778b4235a18cb99e26332841d14a6f3a44403d1b23aad34dce96f7"
-    },
-    {
-      "path": "src/Inu.Kernel.Networking/KernelNetworking.cs",
-      "sha256": "6429a8d74940f67dc55045deee7f41514371934c86ecb157a7bb74204d35e463"
-    },
-    {
       "path": "src/Inu.Kernel.Networking/KernelRouteManager.cs",
       "sha256": "3efd7e348b9b2a5052be40b7b7390a4cb4268f0ef939b4370988a761ff572fda"
     },
     {
-      "path": "src/Inu.Kernel.Networking/KernelSocketServices.cs",
-      "sha256": "d991b822ee8ccab16462de8a4ce5f308c82774cc7123280b24c4d752a2d66e43"
-    },
-    {
       "path": "src/Inu.Kernel.Networking/KernelSockets.cs",
       "sha256": "05eecd0c4b008936f722e02979baa72c8a833854c1d755cda11238e1de02e694"
+    },
+    {
+      "path": "src/Inu.Kernel.Networking/KernelSocketServices.cs",
+      "sha256": "d991b822ee8ccab16462de8a4ce5f308c82774cc7123280b24c4d752a2d66e43"
     },
     {
       "path": "src/Inu.Kernel.Networking/KernelTcpObservationProtocol.cs",
@@ -3170,6 +3166,10 @@
       "sha256": "f92dd2a8e18920be2acec54c34da30d8ddda3ca0198aecb7065304bccaed673a"
     },
     {
+      "path": "src/Inu.Kernel.Nvme/KernelNvme.cs",
+      "sha256": "c4433d371bd01440c76fb6266ce3ebfb444b4fd2bbbce752ee52345100032a3e"
+    },
+    {
       "path": "src/Inu.Kernel.Nvme/KernelNvme.DriverLifecycle.cs",
       "sha256": "b5700ae2ffeb5379c878129780af975661880527c4f92ad0530f171d40bc2d3b"
     },
@@ -3184,10 +3184,6 @@
     {
       "path": "src/Inu.Kernel.Nvme/KernelNvme.Storage.cs",
       "sha256": "0fe3a48646439da161723689943766b04d8a96ddee17a0d55c9018be62b825ff"
-    },
-    {
-      "path": "src/Inu.Kernel.Nvme/KernelNvme.cs",
-      "sha256": "c4433d371bd01440c76fb6266ce3ebfb444b4fd2bbbce752ee52345100032a3e"
     },
     {
       "path": "src/Inu.Kernel.Nvme/NvmeContracts.cs",
@@ -3210,6 +3206,10 @@
       "sha256": "c2cc31711e6afeae7fe3ce5d081f9d6504b390b86a4a0e5c339460ca576a5e1e"
     },
     {
+      "path": "src/Inu.Kernel.Pci/KernelPci.cs",
+      "sha256": "d9119b72e6ee0f692ddbcb5ea690a7e9e2140dec84bd8a000b5b2f286cfce436"
+    },
+    {
       "path": "src/Inu.Kernel.Pci/KernelPci.Enumeration.cs",
       "sha256": "5cadf1ed98a1a42243c0ec4fe3ff91b7f81c5d5a5657b32732245ccd269e9553"
     },
@@ -3224,10 +3224,6 @@
     {
       "path": "src/Inu.Kernel.Pci/KernelPci.Storage.cs",
       "sha256": "a940f6abd7297c62e9c1ca26790fadc983dc7bfd067e522fead8f1ee12600edd"
-    },
-    {
-      "path": "src/Inu.Kernel.Pci/KernelPci.cs",
-      "sha256": "d9119b72e6ee0f692ddbcb5ea690a7e9e2140dec84bd8a000b5b2f286cfce436"
     },
     {
       "path": "src/Inu.Kernel.Pci/KernelPciConfigurationServices.cs",
@@ -3294,32 +3290,16 @@
       "sha256": "eb6d40db1c03fdf7c9be72c3596b777e59a2af319666a0c647a1afaad9f76004"
     },
     {
-      "path": "src/Inu.Kernel.Processes/KernelProcessForegroundProvider.cs",
-      "sha256": "51db58b03281efa0ebf532ba908b7c2d65878400296d6a4e3effad99b0ae80f9"
-    },
-    {
-      "path": "src/Inu.Kernel.Processes/KernelProcessLifecycleProvider.cs",
-      "sha256": "838730969da06a5955c7588c14f633884ce40a05f70ecaab1266409b261f0184"
-    },
-    {
-      "path": "src/Inu.Kernel.Processes/KernelProcessRecordStore.cs",
-      "sha256": "47ce9e8787863078f9e7567cf049948376d795e04ee377dba257091723f28367"
-    },
-    {
-      "path": "src/Inu.Kernel.Processes/KernelProcessServices.cs",
-      "sha256": "5d1fd72c0de0fc8ff1c378833bec4ffb7d0301d220149ff3c8288a6b27eb6c21"
-    },
-    {
-      "path": "src/Inu.Kernel.Processes/KernelProcessSignalProvider.cs",
-      "sha256": "d14a1983f0b1766299220b4071019e6023a9c64811ef43f506dc2cbadb73c5f5"
-    },
-    {
       "path": "src/Inu.Kernel.Processes/KernelProcesses.AddressSpaceOwnership.cs",
       "sha256": "afde541edcf738e33a6fb1d5c003bf846f38443ad1f87b2177ec3d1a3365cb90"
     },
     {
       "path": "src/Inu.Kernel.Processes/KernelProcesses.Creation.cs",
       "sha256": "daccc80f703d0f11d840e99d13b8612e645f7a558a356bdaa5f87bf7ea5969b7"
+    },
+    {
+      "path": "src/Inu.Kernel.Processes/KernelProcesses.cs",
+      "sha256": "d845f06819a879493c1c581e1fe90f1f139d56ea476f08aa1c42610f6e2074cd"
     },
     {
       "path": "src/Inu.Kernel.Processes/KernelProcesses.Diagnostics.cs",
@@ -3374,8 +3354,24 @@
       "sha256": "4dddc2e3bb58117f0cb856ee1bd9d776101239721844ac0b54e747c63d649296"
     },
     {
-      "path": "src/Inu.Kernel.Processes/KernelProcesses.cs",
-      "sha256": "d845f06819a879493c1c581e1fe90f1f139d56ea476f08aa1c42610f6e2074cd"
+      "path": "src/Inu.Kernel.Processes/KernelProcessForegroundProvider.cs",
+      "sha256": "51db58b03281efa0ebf532ba908b7c2d65878400296d6a4e3effad99b0ae80f9"
+    },
+    {
+      "path": "src/Inu.Kernel.Processes/KernelProcessLifecycleProvider.cs",
+      "sha256": "838730969da06a5955c7588c14f633884ce40a05f70ecaab1266409b261f0184"
+    },
+    {
+      "path": "src/Inu.Kernel.Processes/KernelProcessRecordStore.cs",
+      "sha256": "47ce9e8787863078f9e7567cf049948376d795e04ee377dba257091723f28367"
+    },
+    {
+      "path": "src/Inu.Kernel.Processes/KernelProcessServices.cs",
+      "sha256": "5d1fd72c0de0fc8ff1c378833bec4ffb7d0301d220149ff3c8288a6b27eb6c21"
+    },
+    {
+      "path": "src/Inu.Kernel.Processes/KernelProcessSignalProvider.cs",
+      "sha256": "d14a1983f0b1766299220b4071019e6023a9c64811ef43f506dc2cbadb73c5f5"
     },
     {
       "path": "src/Inu.Kernel.Processes/ProcessAddressSpace.cs",
@@ -3422,6 +3418,10 @@
       "sha256": "00bc60613d3945a51d7b4b7705c59178ad75f192862e95ae860f04e724368716"
     },
     {
+      "path": "src/Inu.Kernel.Ps2/KernelPs2.cs",
+      "sha256": "6ed4db3af20eff6628a16f2b1ab311b8cc10961094246c33b2d9bcb41bc52599"
+    },
+    {
       "path": "src/Inu.Kernel.Ps2/KernelPs2.DriverLifecycle.cs",
       "sha256": "0b119098cb7256c8a79a3317500b9f01bf31f914644bb211ef06ae3224e887d0"
     },
@@ -3438,10 +3438,6 @@
       "sha256": "e9d51e1c3ba018910f1b99aebba3bc0c77b5eef1449159782ec164a2c623e2a1"
     },
     {
-      "path": "src/Inu.Kernel.Ps2/KernelPs2.cs",
-      "sha256": "6ed4db3af20eff6628a16f2b1ab311b8cc10961094246c33b2d9bcb41bc52599"
-    },
-    {
       "path": "src/Inu.Kernel.Ps2/KeyboardLayouts.cs",
       "sha256": "183cc0aabd3009c652e95187c7a4c90c78ff8897065c5d096b1a97dcdbb01c93"
     },
@@ -3452,6 +3448,10 @@
     {
       "path": "src/Inu.Kernel.Rtl8168/Inu.Kernel.Rtl8168.csproj",
       "sha256": "98cbdc87225b3282e1a52077f6be07e545ad0fcd5519a2b1756b2d79a69e855b"
+    },
+    {
+      "path": "src/Inu.Kernel.Rtl8168/KernelRtl8168.cs",
+      "sha256": "5501487afac1372c278ab8570ee01a5ce1af871e5c9792c7e4695784eb06f276"
     },
     {
       "path": "src/Inu.Kernel.Rtl8168/KernelRtl8168.DriverLifecycle.cs",
@@ -3468,10 +3468,6 @@
     {
       "path": "src/Inu.Kernel.Rtl8168/KernelRtl8168.StorageAndMmio.cs",
       "sha256": "d1e474912f629e66f1cbfc8c1fa7f2f2df9116fbfefba787cf40e8fa08a5f21a"
-    },
-    {
-      "path": "src/Inu.Kernel.Rtl8168/KernelRtl8168.cs",
-      "sha256": "5501487afac1372c278ab8570ee01a5ce1af871e5c9792c7e4695784eb06f276"
     },
     {
       "path": "src/Inu.Kernel.Rtl8168/Rtl8168Contracts.cs",
@@ -3526,6 +3522,10 @@
       "sha256": "2ef3b00b2614b34adeced216e8f96db2f2b6e5c779871834c5657a1fef06b12b"
     },
     {
+      "path": "src/Inu.Kernel.Scheduler/KernelScheduler.cs",
+      "sha256": "9ff4330003742bd090aa440cfec2c5cd044862813d727bbbf57c939412ab50bb"
+    },
+    {
       "path": "src/Inu.Kernel.Scheduler/KernelScheduler.Dispatch.cs",
       "sha256": "0f50a26d63e19fd039a6e55359898e635cc4df5029485913d98e1aaf95f32e1e"
     },
@@ -3570,10 +3570,6 @@
       "sha256": "c77c5217950b1daf5e82a414495812cac89ccb88cf9eef965d1ab94d496fd565"
     },
     {
-      "path": "src/Inu.Kernel.Scheduler/KernelScheduler.cs",
-      "sha256": "9ff4330003742bd090aa440cfec2c5cd044862813d727bbbf57c939412ab50bb"
-    },
-    {
       "path": "src/Inu.Kernel.Scheduler/KernelSchedulerContracts.cs",
       "sha256": "7b6064ebec45066969668f544ab5d489311364cb67aeece979126078ca2187bc"
     },
@@ -3602,6 +3598,10 @@
       "sha256": "dbe57e0bb32cf5fbdf05318337a227b4493b0a9085252c5d704cdfeff1daf1e8"
     },
     {
+      "path": "src/Inu.Kernel.Security/KernelSecurity.cs",
+      "sha256": "6d41bc7c70ce1addfc7bcfff56306071d26119de3ccf8c2679f2e97c1c694f71"
+    },
+    {
       "path": "src/Inu.Kernel.Security/KernelSecurity.PageTables.cs",
       "sha256": "7f95ca3ff702b53f81722cc2fcd98b160dd8624055084351859785403abb6249"
     },
@@ -3616,10 +3616,6 @@
     {
       "path": "src/Inu.Kernel.Security/KernelSecurity.UserMemoryProtection.cs",
       "sha256": "704590ddfbaed24bf9900a9cb5c98c73a05c2265f3f14415d153c8e578881987"
-    },
-    {
-      "path": "src/Inu.Kernel.Security/KernelSecurity.cs",
-      "sha256": "6d41bc7c70ce1addfc7bcfff56306071d26119de3ccf8c2679f2e97c1c694f71"
     },
     {
       "path": "src/Inu.Kernel.Security/KernelSecurityContracts.cs",
@@ -3646,6 +3642,10 @@
       "sha256": "cebde4ec057f47539f5959ad7af668864943e107e057097af8bcb18e404259c4"
     },
     {
+      "path": "src/Inu.Kernel.Smp/KernelSmp.cs",
+      "sha256": "dfcf0dfc411051460063d8044058a4cde5237818c44794a963d29a979bf03c7c"
+    },
+    {
       "path": "src/Inu.Kernel.Smp/KernelSmp.Discovery.cs",
       "sha256": "748493e6266a1480c6bc8e86cd93a6bb0c7b4b43b6de91c3cd6b149b14e0eb55"
     },
@@ -3660,10 +3660,6 @@
     {
       "path": "src/Inu.Kernel.Smp/KernelSmp.Topology.cs",
       "sha256": "e258f73c3af891bc63b3aac451349aa359fdd6e722e486853d7105efab1665d2"
-    },
-    {
-      "path": "src/Inu.Kernel.Smp/KernelSmp.cs",
-      "sha256": "dfcf0dfc411051460063d8044058a4cde5237818c44794a963d29a979bf03c7c"
     },
     {
       "path": "src/Inu.Kernel.Smp/KernelSmpContracts.cs",
@@ -3690,6 +3686,10 @@
       "sha256": "8a413b14cb8e9c5f92fbcfd8d7851d82eb6c1e46b48921a2043dd9380495d66b"
     },
     {
+      "path": "src/Inu.Kernel.Storage/KernelStorage.cs",
+      "sha256": "f8bf42058dec3e4c72b59e1be5fd5a6e48d559bad88283672737a47a34febd86"
+    },
+    {
       "path": "src/Inu.Kernel.Storage/KernelStorage.DeviceRegistry.cs",
       "sha256": "9c4392670b63ea6571ca0e8ecd93ca2ee8011f80ce480e4c16b94fc61b460654"
     },
@@ -3700,10 +3700,6 @@
     {
       "path": "src/Inu.Kernel.Storage/KernelStorage.Storage.cs",
       "sha256": "2c8f68abfa2fd3d4fbac166e5083e712f113d0b88f6be107084bf28944f32b84"
-    },
-    {
-      "path": "src/Inu.Kernel.Storage/KernelStorage.cs",
-      "sha256": "f8bf42058dec3e4c72b59e1be5fd5a6e48d559bad88283672737a47a34febd86"
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelStorageContracts.cs",
@@ -3726,6 +3722,10 @@
       "sha256": "99a187e1dd60dac0892746a54f2db174bc679ae69f54decfe02fc9a5f5561b89"
     },
     {
+      "path": "src/Inu.Kernel.Storage/KernelVfs.cs",
+      "sha256": "1972a64f0241befcf421e23bd8d54c94166f98c71c62bb22c2d18314ffbb886f"
+    },
+    {
       "path": "src/Inu.Kernel.Storage/KernelVfs.Directories.cs",
       "sha256": "facc29996c8a4ff7bc5a92e9ebd1eec4e94244d454f8c0e1ed419fa2b27f60b5"
     },
@@ -3744,10 +3744,6 @@
     {
       "path": "src/Inu.Kernel.Storage/KernelVfs.Storage.cs",
       "sha256": "7a116563097933b3b78ad7a4ec1b8c14a0efc7695d074fe25c618526e3156c64"
-    },
-    {
-      "path": "src/Inu.Kernel.Storage/KernelVfs.cs",
-      "sha256": "1972a64f0241befcf421e23bd8d54c94166f98c71c62bb22c2d18314ffbb886f"
     },
     {
       "path": "src/Inu.Kernel.SubsystemContracts/Inu.Kernel.SubsystemContracts.csproj",
@@ -3826,6 +3822,10 @@
       "sha256": "05257e1f897c3005e55e9aa77ec83229d07e6f4f7c0af28c8b50e95f2580b835"
     },
     {
+      "path": "src/Inu.Kernel.SystemCalls/KernelSystemCalls.cs",
+      "sha256": "d5b51bf60014e79c35ea1e403fc17cf0feffcba7c895d886a57a377ff23a1e68"
+    },
+    {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCalls.Dispatch.cs",
       "sha256": "6ceb7bbd7530da20d8b3a74d8e0c42bec79b3e12a15489c91d65e6d4b5566c63"
     },
@@ -3844,10 +3844,6 @@
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCalls.UserMemory.cs",
       "sha256": "ccd8d756e7b5361f097c518406d9bcb7822705cb0d7cd9a6241971b00798357d"
-    },
-    {
-      "path": "src/Inu.Kernel.SystemCalls/KernelSystemCalls.cs",
-      "sha256": "d5b51bf60014e79c35ea1e403fc17cf0feffcba7c895d886a57a377ff23a1e68"
     },
     {
       "path": "src/Inu.Kernel.Time/Inu.Kernel.Time.csproj",
@@ -3882,6 +3878,10 @@
       "sha256": "a40529610a3b455d01338c0ef859ca0634829eddb02d1f8a0a29b079e0df370d"
     },
     {
+      "path": "src/Inu.Kernel.Time/KernelTime.cs",
+      "sha256": "9c3af656b64d5ec0f2fc95fbde3f7cff285b174e1ee990e80a682e2306d83d0f"
+    },
+    {
       "path": "src/Inu.Kernel.Time/KernelTime.Delay.cs",
       "sha256": "2ca0d041be28fb3ccee9654cb33abc33c75928a9841e1f73af24e1437e027e06"
     },
@@ -3894,20 +3894,16 @@
       "sha256": "9e5218866958f98ade96693a01a9e87ae0fb877a48bd4d0b94a9c2fe1e80936b"
     },
     {
-      "path": "src/Inu.Kernel.Time/KernelTime.cs",
-      "sha256": "9c3af656b64d5ec0f2fc95fbde3f7cff285b174e1ee990e80a682e2306d83d0f"
-    },
-    {
       "path": "src/Inu.Kernel.Time/KernelTimeContracts.cs",
       "sha256": "d93f2a5ca833cd83b71641c1274528091f15d0292b593f7245c694644c7ecddf"
     },
     {
-      "path": "src/Inu.Kernel.Time/KernelTimeMath.cs",
-      "sha256": "8e7a13d697b4e8da225f4fbcc596b7bac8d878bc547031d61c99c3319b8691fc"
-    },
-    {
       "path": "src/Inu.Kernel.Time/KernelTimekeepingFramework.cs",
       "sha256": "73ae022553db2b67859135e68dccbb54396fd527771d7f8eaeea9a88449e181d"
+    },
+    {
+      "path": "src/Inu.Kernel.Time/KernelTimeMath.cs",
+      "sha256": "8e7a13d697b4e8da225f4fbcc596b7bac8d878bc547031d61c99c3319b8691fc"
     },
     {
       "path": "src/Inu.Kernel.Time/KernelTimerFacilities.cs",
@@ -3938,6 +3934,10 @@
       "sha256": "4f6949faac38a53f12ce42efd64e03e6ab30ce36991253566bb47adc72368cd7"
     },
     {
+      "path": "src/Inu.Kernel.TrueType/KernelTrueType.cs",
+      "sha256": "be68fceb671e0bfd23278d738e5d6ae9577ff2105629f90c877018600b6bdb96"
+    },
+    {
       "path": "src/Inu.Kernel.TrueType/KernelTrueType.FontParsing.cs",
       "sha256": "b29fc9a2fb63e121f84770d8c51534613340e7cefe8a0df801b19b0ea90833cc"
     },
@@ -3950,44 +3950,8 @@
       "sha256": "5117bc825e6a901bfe317e25f5b7c2c1ccf70d237830353fe47626b569ec7c92"
     },
     {
-      "path": "src/Inu.Kernel.TrueType/KernelTrueType.cs",
-      "sha256": "be68fceb671e0bfd23278d738e5d6ae9577ff2105629f90c877018600b6bdb96"
-    },
-    {
       "path": "src/Inu.Kernel.TrueType/TrueTypeContracts.cs",
       "sha256": "1d6dc4a2e4cd9e0819363fb8c130bf28d7371531ccd68831a0d56b3a2becdc63"
-    },
-    {
-      "path": "src/Inu.Kernel.Virtio/Inu.Kernel.Virtio.csproj",
-      "sha256": "a6ec97cb98a79b3f366ac3876ea757e55c357bf4372f3069bbac35ff451dc217"
-    },
-    {
-      "path": "src/Inu.Kernel.Virtio/KernelVirtio.Block.cs",
-      "sha256": "bc58a04c14c284db3076347a5ea717e87d3676cb9dfc969ddbdf080cd8761311"
-    },
-    {
-      "path": "src/Inu.Kernel.Virtio/KernelVirtio.NetworkAndQueues.cs",
-      "sha256": "8adcc77f4ea58ffd58fb8a0ba9a5652fdb6fdc29ee7b7406822f58ac9c5778f8"
-    },
-    {
-      "path": "src/Inu.Kernel.Virtio/KernelVirtio.PciAndStorage.cs",
-      "sha256": "a79545cd21688bac45938e91e0118db253390869cd4f55a20fa1717cbc6ec821"
-    },
-    {
-      "path": "src/Inu.Kernel.Virtio/KernelVirtio.Transport.cs",
-      "sha256": "41db9beff9ee0623e7d1de076226091fb5f4964e2420c4ef405906aef5803ef0"
-    },
-    {
-      "path": "src/Inu.Kernel.Virtio/KernelVirtio.cs",
-      "sha256": "92f2fe47f66472fe0ed0db416ca0f16b02caf11205e836d5a232ca6c58c7c35b"
-    },
-    {
-      "path": "src/Inu.Kernel.Virtio/VirtioContracts.cs",
-      "sha256": "ea1dc1f89968172f810eb8e2f75e1ac2e10003a2c9c60e4113318776c591b62e"
-    },
-    {
-      "path": "src/Inu.Kernel.Virtio/VirtioMath.cs",
-      "sha256": "ff843471e0adc0e473767b0d1a4e50d48f8aef0d36969b8cb9d6789ccb9fe86a"
     },
     {
       "path": "src/Inu.Kernel.Virtio.Gpu/Inu.Kernel.Virtio.Gpu.csproj",
@@ -3996,6 +3960,10 @@
     {
       "path": "src/Inu.Kernel.Virtio.Gpu/KernelVirtioGpu.Commands.cs",
       "sha256": "f9c31a355cc037e17c0d2f19841d4cd99ba0216a949936510c58f13b96924d29"
+    },
+    {
+      "path": "src/Inu.Kernel.Virtio.Gpu/KernelVirtioGpu.cs",
+      "sha256": "b8d21b7fc3d80c63dd1de2501bb3035e502594fd265d7faf79c11812fc8cd6ac"
     },
     {
       "path": "src/Inu.Kernel.Virtio.Gpu/KernelVirtioGpu.Driver.cs",
@@ -4014,16 +3982,48 @@
       "sha256": "6e52b41b0d12350bab2ad60a4ca207bd480a86b3852d7b59c733fe4c1693ce2b"
     },
     {
-      "path": "src/Inu.Kernel.Virtio.Gpu/KernelVirtioGpu.cs",
-      "sha256": "b8d21b7fc3d80c63dd1de2501bb3035e502594fd265d7faf79c11812fc8cd6ac"
-    },
-    {
       "path": "src/Inu.Kernel.Virtio.Gpu/VirtioGpuContracts.cs",
       "sha256": "8705e4738e6b6ed63a37bfe0f11929fd266312b9f067537aead3b38daec6f1bb"
     },
     {
+      "path": "src/Inu.Kernel.Virtio/Inu.Kernel.Virtio.csproj",
+      "sha256": "a6ec97cb98a79b3f366ac3876ea757e55c357bf4372f3069bbac35ff451dc217"
+    },
+    {
+      "path": "src/Inu.Kernel.Virtio/KernelVirtio.Block.cs",
+      "sha256": "bc58a04c14c284db3076347a5ea717e87d3676cb9dfc969ddbdf080cd8761311"
+    },
+    {
+      "path": "src/Inu.Kernel.Virtio/KernelVirtio.cs",
+      "sha256": "92f2fe47f66472fe0ed0db416ca0f16b02caf11205e836d5a232ca6c58c7c35b"
+    },
+    {
+      "path": "src/Inu.Kernel.Virtio/KernelVirtio.NetworkAndQueues.cs",
+      "sha256": "8adcc77f4ea58ffd58fb8a0ba9a5652fdb6fdc29ee7b7406822f58ac9c5778f8"
+    },
+    {
+      "path": "src/Inu.Kernel.Virtio/KernelVirtio.PciAndStorage.cs",
+      "sha256": "a79545cd21688bac45938e91e0118db253390869cd4f55a20fa1717cbc6ec821"
+    },
+    {
+      "path": "src/Inu.Kernel.Virtio/KernelVirtio.Transport.cs",
+      "sha256": "41db9beff9ee0623e7d1de076226091fb5f4964e2420c4ef405906aef5803ef0"
+    },
+    {
+      "path": "src/Inu.Kernel.Virtio/VirtioContracts.cs",
+      "sha256": "ea1dc1f89968172f810eb8e2f75e1ac2e10003a2c9c60e4113318776c591b62e"
+    },
+    {
+      "path": "src/Inu.Kernel.Virtio/VirtioMath.cs",
+      "sha256": "ff843471e0adc0e473767b0d1a4e50d48f8aef0d36969b8cb9d6789ccb9fe86a"
+    },
+    {
       "path": "src/Inu.Kernel.VirtualMemory/Inu.Kernel.VirtualMemory.csproj",
       "sha256": "7275022264e0a096f44e22355b501f572dac43a8cd7b0cceda6718e08bfe59d2"
+    },
+    {
+      "path": "src/Inu.Kernel.VirtualMemory/KernelVirtualMemory.cs",
+      "sha256": "7ca55c175912bce0671be6aeddb3a58a51809f620496116cda5b4c3431bfdf60"
     },
     {
       "path": "src/Inu.Kernel.VirtualMemory/KernelVirtualMemory.Diagnostics.cs",
@@ -4052,10 +4052,6 @@
     {
       "path": "src/Inu.Kernel.VirtualMemory/KernelVirtualMemory.Tables.cs",
       "sha256": "6c4395eec6a03c0c475c91d0fbe4f18c6fb0a60f8090f21aa208c1a99a777508"
-    },
-    {
-      "path": "src/Inu.Kernel.VirtualMemory/KernelVirtualMemory.cs",
-      "sha256": "7ca55c175912bce0671be6aeddb3a58a51809f620496116cda5b4c3431bfdf60"
     },
     {
       "path": "src/Inu.Kernel.X64.LowLevel/Inu.Kernel.X64.LowLevel.csproj",
@@ -4118,6 +4114,14 @@
       "sha256": "07c53c1ff2079a5965fee89f3ad2182dbc3938884a68ddccefb8ab6055865357"
     },
     {
+      "path": "src/Inu.Memory.Heap.Contracts/HeapContracts.cs",
+      "sha256": "dbd00bdea37b57e25ad42ee09bbec6f0d1ade74a36d0bd9d60db25143fe0a453"
+    },
+    {
+      "path": "src/Inu.Memory.Heap.Contracts/Inu.Memory.Heap.Contracts.csproj",
+      "sha256": "77b14a05dd44499708c95d3aee087cb66f694b47d56900d66ed14ca41732724e"
+    },
+    {
       "path": "src/Inu.Memory.Heap/BumpEarlyAllocator.cs",
       "sha256": "c7a02c97fc8ead55eef41301b8240334c66ca3e859ace97f206e8a5defbedb6b"
     },
@@ -4130,12 +4134,16 @@
       "sha256": "d26eedfceaac87358fac291ac92367b91bbcaf564766908507945e13d694d487"
     },
     {
-      "path": "src/Inu.Memory.Heap.Contracts/HeapContracts.cs",
-      "sha256": "dbd00bdea37b57e25ad42ee09bbec6f0d1ade74a36d0bd9d60db25143fe0a453"
+      "path": "src/Inu.Memory.Physical.Contracts/AssemblyInfo.cs",
+      "sha256": "d90d85388718a0dfb0c22b8c4633c790a5ec38ff40b3b69a68d40a0193207190"
     },
     {
-      "path": "src/Inu.Memory.Heap.Contracts/Inu.Memory.Heap.Contracts.csproj",
-      "sha256": "77b14a05dd44499708c95d3aee087cb66f694b47d56900d66ed14ca41732724e"
+      "path": "src/Inu.Memory.Physical.Contracts/Inu.Memory.Physical.Contracts.csproj",
+      "sha256": "3fbdd1344f14f0905292376eb8a7dfa13ea02a8fff5bd581ec58a86556638186"
+    },
+    {
+      "path": "src/Inu.Memory.Physical.Contracts/PhysicalMemoryContracts.cs",
+      "sha256": "aeb37e8f6bd44553f3dc070e53b296befbfc83398622736f48c4e6ac3f65ea4c"
     },
     {
       "path": "src/Inu.Memory.Physical/BitmapPhysicalMemoryManager.cs",
@@ -4156,18 +4164,6 @@
     {
       "path": "src/Inu.Memory.Physical/PhysicalAllocatorInternals.cs",
       "sha256": "e0d20a9a54c53983be4de0d5ed51d927ce24c97b98cf4c1b4ed3e7786a414eb8"
-    },
-    {
-      "path": "src/Inu.Memory.Physical.Contracts/AssemblyInfo.cs",
-      "sha256": "d90d85388718a0dfb0c22b8c4633c790a5ec38ff40b3b69a68d40a0193207190"
-    },
-    {
-      "path": "src/Inu.Memory.Physical.Contracts/Inu.Memory.Physical.Contracts.csproj",
-      "sha256": "3fbdd1344f14f0905292376eb8a7dfa13ea02a8fff5bd581ec58a86556638186"
-    },
-    {
-      "path": "src/Inu.Memory.Physical.Contracts/PhysicalMemoryContracts.cs",
-      "sha256": "aeb37e8f6bd44553f3dc070e53b296befbfc83398622736f48c4e6ac3f65ea4c"
     },
     {
       "path": "src/Inu.Memory.Virtual.Contracts/Inu.Memory.Virtual.Contracts.csproj",
@@ -4330,6 +4326,10 @@
       "sha256": "696f2be2c4982d7d5375c8a93744ea7d086a766d647367d059fb4a29ba415d60"
     },
     {
+      "path": "src/Inu.Usb.Xhci/KernelXhci.cs",
+      "sha256": "5d36c8f1460df312409b9ff0d2c881420da52ca6988e7f7a525eed06c1a185ff"
+    },
+    {
       "path": "src/Inu.Usb.Xhci/KernelXhci.DeviceTransfers.cs",
       "sha256": "c8b5452625913bae247d0d6c80b036a7532c0f612589837af7615e60b4830732"
     },
@@ -4340,10 +4340,6 @@
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.Storage.cs",
       "sha256": "68a25664d8a2db3c999d6931b5bd447b9d51bded9d54eca2858601ee2a8e67fd"
-    },
-    {
-      "path": "src/Inu.Usb.Xhci/KernelXhci.cs",
-      "sha256": "5d36c8f1460df312409b9ff0d2c881420da52ca6988e7f7a525eed06c1a185ff"
     },
     {
       "path": "src/Inu.Usb.Xhci/XhciContracts.cs",
@@ -4374,12 +4370,16 @@
       "sha256": "2729146113553c18aadc4f6d5e947854432b5018e5c1695be1ad99793b1fe37e"
     },
     {
+      "path": "src/Inu.Userland.Runtime/Console.cs",
+      "sha256": "f48cdef3bf8034e2f0e6e612dc39cd3cbd460af9d8b9dcd30641e6310cbf13d6"
+    },
+    {
       "path": "src/Inu.Userland.Runtime/Inu.Userland.Runtime.csproj",
       "sha256": "3d4a6c84e99a860d6f0b7dc7af811a74ab8a11f6d4e2be402fb76a0b90aa35e0"
     },
     {
       "path": "src/Inu.Userland.Runtime/UserlandRuntime.cs",
-      "sha256": "3cfaa515dc52c82fd520e6e38039b2412174c98912eb94461a0c1b1f47a6dec0"
+      "sha256": "ece421951a279543919f3d590d1cda09a576fe7746f5f8e0f61f3afefcfd8181"
     },
     {
       "path": "src/Inu.Userland.RuntimeSupport/Inu.Userland.RuntimeSupport.csproj",
@@ -4466,12 +4466,12 @@
       "sha256": "a52464fa8d65e16594d80d10a159ae800c6ed689baacd3863ec6f371c3883c37"
     },
     {
-      "path": "src/Userland/Login/LOGIN.BGRA",
-      "sha256": "993426b25937000f07877d93b930c238ee39604b7ee3295da748402cc4cb9410"
-    },
-    {
       "path": "src/Userland/Login/Login.asm",
       "sha256": "59e3c9dd423ac373fe2c2fe1b002a7f19a538cb9007265d2e3a8b0018f303f8e"
+    },
+    {
+      "path": "src/Userland/Login/LOGIN.BGRA",
+      "sha256": "993426b25937000f07877d93b930c238ee39604b7ee3295da748402cc4cb9410"
     },
     {
       "path": "src/Userland/Login/LoginApp.cs",
@@ -4648,6 +4648,10 @@
     {
       "path": "templates/InuPackage/Inu.Package.json",
       "sha256": "e986b56e8df4d26af2e26c48b598d945b9a9d93e343f0e21d9efed61b2d409cc"
+    },
+    {
+      "path": "THIRD-PARTY-NOTICES.md",
+      "sha256": "5df2f5d78693aa36bac7afaedcdab3d64ffd5e392b7ffa2a43cf2633e4ee3638"
     },
     {
       "path": "toolchain/Inu.NativeAot.Bootstrap.cs",

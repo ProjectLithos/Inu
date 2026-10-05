@@ -64,6 +64,25 @@ public static unsafe class UserlandConsole
 {
     public static Boolean Write(String text){if(text==null)return false;Byte* b=stackalloc Byte[256];Int32 offset=0;while(offset<text.Length){UInt32 n=(UInt32)(text.Length-offset);if(n>256U)n=256U;for(UInt32 i=0;i<n;i++){Char c=text[offset+(Int32)i];b[i]=(Byte)(c<=255?c:'?');}Int64 r=UserlandSystem.Call(UserlandOperation.Event,"console.output",b,n,null,0UL);if(r<0L)return false;offset+=(Int32)n;}return true;}
     public static Boolean WriteLine(String text){return Write(text)&&Write("\n");}
+    internal static Boolean WriteChar(Char value)
+    {
+        Byte* one=stackalloc Byte[1];one[0]=(Byte)(value<=255?value:'?');
+        return UserlandSystem.Call(UserlandOperation.Event,"console.output",one,1UL,null,0UL)>=0L;
+    }
+    internal static Boolean WriteUnsigned(UInt64 value)
+    {
+        Byte* digits=stackalloc Byte[20];UInt32 length=0U;
+        do{digits[length++]=(Byte)('0'+(value%10UL));value/=10UL;}while(value!=0UL);
+        Byte* output=stackalloc Byte[20];for(UInt32 i=0U;i<length;i++)output[i]=digits[length-1U-i];
+        return UserlandSystem.Call(UserlandOperation.Event,"console.output",output,length,null,0UL)>=0L;
+    }
+    internal static Boolean WriteSigned(Int64 value)
+    {
+        if(value>=0L)return WriteUnsigned((UInt64)value);
+        if(!Write("-"))return false;
+        UInt64 magnitude=(UInt64)(-(value+1L))+1UL;
+        return WriteUnsigned(magnitude);
+    }
     /// <summary>Waits for one decoded character through the kernel's interrupt-driven input service.</summary>
     public static Int32 ReadChar(){Int64 value=UserlandSystem.Call(UserlandOperation.Get,"console.input",null,0UL,null,0UL);return value>=0L?(Int32)value:-1;}
     public static Int32 ReadLineAscii(Byte* buffer,UInt32 capacity)

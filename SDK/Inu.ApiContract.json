@@ -49,6 +49,31 @@
     "description": "C# declarations are not SDK API merely because they are public. Only declarations explicitly marked for SDK users are published.",
     "exports": [
       {
+        "namespace": "System",
+        "type": "Console",
+        "members": [
+          "Write(string)",
+          "Write(char)",
+          "Write(bool)",
+          "Write(int)",
+          "Write(uint)",
+          "Write(long)",
+          "Write(ulong)",
+          "WriteLine()",
+          "WriteLine(string)",
+          "WriteLine(char)",
+          "WriteLine(bool)",
+          "WriteLine(int)",
+          "WriteLine(uint)",
+          "WriteLine(long)",
+          "WriteLine(ulong)",
+          "Clear()"
+        ],
+        "availability": "ring-3 userland",
+        "transport": "Event syscall",
+        "notes": "Freestanding .NET-compatible console supplied by Inu; preferred for new userland source."
+      },
+      {
         "namespace": "Inu.Userland.Runtime",
         "type": "Output",
         "members": [
@@ -57,7 +82,8 @@
           "Clear()"
         ],
         "availability": "ring-3 userland",
-        "transport": "Event syscall"
+        "transport": "Event syscall",
+        "notes": "Compatibility surface retained for source written against Inu 0.0.58."
       }
     ]
   }

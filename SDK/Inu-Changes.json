@@ -1,11 +1,12 @@
 {
-  "baseVersion": "0.0.57",
-  "version": "0.0.58",
+  "baseVersion": "0.0.58",
+  "version": "0.0.59",
   "changedFiles": [
     "Inu.ApiContract.json",
     "docs/Public-API-Rules.md",
+    "src/Inu.Userland.Runtime/Console.cs",
     "src/Inu.Userland.Runtime/UserlandRuntime.cs"
   ],
   "removedFiles": [],
-  "summary": "Adds the first explicit coder-facing ring-3 output API. Shell and other userland source can call Output.Write, Output.WriteLine and Output.Clear; these use the existing Event syscall path and do not expose kernel console implementation namespaces. New coder-owned shell templates import the valid userland API directly."
+  "summary": "Adds Inu's freestanding System.Console for ring-3 userland. Console.Write, Console.WriteLine and Console.Clear use the existing Event syscall path; Output remains as compatibility for 0.0.58."
 }

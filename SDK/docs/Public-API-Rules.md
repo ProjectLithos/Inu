@@ -9,6 +9,8 @@ Inu has one user-facing SDK contract. It is deliberately smaller than the set of
 5. Kath must consume the generated explicit contract rather than inventing or maintaining a second list.
 6. If an advertised API item cannot be compiled/used by an external OS project, that is a conformance failure.
 
-## First explicit userland API
+## First explicit userland APIs
 
-`Inu.Userland.Runtime.Output` is an intentionally exported ring-3 API. Coder-owned userland source may call `Output.Write`, `Output.WriteLine`, and `Output.Clear`; those operations cross the kernel boundary through the existing Event syscall rather than linking to `Inu.Kernel.Console`. Kernel console classes are not a userland SDK API.
+`System.Console` is the preferred coder-facing ring-3 text console. Inu supplies this freestanding .NET-compatible type itself; it does not depend on the desktop .NET runtime. `Console.Write`, `Console.WriteLine`, and `Console.Clear` cross the kernel boundary through the existing Event syscall rather than linking to `Inu.Kernel.Console`.
+
+`Inu.Userland.Runtime.Output` remains available as a compatibility surface for source written against Inu 0.0.58, but new ordinary C# userland source should prefer `System.Console`. Kernel console classes are not a userland SDK API.
