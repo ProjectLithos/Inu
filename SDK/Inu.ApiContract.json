@@ -117,6 +117,31 @@
         "availability": "freestanding managed code (kernel and ring-3 userland)",
         "transport": "in-process CoreLib",
         "notes": "Inu-owned .NET-compatible generic collections. No desktop .NET runtime dependency."
+      },
+      {
+        "namespace": "System.Text",
+        "type": "Text construction and encoding",
+        "members": [
+          "StringBuilder",
+          "StringBuilder.Append(string)",
+          "StringBuilder.Append(char)",
+          "StringBuilder.Append(bool)",
+          "StringBuilder.Append(int/uint/long/ulong)",
+          "StringBuilder.AppendLine()",
+          "StringBuilder.AppendLine(string)",
+          "StringBuilder.Clear()",
+          "StringBuilder.ToString()",
+          "Encoding.ASCII",
+          "Encoding.UTF8",
+          "Encoding.GetByteCount(string)",
+          "Encoding.GetBytes(string)",
+          "Encoding.GetString(byte[])",
+          "ASCIIEncoding",
+          "UTF8Encoding"
+        ],
+        "availability": "freestanding managed code (kernel and ring-3 userland)",
+        "transport": "in-process CoreLib",
+        "notes": "Inu-owned .NET-compatible StringBuilder plus initial ASCII and UTF-8 encoding support. No desktop .NET runtime dependency."
       }
     ]
   }

@@ -1,12 +1,12 @@
 {
-  "baseVersion": "0.0.59",
-  "version": "0.0.60",
+  "baseVersion": "0.0.60",
+  "version": "0.0.61",
   "changedFiles": [
     "Inu.ApiContract.json",
     "docs/Public-API-Rules.md",
-    "src/Inu.Userland.Runtime/Console.cs",
-    "src/Inu.Userland.Runtime/UserlandRuntime.cs"
+    "src/Inu.Freestanding.CoreLib/CoreLib.cs",
+    "src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs"
   ],
   "removedFiles": [],
-  "summary": "Adds Inu's freestanding System.Console for ring-3 userland. Console.Write, Console.WriteLine and Console.Clear use the existing Event syscall path; Output remains as compatibility for 0.0.58."
+  "summary": "Adds the first explicit freestanding System.Text SDK surface: StringBuilder, Encoding, ASCIIEncoding and UTF8Encoding, with managed-string materialisation and runtime conformance checks."
 }

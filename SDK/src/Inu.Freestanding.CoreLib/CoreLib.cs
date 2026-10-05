@@ -599,6 +599,29 @@ namespace System
                 return ReadRuntimeChar(this, index);
             }
         }
+
+        [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        [Runtime.RuntimeImport("*", "RhNewString")]
+        private static extern void* AllocateRuntimeString(global::Internal.Runtime.MethodTable* methodTable, Int32 characterCount);
+
+        // Freestanding string materialisation used by CoreLib helpers such as
+        // System.Text.StringBuilder and Encoding. RhNewString owns the NativeAOT
+        // variable-sized string allocation contract; callers only fill UTF-16 data.
+        internal static String CreateFromChars(Char[] characters, Int32 length)
+        {
+            if (characters == null) throw new ArgumentNullException();
+            if (length < 0 || length > characters.Length || length > MaxLength) throw new ArgumentOutOfRangeException();
+            if (length == 0) return Empty;
+
+            void* address = AllocateRuntimeString(global::Internal.Runtime.MethodTable.Of<String>(), length);
+            if (address == null) throw new OutOfMemoryException();
+            UInt64 raw = (UInt64)(nuint)address;
+            String value = Runtime.CompilerServices.Unsafe.As<UInt64, String>(ref raw);
+            ref Char destination = ref value.GetRawStringData();
+            Char* pointer = (Char*)Runtime.CompilerServices.Unsafe.AsPointer(ref destination);
+            for (Int32 index = 0; index < length; index++) pointer[index] = characters[index];
+            return value;
+        }
     }
     #pragma warning restore CS0660, CS0661
     // CONTRACT with .NET 10 NativeAOT System.Private.CoreLib. ILC recognizes
@@ -3679,6 +3702,361 @@ namespace System.Collections.Generic
             public Boolean MoveNext() { if (_index <= 0) return false; _index--; return true; }
             public void Reset() { _index = _stack._size; }
             public void Dispose() { }
+        }
+    }
+}
+
+
+namespace System.Text
+{
+    /// <summary><inu.api/>Freestanding growable UTF-16 text builder compatible with the ordinary System.Text.StringBuilder programming model.</summary>
+    public sealed class StringBuilder
+    {
+        private Char[] _buffer;
+        private Int32 _length;
+
+        /// <summary><inu.api/>Creates an empty builder with the default initial capacity.</summary>
+        public StringBuilder() : this(16) { }
+
+        /// <summary><inu.api/>Creates an empty builder with at least the requested initial capacity.</summary>
+        public StringBuilder(Int32 capacity)
+        {
+            if (capacity < 0) throw new ArgumentOutOfRangeException();
+            _buffer = new Char[capacity == 0 ? 16 : capacity];
+        }
+
+        /// <summary><inu.api/>Creates a builder initialized from the supplied string.</summary>
+        public StringBuilder(String value)
+        {
+            Int32 length = value == null ? 0 : value.Length;
+            _buffer = new Char[length < 16 ? 16 : length];
+            if (value != null)
+            {
+                for (Int32 index = 0; index < length; index++) _buffer[index] = value[index];
+                _length = length;
+            }
+        }
+
+        /// <summary><inu.api/>Gets or sets the number of characters currently held by the builder.</summary>
+        public Int32 Length
+        {
+            get => _length;
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException();
+                EnsureCapacity(value);
+                if (value > _length)
+                    for (Int32 index = _length; index < value; index++) _buffer[index] = '\0';
+                _length = value;
+            }
+        }
+
+        /// <summary><inu.api/>Gets or sets the current character capacity.</summary>
+        public Int32 Capacity
+        {
+            get => _buffer.Length;
+            set
+            {
+                if (value < _length || value < 0) throw new ArgumentOutOfRangeException();
+                if (value == _buffer.Length) return;
+                Char[] replacement = new Char[value];
+                for (Int32 index = 0; index < _length; index++) replacement[index] = _buffer[index];
+                _buffer = replacement;
+            }
+        }
+
+        /// <summary><inu.api/>Gets or replaces one character already present in the builder.</summary>
+        public Char this[Int32 index]
+        {
+            get
+            {
+                if ((UInt32)index >= (UInt32)_length) throw new IndexOutOfRangeException();
+                return _buffer[index];
+            }
+            set
+            {
+                if ((UInt32)index >= (UInt32)_length) throw new IndexOutOfRangeException();
+                _buffer[index] = value;
+            }
+        }
+
+        /// <summary><inu.api/>Removes all characters while retaining the allocated buffer.</summary>
+        public StringBuilder Clear()
+        {
+            _length = 0;
+            return this;
+        }
+
+        /// <summary><inu.api/>Ensures that at least the requested number of characters fit without another growth allocation.</summary>
+        public Int32 EnsureCapacity(Int32 capacity)
+        {
+            if (capacity < 0) throw new ArgumentOutOfRangeException();
+            if (capacity <= _buffer.Length) return _buffer.Length;
+            Int32 next = _buffer.Length < 16 ? 16 : _buffer.Length;
+            while (next < capacity)
+            {
+                Int32 grown = next <= (Int32.MaxValue / 2) ? next * 2 : Int32.MaxValue;
+                if (grown <= next) { next = capacity; break; }
+                next = grown;
+            }
+            if (next < capacity) next = capacity;
+            Capacity = next;
+            return _buffer.Length;
+        }
+
+        /// <summary><inu.api/>Appends a string value.</summary>
+        public StringBuilder Append(String value)
+        {
+            if (value == null || value.Length == 0) return this;
+            Int32 start = _length;
+            EnsureCapacity(start + value.Length);
+            for (Int32 index = 0; index < value.Length; index++) _buffer[start + index] = value[index];
+            _length += value.Length;
+            return this;
+        }
+
+        /// <summary><inu.api/>Appends one UTF-16 character.</summary>
+        public StringBuilder Append(Char value)
+        {
+            EnsureCapacity(_length + 1);
+            _buffer[_length++] = value;
+            return this;
+        }
+
+        /// <summary><inu.api/>Appends a Boolean using normal .NET True/False spelling.</summary>
+        public StringBuilder Append(Boolean value) => Append(value ? "True" : "False");
+
+        /// <summary><inu.api/>Appends a signed 32-bit integer in decimal form.</summary>
+        public StringBuilder Append(Int32 value) => AppendSigned(value);
+
+        /// <summary><inu.api/>Appends an unsigned 32-bit integer in decimal form.</summary>
+        public StringBuilder Append(UInt32 value) => AppendUnsigned(value);
+
+        /// <summary><inu.api/>Appends a signed 64-bit integer in decimal form.</summary>
+        public StringBuilder Append(Int64 value) => AppendSigned(value);
+
+        /// <summary><inu.api/>Appends an unsigned 64-bit integer in decimal form.</summary>
+        public StringBuilder Append(UInt64 value) => AppendUnsigned(value);
+
+        /// <summary><inu.api/>Appends a CR/LF line terminator.</summary>
+        public StringBuilder AppendLine()
+        {
+            Append('\r');
+            Append('\n');
+            return this;
+        }
+
+        /// <summary><inu.api/>Appends a string followed by a CR/LF line terminator.</summary>
+        public StringBuilder AppendLine(String value)
+        {
+            Append(value);
+            return AppendLine();
+        }
+
+        /// <summary><inu.api/>Materializes the current UTF-16 contents as a managed string.</summary>
+        public override String ToString() => String.CreateFromChars(_buffer, _length);
+
+        private StringBuilder AppendSigned(Int64 value)
+        {
+            if (value < 0)
+            {
+                Append('-');
+                UInt64 magnitude = unchecked(0UL - (UInt64)value);
+                return AppendUnsigned(magnitude);
+            }
+            return AppendUnsigned((UInt64)value);
+        }
+
+        private StringBuilder AppendUnsigned(UInt64 value)
+        {
+            Char[] digits = new Char[20];
+            Int32 count = 0;
+            do
+            {
+                digits[count++] = (Char)('0' + (Char)(value % 10UL));
+                value /= 10UL;
+            }
+            while (value != 0UL);
+
+            EnsureCapacity(_length + count);
+            while (count != 0) _buffer[_length++] = digits[--count];
+            return this;
+        }
+    }
+
+    /// <summary><inu.api/>Freestanding text encoding base for the initial ASCII and UTF-8 SDK surface.</summary>
+    public abstract class Encoding
+    {
+        /// <summary><inu.api/>Returns an Inu-owned ASCII encoding instance.</summary>
+        public static Encoding ASCII => new ASCIIEncoding();
+
+        /// <summary><inu.api/>Returns an Inu-owned UTF-8 encoding instance.</summary>
+        public static Encoding UTF8 => new UTF8Encoding();
+
+        /// <summary><inu.api/>Returns the number of bytes required to encode the supplied string.</summary>
+        public abstract Int32 GetByteCount(String value);
+
+        /// <summary><inu.api/>Encodes the supplied string into a newly allocated byte array.</summary>
+        public abstract Byte[] GetBytes(String value);
+
+        /// <summary><inu.api/>Decodes a complete byte array into a newly allocated managed string.</summary>
+        public abstract String GetString(Byte[] bytes);
+    }
+
+    /// <summary><inu.api/>Freestanding 7-bit ASCII encoding with '?' replacement for characters outside ASCII.</summary>
+    public sealed class ASCIIEncoding : Encoding
+    {
+        /// <summary><inu.api/>Creates an ASCII encoding instance.</summary>
+        public ASCIIEncoding() { }
+
+        /// <summary><inu.api/></summary>
+        public override Int32 GetByteCount(String value)
+        {
+            if (value == null) throw new ArgumentNullException();
+            return value.Length;
+        }
+
+        /// <summary><inu.api/></summary>
+        public override Byte[] GetBytes(String value)
+        {
+            if (value == null) throw new ArgumentNullException();
+            Byte[] bytes = new Byte[value.Length];
+            for (Int32 index = 0; index < value.Length; index++)
+            {
+                Char character = value[index];
+                bytes[index] = character <= 0x7F ? (Byte)character : (Byte)'?';
+            }
+            return bytes;
+        }
+
+        /// <summary><inu.api/></summary>
+        public override String GetString(Byte[] bytes)
+        {
+            if (bytes == null) throw new ArgumentNullException();
+            Char[] characters = new Char[bytes.Length];
+            for (Int32 index = 0; index < bytes.Length; index++)
+                characters[index] = bytes[index] <= 0x7F ? (Char)bytes[index] : '?';
+            return String.CreateFromChars(characters, characters.Length);
+        }
+    }
+
+    /// <summary><inu.api/>Freestanding UTF-8 encoder/decoder for ordinary Unicode scalar values represented by UTF-16 strings.</summary>
+    public sealed class UTF8Encoding : Encoding
+    {
+        /// <summary><inu.api/>Creates a UTF-8 encoding instance.</summary>
+        public UTF8Encoding() { }
+
+        /// <summary><inu.api/></summary>
+        public override Int32 GetByteCount(String value)
+        {
+            if (value == null) throw new ArgumentNullException();
+            Int32 count = 0;
+            for (Int32 index = 0; index < value.Length; index++)
+            {
+                UInt32 scalar = value[index];
+                if (scalar < 0x80U) count += 1;
+                else if (scalar < 0x800U) count += 2;
+                else if (scalar >= 0xD800U && scalar <= 0xDBFFU && index + 1 < value.Length)
+                {
+                    UInt32 low = value[index + 1];
+                    if (low >= 0xDC00U && low <= 0xDFFFU) { count += 4; index++; }
+                    else count += 3; // replacement character
+                }
+                else count += 3;
+            }
+            return count;
+        }
+
+        /// <summary><inu.api/></summary>
+        public override Byte[] GetBytes(String value)
+        {
+            if (value == null) throw new ArgumentNullException();
+            Byte[] bytes = new Byte[GetByteCount(value)];
+            Int32 destination = 0;
+            for (Int32 index = 0; index < value.Length; index++)
+            {
+                UInt32 scalar = value[index];
+                if (scalar >= 0xD800U && scalar <= 0xDBFFU && index + 1 < value.Length)
+                {
+                    UInt32 low = value[index + 1];
+                    if (low >= 0xDC00U && low <= 0xDFFFU)
+                    {
+                        scalar = 0x10000U + ((scalar - 0xD800U) << 10) + (low - 0xDC00U);
+                        index++;
+                    }
+                    else scalar = 0xFFFDU;
+                }
+                else if (scalar >= 0xD800U && scalar <= 0xDFFFU) scalar = 0xFFFDU;
+
+                if (scalar < 0x80U)
+                    bytes[destination++] = (Byte)scalar;
+                else if (scalar < 0x800U)
+                {
+                    bytes[destination++] = (Byte)(0xC0U | (scalar >> 6));
+                    bytes[destination++] = (Byte)(0x80U | (scalar & 0x3FU));
+                }
+                else if (scalar < 0x10000U)
+                {
+                    bytes[destination++] = (Byte)(0xE0U | (scalar >> 12));
+                    bytes[destination++] = (Byte)(0x80U | ((scalar >> 6) & 0x3FU));
+                    bytes[destination++] = (Byte)(0x80U | (scalar & 0x3FU));
+                }
+                else
+                {
+                    bytes[destination++] = (Byte)(0xF0U | (scalar >> 18));
+                    bytes[destination++] = (Byte)(0x80U | ((scalar >> 12) & 0x3FU));
+                    bytes[destination++] = (Byte)(0x80U | ((scalar >> 6) & 0x3FU));
+                    bytes[destination++] = (Byte)(0x80U | (scalar & 0x3FU));
+                }
+            }
+            return bytes;
+        }
+
+        /// <summary><inu.api/></summary>
+        public override String GetString(Byte[] bytes)
+        {
+            if (bytes == null) throw new ArgumentNullException();
+            Char[] characters = new Char[bytes.Length];
+            Int32 output = 0;
+            Int32 index = 0;
+            while (index < bytes.Length)
+            {
+                UInt32 first = bytes[index++];
+                UInt32 scalar;
+                Int32 continuationCount;
+                UInt32 minimum;
+
+                if (first < 0x80U) { scalar = first; continuationCount = 0; minimum = 0U; }
+                else if ((first & 0xE0U) == 0xC0U) { scalar = first & 0x1FU; continuationCount = 1; minimum = 0x80U; }
+                else if ((first & 0xF0U) == 0xE0U) { scalar = first & 0x0FU; continuationCount = 2; minimum = 0x800U; }
+                else if ((first & 0xF8U) == 0xF0U) { scalar = first & 0x07U; continuationCount = 3; minimum = 0x10000U; }
+                else { characters[output++] = (Char)0xFFFD; continue; }
+
+                Boolean valid = true;
+                for (Int32 continuation = 0; continuation < continuationCount; continuation++)
+                {
+                    if (index >= bytes.Length || (bytes[index] & 0xC0U) != 0x80U) { valid = false; break; }
+                    scalar = (scalar << 6) | (UInt32)(bytes[index++] & 0x3FU);
+                }
+
+                if (!valid || scalar < minimum || scalar > 0x10FFFFU || (scalar >= 0xD800U && scalar <= 0xDFFFU))
+                {
+                    characters[output++] = (Char)0xFFFD;
+                    continue;
+                }
+
+                if (scalar < 0x10000U)
+                {
+                    characters[output++] = (Char)scalar;
+                }
+                else
+                {
+                    scalar -= 0x10000U;
+                    characters[output++] = (Char)(0xD800U + (scalar >> 10));
+                    characters[output++] = (Char)(0xDC00U + (scalar & 0x3FFU));
+                }
+            }
+            return String.CreateFromChars(characters, output);
         }
     }
 }

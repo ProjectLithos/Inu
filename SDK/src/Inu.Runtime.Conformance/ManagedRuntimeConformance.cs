@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Inu.Runtime.NativeAot;
 using Inu.Kernel.Scheduler;
 
@@ -1231,6 +1232,34 @@ public static unsafe class ManagedRuntimeConformance
         NativeAotExceptionRuntime.TraceStage(0xB4UL);
         RunCollectionRuntimeChecks(probe, ref passed, ref failed);
         NativeAotExceptionRuntime.TraceStage(0xB5UL);
+
+        // 0.0.61: the first coder-facing System.Text surface is a runtime contract,
+        // including dynamic managed-string materialisation through RhNewString.
+        NativeAotExceptionRuntime.TraceStage(0xB6UL);
+        RunTextRuntimeChecks(ref passed, ref failed);
+        NativeAotExceptionRuntime.TraceStage(0xB7UL);
+    }
+
+    private static void RunTextRuntimeChecks(ref UInt32 passed, ref UInt32 failed)
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.Append("Inu").Append(' ').Append(61).AppendLine();
+        String built = builder.ToString();
+        Record(built.Length == 8 && built[0] == 'I' && built[3] == ' ' && built[4] == '6' && built[5] == '1' && built[6] == '\r' && built[7] == '\n', ref passed, ref failed);
+
+        builder.Clear().Append(true).Append('/').Append((UInt64)42UL);
+        Record(String.Equals(builder.ToString(), "True/42"), ref passed, ref failed);
+
+        Encoding ascii = Encoding.ASCII;
+        Byte[] asciiBytes = ascii.GetBytes("Inu");
+        Record(asciiBytes.Length == 3 && asciiBytes[0] == (Byte)'I' && asciiBytes[2] == (Byte)'u', ref passed, ref failed);
+        Record(String.Equals(ascii.GetString(asciiBytes), "Inu"), ref passed, ref failed);
+
+        Encoding utf8 = Encoding.UTF8;
+        String unicode = "\u00A3\u20AC";
+        Byte[] utf8Bytes = utf8.GetBytes(unicode);
+        Record(utf8Bytes.Length == 5 && utf8Bytes[0] == 0xC2 && utf8Bytes[1] == 0xA3 && utf8Bytes[2] == 0xE2 && utf8Bytes[3] == 0x82 && utf8Bytes[4] == 0xAC, ref passed, ref failed);
+        Record(String.Equals(utf8.GetString(utf8Bytes), unicode), ref passed, ref failed);
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
