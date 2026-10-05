@@ -1,5 +1,5 @@
 {
-  "version": "0.0.53",
+  "version": "0.0.54",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -383,7 +383,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "73dd3eea57be3ef838909dd74f5ab993240936319424c464108461e0db137de2"
+      "sha256": "6e5d24ec508807f142f5cdd6f157e9c7427eba207296a8edcbd2da49fd14b88f"
     },
     {
       "path": "Directory.Build.targets",
@@ -415,7 +415,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "a213822516c63dc0faabe5487968322c0443e61a6895fa1e156530cc23f386a6"
+      "sha256": "0be35456963ba3d30e046c86a68bd4d224609938914abc72e0930612c9e63001"
     },
     {
       "path": "Inu-Package.bat",
@@ -447,7 +447,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "68ba2ffbc99a52adffa7fca87b0e1e0e849dfe1d21752d36957af1894a74fd31"
+      "sha256": "ff9e38b8cfea3dafd374625ba1d0dd7217680802aaec9e2501cc8c69b2ba1428"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -987,7 +987,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "c529074efa6dd9dd39eb228fb13dc52e5b4432748225e4a685684d9d6f22e023"
+      "sha256": "f899bf329344053e0d04eba92c046986b14560e518a94c971541e9e0d9efeec5"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1363,7 +1363,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "2420093a87c3338119037ac66b62300c4c0aa232cb099f74b706efacd148978a"
+      "sha256": "75ea97e8fc243d7f4d10de4aea9ebfe28a9b3d878d2fc926030ec53bc3682395"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -2211,7 +2211,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "b6591f7f812a5b1109ef24313807be59653c8931f46229e55795f52db38a85f0"
+      "sha256": "77462de56c8412f2112aab00175d7c14d9cef7745d275c1ddcf0ced7b1565734"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",

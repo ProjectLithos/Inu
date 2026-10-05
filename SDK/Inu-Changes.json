@@ -1,12 +1,7 @@
 {
-  "baseVersion": "0.0.52",
-  "version": "0.0.53",
-  "changedFiles": [
-    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-    "src/Inu.Kernel.Processes/KernelProcessRecordStore.cs",
-    "Inu.SdkManifest.json",
-    "src/Inu.Core/InuSdkContract.cs"
-  ],
+  "baseVersion": "0.0.53",
+  "version": "0.0.54",
+  "changedFiles": [],
   "removedFiles": [],
-  "summary": "Keep the interactive shell process resident across command launches so returning from short ring-3 commands such as Echo does not reload SHELL.EXE."
+  "summary": "Kath now derives OS instance allocation only from the actual OS directories. The legacy persistent nextInstanceByName counter is discarded, so deleting all OS source directories resets allocation instead of preserving stale suffixes."
 }
