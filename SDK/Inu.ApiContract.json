@@ -46,6 +46,19 @@
   "codingApi": {
     "status": "explicit-only",
     "exportMarker": "<inu.api>",
-    "description": "C# declarations are not SDK API merely because they are public. Only declarations explicitly marked for SDK users are published."
+    "description": "C# declarations are not SDK API merely because they are public. Only declarations explicitly marked for SDK users are published.",
+    "exports": [
+      {
+        "namespace": "Inu.Userland.Runtime",
+        "type": "Output",
+        "members": [
+          "Write(string)",
+          "WriteLine(string)",
+          "Clear()"
+        ],
+        "availability": "ring-3 userland",
+        "transport": "Event syscall"
+      }
+    ]
   }
 }

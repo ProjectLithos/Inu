@@ -47,6 +47,19 @@ public static unsafe class UserlandSystem
     internal static UInt64 CopyAscii(String text,Byte* destination,UInt32 capacity){if(text==null||destination==null||(UInt32)text.Length>capacity)return 0UL;for(Int32 i=0;i<text.Length;i++){Char c=text[i];destination[i]=(Byte)(c<=255?c:'?');}return (UInt64)text.Length;}
 }
 
+/// <summary><inu.api>Coder-facing text output for ordinary ring-3 applications.</inu.api> Output is delivered through the Inu Event syscall boundary; it does not expose kernel console implementation code.</summary>
+public static class Output
+{
+    /// <summary><inu.api>Writes text without appending a line terminator.</inu.api></summary>
+    public static Boolean Write(String text)=>UserlandConsole.Write(text);
+
+    /// <summary><inu.api>Writes text followed by a line terminator.</inu.api></summary>
+    public static Boolean WriteLine(String text)=>UserlandConsole.WriteLine(text);
+
+    /// <summary><inu.api>Requests that the current text console be cleared.</inu.api></summary>
+    public static Boolean Clear()=>UserlandConsole.Clear();
+}
+
 public static unsafe class UserlandConsole
 {
     public static Boolean Write(String text){if(text==null)return false;Byte* b=stackalloc Byte[256];Int32 offset=0;while(offset<text.Length){UInt32 n=(UInt32)(text.Length-offset);if(n>256U)n=256U;for(UInt32 i=0;i<n;i++){Char c=text[offset+(Int32)i];b[i]=(Byte)(c<=255?c:'?');}Int64 r=UserlandSystem.Call(UserlandOperation.Event,"console.output",b,n,null,0UL);if(r<0L)return false;offset+=(Int32)n;}return true;}

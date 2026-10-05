@@ -1,7 +1,11 @@
 {
-  "baseVersion": "0.0.56",
-  "version": "0.0.57",
-  "changedFiles": [],
+  "baseVersion": "0.0.57",
+  "version": "0.0.58",
+  "changedFiles": [
+    "Inu.ApiContract.json",
+    "docs/Public-API-Rules.md",
+    "src/Inu.Userland.Runtime/UserlandRuntime.cs"
+  ],
   "removedFiles": [],
-  "summary": "Kath now treats each operating system's exact user-chosen project path as its sole location identity. It no longer scans remembered or legacy root folders. Instance suffixes are determined only by collisions in the parent folder selected for the current OS creation."
+  "summary": "Adds the first explicit coder-facing ring-3 output API. Shell and other userland source can call Output.Write, Output.WriteLine and Output.Clear; these use the existing Event syscall path and do not expose kernel console implementation namespaces. New coder-owned shell templates import the valid userland API directly."
 }
