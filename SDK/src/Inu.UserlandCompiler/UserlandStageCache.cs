@@ -71,6 +71,9 @@ internal static class UserlandStageCache
             }
         }
         catch (JsonException) { } // A damaged record is a miss.
+        // File.Delete can throw when the parent directory is missing on Windows.
+        // Initialise the cache on the first run before invalidating a record.
+        Directory.CreateDirectory(cacheDirectory);
         File.Delete(cachePath);
         int result = action(); if (result != 0) return result;
         if (!Ready()) { Console.Error.WriteLine($"[FAIL] {name} did not produce its cache outputs."); return 1; }

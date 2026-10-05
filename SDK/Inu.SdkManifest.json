@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "product": "Inu OS SDK",
-  "sdkVersion": "0.0.49",
+  "sdkVersion": "0.0.50",
   "apiVersion": "3.0",
   "abiVersion": "1.0",
   "compatibilityPolicy": "additive-within-major",
@@ -22,7 +22,7 @@
     "heapDiagnostics": "1.0"
   },
   "toolchain": {
-    "dotnet": "10.0.492",
+    "dotnet": "10.0.502",
     "nativeAotIlc": "10.0.10",
     "llvm": "22.1.6",
     "targetAbi": "PE/COFF x64 UEFI",

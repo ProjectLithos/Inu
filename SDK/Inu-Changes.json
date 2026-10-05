@@ -1,6 +1,6 @@
 {
-  "baseVersion": "0.0.48",
-  "version": "0.0.49",
+  "baseVersion": "0.0.49",
+  "version": "0.0.50",
   "changedFiles": [
     "Directory.Build.props",
     "Inu-Changes.json",
@@ -8,6 +8,10 @@
     "Inu.SdkManifest.json",
     "docs/Inu.Documentation.json",
     "docs/site/assets/site.js",
-    "src/Inu.Core/InuSdkContract.cs"
+    "scripts/UserlandStageCache.Tests/Program.cs",
+    "scripts/UserlandStageCache.Tests/UserlandStageCache.Tests.csproj",
+    "src/Inu.Core/InuSdkContract.cs",
+    "src/Inu.UserlandCompiler/Program.cs",
+    "src/Inu.UserlandCompiler/UserlandStageCache.cs"
   ]
 }

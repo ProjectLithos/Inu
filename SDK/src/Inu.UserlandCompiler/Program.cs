@@ -77,7 +77,7 @@ static int MainEntry(string[] args)
     string commandsOutput=Path.Combine(outputRoot,"Commands");
     HashSet<string> expectedCommands=Directory.Exists(commands)?Directory.GetFiles(commands,"*.cs").Select(p=>Sanitize(Path.GetFileNameWithoutExtension(p)).ToUpperInvariant()+".EXE").ToHashSet(StringComparer.OrdinalIgnoreCase):new(StringComparer.OrdinalIgnoreCase);
     if(Directory.Exists(commandsOutput))foreach(string executable in Directory.GetFiles(commandsOutput,"*.EXE"))if(!expectedCommands.Contains(Path.GetFileName(executable)))File.Delete(executable);
-    if(!File.Exists(shellSource)){string oldShell=Path.Combine(outputRoot,"Shell","SHELL.EXE");File.Delete(oldShell);}
+    if(!File.Exists(shellSource)){string oldShell=Path.Combine(outputRoot,"Shell","SHELL.EXE");if(File.Exists(oldShell))File.Delete(oldShell);}
     Console.WriteLine($"[ OK ] Ring-3 userland executables built under: {outputRoot}");
     return 0;
 
