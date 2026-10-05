@@ -50,6 +50,12 @@ public static class Console
     /// <summary><inu.api>Writes an unsigned 64-bit integer followed by the current console line terminator.</inu.api></summary>
     public static void WriteLine(UInt64 value) { Write(value); WriteLine(); }
 
+    /// <summary><inu.api>Waits for and returns the next decoded console character as an integer, or -1 if the input service fails.</inu.api></summary>
+    public static Int32 Read() => UserlandConsole.ReadChar();
+
+    /// <summary><inu.api>Reads one editable line from the console and returns it as a managed string.</inu.api></summary>
+    public static String ReadLine() => UserlandConsole.ReadLine();
+
     /// <summary><inu.api>Clears all visible text from the current text console.</inu.api></summary>
     public static void Clear() => UserlandConsole.Clear();
 }

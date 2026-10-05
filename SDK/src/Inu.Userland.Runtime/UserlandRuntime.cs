@@ -1,6 +1,7 @@
 using System;
 using System.Runtime;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Inu.Userland.Runtime;
 
@@ -60,6 +61,24 @@ public static class Output
     public static Boolean Clear()=>UserlandConsole.Clear();
 }
 
+/// <summary><inu.api>Coder-facing console input for ordinary ring-3 applications.</inu.api> Input is obtained through the Inu Get syscall boundary and remains independent of kernel input implementation classes.</summary>
+public static class Input
+{
+    /// <summary><inu.api>Waits for and returns the next decoded console character, or -1 if the input service fails.</inu.api></summary>
+    public static Int32 Read()=>UserlandConsole.ReadChar();
+
+    /// <summary><inu.api>Waits for and returns the next decoded console character.</inu.api></summary>
+    public static Char ReadChar()
+    {
+        Int32 value=UserlandConsole.ReadChar();
+        if(value<0)throw new InvalidOperationException();
+        return (Char)value;
+    }
+
+    /// <summary><inu.api>Reads one editable line of console input and returns it as a managed string.</inu.api></summary>
+    public static String ReadLine()=>UserlandConsole.ReadLine();
+}
+
 public static unsafe class UserlandConsole
 {
     public static Boolean Write(String text){if(text==null)return false;Byte* b=stackalloc Byte[256];Int32 offset=0;while(offset<text.Length){UInt32 n=(UInt32)(text.Length-offset);if(n>256U)n=256U;for(UInt32 i=0;i<n;i++){Char c=text[offset+(Int32)i];b[i]=(Byte)(c<=255?c:'?');}Int64 r=UserlandSystem.Call(UserlandOperation.Event,"console.output",b,n,null,0UL);if(r<0L)return false;offset+=(Int32)n;}return true;}
@@ -85,6 +104,27 @@ public static unsafe class UserlandConsole
     }
     /// <summary>Waits for one decoded character through the kernel's interrupt-driven input service.</summary>
     public static Int32 ReadChar(){Int64 value=UserlandSystem.Call(UserlandOperation.Get,"console.input",null,0UL,null,0UL);return value>=0L?(Int32)value:-1;}
+
+    internal static String ReadLine()
+    {
+        StringBuilder line=new StringBuilder();
+        for(;;)
+        {
+            Int32 value=ReadChar();
+            if(value<0)throw new InvalidOperationException();
+            Char c=(Char)value;
+            if(c=='\r'||c=='\n'){Write("\n");return line.ToString();}
+            if(c=='\b')
+            {
+                if(line.Length!=0){line.Length=line.Length-1;Write("\b \b");}
+                continue;
+            }
+            if(c<32||c==127)continue;
+            line.Append(c);
+            WriteChar(c);
+        }
+    }
+
     public static Int32 ReadLineAscii(Byte* buffer,UInt32 capacity)
     {
         if(buffer==null||capacity<2U)return -1;
