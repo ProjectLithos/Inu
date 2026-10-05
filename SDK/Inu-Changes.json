@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.0.53",
-  "version": "0.0.54",
+  "baseVersion": "0.0.54",
+  "version": "0.0.55",
   "changedFiles": [],
   "removedFiles": [],
-  "summary": "Kath now derives OS instance allocation only from the actual OS directories. The legacy persistent nextInstanceByName counter is discarded, so deleting all OS source directories resets allocation instead of preserving stale suffixes."
+  "summary": "Kath now treats each operating system's exact user-chosen project path as its sole location identity. It no longer scans remembered or legacy root folders. Instance suffixes are determined only by collisions in the parent folder selected for the current OS creation."
 }
