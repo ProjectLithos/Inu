@@ -1,0 +1,18 @@
+NAME
+    power - Inspect or control the power service lifecycle.
+
+SYNOPSIS
+    power [status|start|run|pause|resume|stop|unload]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Inspect or control the power service lifecycle.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/POWER.CMD
+    /INU/HELP/POWER.MAN

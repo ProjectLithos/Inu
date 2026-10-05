@@ -1,0 +1,31 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Startup.TimerDispatch",
+  "displayName": "Timer dispatch startup",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Kernel startup policy is OS-owned. Kath can include or omit this startup source component."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "kernel.startup.timer-dispatch"
+    ],
+    "requires": []
+  },
+  "dependencies": [],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": null,
+      "sources": [
+        "templates/InuKernel/Startup/TimerDispatchStartup.cs"
+      ]
+    }
+  }
+}

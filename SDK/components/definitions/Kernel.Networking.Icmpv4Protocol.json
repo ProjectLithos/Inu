@@ -1,0 +1,38 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.Icmpv4Protocol",
+  "displayName": "ICMPv4 control protocol",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "ICMPv4 validation, echo-request handling and echo-request transmission register through the IPv4 transport registry and are not required by the IPv4 layer itself."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.icmpv4"
+    ],
+    "requires": [
+      "network.ipv4",
+      "network.ipv4-send",
+      "network.ipv4-transport-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.Ipv4Protocol",
+    "Kernel.Networking.Ipv4TransportRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelIcmpv4Protocol.cs"
+      ]
+    }
+  }
+}

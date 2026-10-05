@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 2,
+  "product": "Inu OS SDK",
+  "sdkVersion": "0.0.49",
+  "apiVersion": "3.0",
+  "abiVersion": "1.0",
+  "compatibilityPolicy": "additive-within-major",
+  "architectures": [
+    "x64",
+    "arm64-planned"
+  ],
+  "projectSchemaVersions": [
+    2,
+    3
+  ],
+  "abi": {
+    "kernel": "1.0",
+    "driver": "1.0",
+    "syscall": "2.0",
+    "debug": "1.0",
+    "crashDump": "1.1",
+    "heapDiagnostics": "1.0"
+  },
+  "toolchain": {
+    "dotnet": "10.0.492",
+    "nativeAotIlc": "10.0.10",
+    "llvm": "22.1.6",
+    "targetAbi": "PE/COFF x64 UEFI",
+    "systemModuleAssembly": "System.Private.CoreLib (Inu freestanding implementation)",
+    "reflectionMetadata": "usage-based runtime mappings; reflection dataflow scan; System.Private.CoreLib dependency-retained (not --root); freestanding NativeFormat dependency anchors; no full reflection rooting"
+  },
+  "contracts": {
+    "publicApiBaseline": "Inu.ApiBaseline.json",
+    "apiPolicy": "Inu.ApiContract.json",
+    "driverManifestSchema": 3,
+    "compatibilityChecker": "Compare-InuApiCompatibility.ps1",
+    "subsystemContracts": "1.0",
+    "subsystemContractManifest": "Inu.SubsystemContracts.json",
+    "driverCapabilityModel": "1.2",
+    "subsystemRuntimeIntegration": "1.0",
+    "driverLifecycle": "1.0",
+    "deviceTree": "1.1",
+    "structuredLogging": "2.0",
+    "kernelTelemetry": "1.1",
+    "crashDump": "1.1",
+    "panic": "1.0",
+    "testFramework": "1.0",
+    "faultInjection": "1.0",
+    "packageFormat": "1.0",
+    "executableFormat": "1.0",
+    "vfs": "1.0",
+    "networkStack": "1.0",
+    "powerManagement": "1.0",
+    "timekeeping": "1.0",
+    "buildProvenance": "1.0",
+    "sdkDoctor": "1.0",
+    "commandLineSdk": "1.0",
+    "memoryDiagnostics": "1.0",
+    "trueTypeRenderer": "1.0",
+    "unifiedSubsystemLifecycle": "1.0",
+    "managedNativeAotRuntime": "1.0",
+    "managedRuntimeConformance": "1.0",
+    "userProcessExecution": "1.0"
+  },
+  "rules": {
+    "majorApiChange": "Breaking public API changes require a new API major version.",
+    "minorApiChange": "Additive public API changes may increment the API minor version.",
+    "abi": "Kernel/driver/syscall/debug ABI versions are independently versioned.",
+    "consumers": "Drivers and applications must declare the API/ABI versions they were built against.",
+    "driverCapabilities": "Drivers declare a maximum privilege set; the kernel issues per-binding grants from discovered device resources and privileged operations require live grants.",
+    "subsystemRuntime": "Kernel boot validates all formal subsystem contracts against the live implementations before exposing the interactive runtime.",
+    "managedRuntime": "NoGcBootstrap is an early-boot phase only; x64 kernels must transition through Inu.Runtime.NativeAot after KernelHeap initialization and pass the executable managed conformance gate before continuing startup.",
+    "userProcessExecution": "Inu x64 user processes use fixed self-contained ELF64 ET_EXEC or PE32+ images, private lower-half paging, package-selected syscall personality/version, native Inu syscall ABI 2.0 structured Get/Set/Event messages, Event(CommandComplete) followed by Set(ProcessControl, PID, Kill), and fail closed on unresolved dependencies, capabilities, PIE/relocations/import resolution, signatures, or ABI-version mismatch."
+  },
+  "supportedDriverFormats": [
+    "inu-driver-manifest-v3"
+  ],
+  "supportedPackageFormats": [
+    "inu-package-v1"
+  ],
+  "supportedExecutableFormats": [
+    "inu-executable-v1"
+  ],
+  "sdkRoot": "Inu/SDK",
+  "kernelLanguage": "CSharp",
+  "componentDelivery": "source-copy",
+  "componentDefinitions": {
+    "schemaVersion": 1,
+    "catalog": "components/Inu.ComponentCatalog.json",
+    "root": "components/definitions",
+    "selectionStatus": "candidate definitions are not independently selectable"
+  },
+  "kernelCompiler": "NativeAOT"
+}

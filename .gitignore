@@ -1,0 +1,7 @@
+.toolchain/
+Bin/
+Artifacts/
+SDK/Artifacts/
+**/bin/
+**/obj/
+*.log

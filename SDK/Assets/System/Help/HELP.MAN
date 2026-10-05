@@ -1,0 +1,18 @@
+NAME
+    help - Show a command manual loaded from the FAT32 system partition.
+
+SYNOPSIS
+    help [command]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show a command manual loaded from the FAT32 system partition.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/HELP.CMD
+    /INU/HELP/HELP.MAN

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Inu.Memory.Physical</RootNamespace>
+    <AssemblyName>Inu.Memory.Physical</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Memory.Physical.Contracts\Inu.Memory.Physical.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Memory.Contracts\Inu.Memory.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Primitives\Inu.Primitives.csproj" />
+    <ProjectReference Include="..\Inu.Core\Inu.Core.csproj" />
+  </ItemGroup>
+</Project>

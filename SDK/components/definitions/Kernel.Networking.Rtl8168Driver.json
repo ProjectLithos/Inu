@@ -1,0 +1,46 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.Rtl8168Driver",
+  "displayName": "Realtek RTL8168/RTL8111 network driver",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "The driver owns its device-specific state and registers through existing driver/subsystem contracts; bootstrap and generated HAL startup reference it only when its component symbol is selected."
+  },
+  "lifecycle": {
+    "ownership": "driver",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.interface.rtl8168"
+    ],
+    "requires": [
+      "driver.registry",
+      "pci.enumeration",
+      "network.interface-registry",
+      "interrupt.request"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.InterfaceRegistry",
+    "Kernel.Interrupts.BrokerCore",
+    "Kernel.Pci.ConfigurationRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Rtl8168/Inu.Kernel.Rtl8168.csproj",
+      "sources": [
+        "src/Inu.Kernel.Rtl8168/KernelRtl8168.DriverLifecycle.cs",
+        "src/Inu.Kernel.Rtl8168/KernelRtl8168.Hardware.cs",
+        "src/Inu.Kernel.Rtl8168/KernelRtl8168.NetworkIo.cs",
+        "src/Inu.Kernel.Rtl8168/KernelRtl8168.StorageAndMmio.cs",
+        "src/Inu.Kernel.Rtl8168/KernelRtl8168.cs",
+        "src/Inu.Kernel.Rtl8168/Rtl8168Contracts.cs",
+        "src/Inu.Kernel.Rtl8168/Rtl8168Math.cs"
+      ]
+    }
+  }
+}

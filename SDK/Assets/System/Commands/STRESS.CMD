@@ -1,0 +1,9 @@
+INU-COMMAND/1
+name=stress
+domain=userland
+aliases=runtime-stress
+manual=SYSTEM/HELP/STRESS.MAN
+entry=stress
+presentation=live
+elapsed-status=true
+timeout-ms=300000

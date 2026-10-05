@@ -1,0 +1,9 @@
+INU-COMMAND/1
+name=selftest
+domain=userland
+aliases=runtime-test
+manual=SYSTEM/HELP/SELFTEST.MAN
+entry=selftest
+presentation=live
+elapsed-status=true
+timeout-ms=300000

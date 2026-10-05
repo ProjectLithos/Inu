@@ -1,0 +1,18 @@
+NAME
+    devices - List discovered devices.
+
+SYNOPSIS
+    devices
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    List discovered devices.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/DEVICES.CMD
+    /INU/HELP/DEVICES.MAN

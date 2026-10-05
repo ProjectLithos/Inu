@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Acpi.HpetTable",
+  "displayName": "ACPI HPET table provider",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Owns HPET table interpretation and registers through KernelAcpiHpetServices; the monotonic clock layer can operate with other clock sources when omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "acpi.hpet"
+    ],
+    "requires": [
+      "acpi.table-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Acpi.TableRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Acpi/Inu.Kernel.Acpi.csproj",
+      "sources": [
+        "src/Inu.Kernel.Acpi/KernelAcpiHpetProvider.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpiHpetServices.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpi.PlatformTables.cs"
+      ]
+    }
+  }
+}

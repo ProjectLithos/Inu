@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Library</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable><DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences><NoStdLib>true</NoStdLib><NoConfig>true</NoConfig><RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion><GenerateAssemblyInfo>false</GenerateAssemblyInfo><GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute><DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences><AllowUnsafeBlocks>true</AllowUnsafeBlocks><AssemblyName>Inu.Kernel.Processes</AssemblyName></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.ApplicationFormat\Inu.ApplicationFormat.csproj" />
+    <ProjectReference Include="..\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.AddressSpace\Inu.Kernel.AddressSpace.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Heap\Inu.Kernel.Heap.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.InterruptDispatch\Inu.Kernel.InterruptDispatch.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Storage\Inu.Kernel.Storage.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Memory\Inu.Kernel.Memory.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Protection\Inu.Kernel.Protection.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Security\Inu.Kernel.Security.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Scheduler\Inu.Kernel.Scheduler.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Smp\Inu.Kernel.Smp.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.SubsystemContracts\Inu.Kernel.SubsystemContracts.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.SystemCalls\Inu.Kernel.SystemCalls.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Gui\Inu.Kernel.Gui.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Drivers\Inu.Kernel.Drivers.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Pci\Inu.Kernel.Pci.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Virtio\Inu.Kernel.Virtio.csproj" />
+    <ProjectReference Include="..\Inu.Filesystem.FatFs\Inu.Filesystem.FatFs.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.VirtualMemory\Inu.Kernel.VirtualMemory.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.X64.LowLevel\Inu.Kernel.X64.LowLevel.csproj" />
+  </ItemGroup>
+</Project>

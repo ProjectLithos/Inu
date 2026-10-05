@@ -1,0 +1,42 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Boot memory map · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Boot memory map</h1>
+<p>Inu captures and retains the UEFI memory map whose key is accepted by <code>ExitBootServices</code>. Earlier copies are diagnostic-only and must never be supplied to the physical allocator because any boot-services allocation can change the map and its key.</p>
+<h2>Assemblies</h2>
+<ul>
+<li><code>Inu.Memory.Contracts</code> contains platform-independent descriptors, ownership and availability types, reservations, immutable diagnostics, result types, and bounded workspaces.</li>
+<li><code>Inu.Boot.Memory</code> contains UEFI descriptor translation, final-map acquisition, the checked <code>NativeUefiMemoryMapSource</code> adapter over the retained native buffer, reservation planning, and the normaliser implementations.</li>
+</ul>
+<h2>Final UEFI sequence</h2>
+<p>The x64 native entry reserves a fixed map buffer before the final firmware call. It then performs:</p>
+<pre><code>
+GetMemoryMap(final preallocated buffer)
+-&gt; ExitBootServices(image handle, returned map key)
+-&gt; retry GetMemoryMap only when ExitBootServices reports a stale key
+-&gt; seal the accepted map and expose it to managed bootstrap
+</code></pre>
+<p>No allocation and no other firmware call occurs between a successful <code>GetMemoryMap</code> and the corresponding <code>ExitBootServices</code> call.</p>
+<h2>Normalisation versions</h2>
+<h3>Strict</h3>
+<p>Use <code>StrictMemoryMapNormaliser</code> when firmware is trusted and an incompatible overlap should stop boot. Explicit Inu reservations are still overlaid and split correctly.</p>
+<h3>Safety priority</h3>
+<p>Use <code>SafetyPriorityMemoryMapNormaliser</code> for the default real-hardware policy. When firmware ranges overlap, bad memory, MMIO, framebuffer, runtime services, firmware reservations, ACPI NVS, page tables, boot structures, the kernel image, and early allocations take priority over reclaimable or usable memory.</p>
+<h3>Conservative</h3>
+<p>Use <code>ConservativeMemoryMapNormaliser</code> when uncertain ownership must never become allocatable. Every incompatible firmware overlap becomes <code>FirmwareReserved</code>. Runtime conflicts remain <code>RuntimeOwned</code>, mixed runtime code/data is retained explicitly, protection flags are combined, and contradictory cache modes are reduced to the safest single mode.</p>
+<h2>Required reservations</h2>
+<p>Before normalisation, create a <code>MemoryReservationPlan</code> and add the page-rounded ranges for:</p>
+<pre><code>
+MemoryReservationPlan reservations = new(16);
+reservations.TryAddKernelImage(kernelStart, kernelPages);
+reservations.TryAddBootStructures(bootContextStart, bootContextPages);
+reservations.TryAddFramebuffer(framebufferStart, framebufferPages, MemoryCacheAttributes.WriteCombining);
+reservations.TryAddMemoryMappedIo(apicStart, apicPages);
+reservations.TryAddPageTables(pageTableStart, pageTablePages);
+reservations.TryAddEarlyAllocation(earlyStart, earlyPages);
+</code></pre>
+<p>Call <code>TryValidateRequiredReservations</code> before normalisation. Kernel-image and boot-structure reservations are mandatory; framebuffer and MMIO requirements are selected from the active platform. Page-table and early-allocation ranges must be added whenever they exist.</p>
+<p>Normalisation sorts all source boundaries, rejects zero-length, unaligned, and overflowing ranges, splits overlaps, applies the reservations, and merges compatible neighbours. When an explicit reservation covers firmware runtime memory, the reservation type is retained while runtime ownership, runtime code/data status, protection flags, and the safest cache mode remain preserved. <code>NormalisedMemoryMap</code> never exposes its backing array; diagnostics use <code>TryGetDescriptor</code> or <code>MemoryMapDiagnosticCursor</code>.</p>
+<h2>Physical allocator hand-off (0.1.0)</h2>
+<p>After normalisation, <code>NormalisedMemoryMap</code> is the authoritative input to <code>Inu.Memory.Physical</code>. The built-in bitmap, buddy, and extent managers admit only descriptors whose <code>Availability</code> is <code>AvailableAfterExitBootServices</code>; runtime, firmware, MMIO, framebuffer, ACPI-reclaimable, bad, and other non-immediate ranges remain outside ordinary allocation.</p>
+<p>Physical allocator metadata must itself be placed in memory reserved before allocator initialisation. The later kernel address-space and VMM layers consume physical allocations rather than returning to the firmware map for ownership decisions.</p>
+<h2>Early Boot Services reclaim boundary</h2>
+<p>After <code>ExitBootServices</code>, UEFI marks <code>BootServicesCode</code> and <code>BootServicesData</code> as reclaimable by the operating system. Inu deliberately does <strong>not</strong> put those ranges into the early PMM free list yet. The kernel can still be executing with firmware-provided bootstrap state, especially the inherited x64 stack, inside Boot Services data pages. Reusing such a page as a page-table frame could overwrite the live stack.</p>
+<p>The early PMM therefore allocates only <code>ConventionalMemory</code>. Boot Services ranges remain deferred-reclaim memory until Inu installs a kernel-owned stack and a later explicit reclaim operation can prove those firmware pages are no longer live. The VMM direct-map bootstrap continues to calculate its storage from the final memory-map-derived PMM ranges; it simply operates on the safe ConventionalMemory subset during this phase.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

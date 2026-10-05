@@ -1,0 +1,22 @@
+NAME
+    mkdir - Create a new directory through the userland filesystem service.
+
+SYNOPSIS
+    mkdir <folder_name>
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Create a new directory through the userland filesystem service.
+
+FAT NAME SUPPORT
+    The current Inu FAT provider creates and renames entries using FAT 8.3 short names.
+    Long-file-name creation and rename are reserved for a later filesystem-provider extension.
+
+EXAMPLES
+    mkdir TEST
+
+FILES
+    /System/Commands/MKDIR.CMD
+    /INU/HELP/MKDIR.MAN

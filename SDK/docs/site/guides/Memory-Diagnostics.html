@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inu SDK Memory Diagnostics · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Inu SDK Memory Diagnostics</h1>
+<p>Inu 0.17.0 provides freestanding, SDK-side memory diagnostics without requiring a managed heap or reflection.</p>
+<h2>Physical allocator statistics</h2>
+<p><code>KernelMemoryDiagnostics.TryGetPhysicalAllocatorStatistics</code> reports total managed pages, free pages, permanently reserved/excluded pages, live allocated pages, the largest free extent, extent count, and live allocation count. The accounting invariant is <code>TotalPages = FreePages + ReservedPages + AllocatedPages</code>.</p>
+<h2>Heap diagnostics</h2>
+<p><code>KernelHeap.GetStatistics</code> remains the stable basic ABI. <code>KernelHeap.GetDiagnosticSnapshot</code> adds leak candidates, guard failures, double-free failures, guarded-allocation count, and tagged-allocation count.</p>
+<h2>Page-table inspection</h2>
+<p><code>KernelVirtualMemory.TryInspectPageTable</code> performs a read-only x64 walk and returns PML4, PDPT, PD, PT and leaf entry values, decoded protection, page size, mapped state, and translated physical address. 1 GiB, 2 MiB and 4 KiB leaves are supported.</p>
+<h2>Leak detection</h2>
+<p>Call <code>KernelHeap.TryCreateLeakCheckpoint</code> before the operation under test. Allocations created after that checkpoint that remain live are enumerated with <code>GetLeakCandidateCount</code> and <code>TryGetLeakCandidate</code>. This is deterministic checkpoint-based leak detection suitable for kernel tests and diagnostics.</p>
+<h2>Guards and canaries</h2>
+<p><code>KernelHeap.TryAllocateGuarded</code> places independent 64-bit leading and trailing canaries around the user range. <code>TryValidateGuards</code> validates every live guarded allocation; <code>TryReleaseGuarded</code> refuses release when a canary has been corrupted so the fault remains inspectable.</p>
+<h2>Double-free detection</h2>
+<p>Released allocation tokens are retained in a bounded tombstone ring. A repeated release is distinguished from an unknown allocation and reports <code>KernelHeapStatus.DoubleFreeDetected</code>; the diagnostic counter is monotonic for the current boot.</p>
+<h2>Allocation tags</h2>
+<p>Live allocations can be tagged with <code>TrySetAllocationTag</code>. Freestanding metadata stores a stable 64-bit FNV-1a tag hash rather than a managed string reference. Leak-candidate records include the tag hash, allocation sequence, address, size, token, and guarded state.</p>
+<h2>API facade</h2>
+<p><code>Inu.Kernel.Memory.Diagnostics.KernelMemoryDiagnostics</code> is the common SDK entry point. It delegates to the canonical physical allocator, kernel heap, and active virtual-memory manager rather than maintaining a second memory model.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

@@ -1,0 +1,18 @@
+NAME
+    man - Show the separate manual file for a command.
+
+SYNOPSIS
+    man <command>
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show the separate manual file for a command.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/MAN.CMD
+    /INU/HELP/MAN.MAN

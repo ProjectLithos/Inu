@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <AssemblyName>Inu.Kernel.Console</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj" />
+    <ProjectReference Include="..\Inu.String\Inu.String.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.X64.LowLevel\Inu.Kernel.X64.LowLevel.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.TrueType\Inu.Kernel.TrueType.csproj" />
+  </ItemGroup>
+</Project>

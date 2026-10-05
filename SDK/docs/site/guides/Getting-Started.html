@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Getting started · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Getting started</h1>
+<p>Inu OS SDK 0.2.1 is a source-component operating-system SDK. Kath 0.2.1 uses the sibling Inu SDK, and selected SDK component source is copied into each generated OS for compilation by the IDE.</p>
+<h2>Create an operating system</h2>
+<p>From Kath, choose <strong>Create New OS</strong>, select Microkernel, Hybrid or Monolithic, complete the authoritative configuration, and let the IDE generate the project. The editable operating-system project lives outside the SDK source tree.</p>
+<p>From a terminal you can instead use:</p>
+<pre><code>
+inu new MyOS
+cd MyOS
+inu build
+inu run
+</code></pre>
+<p><code>inu doctor</code> validates the SDK, manifests, compatibility baseline and required toolchain.</p>
+<h2>Kernel entry point</h2>
+<pre><code>
+[KernelEntry]
+public static bool KMain(BootContext boot)
+{
+    // Initialise or start the facilities selected by this OS configuration.
+    return CPU.Halt();
+}
+</code></pre>
+<p>Generated projects keep <code>Kernel/Kernel.cs</code> high-level. Low-level architecture, memory, interrupt, driver and device work remains in SDK assemblies.</p>
+<h2>Current kernel facilities</h2>
+<p>The current SDK provides architecture contracts; GDT/TSS and interrupt handling; physical and virtual memory; kernel address spaces and heap; ACPI discovery; SMP/per-CPU state; scheduler and threads; ring-3 protection; processes and executable loading; system calls; capability-based drivers; PCI/PCIe and VirtIO; USB; storage and VFS; networking; graphics/framebuffer; TrueType rasterisation; power management; separated timekeeping; synchronization; memory diagnostics; structured logging; panic/crash-dump support; and a formal test framework.</p>
+<h2>Filesystems</h2>
+<p>Applications and services see the VFS contract. Filesystem implementations are providers below it. The SDK includes FatFs support while allowing other filesystem drivers to be selected independently.</p>
+<h2>Networking</h2>
+<p>NIC drivers feed the common Ethernet stack. Standard contracts cover NICs, Ethernet, ARP/NDP, IPv4/IPv6, ICMP, UDP, TCP, sockets and DNS. VirtIO-net, E1000/E1000e and RTL8168/RTL8111-class adapters use this common boundary.</p>
+<h2>Time and power</h2>
+<p>Timekeeping separates the monotonic clock, wall clock, high-resolution counter, scheduler tick and timeout service. Power management exposes ACPI shutdown, reboot and sleep policy, CPU power states and device suspend/resume coordination.</p>
+<h2>Fonts and graphics</h2>
+<p><code>Inu.Kernel.TrueType</code> validates and rasterises memory-resident <code>.ttf</code> fonts with scalable pixel sizes and anti-aliased coverage. It can be used by the framebuffer console or future GUI compositors.</p>
+<h2>Packages and applications</h2>
+<p>Inu applications use the documented <code>.exe</code>/<code>.nexe</code> application format. The package manager uses ordinary ZIP files containing a root <code>Inu.Package.json</code> and supports applications, drivers, libraries, services and kernel extensions.</p>
+<h2>Debugging and tests</h2>
+<p>Use <strong>F5</strong> in the IDE for the debugger path or <code>inu debug</code> from the CLI. The SDK supports NativeAOT source maps, breakpoints, stepping, CPU/thread/process context, memory/page-table/heap views, crash dumps, tracing and hardware-aware testing.</p>
+<p>Run <code>inu test</code> for the SDK test framework. API compatibility checks protect public types, signatures, enum values, syscall IDs, driver ABI and debug formats.</p>
+<h2>Read the reference</h2>
+<p>Use the <strong>Assemblies</strong> and <strong>API index</strong> pages in this offline site for source-derived public API reference. The <strong>Guides</strong> section contains the maintained subsystem documentation and samples guide. All links are relative so the site can be copied or opened offline.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

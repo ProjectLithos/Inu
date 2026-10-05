@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inu Power Management API · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Inu Power Management API</h1>
+<p>Inu 0.23.0 defines one formal power-management boundary above ACPI, SMP and device drivers.</p>
+<h2>System power</h2>
+<p><code>KernelPowerManagement</code> provides ACPI-backed shutdown, reboot and sleep operations. Shutdown uses the FADT/AML <code>_S5</code> package and PM1 control registers. Reboot uses the FADT reset register. Sleep discovers <code>_S1</code>, <code>_S3</code> and <code>_S4</code> packages from the DSDT. S1 can retain the executing context directly. S3/S4 are not attempted until a physical firmware waking vector has been registered in the FACS, preventing Inu from entering a context-losing state without a resume path.</p>
+<h2>CPU power states</h2>
+<p>The public CPU contract names C0 through C3. Inu 0.23.0 implements architectural C1 for the current x64 CPU with <code>HLT</code>, returning after an interrupt. C2/C3 remain capability-gated until an ACPI processor power provider (for <code>_CST</code>/FFH or equivalent platform data) is present; the API reports them as unsupported rather than emulating them.</p>
+<h2>Device suspend and resume</h2>
+<p>Power transitions are coordinated through <code>KernelDrivers</code>. A driver may provide its existing <code>Suspend</code> and <code>Resume</code> lifecycle callbacks. System sleep/shutdown first suspends all started devices. Partial failure is rolled back: if suspension fails, Inu resumes devices already suspended. Resume walks suspended devices in reverse registry order.</p>
+<h2>API summary</h2>
+<ul>
+<li><code>KernelPowerManagement.Initialize()</code></li>
+<li><code>KernelPowerManagement.GetCapabilities()</code></li>
+<li><code>KernelPowerManagement.Shutdown()</code></li>
+<li><code>KernelPowerManagement.Reboot()</code></li>
+<li><code>KernelPowerManagement.Sleep(...)</code></li>
+<li><code>KernelPowerManagement.ConfigureResumeVector(...)</code></li>
+<li><code>KernelPowerManagement.TryGetCpuPowerState(...)</code></li>
+<li><code>KernelPowerManagement.TrySetCpuPowerState(...)</code></li>
+<li><code>KernelPowerManagement.EnterCurrentCpuIdle(...)</code></li>
+<li><code>KernelPowerManagement.SuspendDevice(...)</code></li>
+<li><code>KernelPowerManagement.ResumeDevice(...)</code></li>
+</ul>
+<p>The ACPI layer owns firmware registers and sleep-type discovery. The power coordinator owns transition policy. Device-specific state saving/restoration remains in the driver that owns the device.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

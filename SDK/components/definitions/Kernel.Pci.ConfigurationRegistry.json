@@ -1,0 +1,31 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Pci.ConfigurationRegistry",
+  "displayName": "PCI configuration transport registry",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "Parent-owned dispatch contract that lets PCI discovery use selectable configuration-space transports without naming their concrete implementations."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "pci.configuration-registry"
+    ],
+    "requires": []
+  },
+  "dependencies": [],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Pci/Inu.Kernel.Pci.csproj",
+      "sources": [
+        "src/Inu.Kernel.Pci/KernelPciConfigurationServices.cs"
+      ]
+    }
+  }
+}

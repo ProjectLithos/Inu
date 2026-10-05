@@ -1,0 +1,1 @@
+using System; using Inu.Kernel.Virtio; namespace Inu.Samples.VirtioDriver; public static class Sample { public static Boolean InspectFirst(out VirtioDeviceInfo info){info=default;return KernelVirtio.IsInitialized()&&KernelVirtio.GetDeviceCount()>0U&&KernelVirtio.TryGetDevice(0U,out info);} public static Boolean Service()=>KernelVirtio.ServiceAll(); }

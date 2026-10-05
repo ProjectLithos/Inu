@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Inu.Architecture.Arm64</AssemblyName>
+    <RootNamespace>Inu.Architecture.Arm64</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Core\Inu.Core.csproj" />
+    <ProjectReference Include="..\Inu.Architecture.Contracts\Inu.Architecture.Contracts.csproj" />
+  </ItemGroup>
+</Project>

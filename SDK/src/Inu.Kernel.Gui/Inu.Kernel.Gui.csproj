@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Library</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable><DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences><NoStdLib>true</NoStdLib><NoConfig>true</NoConfig><RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion><GenerateAssemblyInfo>false</GenerateAssemblyInfo><GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute><DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences><AllowUnsafeBlocks>true</AllowUnsafeBlocks><AssemblyName>Inu.Kernel.Gui</AssemblyName></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Graphics\Inu.Kernel.Graphics.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Heap\Inu.Kernel.Heap.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Ps2\Inu.Kernel.Ps2.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Security\Inu.Kernel.Security.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.SystemCalls\Inu.Kernel.SystemCalls.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Synchronization\Inu.Kernel.Synchronization.csproj" />
+    <ProjectReference Include="..\Inu.Usb.Hid\Inu.Usb.Hid.csproj" />
+  </ItemGroup>
+</Project>

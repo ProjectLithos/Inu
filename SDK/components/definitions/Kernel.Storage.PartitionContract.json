@@ -1,0 +1,35 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Storage.PartitionContract",
+  "displayName": "Storage partition registry contract",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "Shared block-device/volume-registry contract used by selectable partition discovery; not independently selectable."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "storage.block-device-registry",
+      "storage.volume-registry"
+    ],
+    "requires": []
+  },
+  "dependencies": [
+    "Kernel.Storage"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Storage/Inu.Kernel.Storage.csproj",
+      "sources": [
+        "src/Inu.Kernel.Storage/KernelStoragePartitionContract.cs",
+        "src/Inu.Kernel.Storage/KernelStoragePartitionServices.cs"
+      ]
+    }
+  }
+}

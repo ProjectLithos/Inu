@@ -1,0 +1,38 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Usb.HidTransport",
+  "displayName": "USB HID transport",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "The generic HID transport is dependency infrastructure automatically required by selected USB HID protocol components. It owns USB interface matching and interrupt transfers but no keyboard or mouse policy."
+  },
+  "lifecycle": {
+    "ownership": "driver",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "usb.hid.transport"
+    ],
+    "requires": [
+      "usb.bus",
+      "driver.registry",
+      "kernel.heap"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Usb.Bus"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Usb.Hid/Inu.Usb.Hid.csproj",
+      "sources": [
+        "src/Inu.Usb.Hid/UsbHid.cs",
+        "src/Inu.Usb.Hid/UsbHidProtocolServices.cs"
+      ]
+    }
+  }
+}

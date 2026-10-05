@@ -1,0 +1,35 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Acpi.TableRegistry",
+  "displayName": "ACPI root table registry",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "Owns RSDP/RSDT/XSDT validation and generic table lookup; ACPI consumers depend on this registry rather than embedding root-table discovery."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "acpi.table-registry"
+    ],
+    "requires": [
+      "boot.acpi-root-pointer"
+    ]
+  },
+  "dependencies": [],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Acpi/Inu.Kernel.Acpi.csproj",
+      "sources": [
+        "src/Inu.Kernel.Acpi/KernelAcpi.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpi.Discovery.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpi.Validation.cs"
+      ]
+    }
+  }
+}

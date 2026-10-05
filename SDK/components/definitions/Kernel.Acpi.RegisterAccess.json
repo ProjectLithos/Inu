@@ -1,0 +1,32 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Acpi.RegisterAccess",
+  "displayName": "ACPI generic-register access",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "Shared Generic Address Structure parsing and register I/O is dependency infrastructure used by selectable ACPI providers, not an end-user policy choice."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "none"
+  },
+  "contracts": {
+    "provides": [
+      "acpi.register-access"
+    ],
+    "requires": []
+  },
+  "dependencies": [],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Acpi/Inu.Kernel.Acpi.csproj",
+      "sources": [
+        "src/Inu.Kernel.Acpi/KernelAcpiRegisterServices.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpiPlatform.cs"
+      ]
+    }
+  }
+}

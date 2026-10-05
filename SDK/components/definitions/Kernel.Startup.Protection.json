@@ -1,0 +1,31 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Startup.Protection",
+  "displayName": "Protection, security and syscall startup",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Kernel startup policy is OS-owned. Kath can include, omit, replace or reorder this startup source component."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "kernel.startup.protection"
+    ],
+    "requires": []
+  },
+  "dependencies": [],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": null,
+      "sources": [
+        "templates/InuKernel/Boot/ProtectionStartup.cs"
+      ]
+    }
+  }
+}

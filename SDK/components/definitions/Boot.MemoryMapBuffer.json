@@ -1,0 +1,36 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Boot.MemoryMapBuffer",
+  "displayName": "Final memory-map buffer",
+  "area": "Boot",
+  "selection": {
+    "status": "selectable",
+    "reason": "Carries only the retained final memory-map bytes; descriptor layout and UEFI diagnostics are separate capabilities."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "boot.memory-map-buffer"
+    ],
+    "requires": [
+      "boot.context"
+    ]
+  },
+  "dependencies": [
+    "Boot.Context.Core"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Console/Inu.Kernel.Console.csproj",
+      "sources": [
+        "src/Inu.Kernel.Console/IFinalMemoryMapBufferContext.cs",
+        "src/Inu.Kernel.Console/BootContext.FinalMemoryMapBuffer.cs"
+      ]
+    }
+  }
+}

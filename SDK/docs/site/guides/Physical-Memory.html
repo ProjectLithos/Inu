@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Physical Memory · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Physical Memory</h1>
+<p>Inu provides one contract and three selectable physical-frame allocator methodologies.</p>
+<h2>Common contract</h2>
+<p>Higher-level SDK facilities can depend on <code>IPhysicalMemoryManager</code>. The built-in implementations are <code>BitmapPhysicalMemoryManager</code>, <code>BuddyPhysicalMemoryManager</code>, and <code>ExtentPhysicalMemoryManager</code>; a project-specific implementation reports <code>PhysicalAllocatorMethod.Custom</code>.</p>
+<p>Every manager consumes a <code>NormalisedMemoryMap</code> and caller-owned <code>PhysicalAllocatorWorkspace</code>. Built-in allocator metadata therefore does not depend on the future kernel heap.</p>
+<p>The built-in managers are structs. Pre-heap code should use the concrete struct directly or a constrained generic <code>ref</code> path; converting a struct manager to an interface variable can box it in ordinary managed code.</p>
+<h2>Allocation constraints</h2>
+<p><code>PhysicalAllocationRequest</code> describes contiguous page count, power-of-two page alignment, a minimum physical address, an optional exclusive maximum address, and ownership purpose. This covers ordinary page frames as well as constraints such as memory below 4 GiB.</p>
+<h2>Ownership safety</h2>
+<p>Successful allocations and reservations return opaque tokens. The exact handle must be supplied on release; stale and double releases fail deterministically. Allocation and reservation record capacities are bounded at initialisation.</p>
+<h2>Method selection</h2>
+<p>Use bitmap when simple per-frame state is preferred and the address space is reasonably dense. Use buddy for power-of-two blocks, natural alignment, split/coalesce behaviour, and visible internal fragmentation. Use extent for sparse maps, exact page counts, and metadata that scales with free-range fragmentation.</p>
+<p>The complete algorithms, formulas, examples, and custom implementation guidance are maintained in <code>docs/Physical-Memory-Management.md</code> in the source tree.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

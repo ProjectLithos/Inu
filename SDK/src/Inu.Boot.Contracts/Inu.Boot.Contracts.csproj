@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <RootNamespace>Inu.Boot.Contracts</RootNamespace>
+    <AssemblyName>Inu.Boot.Contracts</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Primitives\Inu.Primitives.csproj" />
+    <ProjectReference Include="..\Inu.Core\Inu.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,36 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Boot.ApplicationProcessorTrampoline",
+  "displayName": "Application-processor trampoline",
+  "area": "Boot",
+  "selection": {
+    "status": "selectable",
+    "reason": "Boot hand-off capabilities are independent source components so the OS author can include only the information required by the selected architecture."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "boot.application-processor-trampoline"
+    ],
+    "requires": [
+      "boot.context"
+    ]
+  },
+  "dependencies": [
+    "Boot.Context.Core"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Console/Inu.Kernel.Console.csproj",
+      "sources": [
+        "src/Inu.Kernel.Console/IApplicationProcessorTrampolineContext.cs",
+        "src/Inu.Kernel.Console/BootContext.ApplicationProcessors.cs"
+      ]
+    }
+  }
+}

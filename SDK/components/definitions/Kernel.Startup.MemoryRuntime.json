@@ -1,0 +1,41 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Startup.MemoryRuntime",
+  "displayName": "Memory and managed runtime startup",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Kernel startup policy is OS-owned. Kath can include, omit, replace or reorder this startup source component."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "kernel.startup.memory-runtime"
+    ],
+    "requires": [
+      "boot.page-table-workspace",
+      "boot.kernel-image-base",
+      "boot.memory-map-buffer",
+      "boot.memory-descriptor-layout"
+    ]
+  },
+  "dependencies": [
+    "Boot.PageTableWorkspace",
+    "Boot.KernelImageBase",
+    "Boot.MemoryMapBuffer",
+    "Boot.MemoryDescriptorLayout"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": null,
+      "sources": [
+        "templates/InuKernel/Boot/MemoryRuntimeStartup.cs"
+      ]
+    }
+  }
+}

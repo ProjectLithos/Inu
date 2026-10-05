@@ -1,0 +1,36 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Boot.MemoryDescriptorLayout",
+  "displayName": "Memory descriptor layout",
+  "area": "Boot",
+  "selection": {
+    "status": "selectable",
+    "reason": "Descriptor stride/version is independent from the map buffer and is only required by consumers that decode records."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "boot.memory-descriptor-layout"
+    ],
+    "requires": [
+      "boot.context"
+    ]
+  },
+  "dependencies": [
+    "Boot.Context.Core"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Console/Inu.Kernel.Console.csproj",
+      "sources": [
+        "src/Inu.Kernel.Console/IMemoryDescriptorLayoutContext.cs",
+        "src/Inu.Kernel.Console/BootContext.MemoryDescriptorLayout.cs"
+      ]
+    }
+  }
+}

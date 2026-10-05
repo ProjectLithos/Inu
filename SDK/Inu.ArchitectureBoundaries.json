@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "release": "0.14.0",
+  "genericKernelApi": "Inu.Kernel.Architecture",
+  "architectureImplementations": [
+    "Inu.Arch.X64"
+  ],
+  "reservedFutureImplementations": [
+    "Inu.Arch.Arm64"
+  ],
+  "privateLowLevelAssemblies": [
+    "Inu.Kernel.X64.LowLevel"
+  ],
+  "rules": [
+    "Generated user kernel projects must not reference Inu.Kernel.X64.LowLevel directly.",
+    "Generic kernel-facing APIs must not expose X64, Arm64, CRx, MSR, APIC or architecture-specific page-entry encodings.",
+    "Architecture implementations may consume private low-level assemblies; code above the boundary consumes Inu.Kernel.Architecture or higher-level kernel services.",
+    "Adding ARM64 later requires a Inu.Arch.Arm64 implementation without changing generic kernel API consumers."
+  ],
+  "compatibility": {
+    "legacyInternalX64Consumers": "Existing SDK internals that still consume Inu.Kernel.X64.LowLevel are retained as internal implementation details and can be migrated incrementally. New generated-kernel top-level references are prohibited."
+  }
+}

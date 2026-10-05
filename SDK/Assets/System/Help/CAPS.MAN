@@ -1,0 +1,18 @@
+NAME
+    capabilities - Show live subsystem capabilities through privileged kernel services.
+
+SYNOPSIS
+    capabilities | caps | available
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show live subsystem capabilities through privileged kernel services.
+
+ALIASES
+    caps,available
+
+FILES
+    /System/Commands/CAPS.CMD
+    /INU/HELP/CAPS.MAN

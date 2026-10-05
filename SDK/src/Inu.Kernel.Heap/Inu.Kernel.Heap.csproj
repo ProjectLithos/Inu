@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Library</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable><DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences><NoStdLib>true</NoStdLib><NoConfig>true</NoConfig><RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion><GenerateAssemblyInfo>false</GenerateAssemblyInfo><GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute><DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences><AssemblyName>Inu.Kernel.Heap</AssemblyName><AllowUnsafeBlocks>true</AllowUnsafeBlocks></PropertyGroup>
+  <ItemGroup><ProjectReference Include="..\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj" /><ProjectReference Include="..\Inu.Kernel.Memory\Inu.Kernel.Memory.csproj" /><ProjectReference Include="..\Inu.Kernel.VirtualMemory\Inu.Kernel.VirtualMemory.csproj" /><ProjectReference Include="..\Inu.Kernel.AddressSpace\Inu.Kernel.AddressSpace.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.SubsystemContracts\Inu.Kernel.SubsystemContracts.csproj" /></ItemGroup>
+</Project>

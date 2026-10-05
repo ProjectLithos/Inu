@@ -1,0 +1,18 @@
+NAME
+    smp - Read permitted SMP information.
+
+SYNOPSIS
+    smp [status]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Runs as an isolated userland command and issues Get(command.smp.get). It reports SMP information allowed to the calling process and cannot change SMP lifecycle state.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/SMP.CMD
+    /INU/HELP/SMP.MAN

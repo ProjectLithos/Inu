@@ -1,0 +1,18 @@
+NAME
+    processes - Read permitted process information.
+
+SYNOPSIS
+    processes | process
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Runs as an isolated userland command and issues Get(command.processes.get). The kernel returns only process information permitted to the calling process; this command is not a process-control administration interface.
+
+ALIASES
+    process
+
+FILES
+    /System/Commands/PROCESS.CMD
+    /INU/HELP/PROCESS.MAN

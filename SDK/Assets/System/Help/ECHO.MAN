@@ -1,0 +1,18 @@
+NAME
+    echo - Write text to the console through the shell output service.
+
+SYNOPSIS
+    echo <text>
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Write text to the console through the shell output service.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/ECHO.CMD
+    /INU/HELP/ECHO.MAN

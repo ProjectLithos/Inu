@@ -1,0 +1,46 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Storage.NvmeDriver",
+  "displayName": "NVMe block-storage driver",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "The driver owns its device-specific state and registers through existing driver/subsystem contracts; bootstrap and generated HAL startup reference it only when its component symbol is selected."
+  },
+  "lifecycle": {
+    "ownership": "driver",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "storage.block-device.nvme"
+    ],
+    "requires": [
+      "driver.registry",
+      "pci.enumeration",
+      "storage.block-device-registry",
+      "memory.dma"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Storage",
+    "Kernel.Pci.ConfigurationRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Nvme/Inu.Kernel.Nvme.csproj",
+      "sources": [
+        "src/Inu.Kernel.Nvme/KernelNvme.BlockIo.cs",
+        "src/Inu.Kernel.Nvme/KernelNvme.DriverLifecycle.cs",
+        "src/Inu.Kernel.Nvme/KernelNvme.Namespaces.cs",
+        "src/Inu.Kernel.Nvme/KernelNvme.Queues.cs",
+        "src/Inu.Kernel.Nvme/KernelNvme.Storage.cs",
+        "src/Inu.Kernel.Nvme/KernelNvme.cs",
+        "src/Inu.Kernel.Nvme/NvmeContracts.cs",
+        "src/Inu.Kernel.Nvme/NvmeMath.cs"
+      ]
+    }
+  }
+}

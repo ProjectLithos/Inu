@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Acpi.MadtTopology",
+  "displayName": "ACPI MADT topology provider",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Owns MADT parsing and registers processor/APIC/NMI topology through KernelAcpiMadtServices; the ACPI root-table core remains valid when omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "acpi.madt"
+    ],
+    "requires": [
+      "acpi.table-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Acpi.TableRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Acpi/Inu.Kernel.Acpi.csproj",
+      "sources": [
+        "src/Inu.Kernel.Acpi/KernelAcpiMadtProvider.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpiMadtServices.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpi.Madt.cs"
+      ]
+    }
+  }
+}

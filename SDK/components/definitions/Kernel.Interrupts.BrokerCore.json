@@ -1,0 +1,41 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Interrupts.BrokerCore",
+  "displayName": "Interrupt broker core",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "Owns opaque interrupt-route lifecycle and driver dispatch while all optional hardware delivery and affinity policy is reached through parent-owned provider contracts."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "interrupts.driver-broker",
+      "interrupts.gsi-router-registry",
+      "interrupts.pci-router-registry",
+      "interrupts.affinity-registry"
+    ],
+    "requires": [
+      "interrupts.vector-allocation",
+      "memory.heap",
+      "pci.device-registry"
+    ]
+  },
+  "dependencies": [],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.InterruptBroker/Inu.Kernel.InterruptBroker.csproj",
+      "sources": [
+        "src/Inu.Kernel.InterruptBroker/KernelInterruptBroker.cs",
+        "src/Inu.Kernel.InterruptBroker/KernelInterruptBroker.Routes.cs",
+        "src/Inu.Kernel.InterruptBroker/KernelInterruptBroker.Storage.cs",
+        "src/Inu.Kernel.InterruptBroker/KernelInterruptProviderServices.cs"
+      ]
+    }
+  }
+}

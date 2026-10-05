@@ -1,0 +1,35 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.ExtensionRegistry",
+  "displayName": "Network extension service registry",
+  "area": "Kernel",
+  "selection": {
+    "status": "required",
+    "reason": "Provides dependency-resolved registration and dispatch for optional networking components without hard-wiring their concrete implementations into KernelNetworking."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.extension-registry"
+    ],
+    "requires": [
+      "network.interface-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.InterfaceRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelNetworkExtensionServices.cs"
+      ]
+    }
+  }
+}

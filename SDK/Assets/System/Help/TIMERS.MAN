@@ -1,0 +1,18 @@
+NAME
+    timers - Show timer and clock information.
+
+SYNOPSIS
+    timers
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show timer and clock information.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/TIMERS.CMD
+    /INU/HELP/TIMERS.MAN

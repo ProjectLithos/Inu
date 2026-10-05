@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Time.HpetClockSource",
+  "displayName": "HPET monotonic clock source",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "HPET now owns its MMIO discovery, enablement, counter state and conversion data and registers only through the clock-source contract. KernelTime no longer names the concrete HPET implementation."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "time.clock-source.hpet",
+      "time.calibration-reference"
+    ],
+    "requires": [
+      "acpi.hpet",
+      "platform.mmio",
+      "time.clock-selection"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Time.ClockCore",
+    "Kernel.Acpi.HpetTable"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Time/Inu.Kernel.Time.csproj",
+      "sources": [
+        "src/Inu.Kernel.Time/KernelHpetClockSource.cs"
+      ]
+    }
+  }
+}

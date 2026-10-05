@@ -1,0 +1,13 @@
+{
+  "Version": 3,
+  "Completed": false,
+  "Architecture": "x64",
+  "KernelModel": "Monolithic",
+  "BootProtocol": "Uefi",
+  "WorkAreas": [],
+  "ArchitectureSupport": {
+    "x64": "Supported",
+    "arm64": "Target configuration only - architecture pack not installed",
+    "riscv64": "Target configuration only - architecture pack not installed"
+  }
+}

@@ -1,0 +1,42 @@
+NAME
+    commands - List the installed command packages.
+
+SYNOPSIS
+    commands | ?
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Enumerate the .CMD package descriptors currently installed in /System/Commands. The shell has no built-in command availability list.
+
+FILE AND DIRECTORY NAVIGATION
+    dir [path]
+    cd <folder> | cd .. | cd \
+    tree [path]
+
+FILE AND FOLDER MANAGEMENT
+    mkdir <folder>
+    rmdir <folder>
+    copy <source> <destination>
+    move <source> <destination>
+    del <file> [file ...]
+    ren <old> <new>
+    type <file>
+
+SYSTEM AND SERVICE COMMANDS
+    capabilities, info, uptime, cpu, memory, drivers, devices
+    filesystem, networking, network, storage, graphics, display
+    audio, input, time, power, timers, font, buffering, keyboard
+    clear, echo
+
+KERNEL ADMINISTRATION
+    interrupts, scheduler, smp, syscalls, processes
+
+HELP
+    help <command>
+    man <command>
+
+FILES
+    /System/Commands/CMDS.CMD
+    /INU/HELP/CMDS.MAN

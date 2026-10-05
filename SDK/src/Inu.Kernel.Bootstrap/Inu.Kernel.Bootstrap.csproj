@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <AssemblyName>Inu.Kernel.Bootstrap</AssemblyName>
+    <InuSystemModule>System.Private.CoreLib</InuSystemModule>
+    <DefineConstants>$(DefineConstants);INU_COMPONENT_NETWORK_ROUTE_MANAGER;INU_COMPONENT_NETWORK_NEIGHBOR_CACHE;INU_COMPONENT_NETWORK_SOCKET_SERVICE;INU_COMPONENT_NETWORK_DHCP_CODEC;INU_COMPONENT_NETWORK_DNS_CODEC;INU_COMPONENT_NETWORK_ARP_PROTOCOL;INU_COMPONENT_NETWORK_IPV4_PROTOCOL;INU_COMPONENT_NETWORK_ICMPV4_PROTOCOL;INU_COMPONENT_NETWORK_UDP_IPV4_PROTOCOL;INU_COMPONENT_NETWORK_TCP_OBSERVATION_PROTOCOL;INU_COMPONENT_NETWORK_IPV6_NDP_PROTOCOL;INU_COMPONENT_USB_ENUMERATION;INU_COMPONENT_STORAGE_PARTITION_DISCOVERY;INU_COMPONENT_INPUT_KEYBOARD_DECODER;INU_COMPONENT_USB_HID_KEYBOARD;INU_COMPONENT_USB_HID_MOUSE;INU_COMPONENT_USB_MASS_STORAGE;INU_COMPONENT_GRAPHICS_FIRMWARE_FRAMEBUFFER;INU_COMPONENT_TIME_HPET_CLOCK_SOURCE;INU_COMPONENT_TIME_INVARIANT_TSC_CLOCK_SOURCE;INU_COMPONENT_TIME_RTC_CMOS_WALL_CLOCK;INU_COMPONENT_TIME_LOCAL_APIC_INTERRUPT_TIMER;INU_COMPONENT_INTERRUPTS_AFFINITY_RESOLVER;INU_COMPONENT_INTERRUPTS_IO_APIC_ROUTER;INU_COMPONENT_INTERRUPTS_PCI_MESSAGE_ROUTER;INU_COMPONENT_PCI_LEGACY_CONFIGURATION;INU_COMPONENT_PCI_ECAM_CONFIGURATION;INU_COMPONENT_ACPI_MCFG;INU_COMPONENT_ACPI_MADT;INU_COMPONENT_ACPI_HPET_TABLE;INU_COMPONENT_ACPI_FADT;INU_COMPONENT_ACPI_POWER;INU_COMPONENT_ACPI_EMBEDDED_CONTROLLER;INU_COMPONENT_PROCESS_LIFECYCLE;INU_COMPONENT_PROCESS_ADDRESS_SPACE_OWNERSHIP;INU_COMPONENT_PROCESS_FOREGROUND_CONTROL;INU_COMPONENT_PROCESS_SIGNALS;INU_COMPONENT_SCHEDULER_PRIORITY_POLICY;INU_COMPONENT_SCHEDULER_LOAD_AWARE_PLACEMENT</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Console\Inu.Kernel.Console.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.SubsystemContracts\Inu.Kernel.SubsystemContracts.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Memory\Inu.Kernel.Memory.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.VirtualMemory\Inu.Kernel.VirtualMemory.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.AddressSpace\Inu.Kernel.AddressSpace.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Acpi\Inu.Kernel.Acpi.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Time\Inu.Kernel.Time.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Smp\Inu.Kernel.Smp.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Scheduler\Inu.Kernel.Scheduler.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Protection\Inu.Kernel.Protection.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Security\Inu.Kernel.Security.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.SystemCalls\Inu.Kernel.SystemCalls.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Ps2\Inu.Kernel.Ps2.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Processes\Inu.Kernel.Processes.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Drivers\Inu.Kernel.Drivers.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.InterruptDispatch\Inu.Kernel.InterruptDispatch.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.InterruptBroker\Inu.Kernel.InterruptBroker.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.TimerDispatch\Inu.Kernel.TimerDispatch.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Storage\Inu.Kernel.Storage.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Networking\Inu.Kernel.Networking.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Pci\Inu.Kernel.Pci.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Nvme\Inu.Kernel.Nvme.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Ahci\Inu.Kernel.Ahci.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Virtio\Inu.Kernel.Virtio.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Graphics\Inu.Kernel.Graphics.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Gui\Inu.Kernel.Gui.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Audio\Inu.Kernel.Audio.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Virtio.Gpu\Inu.Kernel.Virtio.Gpu.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.E1000\Inu.Kernel.E1000.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Rtl8168\Inu.Kernel.Rtl8168.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Platform.X64\Inu.Kernel.Platform.X64.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.X64.LowLevel\Inu.Kernel.X64.LowLevel.csproj" />
+    <ProjectReference Include="..\Inu.Arch.X64\Inu.Arch.X64.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Architecture\Inu.Kernel.Architecture.csproj" />
+      <ProjectReference Include="..\Inu.Kernel.Heap\Inu.Kernel.Heap.csproj" />
+    <ProjectReference Include="..\Inu.Runtime.NativeAot\Inu.Runtime.NativeAot.csproj" />
+    <ProjectReference Include="..\Inu.Runtime.Conformance\Inu.Runtime.Conformance.csproj" />
+    <ProjectReference Include="..\Inu.Bus.Usb\Inu.Bus.Usb.csproj" />
+    <ProjectReference Include="..\Inu.Usb.Xhci\Inu.Usb.Xhci.csproj" />
+    <ProjectReference Include="..\Inu.Usb.Hid\Inu.Usb.Hid.csproj" />
+    <ProjectReference Include="..\Inu.Usb.MassStorage\Inu.Usb.MassStorage.csproj" />
+    <ProjectReference Include="..\Inu.Usb.Hub\Inu.Usb.Hub.csproj" />
+  </ItemGroup>
+</Project>

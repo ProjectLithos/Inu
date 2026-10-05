@@ -1,0 +1,46 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Storage.AhciDriver",
+  "displayName": "AHCI/SATA block-storage driver",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "The driver owns its device-specific state and registers through existing driver/subsystem contracts; bootstrap and generated HAL startup reference it only when its component symbol is selected."
+  },
+  "lifecycle": {
+    "ownership": "driver",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "storage.block-device.ahci"
+    ],
+    "requires": [
+      "driver.registry",
+      "pci.enumeration",
+      "storage.block-device-registry",
+      "memory.dma"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Storage",
+    "Kernel.Pci.ConfigurationRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Ahci/Inu.Kernel.Ahci.csproj",
+      "sources": [
+        "src/Inu.Kernel.Ahci/AhciContracts.cs",
+        "src/Inu.Kernel.Ahci/AhciMath.cs",
+        "src/Inu.Kernel.Ahci/KernelAhci.BlockIo.cs",
+        "src/Inu.Kernel.Ahci/KernelAhci.DiskDiscovery.cs",
+        "src/Inu.Kernel.Ahci/KernelAhci.DriverLifecycle.cs",
+        "src/Inu.Kernel.Ahci/KernelAhci.Ports.cs",
+        "src/Inu.Kernel.Ahci/KernelAhci.Storage.cs",
+        "src/Inu.Kernel.Ahci/KernelAhci.cs"
+      ]
+    }
+  }
+}

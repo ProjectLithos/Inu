@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Scheduler.PolicyRegistry",
+  "displayName": "Scheduler policy and runnable-thread contract",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "0.2.33: scheduler-owned registry and opaque runnable-thread view isolate dispatch mechanics from replaceable scheduling-policy implementations; CPU-runqueue state is now a separate contract."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "scheduler.selection-policy-registry",
+      "thread.runnable-set"
+    ],
+    "requires": [
+      "thread.record-store"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Threads.RecordStore"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Scheduler/Inu.Kernel.Scheduler.csproj",
+      "sources": [
+        "src/Inu.Kernel.Scheduler/KernelSchedulingPolicyServices.cs",
+        "src/Inu.Kernel.Scheduler/KernelScheduler.RunnableThreadContract.cs"
+      ]
+    }
+  }
+}

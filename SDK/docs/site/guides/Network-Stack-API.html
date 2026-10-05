@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inu Network Stack API · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Inu Network Stack API</h1>
+<p>Inu 0.22.0 standardises the kernel network stack behind one public, freestanding contract. Hardware drivers supply NIC frame transport; Ethernet and protocol processing live above that boundary. Applications and services use sockets rather than calling NIC drivers directly.</p>
+<h2>Layers</h2>
+<p>The standard stack exposes the following layers: NIC, Ethernet, ARP, NDP, IPv4, IPv6, ICMP, UDP, TCP, sockets and DNS. <code>KernelNetworkApi.GetCapabilities()</code> reports the standard layer surface while <code>IKernelNetworkStackContract</code> provides the stable subsystem ABI.</p>
+<h3>NIC</h3>
+<p>A NIC is registered through <code>KernelNetworking.RegisterInterface</code>. A driver provides transmit and receive-enable callbacks and receives a <code>KernelNetworkInterfaceHandle</code>. The network stack owns interface state, MTU, addresses, routing and neighbor state.</p>
+<h3>Ethernet</h3>
+<p><code>KernelNetworkApi.ReceiveEthernet</code> accepts complete Ethernet frames. EtherType routing dispatches ARP, IPv4 and IPv6 without exposing device-specific details to upper layers.</p>
+<h3>ARP and NDP</h3>
+<p>ARP maintains IPv4-to-MAC neighbor entries. IPv6 Neighbor Discovery processes ICMPv6 Neighbor Solicitation and Neighbor Advertisement options and maintains IPv6-to-MAC neighbor entries. Neighbor tables are owned by the networking subsystem, not individual NIC drivers.</p>
+<h3>IPv4 and IPv6</h3>
+<p>IPv4 retains route selection and per-interface addressing. IPv6 has a standard address and endpoint type and an NDP-aware receive path. Architecture-neutral API structures carry addresses; no x64 assumptions are present in the public network contract.</p>
+<h3>ICMP</h3>
+<p>ICMPv4 echo request/reply handling is part of the stack, and <code>SendIcmpEchoIpv4</code> exposes an explicit diagnostic transmit path. ICMPv6 is the transport for NDP and is parsed separately from IPv4 ICMP.</p>
+<h3>UDP and TCP</h3>
+<p>UDP datagrams use route lookup, neighbor resolution, IPv4 framing and socket delivery. TCP exposes the socket state machine and connection observation surface already used by Inu. The API keeps TCP state behind the socket contract so a more complete congestion/retransmission engine can evolve without changing application-facing handles.</p>
+<h3>Sockets</h3>
+<p><code>KernelNetworkApi</code> standardises socket create, bind, connect, listen, receive, UDP send and close operations. <code>KernelNetworkEndpoint</code>, <code>KernelIpv4Endpoint</code> and <code>KernelIpv6Endpoint</code> provide address-family-neutral API shapes.</p>
+<h3>DNS</h3>
+<p>The DNS API supports both A and AAAA records. <code>BuildDnsQuery</code> accepts <code>KernelDnsRecordType.A</code> or <code>KernelDnsRecordType.Aaaa</code>; response parsers return <code>KernelIpv4Address</code> or <code>KernelIpv6Address</code> respectively.</p>
+<h2>Driver boundary</h2>
+<p>NIC drivers sit underneath <code>KernelNetworking</code>. They do not implement ARP, IP, TCP, UDP, sockets or DNS. A driver is responsible for moving Ethernet frames and reporting link receive state. This keeps E1000, RTL8168, VirtIO-net and future hardware behind the same contract.</p>
+<h2>Allocation model</h2>
+<p>The stack uses the Inu kernel heap for registries and fixed caller-owned buffers for packet/query APIs. Public hot-path APIs do not require a managed networking runtime or the desktop .NET socket stack.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

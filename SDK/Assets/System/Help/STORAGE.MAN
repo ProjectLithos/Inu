@@ -1,0 +1,18 @@
+NAME
+    storage - Show discovered storage devices, volumes and mounts.
+
+SYNOPSIS
+    storage | disks
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show discovered storage devices, volumes and mounts.
+
+ALIASES
+    disks
+
+FILES
+    /System/Commands/STORAGE.CMD
+    /INU/HELP/STORAGE.MAN

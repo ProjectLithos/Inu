@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "productVersion": "0.2.3",
+  "dotNetSdk": {
+    "version": "10.0.302",
+    "installDirectory": ".toolchain/DotNet"
+  },
+  "nativeAot": {
+    "packageVersion": "10.0.10",
+    "packages": [
+      "Microsoft.DotNet.ILCompiler",
+      "runtime.win-x64.Microsoft.DotNet.ILCompiler"
+    ],
+    "packageDirectory": ".toolchain/NuGetPackages",
+    "restoreMethod": "CompilerPackageRestore"
+  },
+  "llvm": {
+    "version": "22.1.6",
+    "requiredTools": [
+      "ld.lld.exe",
+      "lld-link.exe",
+      "llvm-ar.exe",
+      "llvm-objcopy.exe",
+      "llvm-readobj.exe",
+      "llvm-nm.exe",
+      "llvm-objdump.exe",
+      "llvm-symbolizer.exe",
+      "llvm-pdbutil.exe"
+    ],
+    "installDirectory": ".toolchain/LLVM",
+    "optionalTools": [
+      "llvm-mc.exe"
+    ]
+  },
+  "qemu": {
+    "minimumVersion": "11.0.0",
+    "wingetId": "SoftwareFreedomConservancy.QEMU"
+  },
+  "ovmf": {
+    "architecture": "x64",
+    "provider": "QEMU EDK2 firmware distribution",
+    "codeFileNames": [
+      "edk2-x86_64-code.fd",
+      "OVMF_CODE.fd"
+    ],
+    "variableStoreFileNames": [
+      "edk2-i386-vars.fd",
+      "edk2-x86_64-vars.fd",
+      "OVMF_VARS.fd"
+    ]
+  },
+  "nasm": {
+    "minimumVersion": "2.16.0",
+    "wingetId": "NASM.NASM"
+  }
+}

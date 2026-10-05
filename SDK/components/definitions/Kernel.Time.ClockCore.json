@@ -1,0 +1,50 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Time.ClockCore",
+  "displayName": "Kernel clock and timer core",
+  "area": "Kernel",
+  "selection": {
+    "status": "required",
+    "reason": "Owns source-neutral monotonic, wall-clock and interrupt-timer registries/facades. Concrete clock, calendar and interrupt-timer hardware is registered through explicit provider contracts."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "time.monotonic",
+      "time.deadlines",
+      "time.clock-selection",
+      "time.wall-clock-selection",
+      "time.interrupt-timer-selection"
+    ],
+    "requires": [
+      "platform.tsc-capability"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Time"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Time/Inu.Kernel.Time.csproj",
+      "sources": [
+        "src/Inu.Kernel.Time/KernelTime.cs",
+        "src/Inu.Kernel.Time/KernelTime.ClockSources.cs",
+        "src/Inu.Kernel.Time/KernelTime.Monotonic.cs",
+        "src/Inu.Kernel.Time/KernelTime.Delay.cs",
+        "src/Inu.Kernel.Time/KernelTimeContracts.cs",
+        "src/Inu.Kernel.Time/KernelClockSourceServices.cs",
+        "src/Inu.Kernel.Time/KernelTimeMath.cs",
+        "src/Inu.Kernel.Time/KernelTimerFacilities.cs",
+        "src/Inu.Kernel.Time/KernelTimekeepingFramework.cs",
+        "src/Inu.Kernel.Time/SubsystemLifecycle.cs",
+        "src/Inu.Kernel.Time/KernelWallClockSourceServices.cs",
+        "src/Inu.Kernel.Time/KernelInterruptTimerServices.cs"
+      ]
+    }
+  }
+}

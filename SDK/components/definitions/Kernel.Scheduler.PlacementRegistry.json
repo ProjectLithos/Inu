@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Scheduler.PlacementRegistry",
+  "displayName": "Thread placement policy registry",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "0.2.33: scheduler/thread code depends on a neutral placement registry; concrete CPU-placement implementations register initial placement, wake rebalance and work-stealing decisions."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "scheduler.thread-placement-registry"
+    ],
+    "requires": [
+      "thread.runnable-set",
+      "scheduler.cpu-runnable-sets"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Scheduler.PolicyRegistry",
+    "Kernel.Scheduler.CpuRunQueues"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Scheduler/Inu.Kernel.Scheduler.csproj",
+      "sources": [
+        "src/Inu.Kernel.Scheduler/KernelThreadPlacementServices.cs"
+      ]
+    }
+  }
+}

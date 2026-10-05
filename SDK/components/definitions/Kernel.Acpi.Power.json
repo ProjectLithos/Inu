@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Acpi.Power",
+  "displayName": "ACPI fixed-feature power provider",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Fixed-feature power owns its sleep/reset/button state and is reached only through KernelAcpiPowerServices; the higher-level power manager reports unsupported when this provider is omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "power.acpi-fixed"
+    ],
+    "requires": [
+      "acpi.fadt",
+      "acpi.register-access"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Acpi.FadtPlatform",
+    "Kernel.Acpi.RegisterAccess"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Acpi/Inu.Kernel.Acpi.csproj",
+      "sources": [
+        "src/Inu.Kernel.Acpi/KernelAcpiPowerProvider.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpiPowerServices.cs",
+        "src/Inu.Kernel.Acpi/AcpiPowerCapabilities.cs"
+      ]
+    }
+  }
+}

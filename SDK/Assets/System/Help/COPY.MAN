@@ -1,0 +1,23 @@
+NAME
+    copy - Copy a file. If destination names a directory, the source leaf name is appended. An existing destination file is overwritten.
+
+SYNOPSIS
+    copy <source> <destination>
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Copy a file. If destination names a directory, the source leaf name is appended. An existing destination file is overwritten.
+
+FAT NAME SUPPORT
+    The current Inu FAT provider creates and renames entries using FAT 8.3 short names.
+    Long-file-name creation and rename are reserved for a later filesystem-provider extension.
+
+EXAMPLES
+    copy README.TXT BACKUP.TXT
+    copy README.TXT \TEMP
+
+FILES
+    /System/Commands/COPY.CMD
+    /INU/HELP/COPY.MAN

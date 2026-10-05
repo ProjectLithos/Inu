@@ -1,0 +1,35 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Startup.Graphics",
+  "displayName": "Graphics startup",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Kernel startup policy is OS-owned. Kath can include, omit, replace or reorder this startup source component."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "kernel.startup.graphics"
+    ],
+    "requires": [
+      "boot.framebuffer-info"
+    ]
+  },
+  "dependencies": [
+    "Boot.FramebufferInfo"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": null,
+      "sources": [
+        "templates/InuKernel/Boot/GraphicsStartup.cs"
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.InterfaceRegistry",
+  "displayName": "Network interface registry",
+  "area": "Kernel",
+  "selection": {
+    "status": "required",
+    "reason": "Provides the network-interface identity and validation service consumed by independently owned networking components."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.interface-registry"
+    ],
+    "requires": [
+      "memory.heap",
+      "driver.device-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelNetworking.cs",
+        "src/Inu.Kernel.Networking/KernelNetworking.Interfaces.cs",
+        "src/Inu.Kernel.Networking/KernelNetworking.Storage.cs",
+        "src/Inu.Kernel.Networking/KernelNetworkInterfaceRegistryContract.cs"
+      ]
+    }
+  }
+}

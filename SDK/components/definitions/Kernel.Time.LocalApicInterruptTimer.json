@@ -1,0 +1,40 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Time.LocalApicInterruptTimer",
+  "displayName": "Local APIC interrupt timer",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Owns Local APIC timer MMIO state, monotonic-source calibration and interrupt programming and registers only through the interrupt-timer contract; the clock core no longer owns Local APIC timer hardware state."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "time.interrupt-timer.local-apic"
+    ],
+    "requires": [
+      "acpi.madt",
+      "platform.mmio",
+      "time.monotonic",
+      "time.interrupt-timer-selection"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Time.ClockCore",
+    "Kernel.Acpi.MadtTopology"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Time/Inu.Kernel.Time.csproj",
+      "sources": [
+        "src/Inu.Kernel.Time/KernelTime.LocalApicTimer.cs",
+        "src/Inu.Kernel.Time/KernelInterruptTimerServices.cs"
+      ]
+    }
+  }
+}

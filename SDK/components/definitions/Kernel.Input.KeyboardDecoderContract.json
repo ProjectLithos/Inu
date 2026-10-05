@@ -1,0 +1,33 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Input.KeyboardDecoderContract",
+  "displayName": "Keyboard decoder transport contract",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "Transport/decoder dispatch contract used by PS/2 and optional keyboard decoders; not independently selectable."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "input.keyboard-decoder-service"
+    ],
+    "requires": []
+  },
+  "dependencies": [
+    "Kernel.Input.Ps2"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Ps2/Inu.Kernel.Ps2.csproj",
+      "sources": [
+        "src/Inu.Kernel.Ps2/KernelKeyboardDecoderServices.cs"
+      ]
+    }
+  }
+}

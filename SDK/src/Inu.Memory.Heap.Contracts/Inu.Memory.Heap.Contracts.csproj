@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><RootNamespace>Inu.Memory.Heap</RootNamespace><AssemblyName>Inu.Memory.Heap.Contracts</AssemblyName></PropertyGroup>
+  <ItemGroup><ProjectReference Include="..\Inu.Core\Inu.Core.csproj" /></ItemGroup>
+</Project>

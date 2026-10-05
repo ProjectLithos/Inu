@@ -1,0 +1,35 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Usb.HidMouse",
+  "displayName": "USB HID mouse decoder",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Pointer report decoding, pointer state, and event delivery are owned by the optional mouse component and registered through UsbHidMouseServices; the HID transport remains valid when it is omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "usb.hid.mouse"
+    ],
+    "requires": [
+      "usb.hid.transport"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Usb.HidTransport"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Usb.Hid/Inu.Usb.Hid.csproj",
+      "sources": [
+        "src/Inu.Usb.Hid/UsbHidMouse.cs"
+      ]
+    }
+  }
+}

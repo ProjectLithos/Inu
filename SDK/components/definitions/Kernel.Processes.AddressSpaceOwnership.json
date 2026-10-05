@@ -1,0 +1,40 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Processes.AddressSpaceOwnership",
+  "displayName": "Process address-space ownership",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "0.2.30: this responsibility is registered through a neutral process-service contract; the KernelProcesses facade and record store no longer name the concrete provider, so Kath may include, omit, or substitute it independently subject to declared dependencies."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "process.address-space-ownership"
+    ],
+    "requires": [
+      "memory.physical",
+      "memory.virtual",
+      "security.process-isolation"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Processes.ServiceRegistry",
+    "Kernel.Processes.RecordStore"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Processes/Inu.Kernel.Processes.csproj",
+      "sources": [
+        "src/Inu.Kernel.Processes/KernelProcesses.AddressSpaceOwnership.cs",
+        "src/Inu.Kernel.Processes/KernelProcesses.ImageLoading.cs",
+        "src/Inu.Kernel.Processes/KernelProcessAddressSpaceProvider.cs"
+      ]
+    }
+  }
+}

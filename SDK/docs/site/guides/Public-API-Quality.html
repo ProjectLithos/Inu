@@ -1,0 +1,8 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Public API quality · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Public API quality</h1>
+<p>Inu treats its public SDK surface as a versioned compatibility contract.</p>
+<h2>Audit report</h2>
+<p>Every documentation build creates <code>Artifacts/Documentation/PublicApiAudit.json</code>. The report records the public assemblies and public items discovered from the source tree, the number with complete usage documentation, and every missing field.</p>
+<h2>Required information</h2>
+<p>Each public item must explain what it does, when to use it, what it depends upon and how it is used. Value-returning methods must document their return value. Method examples become mandatory when strict example validation is enabled.</p>
+<h2>Strict validation</h2>
+<p>Run <code>Build-InuDocumentation.bat -Strict</code> before publishing an SDK release. Strict mode turns every audit finding into a build failure, preventing undocumented public API additions from entering a release.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

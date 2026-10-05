@@ -1,0 +1,38 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Threads.Lifecycle",
+  "displayName": "Kernel thread lifecycle",
+  "area": "Kernel",
+  "selection": {
+    "status": "candidate",
+    "reason": "0.2.31: creation, role-thread setup and retirement are separated from state control; promotion waits for an opaque thread-record contract."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "thread.lifecycle"
+    ],
+    "requires": [
+      "thread.records",
+      "scheduler.thread-placement"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Threads.RecordStore",
+    "Kernel.Scheduler.PlacementRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Scheduler/Inu.Kernel.Scheduler.csproj",
+      "sources": [
+        "src/Inu.Kernel.Scheduler/KernelScheduler.ThreadLifecycle.cs",
+        "src/Inu.Kernel.Scheduler/KernelScheduler.ThreadRetirement.cs"
+      ]
+    }
+  }
+}

@@ -1,0 +1,1 @@
+using System; using Inu.Kernel.Processes; using Inu.Kernel.Storage; namespace Inu.Samples.UserlandProcess; public static class Sample { public static Boolean Launch(String path,UInt64 argument){if(!KernelProcesses.TryCreateFromFile(KernelVfs.DefaultNamespace,path,out KernelProcessInfo p))return false;return KernelProcesses.TryStart(p.Id,argument);} }

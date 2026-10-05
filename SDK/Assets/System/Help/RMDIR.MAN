@@ -1,0 +1,22 @@
+NAME
+    rmdir - Remove an existing empty directory. The root directory cannot be removed.
+
+SYNOPSIS
+    rmdir <folder_name>
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Remove an existing empty directory. The root directory cannot be removed.
+
+FAT NAME SUPPORT
+    The current Inu FAT provider creates and renames entries using FAT 8.3 short names.
+    Long-file-name creation and rename are reserved for a later filesystem-provider extension.
+
+EXAMPLES
+    rmdir TEST
+
+FILES
+    /System/Commands/RMDIR.CMD
+    /INU/HELP/RMDIR.MAN

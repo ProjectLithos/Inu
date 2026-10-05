@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Inu.InterruptControllers.X64</AssemblyName>
+    <RootNamespace>Inu.InterruptControllers.X64</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.InterruptControllers.Contracts\Inu.InterruptControllers.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Interrupts.Contracts\Inu.Interrupts.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Primitives\Inu.Primitives.csproj" />
+  </ItemGroup>
+</Project>

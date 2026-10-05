@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Library</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable><DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences><NoStdLib>true</NoStdLib><NoConfig>true</NoConfig><RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion><GenerateAssemblyInfo>false</GenerateAssemblyInfo><GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute><DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences><AllowUnsafeBlocks>true</AllowUnsafeBlocks><AssemblyName>Inu.Kernel.Virtio.Gpu</AssemblyName></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Pci\Inu.Kernel.Pci.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Drivers\Inu.Kernel.Drivers.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Heap\Inu.Kernel.Heap.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Memory\Inu.Kernel.Memory.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.AddressSpace\Inu.Kernel.AddressSpace.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Time\Inu.Kernel.Time.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Graphics\Inu.Kernel.Graphics.csproj" />
+  </ItemGroup>
+</Project>

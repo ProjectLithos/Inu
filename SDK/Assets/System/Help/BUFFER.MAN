@@ -1,0 +1,18 @@
+NAME
+    buffering - Inspect or change framebuffer buffering.
+
+SYNOPSIS
+    buffering [1|2|3|auto]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Inspect or change framebuffer buffering.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/BUFFER.CMD
+    /INU/HELP/BUFFER.MAN

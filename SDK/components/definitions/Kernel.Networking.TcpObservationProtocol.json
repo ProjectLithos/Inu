@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.TcpObservationProtocol",
+  "displayName": "TCP IPv4 observation",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "The current minimal TCP header/state observation path is isolated from IPv4 and registers independently. It may be omitted when TCP socket observation is not required."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.tcp-ipv4-observation"
+    ],
+    "requires": [
+      "network.ipv4",
+      "network.ipv4-transport-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.Ipv4Protocol",
+    "Kernel.Networking.Ipv4TransportRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelTcpObservationProtocol.cs"
+      ]
+    }
+  }
+}

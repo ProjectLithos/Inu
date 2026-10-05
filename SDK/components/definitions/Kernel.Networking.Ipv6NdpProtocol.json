@@ -1,0 +1,40 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.Ipv6NdpProtocol",
+  "displayName": "IPv6 and NDP protocol",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "IPv6 packet validation and neighbour-discovery interpretation register through the packet registry and can be omitted independently of the Ethernet/interface core."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.ipv6",
+      "network.ndp"
+    ],
+    "requires": [
+      "network.packet-registry",
+      "network.interface-registry",
+      "network.neighbor-cache"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.PacketRegistry",
+    "Kernel.Networking.InterfaceRegistry",
+    "Kernel.Networking.NeighborCache"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelIpv6NdpProtocol.cs"
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": "3.0",
+  "policy": "additive-within-major",
+  "publicAssemblyPrefix": "Inu.",
+  "breakingChanges": [
+    "remove-public-item",
+    "rename-public-item",
+    "change-public-signature",
+    "change-enum-value",
+    "narrow-public-visibility"
+  ],
+  "allowedWithinMajor": [
+    "add-public-type",
+    "add-public-member",
+    "add-optional-capability"
+  ],
+  "abiVersions": {
+    "kernel": "1.0",
+    "driver": "1.0",
+    "syscall": "2.0",
+    "debug": "1.0",
+    "crashDump": "1.0",
+    "heapDiagnostics": "1.0"
+  }
+}

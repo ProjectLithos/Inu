@@ -1,0 +1,11 @@
+using System;
+namespace Inu.Kernel.Networking;
+
+public static unsafe class KernelDhcpCodec
+{
+    public static Boolean Register()=>KernelNetworkProtocolServices.RegisterDhcpCodec(&BuildDiscoverForService,&ParseOfferForService);
+    private static Boolean BuildDiscoverForService(Byte* buffer,UInt32 capacity,UInt32 transactionId,KernelMacAddress mac,UInt32* length){if(length==null)return false;UInt32 value=0;if(!BuildDiscover(buffer,capacity,transactionId,mac,out value))return false;*length=value;return true;}
+    private static Boolean ParseOfferForService(Byte* packet,UInt32 length,UInt32 transactionId,KernelIpv4Address* offered,KernelIpv4Address* server){if(offered==null||server==null)return false;KernelIpv4Address o=default,s=default;if(!TryParseOffer(packet,length,transactionId,out o,out s))return false;*offered=o;*server=s;return true;}
+    private static Boolean BuildDiscover(Byte* buffer,UInt32 capacity,UInt32 transactionId,KernelMacAddress mac,out UInt32 length){length=0;if(buffer==null||capacity<244||mac.IsZero)return false;for(UInt32 i=0;i<244;i++)buffer[i]=0;buffer[0]=1;buffer[1]=1;buffer[2]=6;KernelNetworkMath.WriteUInt32Network(buffer+4,4,transactionId);buffer[10]=0x80;buffer[28]=mac.A;buffer[29]=mac.B;buffer[30]=mac.C;buffer[31]=mac.D;buffer[32]=mac.E;buffer[33]=mac.F;buffer[236]=99;buffer[237]=130;buffer[238]=83;buffer[239]=99;buffer[240]=53;buffer[241]=1;buffer[242]=1;buffer[243]=255;length=244;return true;}
+    private static Boolean TryParseOffer(Byte* packet,UInt32 length,UInt32 transactionId,out KernelIpv4Address offeredAddress,out KernelIpv4Address serverAddress){offeredAddress=default;serverAddress=default;if(packet==null||length<240||packet[0]!=2||KernelNetworkMath.ReadUInt32Network(packet+4)!=transactionId)return false;if(packet[236]!=99||packet[237]!=130||packet[238]!=83||packet[239]!=99)return false;offeredAddress=new KernelIpv4Address(KernelNetworkMath.ReadUInt32Network(packet+16));UInt32 i=240;Boolean offer=false;while(i<length){Byte code=packet[i++];if(code==255)break;if(code==0)continue;if(i>=length)return false;Byte size=packet[i++];if(i+(UInt32)size>length)return false;if(code==53&&size==1&&packet[i]==2)offer=true;if(code==54&&size==4)serverAddress=new KernelIpv4Address(KernelNetworkMath.ReadUInt32Network(packet+i));i+=(UInt32)size;}return offer&&offeredAddress.Value!=0;}
+}

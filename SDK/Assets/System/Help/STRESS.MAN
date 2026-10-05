@@ -1,0 +1,69 @@
+NAME
+    stress - Repeatedly exercise managed-runtime and ring-3 userland subsystems.
+
+SYNOPSIS
+    stress [all|exceptions|eh|ehstress|gc|dispatch|generics|collections|typeloader|abi|userland] [iterations]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Runs the stress controller as a real ring-3 Inu process. Inu exposes exactly three
+    native syscall operations: Get, Set and Event. Stress progress is emitted with
+    Event(ConsoleOutput); the shell does not poll shared progress state. Managed runtime
+    stages are requested with Set(StressControl), while completion is read with
+    Get(StressStatus). Event payloads are copied into a bounded kernel queue and rendered
+    by the GUI role worker. Managed stages run on the persistent Background role worker
+    with a normal kernel/GC stack; no scheduler creation or context switch occurs on a
+    syscall stack.
+
+    The path therefore also validates package parsing, ELF64 loading, a private process
+    address space, IRETQ ring-3 entry, SYSCALL/SYSRETQ, Get/Set/Event dispatch and
+    controlled process exit back to ring 0.
+
+    all          managed runtime suites plus the end-to-end userland process suite
+    exceptions   throw/catch/finally, cross-frame unwind and rethrow (aliases: eh, ehstress)
+    gc           mature collection, roots, reclamation, reuse and finalization
+    dispatch     class virtual, interface dispatch, casts and variance
+    generics     dictionaries, GVMs, constrained calls, constructors and statics
+    collections  List, Dictionary, Queue and Stack mutation/enumeration/EH
+    typeloader   NativeLayout type lookup plus generic static/default-ctor paths
+    abi          object, boxing, handles, delegates, primitive and MethodTable ABI
+    userland     application package -> process -> ring 3 -> Get/Set/Event -> exit -> cleanup
+
+LIMITS
+    all/gc/userland: 16 iterations
+    generics/collections/abi: 250 iterations
+    typeloader: 500 iterations
+    exceptions/dispatch: 1000 iterations
+
+EXAMPLES
+    stress all 2
+    stress userland 4
+    stress gc 3
+    stress ehstress 32
+    stress generics 100
+    stress typeloader 100
+
+BOOT POLICY
+    Exception/unwind stress is not run automatically during normal OS boot. The former
+    EHStress boot workload is owned by this command; use `stress exceptions`, `stress eh`
+    or `stress ehstress` when you want to run it explicitly.
+
+ELAPSED TIME
+    Long-running stress/selftest packages request one live elapsed-time status line from
+    the presentation layer. The line is updated in place once per second and is not a
+    stress-progress polling channel; stage progress still arrives only through Event(ConsoleOutput).
+
+SEE ALSO
+    selftest
+
+Live progress
+-------------
+Stress/selftest output is emitted by the ring-3 controller with Event(ConsoleOutput).
+Exceptions, dispatch, generics, collections, typeloader, ABI, GC and userland are
+announced in order and each result is printed before the next stage is submitted. No
+shell-side stress progress polling or single-slot coalescing is used. Immediately before
+controlled process exit the controller prints an exit marker; if the VM stops, the last
+visible Event-delivered line identifies whether failure occurred inside a stage or on the
+ring-3-to-ring-0 exit path.

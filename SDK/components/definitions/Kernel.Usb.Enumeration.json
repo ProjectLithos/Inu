@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Usb.Enumeration",
+  "displayName": "USB enumeration",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "USB enumeration now owns the enumeration state machine and reaches the USB bus only through KernelUsbEnumerationBusContract; the bus core dispatches enumeration through KernelUsbEnumerationServices and does not name the concrete component."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "usb.enumeration"
+    ],
+    "requires": [
+      "usb.host-controller",
+      "usb.device-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Usb.Bus"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Bus.Usb/Inu.Bus.Usb.csproj",
+      "sources": [
+        "src/Inu.Bus.Usb/KernelUsbEnumeration.cs",
+        "src/Inu.Bus.Usb/KernelUsbEnumerationServices.cs",
+        "src/Inu.Bus.Usb/KernelUsbEnumerationBusContract.cs",
+        "src/Inu.Bus.Usb/UsbDescriptorParser.cs"
+      ]
+    }
+  }
+}

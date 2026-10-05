@@ -1,0 +1,36 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Boot.MemoryMapCaptureDiagnostics",
+  "displayName": "Memory-map capture diagnostics",
+  "area": "Boot",
+  "selection": {
+    "status": "selectable",
+    "reason": "Capture attempts and ExitBootServices status are diagnostics, not memory-manager requirements."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "boot.memory-map-capture-diagnostics"
+    ],
+    "requires": [
+      "boot.context"
+    ]
+  },
+  "dependencies": [
+    "Boot.Context.Core"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Console/Inu.Kernel.Console.csproj",
+      "sources": [
+        "src/Inu.Kernel.Console/IMemoryMapCaptureDiagnosticsContext.cs",
+        "src/Inu.Kernel.Console/BootContext.MemoryMapCaptureDiagnostics.cs"
+      ]
+    }
+  }
+}

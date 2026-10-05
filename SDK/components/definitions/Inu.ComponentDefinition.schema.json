@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "Inu.ComponentDefinition.schema.json",
+  "title": "Inu language-neutral source component definition",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "displayName",
+    "area",
+    "selection",
+    "lifecycle",
+    "contracts",
+    "dependencies",
+    "implementations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "area": {
+      "enum": [
+        "Boot",
+        "Kernel",
+        "Userland"
+      ]
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reason"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "required",
+            "selectable",
+            "candidate",
+            "internal"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ownership",
+        "startup"
+      ],
+      "properties": {
+        "ownership": {
+          "enum": [
+            "os",
+            "kernel",
+            "process",
+            "driver",
+            "shared"
+          ]
+        },
+        "startup": {
+          "enum": [
+            "boot",
+            "on-demand",
+            "parent-controlled",
+            "none"
+          ]
+        }
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provides",
+        "requires"
+      ],
+      "properties": {
+        "provides": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "implementations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "CSharp": {
+          "$ref": "#/$defs/implementation"
+        },
+        "Ada": {
+          "$ref": "#/$defs/implementation"
+        },
+        "Assembly": {
+          "$ref": "#/$defs/implementation"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "sources"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "available",
+            "planned",
+            "not-applicable"
+          ]
+        },
+        "project": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

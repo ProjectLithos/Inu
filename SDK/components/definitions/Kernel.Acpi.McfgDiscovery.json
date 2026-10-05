@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Acpi.McfgDiscovery",
+  "displayName": "ACPI MCFG discovery provider",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Owns MCFG ECAM-allocation parsing and registers only through KernelAcpiMcfgServices; PCI can retain legacy configuration support when this component is omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "acpi.mcfg"
+    ],
+    "requires": [
+      "acpi.table-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Acpi.TableRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Acpi/Inu.Kernel.Acpi.csproj",
+      "sources": [
+        "src/Inu.Kernel.Acpi/KernelAcpiMcfgProvider.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpiMcfgServices.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpi.PlatformTables.cs"
+      ]
+    }
+  }
+}

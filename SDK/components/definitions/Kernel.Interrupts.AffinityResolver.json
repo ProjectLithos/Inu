@@ -1,0 +1,35 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Interrupts.AffinityResolver",
+  "displayName": "Interrupt CPU affinity resolver",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Owns SMP-aware processor/APIC target selection behind KernelInterruptAffinityServices; the broker uses contract fallbacks when this policy component is omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "interrupts.affinity-resolution"
+    ],
+    "requires": [
+      "smp.processor-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Interrupts.BrokerCore"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.InterruptBroker/Inu.Kernel.InterruptBroker.csproj",
+      "sources": [
+        "src/Inu.Kernel.InterruptBroker/KernelInterruptBroker.Affinity.cs"
+      ]
+    }
+  }
+}

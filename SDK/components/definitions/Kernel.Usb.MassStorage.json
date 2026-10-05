@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Usb.MassStorage",
+  "displayName": "USB mass-storage transport",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "USB bulk-only mass storage is already isolated behind USB-bus and block-storage contracts. Bootstrap and generated HAL startup now include it only when its component symbol is selected."
+  },
+  "lifecycle": {
+    "ownership": "driver",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "storage.block-device.usb"
+    ],
+    "requires": [
+      "usb.bus",
+      "driver.registry",
+      "storage.block-device-registry",
+      "kernel.heap"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Usb.Bus",
+    "Kernel.Storage"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Usb.MassStorage/Inu.Usb.MassStorage.csproj",
+      "sources": [
+        "src/Inu.Usb.MassStorage/UsbMassStorage.cs"
+      ]
+    }
+  }
+}

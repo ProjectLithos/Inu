@@ -1,0 +1,33 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Session.DesktopOrText",
+  "displayName": "Desktop with text fallback session",
+  "area": "Userland",
+  "selection": {
+    "status": "selectable",
+    "reason": "Kernel startup policy is OS-owned. Kath can include, omit, replace or reorder this startup source component."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "kernel.session.desktop-or-text"
+    ],
+    "requires": []
+  },
+  "dependencies": [
+    "Kernel.Session.TextConsole"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": null,
+      "sources": [
+        "templates/InuKernel/Startup/DesktopOrTextSessionStartup.cs"
+      ]
+    }
+  }
+}

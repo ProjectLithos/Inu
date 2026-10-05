@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://inu.dev/schemas/package-v1.json",
+  "title": "Inu ZIP Package Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "schemaVersion", "id", "name", "version", "type", "architectures", "requires", "dependencies", "capabilities", "files", "install", "signing"],
+  "properties": {
+    "format": { "const": "inu-package-v1" },
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)+$", "minLength": 3, "maxLength": 160 },
+    "name": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$" },
+    "type": { "enum": ["Application", "Driver", "Library", "Service", "KernelExtension"] },
+    "publisher": { "type": "string", "maxLength": 256 },
+    "architectures": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "enum": ["any", "x64", "x86_64", "arm64", "riscv64"] }
+    },
+    "requires": {
+      "type": "object", "additionalProperties": false,
+      "required": ["minimumInuVersion", "sdkApiVersion", "abiVersion"],
+      "properties": {
+        "minimumInuVersion": { "type": "string" },
+        "sdkApiVersion": { "type": "string" },
+        "abiVersion": { "type": "string" }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "version", "optional"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 },
+          "optional": { "type": "boolean" }
+        }
+      }
+    },
+    "capabilities": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["path", "length", "sha256"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^payload/" },
+          "length": { "type": "integer", "minimum": 0 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-fA-F]{64}$" }
+        }
+      }
+    },
+    "install": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "entry": { "type": "string" },
+        "serviceName": { "type": "string" },
+        "serviceStartup": { "enum": ["automatic", "manual", "disabled", "on-demand"] },
+        "libraryKind": { "enum": ["", "dynamic", "static", "import"] }
+      }
+    },
+    "signing": {
+      "type": "object", "additionalProperties": false, "required": ["state"],
+      "properties": {
+        "state": { "enum": ["unsigned", "development", "signed", "trusted", "revoked"] },
+        "algorithm": { "type": "string" },
+        "signerId": { "type": "string" },
+        "manifestDigest": { "type": "string" },
+        "value": { "type": "string" }
+      }
+    }
+  }
+}

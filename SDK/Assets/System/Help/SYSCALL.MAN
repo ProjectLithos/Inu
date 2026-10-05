@@ -1,0 +1,18 @@
+NAME
+    syscalls - Read permitted system-call facility information.
+
+SYNOPSIS
+    syscalls | syscall
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Runs as an isolated userland command and issues Get(command.syscalls.get). Native Inu system calls use the Get, Set and Event classes with structured AppName/PID/Message envelopes; Linux and NT compatibility namespaces may retain numeric syscall identifiers.
+
+ALIASES
+    syscall
+
+FILES
+    /System/Commands/SYSCALL.CMD
+    /INU/HELP/SYSCALL.MAN

@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Input.KeyboardDecoder",
+  "displayName": "Keyboard scan-code decoder",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Keyboard decoding now owns scan-code state, modifiers, pressed-key state, layout state and decoded-event delivery independently of the PS/2 transport. KernelPs2 consumes the decoder only through KernelKeyboardDecoderServices."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "input.keyboard-decoding"
+    ],
+    "requires": [
+      "input.keyboard-layout"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Input.Ps2"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Ps2/Inu.Kernel.Ps2.csproj",
+      "sources": [
+        "src/Inu.Kernel.Ps2/KernelKeyboardDecoder.cs",
+        "src/Inu.Kernel.Ps2/KernelKeyboardDecoderServices.cs",
+        "src/Inu.Kernel.Ps2/KeyboardLayouts.cs"
+      ]
+    }
+  }
+}

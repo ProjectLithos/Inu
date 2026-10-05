@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Documentation Authoring · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Documentation Authoring</h1>
+<p>Public SDK declarations use normal XML documentation plus Inu-specific metadata.</p>
+<pre><code>
+/// &lt;summary&gt;Halts the current processor.&lt;/summary&gt;
+/// &lt;remarks&gt;This operation normally does not return.&lt;/remarks&gt;
+/// &lt;returns&gt;False only when the architecture implementation rejects the operation.&lt;/returns&gt;
+/// &lt;nova.when&gt;Use after final kernel output when no scheduler is active.&lt;/nova.when&gt;
+/// &lt;nova.depends&gt;The selected architecture CPU implementation.&lt;/nova.depends&gt;
+/// &lt;example&gt;return CPU.Halt();&lt;/example&gt;
+public static bool Halt()
+</code></pre>
+<p>The generator reads public declarations from <code>src</code>, records project-reference dependencies, writes the offline site beneath <code>Artifacts/Documentation/site</code>, and writes <code>Artifacts/Documentation/PublicApiAudit.json</code>. <code>Build-InuDocumentation.bat -Strict</code> fails when a configured public API is missing required summary, usage, dependency, return, or example documentation.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

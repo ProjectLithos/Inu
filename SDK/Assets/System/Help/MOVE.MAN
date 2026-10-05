@@ -1,0 +1,23 @@
+NAME
+    move - Move or rename a file or directory. Same-filesystem moves use the provider rename operation; cross-filesystem files fall back to copy then delete.
+
+SYNOPSIS
+    move <source> <destination>
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Move or rename a file or directory. Same-filesystem moves use the provider rename operation; cross-filesystem files fall back to copy then delete.
+
+FAT NAME SUPPORT
+    The current Inu FAT provider creates and renames entries using FAT 8.3 short names.
+    Long-file-name creation and rename are reserved for a later filesystem-provider extension.
+
+EXAMPLES
+    move OLD.TXT NEW.TXT
+    move LOG.TXT \ARCHIVE
+
+FILES
+    /System/Commands/MOVE.CMD
+    /INU/HELP/MOVE.MAN

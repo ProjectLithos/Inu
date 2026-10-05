@@ -1,0 +1,35 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Hardware.Networking",
+  "displayName": "Networking hardware startup",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Hardware policy is OS-owned. Kath can include, omit, replace or reorder this source component."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "kernel.hardware.networking"
+    ],
+    "requires": [
+      "kernel.hardware.driver-infrastructure"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Hardware.DriverInfrastructure"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": null,
+      "sources": [
+        "templates/InuKernel/HAL/NetworkingHardwareStartup.cs"
+      ]
+    }
+  }
+}

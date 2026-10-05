@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Framebuffer font · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Framebuffer font</h1>
+<p>Inu framebuffer consoles use the embedded <strong>Inu Mono</strong> bitmap typeface.</p>
+<h2>Coverage</h2>
+<p>The font contains the complete printable ASCII range, U+0020 through U+007E. Unsupported characters use a visible question-mark replacement glyph rather than an indistinguishable generic block.</p>
+<h2>Font size</h2>
+<p>The renderer has one authoritative rendered-size input: <code>FontSize</code>. It is the glyph height in framebuffer pixels. The default is 16 pixels.</p>
+<p>The embedded monochrome raster master is 8 pixels wide by 16 pixels high. For any supported <code>FontSize</code> from 8 through 128 pixels, the renderer derives the actual glyph width, character advance, line height, source row, and source column from <code>FontSize</code>. It does not expose or apply a second scale value.</p>
+<p>At the default <code>FontSize</code> of 16 pixels, the resulting measurements are:</p>
+<ul>
+<li>rendered glyph width: 8 pixels;</li>
+<li>rendered glyph height: 16 pixels;</li>
+<li>character advance: 10 pixels;</li>
+<li>line height: 20 pixels.</li>
+</ul>
+<p>Generated freestanding kernels pass an explicit 16-pixel size to <code>KernelConsole.Initialize(boot, 16U)</code>. Kernel authors can choose any supported pixel height through the overload, and <code>KernelConsole.FontSize</code> reports the exact value the renderer accepted. The reusable <code>Inu.Console.Framebuffer</code> assembly accepts the same exact pixel height through <code>FramebufferConfiguration.FontSize</code> and reports it through <code>FramebufferConsole.FontSize</code>.</p>
+<h2>Descenders and baseline</h2>
+<p>Lowercase <code>g</code>, <code>j</code>, <code>p</code>, <code>q</code>, and <code>y</code> use the final rows of the raster master. The renderer samples every rendered row from the complete glyph, so descenders remain visible at every supported font size.</p>
+<h2>Kernel compatibility</h2>
+<p>The freestanding implementation stores each source glyph as two packed 64-bit halves. It does not allocate arrays, require a garbage collector, load a font file, or call firmware after <code>ExitBootServices</code>. The reusable managed framebuffer assembly uses the same packed glyph values.</p>
+<h2>Copies kept in sync</h2>
+<p>The source-policy tests require the authoritative freestanding font and renderer to be byte-identical to the command-line and Visual Studio template copies. They also compare the packed glyph values against the reusable framebuffer assembly and reject any reintroduction of a separate public scale property.</p>
+<h2>Rendered specimen</h2>
+<p><code>docs/assets/Inu-Mono-8x16.png</code> is the unscaled raster-master specimen and now matches the default 16-pixel glyph height. <code>docs/assets/Inu-Mono-32px.png</code> remains as a larger supported-size specimen.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

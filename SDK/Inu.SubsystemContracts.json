@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "1.0",
+  "policy": "All cross-subsystem consumers target Inu.Kernel.SubsystemContracts. Implementations remain replaceable and architecture-specific details stay below the boundary.",
+  "subsystems": [
+    {
+      "id": "Memory",
+      "interface": "IKernelMemoryContract",
+      "implementation": "Inu.Kernel.Memory"
+    },
+    {
+      "id": "Interrupts",
+      "interface": "IKernelInterruptContract",
+      "implementation": "Inu.Kernel.InterruptBroker"
+    },
+    {
+      "id": "Scheduler",
+      "interface": "IKernelSchedulerContract",
+      "implementation": "Inu.Kernel.Scheduler"
+    },
+    {
+      "id": "Processes",
+      "interface": "IKernelProcessContract",
+      "implementation": "Inu.Kernel.Processes"
+    },
+    {
+      "id": "Syscalls",
+      "interface": "IKernelSyscallContract",
+      "implementation": "Inu.Kernel.SystemCalls"
+    },
+    {
+      "id": "Drivers",
+      "interface": "IKernelDriverContract",
+      "implementation": "Inu.Kernel.Drivers"
+    },
+    {
+      "id": "Filesystem",
+      "interface": "IKernelFilesystemContract",
+      "implementation": "Inu.Kernel.Storage"
+    },
+    {
+      "id": "Networking",
+      "interface": "IKernelNetworkingContract",
+      "implementation": "Inu.Kernel.Networking"
+    },
+    {
+      "id": "Graphics",
+      "interface": "IKernelGraphicsContract",
+      "implementation": "Inu.Kernel.Graphics"
+    },
+    {
+      "id": "Input",
+      "interface": "IKernelInputContract",
+      "implementation": "Inu.Kernel.Ps2"
+    },
+    {
+      "id": "Time",
+      "interface": "IKernelTimeContract",
+      "implementation": "Inu.Kernel.Time"
+    },
+    {
+      "id": "Power",
+      "interface": "IKernelPowerContract",
+      "implementation": "Inu.Kernel.Acpi"
+    },
+    {
+      "id": "Smp",
+      "interface": "IKernelSmpContract",
+      "implementation": "Inu.Kernel.Smp"
+    }
+  ],
+  "runtimeBridge": "Inu.Kernel.Bootstrap.KernelSubsystemRuntime",
+  "runtimePolicy": "Kernel boot validates all 13 formal subsystem boundaries at contract version 1.0 before enabling the interactive runtime."
+}

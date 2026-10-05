@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.PacketRegistry",
+  "displayName": "Network packet protocol registry",
+  "area": "Kernel",
+  "selection": {
+    "status": "required",
+    "reason": "Provides source-neutral Ethernet-to-network-layer dispatch so ARP, IPv4 and IPv6 implementations can be selected independently of KernelNetworkStack."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.packet-registry",
+      "network.packet-stack"
+    ],
+    "requires": [
+      "network.interface-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.InterfaceRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelNetworkPacketServices.cs",
+        "src/Inu.Kernel.Networking/KernelNetworkStack.cs"
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Formal kernel subsystem contracts · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Formal kernel subsystem contracts</h1>
+<p>Inu defines one versioned public boundary for each major kernel subsystem. The first contract generation is <code>1.0</code> and is published by <code>Inu.Kernel.SubsystemContracts</code>.</p>
+<p>Kernel and driver code should depend on these contracts when crossing subsystem boundaries. Hardware-specific or implementation-specific entry points remain internal to their owning subsystem. This prevents consumers from binding themselves to allocator internals, APIC details, scheduler tables, filesystem implementations, NIC drivers, graphics transports, input buses, ACPI machinery, or SMP implementation details.</p>
+<p>| Subsystem | Public contract | Current implementation |</p>
+<p>|---|---|---|</p>
+<p>| Memory | <code>IKernelMemoryContract</code> | <code>Inu.Kernel.Memory</code> |</p>
+<p>| Interrupts | <code>IKernelInterruptContract</code> | <code>Inu.Kernel.InterruptBroker</code> |</p>
+<p>| Scheduler | <code>IKernelSchedulerContract</code> | <code>Inu.Kernel.Scheduler</code> |</p>
+<p>| Processes | <code>IKernelProcessContract</code> | <code>Inu.Kernel.Processes</code> |</p>
+<p>| Syscalls | <code>IKernelSyscallContract</code> | <code>Inu.Kernel.SystemCalls</code> |</p>
+<p>| Drivers | <code>IKernelDriverContract</code> | <code>Inu.Kernel.Drivers</code> |</p>
+<p>| Filesystem | <code>IKernelFilesystemContract</code> | <code>Inu.Kernel.Storage</code> |</p>
+<p>| Networking | <code>IKernelNetworkingContract</code> | <code>Inu.Kernel.Networking</code> |</p>
+<p>| Graphics | <code>IKernelGraphicsContract</code> | <code>Inu.Kernel.Graphics</code> |</p>
+<p>| Input | <code>IKernelInputContract</code> | <code>Inu.Kernel.Ps2</code> |</p>
+<p>| Time | <code>IKernelTimeContract</code> | <code>Inu.Kernel.Time</code> |</p>
+<p>| Power | <code>IKernelPowerContract</code> | <code>Inu.Kernel.Acpi</code> |</p>
+<p>| SMP | <code>IKernelSmpContract</code> | <code>Inu.Kernel.Smp</code> |</p>
+<p>Every implementation reports <code>KernelSubsystemStatus</code> including the subsystem ID, lifecycle state, contract major/minor version and capability bits. Consumers use <code>IsCompatible</code> to require an exact major version and a minimum minor version. Breaking contract changes therefore require a new contract major version; additive changes can advance the minor version.</p>
+<p>The machine-readable mapping is <code>Inu.SubsystemContracts.json</code> and the SDK manifest advertises the subsystem-contract version independently of the SDK release/API/ABI versions.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

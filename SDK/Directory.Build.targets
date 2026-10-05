@@ -1,0 +1,5 @@
+<Project>
+  <Target Name="RejectPublicVoidMethods" AfterTargets="CoreCompile" Condition="'$(InuSkipPublicApiValidation)' != 'true'">
+    <Message Importance="Low" Text="Inu public API validation is performed by the independent Inu policy test programs." />
+  </Target>
+</Project>

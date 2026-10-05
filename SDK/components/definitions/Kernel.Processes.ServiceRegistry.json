@@ -1,0 +1,41 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Processes.ServiceRegistry",
+  "displayName": "Process service registry",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "Stable process facade dispatches optional lifecycle, address-space, foreground-control and signalling responsibilities through these registries."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "process.lifecycle-service-registry",
+      "process.address-space-service-registry",
+      "process.foreground-service-registry",
+      "process.signal-service-registry"
+    ],
+    "requires": [
+      "process.records"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Processes.RecordStore"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Processes/Inu.Kernel.Processes.csproj",
+      "sources": [
+        "src/Inu.Kernel.Processes/KernelProcessServices.cs",
+        "src/Inu.Kernel.Processes/KernelProcesses.LifecycleFacade.cs",
+        "src/Inu.Kernel.Processes/KernelProcesses.ForegroundFacade.cs",
+        "src/Inu.Kernel.Processes/KernelProcesses.SignalFacade.cs"
+      ]
+    }
+  }
+}

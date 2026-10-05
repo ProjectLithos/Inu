@@ -1,0 +1,38 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Interrupts.PciMessageSignaledRouter",
+  "displayName": "PCI MSI/MSI-X route policy",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Owns PCI MSI-X/MSI/INTx fallback policy behind KernelPciInterruptRouterServices; the broker reaches it only through the provider contract and can operate without PCI message-signaled delivery."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "interrupts.pci-message-routing"
+    ],
+    "requires": [
+      "pci.msi",
+      "pci.msix",
+      "interrupts.affinity-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Interrupts.BrokerCore"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.InterruptBroker/Inu.Kernel.InterruptBroker.csproj",
+      "sources": [
+        "src/Inu.Kernel.InterruptBroker/KernelInterruptBroker.PciDelivery.cs",
+        "src/Inu.Kernel.InterruptBroker/KernelInterruptBrokerMath.cs"
+      ]
+    }
+  }
+}

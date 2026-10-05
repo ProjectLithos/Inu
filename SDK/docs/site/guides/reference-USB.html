@@ -1,0 +1,16 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inu USB subsystem · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Inu USB subsystem</h1>
+<p>Inu treats USB as a bus and class-driver stack rather than as a collection of unrelated device drivers.</p>
+<h2>Assemblies</h2>
+<ul>
+<li><code>Inu.Bus.Usb</code> owns descriptor parsing, addresses, devices, interfaces, endpoint metadata, host-controller routing and enumeration.</li>
+<li><code>Inu.Usb.Xhci</code> is the primary host-controller implementation. It discovers PCI class <code>0C/03/30</code>, maps BAR0, resets and starts the controller, provisions DCBAA/scratchpads, command/event rings, device contexts and endpoint transfer rings, and provides synchronous control/bulk/interrupt transfers.</li>
+<li><code>Inu.Usb.Hub</code> handles hub descriptors, port power/status/reset and downstream topology enumeration.</li>
+<li><code>Inu.Usb.Hid</code> handles boot-protocol HID keyboards and mice. Keyboard events are consumed by the same kernel console input path as PS/2 input.</li>
+<li><code>Inu.Usb.MassStorage</code> implements USB Bulk-Only Transport with SCSI READ CAPACITY, READ(10), WRITE(10), and SYNCHRONIZE CACHE and registers removable disks with <code>KernelStorage</code>.</li>
+</ul>
+<h2>Host-controller policy</h2>
+<p>xHCI is the preferred USB host-controller architecture. Inu does not spend comparable implementation effort on UHCI, OHCI or EHCI; those can later be added as alternate implementations of the <code>UsbHostCallbacks</code> contract without changing USB class drivers.</p>
+<h2>Topology</h2>
+<p>The USB bus passes parent-address and downstream-port information to the host controller before enumeration. This allows xHCI to build route strings and transaction-translator information for devices behind hubs while keeping HID, storage and hub drivers independent of xHCI details.</p>
+<h2>Execution model</h2>
+<p>The current xHCI implementation uses synchronous ring submission and event-ring polling for early-kernel reliability. The public USB bus boundary is independent of interrupt delivery, so xHCI event processing can later move to the existing interrupt broker without changing class-driver APIs.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

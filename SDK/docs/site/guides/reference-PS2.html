@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PS/2 input · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>PS/2 input</h1>
+<p>Inu 0.25.0 provides an i8042 controller service, PS/2 Set-1 keyboard decoding, standard three-byte PS/2 mouse decoding, and runtime keyboard layout selection.</p>
+<p>The installed keyboard layouts are <code>English_UK</code> and <code>English_USA</code>. These are real translation tables, including letters with Shift/Caps Lock, number-row symbols, punctuation, keypad characters, UK <code>£</code>, UK <code>#/~</code>, the ISO UK <code>\/|</code> key, and UK AltGr+4 <code>€</code>.</p>
+<p>The kernel owns ports <code>0x60</code> and <code>0x64</code>. User processes select a layout only through Inu Get/Set service 32.</p>
+<p>Userland command syntax:</p>
+<pre><code>
+keyboard get
+keyboard set English_UK
+keyboard set English_USA
+keyboard list
+</code></pre>
+<p>A layout change takes effect immediately for subsequent decoded keyboard events.</p>
+<p>In 0.25.0 the PS/2 driver is the sole owner of i8042 reads. Decoded key events are delivered upward to the live console/input consumer; the console no longer rereads ports <code>0x60</code>/<code>0x64</code>. Printable keys are echoed by the generated kernel, Up/Down scroll, 1/2/3 select framebuffer font presets, and Ctrl+1/2/3 select single/double/triple framebuffer buffering.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

@@ -1,0 +1,20 @@
+NAME
+    cd - Change the userland shell current directory. Relative paths, parent navigation and an immediate return to the root are supported.
+
+SYNOPSIS
+    cd <folder_name> | cd .. | cd \
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Change the userland shell current directory. Relative paths, parent navigation and an immediate return to the root are supported.
+
+EXAMPLES
+    cd INU
+    cd ..
+    cd \
+
+FILES
+    /System/Commands/CD.CMD
+    /INU/HELP/CD.MAN

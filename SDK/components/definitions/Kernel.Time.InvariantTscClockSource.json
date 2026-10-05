@@ -1,0 +1,38 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Time.InvariantTscClockSource",
+  "displayName": "Invariant TSC monotonic clock source",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Invariant-TSC state and calibration are now owned by the provider and registered through the clock-source contract. It depends on a registered HPET calibration reference but KernelTime no longer names the concrete implementation."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "time.clock-source.invariant-tsc"
+    ],
+    "requires": [
+      "platform.tsc",
+      "time.calibration-reference",
+      "time.clock-selection"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Time.ClockCore",
+    "Kernel.Time.HpetClockSource"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Time/Inu.Kernel.Time.csproj",
+      "sources": [
+        "src/Inu.Kernel.Time/KernelInvariantTscClockSource.cs"
+      ]
+    }
+  }
+}

@@ -1,0 +1,18 @@
+NAME
+    font - Inspect or change the graphics-console font preset.
+
+SYNOPSIS
+    font [1|2|3|auto]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Inspect or change the graphics-console font preset.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/FONT.CMD
+    /INU/HELP/FONT.MAN

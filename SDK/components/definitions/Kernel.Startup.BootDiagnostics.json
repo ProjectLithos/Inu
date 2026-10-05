@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Startup.BootDiagnostics",
+  "displayName": "Boot diagnostics startup",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Kernel startup policy is OS-owned. Kath can include, omit, replace or reorder this startup source component."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "kernel.startup.boot-diagnostics"
+    ],
+    "requires": [
+      "boot.framebuffer-info",
+      "boot.memory-map-buffer",
+      "boot.memory-descriptor-layout"
+    ]
+  },
+  "dependencies": [
+    "Boot.FramebufferInfo",
+    "Boot.MemoryMapBuffer",
+    "Boot.MemoryDescriptorLayout"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": null,
+      "sources": [
+        "templates/InuKernel/Boot/BootDiagnosticsStartup.cs"
+      ]
+    }
+  }
+}

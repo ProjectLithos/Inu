@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Time.RtcCmosWallClockSource",
+  "displayName": "RTC/CMOS wall-clock source",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Owns PC-compatible RTC/CMOS probing and calendar reads and registers only through the wall-clock source contract; the clock core no longer names or initializes the concrete RTC implementation."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "time.wall-clock-source.rtc-cmos"
+    ],
+    "requires": [
+      "acpi.fadt",
+      "platform.io-port",
+      "time.wall-clock-selection"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Time.ClockCore"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Time/Inu.Kernel.Time.csproj",
+      "sources": [
+        "src/Inu.Kernel.Time/KernelRtcCmos.cs",
+        "src/Inu.Kernel.Time/KernelRtcMath.cs",
+        "src/Inu.Kernel.Time/KernelWallClockSourceServices.cs"
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "source": "Linux kernel",
+  "repository": "https://github.com/torvalds/linux",
+  "commit": "a13307e97d5c54b65720bb71fa379960ded1e51a",
+  "license": "GPL-2.0",
+  "generatedFormat": "PSF2",
+  "glyphCount": 256,
+  "fonts": [
+    { "id": "linux-vga-8x8", "sourceFile": "font_8x8.c", "width": 8, "height": 8, "gitBlob": "e5b697fc967500fc9532591ae77329f191d4028d", "psfFile": "linux-vga-8x8.psf" },
+    { "id": "linux-vga-8x16", "sourceFile": "font_8x16.c", "width": 8, "height": 16, "gitBlob": "523e95c75569eee09d133adf1e52c6b08a18fab3", "psfFile": "linux-vga-8x16.psf" },
+    { "id": "linux-vga-6x11", "sourceFile": "font_6x11.c", "width": 6, "height": 11, "gitBlob": "671487ccc1724d9b73f969c5cb8ee6d39f1264f5", "psfFile": "linux-vga-6x11.psf" },
+    { "id": "linux-sun-8x16", "sourceFile": "font_sun8x16.c", "width": 8, "height": 16, "gitBlob": "2b7b2d8e548ac100a112ec6c6a62ca6311112d89", "psfFile": "linux-sun-8x16.psf" },
+    { "id": "linux-sun-12x22", "sourceFile": "font_sun12x22.c", "width": 12, "height": 22, "gitBlob": "2afbc144bea81b8be8acafe2679a47bd017af4b5", "psfFile": "linux-sun-12x22.psf" }
+  ]
+}

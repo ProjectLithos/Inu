@@ -1,0 +1,19 @@
+NAME
+    tree - Display a text tree of all subdirectories below the current directory or an optional path. The traversal is bounded to 32 levels.
+
+SYNOPSIS
+    tree [path]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Display a text tree of all subdirectories below the current directory or an optional path. The traversal is bounded to 32 levels.
+
+EXAMPLES
+    tree
+    tree \INU
+
+FILES
+    /System/Commands/TREE.CMD
+    /INU/HELP/TREE.MAN

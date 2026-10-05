@@ -1,0 +1,35 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Usb.BusContract",
+  "displayName": "USB bus enumeration contract",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "Shared contract surface used by USB bus and selectable enumerators; not an end-user feature by itself."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "usb.host-controller",
+      "usb.device-registry"
+    ],
+    "requires": []
+  },
+  "dependencies": [
+    "Kernel.Usb.Bus"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Bus.Usb/Inu.Bus.Usb.csproj",
+      "sources": [
+        "src/Inu.Bus.Usb/KernelUsbEnumerationBusContract.cs",
+        "src/Inu.Bus.Usb/KernelUsbEnumerationServices.cs"
+      ]
+    }
+  }
+}

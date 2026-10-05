@@ -1,0 +1,38 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Pci.EcamConfiguration",
+  "displayName": "PCI Express ECAM configuration transport",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Owns ACPI MCFG lookup, ECAM function mapping and transient configuration-window state and registers only through the PCI configuration registry; the PCI core remains valid when this transport is omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "pci.configuration.ecam"
+    ],
+    "requires": [
+      "pci.configuration-registry",
+      "acpi.mcfg",
+      "memory.virtual.mmio"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Pci.ConfigurationRegistry",
+    "Kernel.Acpi.McfgDiscovery"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Pci/Inu.Kernel.Pci.csproj",
+      "sources": [
+        "src/Inu.Kernel.Pci/KernelPciEcamConfigurationProvider.cs"
+      ]
+    }
+  }
+}

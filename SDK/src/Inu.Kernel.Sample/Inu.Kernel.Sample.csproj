@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Inu.Kernel.Sample</RootNamespace>
+    <AssemblyName>Inu.Kernel.Sample</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Architecture.X64\Inu.Architecture.X64.csproj" />
+    <ProjectReference Include="..\Inu.Architecture.Contracts\Inu.Architecture.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Architecture.X64.Descriptors\Inu.Architecture.X64.Descriptors.csproj" />
+    <ProjectReference Include="..\Inu.Architecture.X64.Interrupts\Inu.Architecture.X64.Interrupts.csproj" />
+    <ProjectReference Include="..\Inu.InterruptControllers.Contracts\Inu.InterruptControllers.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.InterruptControllers.X64\Inu.InterruptControllers.X64.csproj" />
+    <ProjectReference Include="..\Inu.Interrupts.Contracts\Inu.Interrupts.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Boot.Contracts\Inu.Boot.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Boot.Memory\Inu.Boot.Memory.csproj" />
+    <ProjectReference Include="..\Inu.Memory.Virtual.Contracts\Inu.Memory.Virtual.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Memory.Virtual.X64\Inu.Memory.Virtual.X64.csproj" />
+    <ProjectReference Include="..\Inu.Memory.AddressSpace.Contracts\Inu.Memory.AddressSpace.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Memory.AddressSpace.X64\Inu.Memory.AddressSpace.X64.csproj" />
+    <ProjectReference Include="..\Inu.Memory.Heap.Contracts\Inu.Memory.Heap.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Memory.Heap\Inu.Memory.Heap.csproj" />
+    <ProjectReference Include="..\Inu.Console.Serial\Inu.Console.Serial.csproj" />
+    <ProjectReference Include="..\Inu.Console.Framebuffer\Inu.Console.Framebuffer.csproj" />
+    <ProjectReference Include="..\Inu.Core\Inu.Core.csproj" />
+  </ItemGroup>
+</Project>

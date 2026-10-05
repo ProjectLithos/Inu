@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inu Kernel Address-Space Design · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Inu Kernel Address-Space Design</h1>
+<p>Inu 0.3.0 defines the permanent virtual-address policy that later heap, stack, MMIO, process, and user/kernel-separation work will consume.</p>
+<h2>Standard x64 layout</h2>
+<p>The standard four-level x64 policy reserves the low canonical half for user mode and divides selected higher-half ranges by purpose. Reservations are policy boundaries; 0.3.0 does not eagerly populate every byte with page-table mappings.</p>
+<p>| Purpose | Base | Length | Notes |</p>
+<p>| --- | ---: | ---: | --- |</p>
+<p>| Low-address guard | <code>0x0000000000000000</code> | 64 KiB | Intentionally outside the user region so null/low-pointer faults remain detectable. |</p>
+<p>| User | <code>0x0000000000010000</code> | to <code>0x0000800000000000</code> | Low canonical half available to future process address spaces. |</p>
+<p>| Kernel image | <code>0xFFFF800000000000</code> | 4 GiB | Target higher-half location for kernel image/static mappings. |</p>
+<p>| Kernel heap | <code>0xFFFF810000000000</code> | 1 TiB | Reserved for roadmap item 11; no heap allocator is introduced here. |</p>
+<p>| Kernel stacks | <code>0xFFFF820000000000</code> | 1 TiB | Stack arena with room for per-stack guard pages. |</p>
+<p>| Direct physical map | <code>0xFFFF900000000000</code> | 64 TiB | Stable virtual window for physical memory; mapping population follows the address-space activation work. |</p>
+<p>| MMIO | <code>0xFFFFD00000000000</code> | 16 TiB | Device mappings are kept out of ordinary RAM/direct-map allocation policy. |</p>
+<p>| Page-table window | <code>0xFFFFFF0000000000</code> | 512 GiB | Dedicated page-table access reservation, avoiding dependence on permanent identity mapping. |</p>
+<p>Unassigned gaps remain deliberately reserved for future kernel facilities and layout evolution.</p>
+<h2>Contracts</h2>
+<p><code>Inu.Memory.AddressSpace.Contracts</code> defines <code>KernelAddressSpaceRegion</code>, <code>KernelAddressSpaceLayout</code>, region roles, overlap/range validation, and <code>IKernelAddressSpacePolicy</code>. An SDK consumer can therefore replace the standard layout rather than inheriting Inu&#x27;s choices.</p>
+<p><code>Inu.Memory.AddressSpace.X64</code> supplies <code>X64KernelAddressSpace</code>, the standard constants, x64 canonical-half validation, and checked direct-map physical/virtual transforms.</p>
+<h2>Freestanding bootstrap</h2>
+<p>Generated x64 kernels include <code>Inu.Kernel.AddressSpace</code>. After physical memory and the VMM are initialized, the template calls:</p>
+<pre><code>
+if (!KernelAddressSpace.Initialize()) return false;
+</code></pre>
+<p>This validates the compiled standard layout and, as of 0.4.1, activates the direct physical map over the PMM-managed ranges captured from the final UEFI memory map before the policy reports success. It does not move the current kernel image or eagerly populate the MMIO/page-table windows. The heap is still initialized separately after this direct-map bootstrap completes.</p>
+<h2>Why reservations precede the heap</h2>
+<p>The heap must know which virtual range it owns before it asks the VMM and PMM for backing pages. Defining the layout first prevents heap growth from colliding with stacks, MMIO, page-table access, the direct map, or the future user/kernel boundary.</p>
+<h2>Guard pages</h2>
+<p>0.3.0 reserves a large kernel-stack arena but does not choose a scheduler stack size. The later thread/scheduler layer can carve individual stacks from this arena and leave unmapped pages between them. A guard page is therefore a layout rule, not a separate allocator in this release.</p>
+<h2>Direct-map formula</h2>
+<p>For the standard layout, a physical byte address <code>p</code> below 64 TiB can be represented by:</p>
+<pre><code>
+virtual = 0xFFFF900000000000 + p
+physical = virtual - 0xFFFF900000000000
+</code></pre>
+<p>The checked APIs reject addresses outside the configured window.</p>
+<h2>Boundary with item 9</h2>
+<p>The 0.2.x VMM supplied mapping mechanics while retaining the inherited UEFI address space. 0.3.x supplied the destination policy. Inu 0.4.1 performs the first activation step by calculating and establishing the PMM-backed direct map before the heap requests high-half mappings; later releases can move the kernel image or replace the root without changing the layout contract.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

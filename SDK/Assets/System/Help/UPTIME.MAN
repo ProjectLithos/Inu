@@ -1,0 +1,18 @@
+NAME
+    uptime - Show monotonic system uptime.
+
+SYNOPSIS
+    uptime
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show monotonic system uptime.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/UPTIME.CMD
+    /INU/HELP/UPTIME.MAN

@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://inu.dev/schemas/crash-dump-v1.json",
+  "title": "Inu Crash Dump v1",
+  "type": "object",
+  "required": [
+    "magic",
+    "format",
+    "formatVersion",
+    "architecture",
+    "createdUtc",
+    "producer",
+    "sections"
+  ],
+  "properties": {
+    "magic": {
+      "const": "NOCD"
+    },
+    "format": {
+      "const": "Inu Crash Dump"
+    },
+    "formatVersion": {
+      "type": "object",
+      "required": [
+        "major",
+        "minor"
+      ],
+      "properties": {
+        "major": {
+          "const": 1
+        },
+        "minor": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "architecture": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdUtc": {
+      "type": "string",
+      "minLength": 1
+    },
+    "producer": {
+      "type": "object",
+      "required": [
+        "product",
+        "version"
+      ],
+      "properties": {
+        "product": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "project": {
+      "type": "object"
+    },
+    "sections": {
+      "type": "object",
+      "required": [
+        "cpuState",
+        "registers",
+        "stack",
+        "pageTables",
+        "processes",
+        "modules",
+        "heap",
+        "memoryRanges",
+        "panic",
+        "drivers",
+        "telemetry"
+      ],
+      "properties": {
+        "cpuState": {
+          "$ref": "#/$defs/section"
+        },
+        "registers": {
+          "$ref": "#/$defs/section"
+        },
+        "stack": {
+          "$ref": "#/$defs/section"
+        },
+        "pageTables": {
+          "$ref": "#/$defs/section"
+        },
+        "processes": {
+          "$ref": "#/$defs/section"
+        },
+        "modules": {
+          "$ref": "#/$defs/section"
+        },
+        "heap": {
+          "$ref": "#/$defs/section"
+        },
+        "memoryRanges": {
+          "$ref": "#/$defs/section"
+        },
+        "panic": {
+          "$ref": "#/$defs/section"
+        },
+        "drivers": {
+          "$ref": "#/$defs/section"
+        },
+        "telemetry": {
+          "$ref": "#/$defs/section"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/section"
+      }
+    }
+  },
+  "$defs": {
+    "section": {
+      "type": "object",
+      "required": [
+        "version",
+        "available",
+        "data"
+      ],
+      "properties": {
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "data": {},
+        "note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

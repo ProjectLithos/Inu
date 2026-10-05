@@ -1,0 +1,18 @@
+NAME
+    audio - Inspect audio devices and control the audio service lifecycle.
+
+SYNOPSIS
+    audio [status|start|run|pause|resume|stop|unload]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Inspect audio devices and control the audio service lifecycle.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/AUDIO.CMD
+    /INU/HELP/AUDIO.MAN

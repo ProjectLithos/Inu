@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inu Crash Dump Format · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Inu Crash Dump Format</h1>
+<p><strong>Format name:</strong> Inu Crash Dump</p>
+<p><strong>Magic:</strong> <code>NOCD</code> (<code>0x4E4F4344</code>)</p>
+<p><strong>Current format version:</strong> <strong>1.0</strong></p>
+<p><strong>SDK ABI:</strong> <code>CrashDumpAbiVersion = &quot;1.0&quot;</code></p>
+<p><strong>IDE file extension:</strong> <code>.nodump.json</code></p>
+<p>Inu 0.10.11 makes crash dumps a public SDK format. The format is designed so newer IDE versions can continue opening older dumps and so non-IDE tools can consume the same crash information.</p>
+<h2>Compatibility contract</h2>
+<ul>
+<li>The <strong>major</strong> format version is the breaking compatibility boundary.</li>
+<li>A reader supporting major version <code>1</code> must accept any <code>1.x</code> dump whose known sections can be decoded.</li>
+<li>A <strong>minor</strong> release may add optional fields and optional section kinds; it must not reinterpret existing fields.</li>
+<li>Every section has its own independent integer <code>version</code>.</li>
+<li>Readers must ignore <strong>unknown section kinds</strong> and <strong>unknown fields</strong>.</li>
+<li>If a known section has a newer section version, a reader may use the fields it understands and must not reject the entire dump solely because optional fields were added.</li>
+<li>Required top-level fields are <code>magic</code>, <code>format</code>, <code>formatVersion</code>, <code>architecture</code>, <code>createdUtc</code>, <code>producer</code>, and <code>sections</code>.</li>
+<li>Pre-0.10.11 IDE <code>schemaVersion: 1</code> JSON dumps are a legacy input format. Kath 0.10.11 retains an adapter for them; new producers must write the formal <code>NOCD</code> format.</li>
+</ul>
+<h2>Section directory</h2>
+<p>Version 1 defines ten standard sections. Each section is represented as:</p>
+<pre><code>
+{
+  &quot;version&quot;: 1,
+  &quot;available&quot;: true,
+  &quot;data&quot;: {},
+  &quot;note&quot;: &quot;optional capture note&quot;
+}
+</code></pre>
+<p>An unavailable section remains present with <code>available: false</code>; this distinguishes “not captured” from “format does not define this data”.</p>
+<p>| ID | JSON name | v1 contents |</p>
+<p>|---:|---|---|</p>
+<p>| 1 | <code>cpuState</code> | architecture, current CPU/thread/process, RIP/RSP/RBP, flags, page-table root, execution contexts |</p>
+<p>| 2 | <code>registers</code> | named architectural register values |</p>
+<p>| 3 | <code>stack</code> | unwind frames and captured stack memory |</p>
+<p>| 4 | <code>pageTables</code> | CR3 and decoded x64 page-table walk for the fault/current address |</p>
+<p>| 5 | <code>processes</code> | process IDs with associated threads/CPUs and current-process marker |</p>
+<p>| 6 | <code>modules</code> | loaded/debug image modules, image/PDB paths, runtime relocation data |</p>
+<p>| 7 | <code>heap</code> | initialization state, committed/allocated/free/peak bytes and heap blocks |</p>
+<p>| 8 | <code>memoryRanges</code> | captured memory ranges, initially current stack and code windows |</p>
+<p>| 9 | <code>panic</code> | panic/crash reason, exception vector/name, source location, diagnostic message |</p>
+<p>| 10 | <code>drivers</code> | driver IDs, configuration/runtime state and diagnostic detail |</p>
+<h2>Top-level v1.0 JSON shape</h2>
+<pre><code>
+{
+  &quot;magic&quot;: &quot;NOCD&quot;,
+  &quot;format&quot;: &quot;Inu Crash Dump&quot;,
+  &quot;formatVersion&quot;: { &quot;major&quot;: 1, &quot;minor&quot;: 0 },
+  &quot;architecture&quot;: &quot;x86_64&quot;,
+  &quot;createdUtc&quot;: &quot;2026-08-19T00:00:00.000Z&quot;,
+  &quot;producer&quot;: { &quot;product&quot;: &quot;Kath&quot;, &quot;version&quot;: &quot;0.10.11&quot; },
+  &quot;project&quot;: { &quot;name&quot;: &quot;ExampleOS&quot;, &quot;root&quot;: &quot;C:\\InuOSes\\ExampleOS&quot; },
+  &quot;sections&quot;: {
+    &quot;cpuState&quot;: { &quot;version&quot;: 1, &quot;available&quot;: true, &quot;data&quot;: {} },
+    &quot;registers&quot;: { &quot;version&quot;: 1, &quot;available&quot;: true, &quot;data&quot;: [] },
+    &quot;stack&quot;: { &quot;version&quot;: 1, &quot;available&quot;: true, &quot;data&quot;: {} },
+    &quot;pageTables&quot;: { &quot;version&quot;: 1, &quot;available&quot;: true, &quot;data&quot;: {} },
+    &quot;processes&quot;: { &quot;version&quot;: 1, &quot;available&quot;: true, &quot;data&quot;: [] },
+    &quot;modules&quot;: { &quot;version&quot;: 1, &quot;available&quot;: true, &quot;data&quot;: [] },
+    &quot;heap&quot;: { &quot;version&quot;: 1, &quot;available&quot;: true, &quot;data&quot;: {} },
+    &quot;memoryRanges&quot;: { &quot;version&quot;: 1, &quot;available&quot;: true, &quot;data&quot;: {} },
+    &quot;panic&quot;: { &quot;version&quot;: 1, &quot;available&quot;: true, &quot;data&quot;: {} },
+    &quot;drivers&quot;: { &quot;version&quot;: 1, &quot;available&quot;: true, &quot;data&quot;: [] }
+  }
+}
+</code></pre>
+<h2>Binary SDK representation</h2>
+<p><code>Inu.Kernel.SubsystemContracts</code> exposes <code>KernelCrashDumpFormat</code>, <code>KernelCrashDumpHeader</code>, <code>KernelCrashDumpSection</code>, <code>KernelCrashSectionKind</code>, and the v1 record contracts. The same magic, major/minor rules, section IDs, and section versions apply to a future compact/binary producer. A binary reader uses the section directory offsets/lengths; the IDE JSON representation uses the named <code>sections</code> object.</p>
+<h2>Capture completeness</h2>
+<p>The format describes what a crash dump *can* carry; a particular target may not expose every live diagnostic ABI yet. Producers must keep every standard section and set <code>available: false</code> or add a <code>note</code> when the target could not provide that state. This allows the format to evolve independently from individual kernel subsystem implementations.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

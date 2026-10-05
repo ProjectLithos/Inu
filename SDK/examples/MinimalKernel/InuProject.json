@@ -1,0 +1,9 @@
+{
+  "Name": "MinimalKernel",
+  "ProjectFile": "../../src/Inu.Kernel.Bootstrap/Inu.Kernel.Bootstrap.csproj",
+  "TargetArchitecture": "x64",
+  "BootProtocol": "Uefi",
+  "KernelEntry": "KMain",
+  "RuntimePack": "Inu.RuntimePack.X64.NativeAot",
+  "OutputDirectory": "../../Artifacts/MinimalKernel"
+}

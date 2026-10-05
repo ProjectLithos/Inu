@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Interactive QEMU Console · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Interactive QEMU Console</h1>
+<p>Inu&#x27;s framebuffer console accepts decoded keyboard input from PS/2 and USB HID devices and feeds it into the freestanding <code>Inu.Kernel.CommandLine</code> service.</p>
+<p>The command line provides a 256-byte editable input buffer, printable ASCII echo, Backspace, Enter submission, case-insensitive command matching, and a <code>Inu&gt; </code> prompt. Up/Down remain scrollback controls. Ctrl+1/2/3 force framebuffer buffering modes; Alt+1/2/3 force font-size presets, leaving ordinary digits available for command arguments.</p>
+<p>Built-in control commands are available immediately after boot:</p>
+<ul>
+<li><code>help</code></li>
+<li><code>font get</code>, <code>font set 1|2|3</code>, <code>font list</code></li>
+<li><code>buffering get</code>, <code>buffering set auto|1|2|3</code>, <code>buffering list</code></li>
+<li><code>keyboard get</code>, <code>keyboard set English_UK|English_USA</code>, <code>keyboard list</code></li>
+<li><code>echo &lt;text&gt;</code></li>
+</ul>
+<p>These built-in commands are the freestanding console control surface for services that already exist in the SDK. The ELF64/PE32+ ring-3 process loader remains a separate subsystem; filesystem-backed user executables can be launched through <code>KernelProcesses</code> once a shell/process-launch command has a runtime-safe path-string ABI and executable files are present on a mounted volume.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

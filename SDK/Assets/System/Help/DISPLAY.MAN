@@ -1,0 +1,18 @@
+NAME
+    display - List displays/resolutions or test/apply a display mode.
+
+SYNOPSIS
+    display [list | set resolution <number> <true|false>]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    List displays/resolutions or test/apply a display mode.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/DISPLAY.CMD
+    /INU/HELP/DISPLAY.MAN

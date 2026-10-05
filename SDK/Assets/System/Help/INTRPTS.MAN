@@ -1,0 +1,18 @@
+NAME
+    interrupts - Read permitted interrupt-controller and dispatch information.
+
+SYNOPSIS
+    interrupts | irq | irqs [status|types|vectors|cpus]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Runs as an isolated userland command and issues Get(command.interrupts.get). The kernel returns only interrupt information permitted to the calling process. This command does not start, stop, pause or resume interrupt machinery.
+
+ALIASES
+    irq,irqs
+
+FILES
+    /System/Commands/INTRPTS.CMD
+    /INU/HELP/INTRPTS.MAN

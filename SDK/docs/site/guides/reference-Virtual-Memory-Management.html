@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inu Virtual Memory Management · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Inu Virtual Memory Management</h1>
+<p>Inu 0.2.0 introduces architecture-neutral virtual-memory contracts, x64 four-level page-table mechanics, and a freestanding bootstrap virtual-memory manager.</p>
+<h2>Scope</h2>
+<p>The virtual-memory layer is responsible for translating virtual addresses to physical pages, installing and removing mappings, changing protection, decoding translations, allocating intermediate page-table pages, and invalidating stale processor translations.</p>
+<p>0.2.0 deliberately does <strong>not</strong> impose the final kernel virtual-address layout. Kernel image placement, direct physical mapping, MMIO windows, heap placement, stack regions, guard pages, and the user/kernel split belong to the separate kernel address-space design stage.</p>
+<h2>Architecture-neutral contracts</h2>
+<p><code>Inu.Memory.Virtual.Contracts</code> defines:</p>
+<ul>
+<li><code>IVirtualMemoryManager</code></li>
+<li><code>VirtualMappingRequest</code></li>
+<li><code>VirtualAddressRange</code></li>
+<li><code>VirtualTranslation</code></li>
+<li><code>VirtualMemoryStatistics</code></li>
+<li><code>VirtualMemoryProtection</code></li>
+<li><code>VirtualPageSize</code></li>
+<li><code>VirtualMemoryStatus</code></li>
+<li><code>VirtualMemoryMethod</code></li>
+</ul>
+<p>SDK consumers can implement <code>IVirtualMemoryManager</code> themselves instead of using the supplied x64 methodology.</p>
+<h2>x64 methodology</h2>
+<p><code>Inu.Memory.Virtual.X64</code> supplies checked helpers for the four-level long-mode hierarchy:</p>
+<ul>
+<li>canonical-address validation;</li>
+<li>PML4, PDPT, page-directory, and page-table index extraction;</li>
+<li>4 KiB leaf encoding and decoding;</li>
+<li>2 MiB large-page encoding and decoding;</li>
+<li>1 GiB large-page encoding and decoding;</li>
+<li>non-leaf table-pointer encoding;</li>
+<li>present and large-page inspection.</li>
+</ul>
+<p>For a canonical virtual address <code>v</code>, the four table indices are:</p>
+<pre><code>
+PML4 = (v &gt;&gt; 39) &amp; 0x1FF
+PDPT = (v &gt;&gt; 30) &amp; 0x1FF
+PD   = (v &gt;&gt; 21) &amp; 0x1FF
+PT   = (v &gt;&gt; 12) &amp; 0x1FF
+</code></pre>
+<p>The offset is selected by the leaf size:</p>
+<pre><code>
+4 KiB: offset = v &amp; 0xFFF
+2 MiB: offset = v &amp; 0x1FFFFF
+1 GiB: offset = v &amp; 0x3FFFFFFF
+</code></pre>
+<h2>Freestanding kernel manager</h2>
+<p><code>Inu.Kernel.VirtualMemory</code> is the no-heap bootstrap implementation used by generated kernels. It:</p>
+<ol>
+<li>requires <code>KernelPhysicalMemory</code> to be initialized;</li>
+<li>reads the active x64 CR3 root;</li>
+<li>walks the inherited UEFI-created page-table hierarchy;</li>
+<li>permanently excludes every discovered page-table frame from ordinary physical allocation;</li>
+<li>allocates new intermediate table pages from <code>KernelPhysicalMemory</code> when mappings require them;</li>
+<li>supports mapping, unmapping, protection changes, and translation for 4 KiB, 2 MiB, and 1 GiB leaves;</li>
+<li>enables EFER.NXE only when CPUID reports execute-disable support and rejects NX-dependent mappings otherwise;</li>
+<li>checks CPUID before allowing 1 GiB leaf creation;</li>
+<li>invalidates affected TLB entries using <code>INVLPG</code>;</li>
+<li>reports inherited table pages, created table pages, and manager-created leaf counts.</li>
+</ol>
+<h3>Bootstrap physical-access rule</h3>
+<p>Inu 0.4.1 removes the assumption that an arbitrary PMM allocation can be dereferenced as an identity address. At VMM initialization it snapshots the PMM-managed ranges derived from the retained final UEFI memory map. While the permanent direct map is being created, each new page-table frame is selected only when the PMM reports it free <strong>and</strong> a walk of the active x64 tables proves that virtual address <code>p</code> currently translates to physical address <code>p</code>.</p>
+<p><code>KernelAddressSpace.Initialize()</code> then asks the VMM to populate the standard direct-map window over the calculated PMM-managed ranges. Large 1 GiB or 2 MiB leaves are used where alignment and processor support allow; 4 KiB leaves cover boundaries. Once this succeeds, newly allocated page-table frames are accessed through <code>DirectMapBase + physicalAddress</code> rather than by assuming permanent identity mapping. Inherited active table frames that are not part of PMM-managed RAM continue to use the identity access that was already validated during hierarchy discovery.</p>
+<h2>Protection model</h2>
+<p>The architecture-neutral and freestanding protection models cover:</p>
+<ul>
+<li>read;</li>
+<li>write;</li>
+<li>execute;</li>
+<li>user access;</li>
+<li>global translation intent;</li>
+<li>uncached/device memory;</li>
+<li>write-through caching.</li>
+</ul>
+<p>x64 execute permission is represented by clearing NX; a non-executable mapping sets NX. Parent entries are not silently widened when an inherited hierarchy would prevent a requested write, user, or execute permission. In that case the bootstrap manager reports <code>UnsupportedProtection</code> rather than weakening unrelated mappings.</p>
+<h2>Physical-memory ownership</h2>
+<p>Page-table pages must never be returned to the general physical allocator while they remain reachable from an active root. 0.2.0 therefore adds <code>KernelPhysicalMemory.TryExcludePage</code>, which permanently removes a currently-free 4 KiB page from early allocation and succeeds harmlessly when that page was already unavailable.</p>
+<p>New intermediate page tables are normal live physical allocations and remain owned for the lifetime of the bootstrap address space. Bootstrap table pages are exact PMM allocations chosen from the intersection of free memory-map-derived ranges and currently identity-reachable mappings. Empty-table reclamation remains intentionally deferred until the address-space ownership/lifetime model is defined.</p>
+<h2>Example</h2>
+<pre><code>
+if (!KernelPhysicalMemory.Initialize(boot)) return false;
+if (!KernelVirtualMemory.Initialize()) return false;
+
+KernelVirtualMemoryProtection protection =
+    KernelVirtualMemoryProtection.Read |
+    KernelVirtualMemoryProtection.Write;
+
+if (!KernelVirtualMemory.TryMap(
+        0xFFFF800000400000UL,
+        0x00400000UL,
+        KernelVirtualPageSize.Page4KiB,
+        protection))
+    return false;
+</code></pre>
+<p>The example demonstrates the mechanics only; 0.2.0 does not prescribe that virtual address as part of a final Inu kernel layout.</p>
+<h2>0.3.0 address-space policy</h2>
+<p>Roadmap item 10 is now defined by <code>docs/Kernel-Address-Space-Design.md</code>. The VMM mechanics remain separate from the selected layout so SDK consumers can replace the policy without replacing the page-table engine.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

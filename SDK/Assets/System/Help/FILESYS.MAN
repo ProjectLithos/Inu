@@ -1,0 +1,18 @@
+NAME
+    filesystem - Inspect or control the filesystem service lifecycle.
+
+SYNOPSIS
+    filesystem | fs [status|start|run|pause|resume|stop|unload]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Inspect or control the filesystem service lifecycle.
+
+ALIASES
+    fs
+
+FILES
+    /System/Commands/FILESYS.CMD
+    /INU/HELP/FILESYS.MAN

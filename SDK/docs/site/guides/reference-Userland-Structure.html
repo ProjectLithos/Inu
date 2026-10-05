@@ -1,0 +1,10 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Userland project structure · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Userland project structure</h1>
+<p>User-facing SDK functionality is organized under <code>src/Userland</code>. <code>Inu.Userland</code> is the aggregate project.</p>
+<ul>
+<li><code>Commands</code> contains canonical userland command implementations and grammar.</li>
+<li><code>Settings</code> contains user-configurable settings contracts.</li>
+<li><code>Fonts</code> contains font catalogs and font-management surface.</li>
+<li><code>Images</code> contains image-resource contracts.</li>
+<li><code>Drivers</code> contains userland-visible driver contracts; privileged device drivers remain in HAL/kernel assemblies.</li>
+</ul>
+<p>The older <code>Inu.Userland.Font</code>, <code>Inu.Userland.Buffering</code>, and <code>Inu.Userland.Keyboard</code> assemblies are retained as compatibility facades that forward to <code>Inu.Userland.Commands</code>.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

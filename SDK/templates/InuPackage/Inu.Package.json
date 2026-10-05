@@ -1,0 +1,31 @@
+{
+  "format": "inu-package-v1",
+  "schemaVersion": 1,
+  "id": "org.example.package",
+  "name": "Example Package",
+  "version": "1.0.0",
+  "type": "Application",
+  "publisher": "",
+  "architectures": ["x64"],
+  "requires": {
+    "minimumInuVersion": "0.2.3",
+    "sdkApiVersion": "1.0",
+    "abiVersion": "1.0"
+  },
+  "dependencies": [],
+  "capabilities": [],
+  "files": [],
+  "install": {
+    "entry": "payload/Example.exe",
+    "serviceName": "",
+    "serviceStartup": "manual",
+    "libraryKind": ""
+  },
+  "signing": {
+    "state": "unsigned",
+    "algorithm": "",
+    "signerId": "",
+    "manifestDigest": "",
+    "value": ""
+  }
+}

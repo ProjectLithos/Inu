@@ -1,0 +1,18 @@
+NAME
+    scheduler - Read permitted scheduler information.
+
+SYNOPSIS
+    scheduler | threads [status]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Runs as an isolated userland command and issues Get(command.scheduler.get). It reports scheduler information allowed to the calling process; it is not a scheduler administration interface.
+
+ALIASES
+    threads
+
+FILES
+    /System/Commands/SCHED.CMD
+    /INU/HELP/SCHED.MAN

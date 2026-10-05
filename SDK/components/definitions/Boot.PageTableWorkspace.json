@@ -1,0 +1,36 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Boot.PageTableWorkspace",
+  "displayName": "Bootstrap page-table workspace",
+  "area": "Boot",
+  "selection": {
+    "status": "selectable",
+    "reason": "Boot hand-off capabilities are independent source components so the OS author can include only the information required by the selected architecture."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "boot.page-table-workspace"
+    ],
+    "requires": [
+      "boot.context"
+    ]
+  },
+  "dependencies": [
+    "Boot.Context.Core"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Console/Inu.Kernel.Console.csproj",
+      "sources": [
+        "src/Inu.Kernel.Console/IBootstrapPageTableWorkspaceContext.cs",
+        "src/Inu.Kernel.Console/BootContext.PageTableWorkspace.cs"
+      ]
+    }
+  }
+}

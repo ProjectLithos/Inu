@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Inu.InterruptControllers.Contracts</AssemblyName>
+    <RootNamespace>Inu.InterruptControllers</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Interrupts.Contracts\Inu.Interrupts.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Primitives\Inu.Primitives.csproj" />
+  </ItemGroup>
+</Project>

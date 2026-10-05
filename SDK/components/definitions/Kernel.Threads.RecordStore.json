@@ -1,0 +1,34 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Threads.RecordStore",
+  "displayName": "Kernel thread record store",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "0.2.31: kernel-thread record layout, IDs and active-thread accounting have a dedicated ownership source, but scheduler internals still consume that storage directly."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "thread.records"
+    ],
+    "requires": [
+      "kernel.heap"
+    ]
+  },
+  "dependencies": [],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Scheduler/Inu.Kernel.Scheduler.csproj",
+      "sources": [
+        "src/Inu.Kernel.Scheduler/KernelScheduler.ThreadStore.cs",
+        "src/Inu.Kernel.Scheduler/KernelScheduler.Storage.cs"
+      ]
+    }
+  }
+}

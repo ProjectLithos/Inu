@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inu executable/application format · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Inu executable/application format</h1>
+<p>Inu 0.19.0 defines a stable application package contract while keeping end-user filenames familiar.</p>
+<h2>Default visible extensions</h2>
+<ul>
+<li><strong><code>.exe</code></strong> — packaged Inu application. This is a Inu package container identified by its <code>NOAP</code> magic; the extension alone never makes data executable.</li>
+<li><strong><code>.nexe</code></strong> — architecture-specific native executable image stored inside a package. x64 uses the existing validated PE32+/ELF64 image loader; PE32+ is the preferred NativeAOT/LLD payload.</li>
+<li><strong><code>.dll</code></strong> — dynamic/shared userland library.</li>
+<li><strong><code>.lib</code></strong> — static/import development library.</li>
+</ul>
+<p>An OS may override file associations for presentation, but the package ABI, magic and loader validation are unchanged.</p>
+<h2>Package header</h2>
+<p>The canonical binary package starts with a 192-byte little-endian header (<code>NOAP</code>, format 1.0) containing architecture, syscall ABI, ABI major/minor, flags, package size, native-image range, entry-point RVA, dependency/capability/resource tables, a UTF-8 string table, resource-data range, identity, name, version, publisher and minimum-SDK references. All ranges are bounds checked before use.</p>
+<h2>Metadata</h2>
+<p>A package formally identifies: application ID, display name, application version, publisher, architecture (<code>x86_64</code>, <code>arm64</code>, <code>riscv64</code>), Inu ABI major/minor, syscall personality (<code>inu</code>, <code>linux</code>, <code>windows-nt</code>), native image, semantic entry-point RVA, dependencies, required capabilities and resources.</p>
+<p>The application version is independent of the Inu ABI version. Major ABI mismatch is rejected; a package requiring a newer minor ABI is rejected.</p>
+<h2>Dependencies</h2>
+<p>Dependencies are explicit ID + version-constraint records. Runtime loaders/package managers must resolve declared dependencies rather than performing unrestricted directory searches. This is the basis for deterministic loading and prevents path-preloading from becoming part of the Inu ABI.</p>
+<h2>Capabilities</h2>
+<p>The package declares capabilities it <strong>may request</strong>. Declaration is not authority. Inu security policy decides which capability handles are actually granted to the process. This directly composes with the 0.18.0 process-scoped capability/handle model.</p>
+<h2>Resources</h2>
+<p>Resources are immutable package records with a name, offset, length and flags. Package resources are read-only by default; mutable application data belongs in the user&#x27;s application-data area rather than in the installed <code>.exe</code>.</p>
+<h2>Entry point and security</h2>
+<p>The package stores an entry-point RVA, never a fixed virtual address. The process loader unwraps the <code>.nexe</code>, validates the native executable, verifies the package RVA against the image entry point when supplied, then creates the private user address space. Existing W^X, NX, guard-page, privilege-ring, syscall and user-pointer validation remain authoritative.</p>
+<h2>Packaging tool</h2>
+<p><code>Inu.ApplicationPacker</code> consumes <code>Inu.Application.json</code> and emits the canonical <code>.exe</code> binary package. The manifest supports identity/version/publisher, architecture, ABI, syscall ABI, entry-point RVA, native image, dependency records, requested capability records and resource files.</p>
+<p>Example:</p>
+<pre><code>
+{
+  &quot;id&quot;: &quot;com.example.editor&quot;,
+  &quot;name&quot;: &quot;Editor&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;publisher&quot;: &quot;Example&quot;,
+  &quot;architecture&quot;: &quot;x86_64&quot;,
+  &quot;syscallAbi&quot;: &quot;inu&quot;,
+  &quot;abiMajor&quot;: 2,
+  &quot;abiMinor&quot;: 0,
+  &quot;entryPointRva&quot;: 4096,
+  &quot;nativeImage&quot;: &quot;bin/x64/Editor.nexe&quot;,
+  &quot;dependencies&quot;: [{ &quot;id&quot;: &quot;Inu.UI&quot;, &quot;version&quot;: &quot;1.x&quot; }],
+  &quot;requiredCapabilities&quot;: [{ &quot;name&quot;: &quot;graphics.window&quot;, &quot;rights&quot;: 65 }],
+  &quot;resources&quot;: [{ &quot;name&quot;: &quot;icon&quot;, &quot;path&quot;: &quot;resources/icon.png&quot;, &quot;flags&quot;: 1 }]
+}
+</code></pre><p><strong>Syscall ABI versions:</strong> Native Inu syscall ABI 2.0 uses structured Get/Set/Event messages. Linux and Windows-NT compatibility personalities remain at 1.0. The loader rejects package/personality version mismatches.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

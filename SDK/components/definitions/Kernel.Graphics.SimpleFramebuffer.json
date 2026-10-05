@@ -1,0 +1,35 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Graphics.SimpleFramebuffer",
+  "displayName": "Simple linear framebuffer provider",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Registers an already mapped linear framebuffer through the generic display registry and has no provider-specific state in KernelGraphics."
+  },
+  "lifecycle": {
+    "ownership": "driver",
+    "startup": "on-demand"
+  },
+  "contracts": {
+    "provides": [
+      "graphics.framebuffer.simple"
+    ],
+    "requires": [
+      "graphics.display-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Graphics.DisplayRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Graphics/Inu.Kernel.Graphics.csproj",
+      "sources": [
+        "src/Inu.Kernel.Graphics/SimpleFramebuffer.cs"
+      ]
+    }
+  }
+}

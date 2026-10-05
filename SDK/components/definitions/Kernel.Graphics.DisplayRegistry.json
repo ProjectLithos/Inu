@@ -1,0 +1,40 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Graphics.DisplayRegistry",
+  "displayName": "Graphics display registry",
+  "area": "Kernel",
+  "selection": {
+    "status": "required",
+    "reason": "Owns generic display handles, framebuffer metadata, primary-display selection and driver-neutral presentation callbacks. Graphics providers register through this contract."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "graphics.display-registry"
+    ],
+    "requires": [
+      "memory.heap",
+      "driver.device-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Graphics"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Graphics/Inu.Kernel.Graphics.csproj",
+      "sources": [
+        "src/Inu.Kernel.Graphics/KernelGraphics.cs",
+        "src/Inu.Kernel.Graphics/KernelGraphics.Registry.cs",
+        "src/Inu.Kernel.Graphics/KernelGraphics.ModesAndPresentation.cs",
+        "src/Inu.Kernel.Graphics/KernelGraphics.Storage.cs",
+        "src/Inu.Kernel.Graphics/GraphicsContracts.cs"
+      ]
+    }
+  }
+}

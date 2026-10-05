@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://inu.dev/schemas/driver-package-3.json",
+  "title": "Inu Driver Package Manifest v3",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "id",
+    "name",
+    "kind",
+    "version",
+    "architecture",
+    "minimumInuVersion",
+    "sdkApiVersion",
+    "driverAbiVersion",
+    "ids",
+    "dependencies",
+    "capabilities",
+    "permissions",
+    "signing"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 3
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)+$",
+      "minLength": 3,
+      "maxLength": 160
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "kind": {
+      "enum": [
+        "pci",
+        "usb",
+        "virtio",
+        "platform"
+      ]
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+    },
+    "architecture": {
+      "enum": [
+        "any",
+        "x64",
+        "arm64"
+      ]
+    },
+    "minimumInuVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+    },
+    "sdkApiVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "driverAbiVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      },
+      "uniqueItems": true
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 192
+      },
+      "uniqueItems": true
+    },
+    "capabilities": {
+      "$ref": "#/$defs/capabilities"
+    },
+    "permissions": {
+      "$ref": "#/$defs/capabilities"
+    },
+    "signing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "unsigned",
+            "development",
+            "signed",
+            "trusted",
+            "revoked"
+          ]
+        },
+        "algorithm": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "signerId": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "digest": {
+          "type": "string",
+          "maxLength": 256
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "path"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "kernel-module",
+            "userland-service"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 260,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+        }
+      }
+    },
+    "binding": {
+      "enum": [
+        "automatic",
+        "manual",
+        "disabled"
+      ]
+    },
+    "install": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root"
+      ],
+      "properties": {
+        "root": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 260,
+          "pattern": "^/(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "mmio",
+          "pio",
+          "interrupts",
+          "msi",
+          "msix",
+          "dma",
+          "pci-config",
+          "physical-memory",
+          "timers",
+          "networking",
+          "filesystem"
+        ]
+      }
+    }
+  }
+}

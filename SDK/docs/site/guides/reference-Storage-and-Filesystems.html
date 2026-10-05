@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Storage and filesystems · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Storage and filesystems</h1>
+<p>Inu separates <strong>block storage</strong>, <strong>VFS</strong>, and <strong>filesystem implementations</strong>.</p>
+<p><code>Inu.Kernel.Storage</code> owns generic block-device registration, MBR/GPT volume discovery, namespaces, mount points and file-handle dispatch. It contains no FAT, ext, NTFS or other filesystem-format implementation.</p>
+<h2>End-user selection</h2>
+<p>The base kernel initializes:</p>
+<pre><code>
+if (!KernelStorage.Initialize()) return false;
+</code></pre>
+<p>and installs no filesystem automatically.</p>
+<p>A user selects a filesystem by adding a kernel-side filesystem project below <code>KernelProjects</code> (or deliberately linking it elsewhere) and explicitly installing that provider.</p>
+<p>For FatFs:</p>
+<pre><code>
+using Inu.Filesystem.FatFs;
+
+if (!KernelStorage.Initialize()) return false;
+if (!FatFs.Install()) return false;
+</code></pre>
+<p>The Visual Studio SDK supplies <strong>Inu Filesystem - FatFs</strong> as an independent project template.</p>
+<h2>FatFs 0.35.21 profile</h2>
+<p>The initial C#/.NET-compatible port exposes FAT12, FAT16 and FAT32 through generic Inu VFS/block-device callbacks. It supports 8.3 path traversal, file reads, VFS seek, flush and safe in-place writes inside an existing file&#x27;s allocated cluster chain.</p>
+<p>The current VFS does not yet define create/delete/rename/truncate operations. Therefore those capabilities, long file names and exFAT are not advertised in this first port. They remain optional filesystem-module work rather than hidden base-kernel functionality.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

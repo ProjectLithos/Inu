@@ -1,0 +1,18 @@
+NAME
+    time - Inspect or control the time service lifecycle.
+
+SYNOPSIS
+    time [status|start|run|pause|resume|stop|unload]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Inspect or control the time service lifecycle.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/TIME.CMD
+    /INU/HELP/TIME.MAN

@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Acpi.FadtPlatform",
+  "displayName": "ACPI FADT platform provider",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "FADT parsing owns its state and registers through KernelAcpiFadtServices; consumers depend only on the acpi.fadt contract and the ACPI core remains valid when the provider is omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "acpi.fadt"
+    ],
+    "requires": [
+      "acpi.table-registry",
+      "acpi.register-access"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Acpi.TableRegistry",
+    "Kernel.Acpi.RegisterAccess"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Acpi/Inu.Kernel.Acpi.csproj",
+      "sources": [
+        "src/Inu.Kernel.Acpi/KernelAcpiFadtProvider.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpiFadtServices.cs",
+        "src/Inu.Kernel.Acpi/AcpiFadtInfo.cs"
+      ]
+    }
+  }
+}

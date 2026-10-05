@@ -1,0 +1,18 @@
+NAME
+    type - Display the textual contents of a file in the console. Binary control bytes are made safe for console output.
+
+SYNOPSIS
+    type <file_name>
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Display the textual contents of a file in the console. Binary control bytes are made safe for console output.
+
+EXAMPLES
+    type README.TXT
+
+FILES
+    /System/Commands/TYPE.CMD
+    /INU/HELP/TYPE.MAN

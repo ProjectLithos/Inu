@@ -1,0 +1,31 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.Ipv4TransportRegistry",
+  "displayName": "IPv4 control/transport protocol registry",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "Provides source-neutral dispatch between the IPv4 layer and independently selected ICMPv4, UDP and TCP-observation components."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.ipv4-transport-registry"
+    ],
+    "requires": []
+  },
+  "dependencies": [],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelIpv4TransportServices.cs"
+      ]
+    }
+  }
+}

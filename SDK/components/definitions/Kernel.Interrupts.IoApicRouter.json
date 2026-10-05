@@ -1,0 +1,38 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Interrupts.IoApicRouter",
+  "displayName": "I/O APIC interrupt router",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Owns I/O APIC discovery, MMIO mapping and GSI routing behind KernelIoApicRouterServices; the interrupt broker names only the provider contract and remains valid when this provider is omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "interrupts.gsi-routing.io-apic"
+    ],
+    "requires": [
+      "acpi.madt",
+      "platform.mmio",
+      "interrupts.affinity-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Interrupts.BrokerCore",
+    "Kernel.Acpi.MadtTopology"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.InterruptBroker/Inu.Kernel.InterruptBroker.csproj",
+      "sources": [
+        "src/Inu.Kernel.InterruptBroker/KernelInterruptBroker.IoApic.cs"
+      ]
+    }
+  }
+}

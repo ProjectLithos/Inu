@@ -1,0 +1,41 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Scheduler.LoadAwarePlacementPolicy",
+  "displayName": "Load-aware CPU placement policy",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "0.2.33: initial placement, wake rebalance and remote work stealing consume only runnable-thread and CPU-runqueue contracts; scheduler core no longer contains the concrete placement algorithm."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "scheduler.thread-placement"
+    ],
+    "requires": [
+      "scheduler.thread-placement-registry",
+      "thread.runnable-set",
+      "scheduler.cpu-runnable-sets",
+      "time.monotonic"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Scheduler.PlacementRegistry",
+    "Kernel.Scheduler.CpuRunQueues",
+    "Kernel.Scheduler.PolicyRegistry",
+    "Kernel.Time.ClockCore"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Scheduler/Inu.Kernel.Scheduler.csproj",
+      "sources": [
+        "src/Inu.Kernel.Scheduler/KernelScheduler.LoadAwarePlacementPolicy.cs"
+      ]
+    }
+  }
+}

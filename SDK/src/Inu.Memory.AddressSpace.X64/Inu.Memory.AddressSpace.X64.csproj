@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><RootNamespace>Inu.Memory.AddressSpace.X64</RootNamespace><AssemblyName>Inu.Memory.AddressSpace.X64</AssemblyName></PropertyGroup>
+  <ItemGroup><ProjectReference Include="..\Inu.Core\Inu.Core.csproj" /><ProjectReference Include="..\Inu.Memory.AddressSpace.Contracts\Inu.Memory.AddressSpace.Contracts.csproj" /><ProjectReference Include="..\Inu.Memory.Virtual.X64\Inu.Memory.Virtual.X64.csproj" /></ItemGroup>
+</Project>

@@ -1,0 +1,18 @@
+NAME
+    keyboard - Show keyboard/input bridge information.
+
+SYNOPSIS
+    keyboard
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show keyboard/input bridge information.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/KEYBOARD.CMD
+    /INU/HELP/KEYBOARD.MAN

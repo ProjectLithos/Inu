@@ -1,0 +1,18 @@
+NAME
+    drivers - List drivers or control the driver subsystem lifecycle.
+
+SYNOPSIS
+    drivers [status|start|run|pause|resume|stop|unload]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    List drivers or control the driver subsystem lifecycle.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/DRIVERS.CMD
+    /INU/HELP/DRIVERS.MAN

@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Acpi.EmbeddedController",
+  "displayName": "ACPI embedded-controller provider",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "ECDT discovery and EC byte transport own their state and register through KernelAcpiEcServices; they use only table-registry and generic-register contracts."
+  },
+  "lifecycle": {
+    "ownership": "driver",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "acpi.embedded-controller"
+    ],
+    "requires": [
+      "acpi.table-registry",
+      "acpi.register-access"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Acpi.TableRegistry",
+    "Kernel.Acpi.RegisterAccess"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Acpi/Inu.Kernel.Acpi.csproj",
+      "sources": [
+        "src/Inu.Kernel.Acpi/KernelAcpiEcProvider.cs",
+        "src/Inu.Kernel.Acpi/KernelAcpiEcServices.cs",
+        "src/Inu.Kernel.Acpi/AcpiEcInfo.cs"
+      ]
+    }
+  }
+}

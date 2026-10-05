@@ -1,0 +1,46 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.E1000Driver",
+  "displayName": "Intel E1000/E1000e network driver",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "The driver owns its device-specific state and registers through existing driver/subsystem contracts; bootstrap and generated HAL startup reference it only when its component symbol is selected."
+  },
+  "lifecycle": {
+    "ownership": "driver",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.interface.e1000"
+    ],
+    "requires": [
+      "driver.registry",
+      "pci.enumeration",
+      "network.interface-registry",
+      "interrupt.request"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.InterfaceRegistry",
+    "Kernel.Interrupts.BrokerCore",
+    "Kernel.Pci.ConfigurationRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.E1000/Inu.Kernel.E1000.csproj",
+      "sources": [
+        "src/Inu.Kernel.E1000/E1000Contracts.cs",
+        "src/Inu.Kernel.E1000/E1000Math.cs",
+        "src/Inu.Kernel.E1000/KernelE1000.DriverLifecycle.cs",
+        "src/Inu.Kernel.E1000/KernelE1000.Hardware.cs",
+        "src/Inu.Kernel.E1000/KernelE1000.NetworkIo.cs",
+        "src/Inu.Kernel.E1000/KernelE1000.StorageAndMmio.cs",
+        "src/Inu.Kernel.E1000/KernelE1000.cs"
+      ]
+    }
+  }
+}

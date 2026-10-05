@@ -1,0 +1,36 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Pci.LegacyConfiguration",
+  "displayName": "PCI legacy configuration I/O transport",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Owns x86 PCI configuration mechanism #1 CF8/CFC port access and registers only through the PCI configuration registry; the PCI core remains valid when this transport is omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "pci.configuration.legacy-io"
+    ],
+    "requires": [
+      "pci.configuration-registry",
+      "architecture.x64.io-port"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Pci.ConfigurationRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Pci/Inu.Kernel.Pci.csproj",
+      "sources": [
+        "src/Inu.Kernel.Pci/KernelPciLegacyConfigurationProvider.cs"
+      ]
+    }
+  }
+}

@@ -1,0 +1,23 @@
+NAME
+    ren - Rename a file or directory. A simple new name keeps the item in its current parent directory.
+
+SYNOPSIS
+    ren <old_name> <new_name>
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Rename a file or directory. A simple new name keeps the item in its current parent directory.
+
+FAT NAME SUPPORT
+    The current Inu FAT provider creates and renames entries using FAT 8.3 short names.
+    Long-file-name creation and rename are reserved for a later filesystem-provider extension.
+
+EXAMPLES
+    ren OLD.TXT NEW.TXT
+    ren OLD NEW
+
+FILES
+    /System/Commands/REN.CMD
+    /INU/HELP/REN.MAN

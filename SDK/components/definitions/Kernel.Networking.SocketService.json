@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.SocketService",
+  "displayName": "Kernel socket service",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Socket state ownership is independent and the networking API accesses it only through KernelSocketServices. UDP framing and TCP packet observation are independently selectable dependencies rather than being embedded in IPv4."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.sockets"
+    ],
+    "requires": [
+      "memory.heap",
+      "network.udp-ipv4",
+      "network.tcp-ipv4-observation"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.UdpIpv4Protocol",
+    "Kernel.Networking.TcpObservationProtocol"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelSocketServices.cs",
+        "src/Inu.Kernel.Networking/KernelSockets.cs"
+      ]
+    }
+  }
+}

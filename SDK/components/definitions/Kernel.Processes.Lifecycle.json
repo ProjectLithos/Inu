@@ -1,0 +1,42 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Processes.Lifecycle",
+  "displayName": "Process lifecycle",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "0.2.30: this responsibility is registered through a neutral process-service contract; the KernelProcesses facade and record store no longer name the concrete provider, so Kath may include, omit, or substitute it independently subject to declared dependencies."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "process.creation",
+      "process.termination"
+    ],
+    "requires": [
+      "process.records",
+      "process.address-space-ownership",
+      "security.process-isolation"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Processes.ServiceRegistry",
+    "Kernel.Processes.RecordStore",
+    "Kernel.Processes.AddressSpaceOwnership"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Processes/Inu.Kernel.Processes.csproj",
+      "sources": [
+        "src/Inu.Kernel.Processes/KernelProcesses.Creation.cs",
+        "src/Inu.Kernel.Processes/KernelProcesses.Termination.cs",
+        "src/Inu.Kernel.Processes/KernelProcessLifecycleProvider.cs"
+      ]
+    }
+  }
+}

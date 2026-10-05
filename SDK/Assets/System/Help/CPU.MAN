@@ -1,0 +1,18 @@
+NAME
+    cpu - Inspect CPU topology/roles or start the live CPU monitor.
+
+SYNOPSIS
+    cpu | cpus [status|usage|watch|top|monitor]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Inspect CPU topology/roles or start the live CPU monitor.
+
+ALIASES
+    cpus,cpuusage,cputop
+
+FILES
+    /System/Commands/CPU.CMD
+    /INU/HELP/CPU.MAN

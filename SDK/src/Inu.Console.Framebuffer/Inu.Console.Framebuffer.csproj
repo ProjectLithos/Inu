@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Inu.Console.Framebuffer</RootNamespace>
+    <AssemblyName>Inu.Console.Framebuffer</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Boot.Contracts\Inu.Boot.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Console.Contracts\Inu.Console.Contracts.csproj" />
+  </ItemGroup>
+</Project>

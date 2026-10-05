@@ -1,0 +1,13 @@
+{
+  "baseVersion": "0.0.48",
+  "version": "0.0.49",
+  "changedFiles": [
+    "Directory.Build.props",
+    "Inu-Changes.json",
+    "Inu-SourceManifest.json",
+    "Inu.SdkManifest.json",
+    "docs/Inu.Documentation.json",
+    "docs/site/assets/site.js",
+    "src/Inu.Core/InuSdkContract.cs"
+  ]
+}

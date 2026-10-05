@@ -1,0 +1,32 @@
+{
+  "Name": "MinimalKernel",
+  "Author": "The DCL Group",
+  "ProjectFile": "InuKernel.csproj",
+  "TargetArchitecture": "x64",
+  "BootProtocol": "Uefi",
+  "KernelEntry": "KMain",
+  "RuntimePack": "Inu.RuntimePack.X64.NativeAot",
+  "OutputDirectory": "C:\\Inu\\Artifacts\\MinimalKernel",
+  "KernelModel": "Monolithic",
+  "ConfigurationFile": "Inu.Configuration.json",
+  "WorkAreas": [
+    "Shell",
+    "GUI",
+    "Drivers",
+    "HAL",
+    "Audio",
+    "Filesystems",
+    "Storage",
+    "Networking",
+    "USB",
+    "Input",
+    "Processes",
+    "Scheduler",
+    "System Calls",
+    "Security",
+    "Diagnostics",
+    "Tests"
+  ],
+  "ConfigurationVersion": 3,
+  "DevelopmentAreas": []
+}

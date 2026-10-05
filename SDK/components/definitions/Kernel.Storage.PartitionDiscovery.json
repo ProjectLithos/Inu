@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Storage.PartitionDiscovery",
+  "displayName": "Block partition discovery",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Partition discovery now owns MBR/GPT discovery and consumes explicit block-device/volume-registry services through KernelStoragePartitionContract; KernelStorage exposes only a compatibility facade through KernelStoragePartitionServices."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "storage.partition-discovery"
+    ],
+    "requires": [
+      "storage.block-device-registry",
+      "storage.volume-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Storage"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Storage/Inu.Kernel.Storage.csproj",
+      "sources": [
+        "src/Inu.Kernel.Storage/KernelPartitionDiscovery.cs",
+        "src/Inu.Kernel.Storage/KernelStoragePartitionServices.cs",
+        "src/Inu.Kernel.Storage/KernelStoragePartitionContract.cs",
+        "src/Inu.Kernel.Storage/KernelStorageMath.cs"
+      ]
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.DnsCodec",
+  "displayName": "DNS packet codec",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "The codec registers through KernelNetworkProtocolServices and can be included or omitted without changing the networking core or KernelNetworkApi."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.dns-codec"
+    ],
+    "requires": [
+      "network.protocol-registry"
+    ]
+  },
+  "dependencies": [],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelNetworkProtocolServices.cs",
+        "src/Inu.Kernel.Networking/KernelDnsCodec.cs"
+      ]
+    }
+  }
+}

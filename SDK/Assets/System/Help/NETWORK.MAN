@@ -1,0 +1,18 @@
+NAME
+    network - Show network interfaces, routes and sockets.
+
+SYNOPSIS
+    network | net
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show network interfaces, routes and sockets.
+
+ALIASES
+    net
+
+FILES
+    /System/Commands/NETWORK.CMD
+    /INU/HELP/NETWORK.MAN

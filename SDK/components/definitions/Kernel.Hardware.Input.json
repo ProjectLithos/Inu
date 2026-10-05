@@ -1,0 +1,36 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Hardware.Input",
+  "displayName": "Input hardware startup",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Hardware policy is OS-owned. Kath can include, omit, replace or reorder this source component."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "kernel.hardware.input"
+    ],
+    "requires": [
+      "kernel.startup.timer-dispatch"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Startup.TimerDispatch",
+    "Kernel.Input.KeyboardDecoder"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": null,
+      "sources": [
+        "templates/InuKernel/HAL/InputHardwareStartup.cs"
+      ]
+    }
+  }
+}

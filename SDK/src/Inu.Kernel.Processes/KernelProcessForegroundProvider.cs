@@ -1,0 +1,6 @@
+using System;
+namespace Inu.Kernel.Processes;
+public static unsafe class KernelProcessForegroundProvider
+{
+    public static Boolean Register()=>KernelProcessForegroundServices.Register(&KernelProcesses.GetForegroundCommandProcessIdImplementation,&KernelProcesses.BeginForegroundCommandExecutionImplementation,&KernelProcesses.RequestForegroundCommandCancellationImplementation,&KernelProcesses.ClearForegroundCommandCancellationImplementation,&KernelProcesses.IsForegroundCommandCancellationRequestedImplementation,&KernelProcesses.TryClaimForegroundProcessImplementation,&KernelProcesses.ReleaseForegroundProcessClaimImplementation,&KernelProcesses.IsForegroundCancellationRequestedForImplementation);
+}

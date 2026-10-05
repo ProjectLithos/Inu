@@ -1,0 +1,1 @@
+using System; using Inu.Kernel.Console; namespace Inu.Samples.HelloKernel; public static class Kernel { public static Int32 KMain(IBootContext boot){ if(!boot.IsAvailable()) return 1; KernelConsole.WriteLine("Hello from Inu."); return 0; } }

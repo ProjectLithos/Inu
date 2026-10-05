@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <AssemblyName>Inu.Kernel.Entry.X64</AssemblyName>
+    <InuSystemModule>System.Private.CoreLib</InuSystemModule>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Console\Inu.Kernel.Console.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.X64.LowLevel\Inu.Kernel.X64.LowLevel.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Bootstrap\Inu.Kernel.Bootstrap.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.InterruptDispatch\Inu.Kernel.InterruptDispatch.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.TimerDispatch\Inu.Kernel.TimerDispatch.csproj" />
+      <ProjectReference Include="..\Inu.Kernel.Heap\Inu.Kernel.Heap.csproj" />
+    <ProjectReference Include="..\Inu.Runtime.NativeAot\Inu.Runtime.NativeAot.csproj" />
+    <ProjectReference Include="..\Inu.Runtime.Conformance\Inu.Runtime.Conformance.csproj" />
+  </ItemGroup>
+</Project>

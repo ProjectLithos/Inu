@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Scheduler.PriorityPolicy",
+  "displayName": "Priority-first scheduling policy",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "0.2.33: priority selection sees only CPU-owned runnable threads and delegates all cross-CPU stealing/migration decisions to the registered placement policy."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "scheduler.selection-policy"
+    ],
+    "requires": [
+      "thread.runnable-set",
+      "scheduler.thread-placement"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Scheduler.PolicyRegistry",
+    "Kernel.Scheduler.PlacementRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Scheduler/Inu.Kernel.Scheduler.csproj",
+      "sources": [
+        "src/Inu.Kernel.Scheduler/KernelScheduler.PriorityPolicy.cs"
+      ]
+    }
+  }
+}

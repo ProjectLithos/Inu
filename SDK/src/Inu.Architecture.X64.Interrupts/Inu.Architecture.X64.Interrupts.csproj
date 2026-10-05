@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Inu.Architecture.X64.Interrupts</AssemblyName>
+    <RootNamespace>Inu.Architecture.X64.Interrupts</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Interrupts.Contracts\Inu.Interrupts.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Architecture.Contracts\Inu.Architecture.Contracts.csproj" />
+    <ProjectReference Include="..\Inu.Primitives\Inu.Primitives.csproj" />
+  </ItemGroup>
+</Project>

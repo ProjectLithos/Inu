@@ -1,0 +1,39 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.ArpProtocol",
+  "displayName": "ARP protocol",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "ARP owns its packet interpretation/reply logic and registers through the packet registry; KernelNetworkStack compiles and dispatches correctly when ARP is omitted."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.arp"
+    ],
+    "requires": [
+      "network.packet-registry",
+      "network.interface-registry",
+      "network.neighbor-cache"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.PacketRegistry",
+    "Kernel.Networking.InterfaceRegistry",
+    "Kernel.Networking.NeighborCache"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelArpProtocol.cs"
+      ]
+    }
+  }
+}

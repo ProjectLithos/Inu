@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<PropertyGroup><TargetFramework>net10.0</TargetFramework><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup>
+<ItemGroup>
+<ProjectReference Include="../../System/Commands/Inu.Userland.Commands.csproj" />
+<ProjectReference Include="../Settings/Inu.Userland.Settings.csproj" />
+<ProjectReference Include="../Fonts/Inu.Userland.Fonts.csproj" />
+<ProjectReference Include="../Images/Inu.Userland.Images.csproj" />
+<ProjectReference Include="../Drivers/Inu.Userland.Drivers.csproj" />
+<ProjectReference Include="../Gui/Inu.Userland.Gui.csproj" />
+<ProjectReference Include="../Desktop/Inu.Userland.Desktop.csproj" />
+<ProjectReference Include="../Login/Inu.Userland.Login.csproj" />
+</ItemGroup>
+</Project>

@@ -1,0 +1,18 @@
+NAME
+    clear - Clear the active console.
+
+SYNOPSIS
+    clear | cls
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Clear the active console.
+
+ALIASES
+    cls
+
+FILES
+    /System/Commands/CLEAR.CMD
+    /INU/HELP/CLEAR.MAN

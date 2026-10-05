@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ILCompilerVersion Condition="'$(ILCompilerVersion)' == ''">10.0.10</ILCompilerVersion>
+    <RestorePackagesPath>$(MSBuildThisFileDirectory)..\.toolchain\NuGetPackages</RestorePackagesPath>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="$(ILCompilerVersion)" PrivateAssets="all" />
+    <PackageReference Include="runtime.win-x64.Microsoft.DotNet.ILCompiler" Version="$(ILCompilerVersion)" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

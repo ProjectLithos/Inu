@@ -1,0 +1,44 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Filesystem.FatFs",
+  "displayName": "FAT12/FAT16/FAT32 filesystem provider",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "FatFs already owns its filesystem implementation and registers only through the VFS provider contract. It can be included or omitted without changing KernelVfs."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "on-demand"
+  },
+  "contracts": {
+    "provides": [
+      "filesystem.fat12",
+      "filesystem.fat16",
+      "filesystem.fat32"
+    ],
+    "requires": [
+      "storage.vfs",
+      "memory.heap"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Storage"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Filesystem.FatFs/Inu.Filesystem.FatFs.csproj",
+      "sources": [
+        "src/Inu.Filesystem.FatFs/FatFs.cs",
+        "src/Inu.Filesystem.FatFs/FatFs.BootSector.cs",
+        "src/Inu.Filesystem.FatFs/FatFs.Lookup.cs",
+        "src/Inu.Filesystem.FatFs/FatFs.NamesAndDirectories.cs",
+        "src/Inu.Filesystem.FatFs/FatFs.Allocation.cs",
+        "src/Inu.Filesystem.FatFs/FatFs.FileIo.cs",
+        "src/Inu.Filesystem.FatFs/FatFs.Mutations.cs"
+      ]
+    }
+  }
+}

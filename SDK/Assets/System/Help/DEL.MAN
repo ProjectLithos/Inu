@@ -1,0 +1,26 @@
+NAME
+    del - Permanently delete one or more explicitly named files. Directories are not removed by del.
+
+SYNOPSIS
+    del <file_name> [file_name ...]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Permanently delete one or more explicitly named files. Directories are not removed by del.
+
+FAT NAME SUPPORT
+    The current Inu FAT provider creates and renames entries using FAT 8.3 short names.
+    Long-file-name creation and rename are reserved for a later filesystem-provider extension.
+
+NOTES
+    Wildcards are not expanded in 0.37.0; provide each file name explicitly.
+
+EXAMPLES
+    del OLD.TXT
+    del A.TXT B.TXT C.TXT
+
+FILES
+    /System/Commands/DEL.CMD
+    /INU/HELP/DEL.MAN

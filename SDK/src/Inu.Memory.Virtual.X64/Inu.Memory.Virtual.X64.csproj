@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Inu.Memory.Virtual.X64</RootNamespace>
+    <AssemblyName>Inu.Memory.Virtual.X64</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Inu.Core\Inu.Core.csproj" />
+    <ProjectReference Include="..\Inu.Primitives\Inu.Primitives.csproj" />
+    <ProjectReference Include="..\Inu.Memory.Virtual.Contracts\Inu.Memory.Virtual.Contracts.csproj" />
+  </ItemGroup>
+</Project>

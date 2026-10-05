@@ -1,0 +1,18 @@
+NAME
+    memory - Show physical/kernel heap memory information.
+
+SYNOPSIS
+    memory
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show physical/kernel heap memory information.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/MEMORY.CMD
+    /INU/HELP/MEMORY.MAN

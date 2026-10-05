@@ -1,0 +1,21 @@
+NAME
+    selftest - Run one complete Inu runtime and userland execution conformance pass.
+
+SYNOPSIS
+    selftest
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Equivalent to stress all 1. The controller itself executes in ring 3 and uses only
+    Inu Get/Set/Event operations: Event(ConsoleOutput) for live progress,
+    Set(StressControl) to request each managed stage, and Get(StressStatus) to wait for
+    its result. Event output is queued to the GUI worker and managed stages run on the
+    persistent Background worker, keeping heavy work off the syscall stack. The test also
+    validates Inu package parsing, executable loading, private process paging, ring-3
+    IRETQ entry, protected SYSCALL/SYSRETQ, current-process identity, controlled exit to
+    ring 0 and cleanup.
+
+SEE ALSO
+    stress

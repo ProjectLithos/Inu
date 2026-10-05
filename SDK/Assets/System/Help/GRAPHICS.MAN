@@ -1,0 +1,18 @@
+NAME
+    graphics - Show graphics capabilities or control the graphics lifecycle.
+
+SYNOPSIS
+    graphics [status|start|run|pause|resume|stop|unload]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show graphics capabilities or control the graphics lifecycle.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/GRAPHICS.CMD
+    /INU/HELP/GRAPHICS.MAN

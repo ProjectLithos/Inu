@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="Inu.Configuration.props" Condition="Exists('Inu.Configuration.props')" />
+  <Import Project="Inu.Configuration.targets" Condition="Exists('Inu.Configuration.targets')" />
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <AssemblyName>Inu.Kernel.Entry.X64</AssemblyName>
+    <RootNamespace>Inu.Kernel.Bootstrap</RootNamespace>
+    <InuSystemModule>System.Private.CoreLib</InuSystemModule>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <InuProject>true</InuProject>
+    <InuProjectType>Kernel</InuProjectType>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <InuOsSdkRoot>$(MSBuildThisFileDirectory)Kernel\Provided\SDK</InuOsSdkRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Compile only the active OS-owned source tree. Kernel/Provided/SDK is a
+         reference/source library, never a wildcard compile root. Userland is ring 3. -->
+    <Compile Include="Kernel\*\**\*.cs"
+             Exclude="Kernel\Provided\**\*.cs" />
+    <!-- ProjectCreator places startup scaffolding in these explicit folders.
+         Feature dependency copies are compiled only by Inu.KernelSources.targets. -->
+    <Compile Include="Boot\Provided\Startup\**\*.cs" />
+    <Compile Include="Kernel\Provided\Core\**\*.cs" />
+    <Compile Include="Kernel\Provided\Configuration\**\*.cs" />
+    <Compile Include="Kernel\Provided\HAL\**\*.cs" />
+    <Compile Include="Kernel\Provided\Startup\**\*.cs" />
+    <Compile Include="Boot\*\**\*.cs"
+             Exclude="Boot\Provided\**\*.cs" />
+
+    <!-- Absolute source-ownership barriers. These remain effective even if an old generated
+         project or another SDK target tries to add these trees to Compile. -->
+    <Compile Remove="Kernel\Provided\SDK\**\*.cs" />
+    <Compile Remove="Kernel\Kernel.cs" />
+    <Compile Remove="Boot\*.cs" />
+    <Compile Remove="HAL\**\*.cs" />
+    <Compile Remove="Startup\**\*.cs" />
+    <Compile Remove="Userland\**\*.cs" />
+
+    <!-- All planned kernel source shares one compilation and one set of static state.
+         Only the freestanding system module remains a separate assembly. -->
+    <ProjectReference Include="$(InuOsSdkRoot)\src\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj" />
+
+    <None Include="InuProject.json" />
+    <None Include="Inu.Configuration.json" />
+    <None Include="Inu.Configuration.props" />
+    <None Include="Inu.Configuration.targets" />
+    <None Include="Build-Kernel.bat" Condition="Exists('Build-Kernel.bat')" />
+    <None Include="Run-Kernel.bat" Condition="Exists('Run-Kernel.bat')" />
+    <None Include="README-Kernel.md" Condition="Exists('README-Kernel.md')" />
+  </ItemGroup>
+  <Import Project="Inu.KernelSources.targets" Condition="Exists('Inu.KernelSources.targets')" />
+  <Target Name="RequireKernelSourcePlan" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('Inu.KernelSources.targets')" Text="Kath kernel source plan is missing. Open the OS in Kath to compose its selected source dependencies before building." />
+  </Target>
+</Project>

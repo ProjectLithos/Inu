@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Timers and clocks · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Timers and clocks</h1>
+<p>Inu 0.23.0 provides the x64 timing stack in <code>Inu.Kernel.Time</code> while keeping CPUID, port I/O, RDTSC, APIC MMIO, and HPET MMIO out of generated application/kernel code.</p>
+<h2>HPET</h2>
+<p><code>KernelTime.Initialize()</code> consumes the validated ACPI HPET description, enables the HPET main counter, records its advertised femtosecond period, and uses HPET as the bootstrap calibration reference. <code>KernelHpet</code> exposes only high-level availability, frequency, and counter-period information.</p>
+<p>HPET remains the fallback monotonic source if an invariant TSC cannot be selected.</p>
+<h2>TSC and invariant-TSC clock source</h2>
+<p>Inu separately detects ordinary TSC support and invariant-TSC support through CPUID. <code>KernelTsc</code> exposes TSC availability, invariant status, the HPET-calibrated frequency, and a serialized raw counter read for facilities that explicitly require it.</p>
+<p>An invariant TSC is not promoted to the monotonic clock merely because CPUID advertises it. Inu measures the TSC against HPET over a bounded calibration interval and selects <code>KernelClockSource.InvariantTsc</code> only when the resulting frequency is valid. Otherwise HPET stays active.</p>
+<p><code>KernelTime.GetMonotonicNanoseconds()</code> is source-independent, so higher-level code does not need to know whether HPET or invariant TSC supplied the reading.</p>
+<h2>Local APIC timer</h2>
+<p>When MADT supplies a Local APIC base, Inu calibrates the Local APIC timer against HPET using divide-by-16. <code>KernelLocalApicTimer</code> then exposes calibrated frequency, one-shot interrupts, periodic interrupts, and cancellation.</p>
+<p>Vectors below 32 are rejected because they are reserved for processor exceptions. This processor-local timer remains separate from the opaque driver interrupt broker: device drivers still do not care whether their interrupts arrive via I/O APIC, MSI, or MSI-X.</p>
+<h2>RTC / CMOS</h2>
+<p><code>KernelRtcCmos</code> provides the PC-compatible real-time calendar clock. It waits for the CMOS update-in-progress window to clear, reads two complete samples, and accepts the time only when both samples match. This prevents mixed calendar fields across an RTC rollover.</p>
+<p>The reader supports both packed BCD and binary CMOS formats, both 12-hour and 24-hour modes, and converts the result to a validated <code>KernelRtcDateTime</code>. When ACPI FADT supplies the RTC century-register index, Inu uses it to form the full Gregorian year. Firmware without a century register uses the conventional 1970/2000 pivot for the two-digit year.</p>
+<p>RTC/CMOS is a wall-calendar facility. It is not used as the kernel monotonic clock because RTC resolution and update behaviour are unsuitable for scheduling and interval measurement.</p>
+<h2>Capability model</h2>
+<p><code>KernelTime.GetCapabilities()</code> reports:</p>
+<ul>
+<li>HPET availability;</li>
+<li>TSC availability;</li>
+<li>invariant-TSC support;</li>
+<li>RTC/CMOS availability;</li>
+<li>selected monotonic source and its frequency;</li>
+<li>calibrated Local APIC timer availability and frequency.</li>
+</ul>
+<p>Named façade classes (<code>KernelHpet</code>, <code>KernelTsc</code>, <code>KernelRtcCmos</code>, and <code>KernelLocalApicTimer</code>) let SDK users consume one facility without exposing low-level x64 programming in <code>Kernel.cs</code>.</p>
+<h2>Integer timing methodology</h2>
+<p>Inu keeps timing conversion arithmetic integer-only and overflow-aware:</p>
+<ul>
+<li>HPET ticks to nanoseconds use the ACPI femtosecond period with quotient/remainder splitting;</li>
+<li>calibration uses elapsed ticks and elapsed nanoseconds to derive integer hertz;</li>
+<li>nanoseconds to Local APIC timer ticks rounds upward so hardware does not expire before the requested interval;</li>
+<li>calibrated source ticks convert to nanoseconds without floating point;</li>
+<li>RTC packed BCD, 12-hour PM, century, leap-year, and date-range conversions are isolated in <code>KernelRtcMath</code> and exercised by standalone tests.</li>
+</ul></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

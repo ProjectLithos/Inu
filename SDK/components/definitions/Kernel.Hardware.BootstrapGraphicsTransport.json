@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Hardware.BootstrapGraphicsTransport",
+  "displayName": "Bootstrap graphics transport startup",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Hardware policy is OS-owned. Kath can include, omit, replace or reorder this source component."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "kernel.hardware.bootstrap-graphics"
+    ],
+    "requires": [
+      "kernel.pci.configuration",
+      "kernel.graphics.display-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Pci.ConfigurationRegistry",
+    "Kernel.Graphics.DisplayRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": null,
+      "sources": [
+        "templates/InuKernel/HAL/BootstrapGraphicsTransportStartup.cs"
+      ]
+    }
+  }
+}

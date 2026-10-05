@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "apiVersion": "1.0",
+  "sdkVersion": "0.38.0",
+  "policy": "additive-within-major",
+  "baselineKind": "declared-contract",
+  "note": "The generated Artifacts/Documentation/Inu.ApiCompatibility.json is the deterministic public API inventory and fingerprint used for release comparison."
+}

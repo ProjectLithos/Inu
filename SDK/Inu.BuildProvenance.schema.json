@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "required": [
+    "sdkVersion",
+    "compilerVersion",
+    "linkerVersion",
+    "configuration",
+    "sourceHash",
+    "dependencyHash"
+  ],
+  "deterministic": true
+}

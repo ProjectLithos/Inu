@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inu Architecture · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>Inu Architecture</h1>
+<p>Inu separates managed kernel policy from architecture, boot, memory, console, runtime, compiler, linker, image, and launch concerns.</p>
+<p>The current x64 UEFI path is:</p>
+<pre><code>
+UEFI firmware
+ -&gt; native x64 EFI entry
+ -&gt; Graphics Output Protocol discovery
+ -&gt; final UEFI memory-map capture
+ -&gt; ExitBootServices
+ -&gt; Inu-owned no-CoreLib NativeAOT bootstrap
+ -&gt; managed serial/framebuffer console
+ -&gt; managed KMain
+ -&gt; repeating CLI/HLT loop
+</code></pre>
+<p>The native entry performs only the firmware ABI work that must occur before managed execution. Framebuffer validation, clearing, pixel-format conversion, bitmap-font rendering, cursor movement, and serial/framebuffer mirroring are managed C# responsibilities.</p>
+<p>The reusable SDK memory architecture is layered separately from the minimal bootstrap path:</p>
+<pre><code>
+Inu.Boot.Contracts
+ -&gt; Inu.Memory.Contracts
+ -&gt; Inu.Boot.Memory
+ -&gt; Inu.Memory.Physical.Contracts
+ -&gt; Inu.Memory.Physical
+ -&gt; kernel address-space design (next)
+ -&gt; virtual memory management
+ -&gt; early allocator / kernel heap
+</code></pre>
+<p><code>Inu.Boot.Memory</code> turns the final firmware map plus explicit Inu reservations into a normalised ownership map. <code>Inu.Memory.Physical</code> consumes only ranges marked immediately allocatable and provides bitmap, buddy, and extent frame allocators through <code>IPhysicalMemoryManager</code>. Their metadata storage is caller-owned so physical allocation does not depend on the future kernel heap.</p>
+<p>The ordinary SDK surface exposes boot data through <code>Inu.Boot.Contracts</code>, reusable memory ownership through <code>Inu.Memory.Contracts</code>, physical allocation through the two <code>Inu.Memory.Physical*</code> assemblies, and framebuffer output through <code>Inu.Console.Framebuffer</code>. Architecture-specific CPU and port operations remain in <code>Inu.Architecture.X64</code>.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

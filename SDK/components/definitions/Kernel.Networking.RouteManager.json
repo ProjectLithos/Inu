@@ -1,0 +1,38 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.RouteManager",
+  "displayName": "Network route manager",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "State ownership and startup are independent. The component registers through the networking extension-service contract and can be included, omitted, or substituted without changing KernelNetworking source."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.route-management"
+    ],
+    "requires": [
+      "network.interface-registry",
+      "memory.heap",
+      "network.extension-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.InterfaceRegistry",
+    "Kernel.Networking.ExtensionRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelRouteManager.cs"
+      ]
+    }
+  }
+}

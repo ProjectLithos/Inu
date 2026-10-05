@@ -1,0 +1,18 @@
+NAME
+    info - Show Inu system information.
+
+SYNOPSIS
+    info | system
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Show Inu system information.
+
+ALIASES
+    system
+
+FILES
+    /System/Commands/INFO.CMD
+    /INU/HELP/INFO.MAN

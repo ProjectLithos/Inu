@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PCI, PCIe and VirtIO · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>PCI, PCIe and VirtIO</h1>
+<p>Inu 0.23.0 introduces the first built-in modern hardware bus and virtual-device drivers.</p>
+<h2>PCI initialization</h2>
+<p>Call <code>KernelPci.Initialize()</code> after <code>KernelDrivers.Initialize()</code> and after the physical/virtual-memory, address-space, heap and ACPI services are online. The standard bootstrap performs this automatically.</p>
+<p>When ACPI MCFG entries exist, Inu enumerates their PCIe ECAM segment and bus ranges. Otherwise x64 falls back to conventional PCI configuration mechanism #1 through ports <code>0xCF8</code> and <code>0xCFC</code>.</p>
+<p>Each discovered PCI function becomes a <code>KernelDeviceBus.Pci</code> device in <code>KernelDrivers</code>. The packed <code>KernelDeviceIdentifier.Location</code> preserves the complete 16-bit segment, 8-bit bus, 5-bit device and 3-bit function address.</p>
+<h2>BARs and MMIO</h2>
+<p>On x64 segment 0, conventional configuration fields below <code>0x100</code> use PCI Configuration Mechanism #1 (CF8/CFC) even when MCFG is present. This avoids per-function ECAM page remapping during enumeration. PCIe extended configuration (<code>0x100</code>-<code>0xFFF</code>) and non-zero PCI segments continue to use ACPI MCFG ECAM.</p>
+<p><code>KernelPci.TryGetBar</code> performs the standard BAR sizing transaction while temporarily disabling I/O and memory decoding. It recognizes I/O BARs, 32-bit memory BARs and paired 64-bit memory BARs.</p>
+<p><code>KernelPci.TryMapBar</code> and <code>KernelPci.TryMapMmio</code> map physical device ranges into the standard kernel MMIO reservation. Mappings use <code>KernelVirtualMemoryProtection.Device</code> and are separate from the RAM direct map.</p>
+<h2>PCI capabilities</h2>
+<p>Use <code>KernelPci.TryGetCapability</code> or <code>KernelPci.TryFindCapability</code> for the conventional capability chain. On ECAM devices, <code>KernelPci.TryGetExtendedCapability</code> walks the PCIe extended-capability chain.</p>
+<p><code>KernelPci.TryGetMsiCapability</code> and <code>KernelPci.TryGetMsixCapability</code> expose interrupt capability discovery without making ordinary drivers depend on PIC, I/O APIC, MSI or MSI-X delivery details.</p>
+<h2>VirtIO</h2>
+<p>Call <code>KernelVirtio.Initialize()</code> after <code>KernelStorage.Initialize()</code> and <code>KernelNetworking.Initialize()</code>. The standard bootstrap does this automatically.</p>
+<p>The transport requires modern VirtIO PCI capabilities and negotiates <code>VIRTIO_F_VERSION_1</code>. Queue metadata and bounce buffers come from <code>KernelPhysicalMemory</code>; CPU access uses <code>KernelAddressSpace.TryPhysicalToDirectMap</code>.</p>
+<p>Built-in device support is:</p>
+<ul>
+<li>VirtIO block (<code>VirtioDeviceType.Block</code>)</li>
+<li>VirtIO network (<code>VirtioDeviceType.Network</code>)</li>
+<li>VirtIO console (<code>VirtioDeviceType.Console</code>)</li>
+<li>VirtIO RNG (<code>VirtioDeviceType.EntropySource</code>)</li>
+</ul>
+<p>Block devices register with <code>KernelStorage</code>; network devices register with <code>KernelNetworking</code>. Console and RNG expose direct high-level APIs on <code>KernelVirtio</code>.</p>
+<h2>Polling and interrupts</h2>
+<p>The current VirtIO transport can operate by polling and exposes <code>KernelVirtio.Poll</code>. The generic driver interrupt callback also routes to the same receive-side poll path, so MSI/MSI-X routing can be connected through the existing opaque interrupt broker without changing the VirtIO device-driver API.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

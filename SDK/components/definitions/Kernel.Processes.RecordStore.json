@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Processes.RecordStore",
+  "displayName": "Process record and PID store",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "The record store is required process infrastructure. Its private ProcessRecord layout is hidden behind an opaque KernelProcessRecordHandle and store operations so other process responsibilities no longer compile against the record representation."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "process.records",
+      "process.record-storage",
+      "process.pid-allocation",
+      "process.record-handle"
+    ],
+    "requires": [
+      "memory.atomic"
+    ]
+  },
+  "dependencies": [],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Processes/Inu.Kernel.Processes.csproj",
+      "sources": [
+        "src/Inu.Kernel.Processes/KernelProcessRecordStore.cs",
+        "src/Inu.Kernel.Processes/KernelProcesses.Records.cs"
+      ]
+    }
+  }
+}

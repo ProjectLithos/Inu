@@ -1,0 +1,37 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Scheduler.CpuRunQueues",
+  "displayName": "Per-CPU runnable-set ownership",
+  "area": "Kernel",
+  "selection": {
+    "status": "internal",
+    "reason": "0.2.33: scheduler-owned CPU-local runnable-set/load state is exposed through an opaque contract instead of being read directly by placement or scheduling policies."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "parent-controlled"
+  },
+  "contracts": {
+    "provides": [
+      "scheduler.cpu-runnable-sets",
+      "scheduler.cpu-state"
+    ],
+    "requires": [
+      "thread.records",
+      "smp.topology"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Threads.RecordStore"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Scheduler/Inu.Kernel.Scheduler.csproj",
+      "sources": [
+        "src/Inu.Kernel.Scheduler/KernelScheduler.CpuRunQueues.cs"
+      ]
+    }
+  }
+}

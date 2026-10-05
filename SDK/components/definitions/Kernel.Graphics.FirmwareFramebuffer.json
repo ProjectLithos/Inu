@@ -1,0 +1,36 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Graphics.FirmwareFramebuffer",
+  "displayName": "Firmware/boot framebuffer provider",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "Registers a framebuffer supplied in the boot context through the generic display registry. The graphics registry and the rest of the kernel do not name this concrete provider."
+  },
+  "lifecycle": {
+    "ownership": "driver",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "graphics.framebuffer.boot"
+    ],
+    "requires": [
+      "graphics.display-registry",
+      "boot.framebuffer-info"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Graphics.DisplayRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Graphics/Inu.Kernel.Graphics.csproj",
+      "sources": [
+        "src/Inu.Kernel.Graphics/FirmwareFramebuffer.cs"
+      ]
+    }
+  }
+}

@@ -1,0 +1,18 @@
+NAME
+    input - Inspect or control the input service lifecycle.
+
+SYNOPSIS
+    input [status|start|run|pause|resume|stop|unload]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Inspect or control the input service lifecycle.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/INPUT.CMD
+    /INU/HELP/INPUT.MAN

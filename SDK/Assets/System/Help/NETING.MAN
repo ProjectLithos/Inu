@@ -1,0 +1,18 @@
+NAME
+    networking - Inspect or control the networking subsystem lifecycle.
+
+SYNOPSIS
+    networking [status|start|run|pause|resume|stop|unload]
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Inspect or control the networking subsystem lifecycle.
+
+ALIASES
+    (none)
+
+FILES
+    /System/Commands/NETING.CMD
+    /INU/HELP/NETING.MAN

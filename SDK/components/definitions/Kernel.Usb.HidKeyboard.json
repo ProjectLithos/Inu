@@ -1,0 +1,35 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Usb.HidKeyboard",
+  "displayName": "USB HID keyboard decoder",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "The generic USB HID transport no longer owns keyboard decoding or event delivery. The optional keyboard component registers protocol callbacks through UsbHidKeyboardServices and can be omitted without removing HID transport."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "usb.hid.keyboard"
+    ],
+    "requires": [
+      "usb.hid.transport"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Usb.HidTransport"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Usb.Hid/Inu.Usb.Hid.csproj",
+      "sources": [
+        "src/Inu.Usb.Hid/UsbHidKeyboard.cs"
+      ]
+    }
+  }
+}

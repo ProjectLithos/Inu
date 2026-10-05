@@ -1,0 +1,38 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Kernel.Networking.UdpIpv4Protocol",
+  "displayName": "UDP over IPv4 protocol",
+  "area": "Kernel",
+  "selection": {
+    "status": "selectable",
+    "reason": "UDP header framing/parsing registers independently of IPv4. Socket delivery is optional through KernelSocketServices, so UDP can exist without the kernel socket component."
+  },
+  "lifecycle": {
+    "ownership": "kernel",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "network.udp-ipv4"
+    ],
+    "requires": [
+      "network.ipv4",
+      "network.ipv4-send",
+      "network.ipv4-transport-registry"
+    ]
+  },
+  "dependencies": [
+    "Kernel.Networking.Ipv4Protocol",
+    "Kernel.Networking.Ipv4TransportRegistry"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
+      "sources": [
+        "src/Inu.Kernel.Networking/KernelUdpIpv4Protocol.cs"
+      ]
+    }
+  }
+}

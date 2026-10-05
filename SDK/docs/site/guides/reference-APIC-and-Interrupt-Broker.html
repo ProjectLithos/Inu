@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>APIC and opaque interrupt broker · Inu SDK</title><link rel="stylesheet" href="../assets/site.css"><script defer src="../assets/site.js"></script></head><body><header><nav class="nav"><a class="brand" href="../index.html">Inu <span>OS SDK</span></a><a href="../guides/index.html">Guides</a><a href="../assemblies/index.html">Assemblies</a><a href="../api/index.html">API index</a><a href="../source/index.html">Source</a></nav></header><main><h1>APIC and opaque interrupt broker</h1>
+<p>Inu 0.23.0 completes the x64 driver interrupt-routing boundary. Device drivers request an interrupt through <code>KernelDrivers.TryRequestInterrupt</code> and receive only an opaque <code>KernelDriverInterruptHandle</code>; they do not select or program PIC, I/O APIC, MSI, MSI-X, Local APIC, or x2APIC delivery.</p>
+<h2>Platform mechanisms</h2>
+<p><code>Inu.Kernel.InterruptBroker</code> reports Local APIC, I/O APIC, x2APIC, MSI, and MSI-X capabilities. Local APIC/x2APIC terminate interrupt delivery at the processor. I/O APIC provides pin/GSI routing. PCI message delivery is selected internally by the broker.</p>
+<p>For PCI functions the broker uses the policy:</p>
+<ol>
+<li>MSI-X when the function exposes a usable MSI-X table.</li>
+<li>MSI when MSI-X is unavailable or cannot be programmed.</li>
+<li>I/O APIC/INTx as the fallback when a usable PCI interrupt line is available.</li>
+</ol>
+<p>The decision is not returned to the device driver. <code>KernelInterruptBroker.TryGetRoute</code> exists for kernel diagnostics only.</p>
+<h2>Driver contract</h2>
+<p>A driver supplies a <code>KernelDriverInterruptRequest</code> containing its generic device handle, source hint, priority, processor target, trigger/polarity hints, and an opaque driver cookie. The broker allocates the IDT vector, registers the callback with <code>KernelInterruptDispatch</code>, configures the delivery mechanism, and returns an opaque handle. Interrupt entry then dispatches through <code>KernelDrivers.DispatchInterrupt</code>, so the driver&#x27;s interrupt callback receives the same framework context regardless of how the hardware interrupt arrived.</p>
+<h2>PCI ownership</h2>
+<p>Generic PCI MSI and MSI-X programming now lives in <code>Inu.Kernel.Pci</code> beneath the broker. NVMe no longer exposes driver-specific MSI/MSI-X programming methods. Intel E1000/E1000e and Realtek RTL8168/RTL8111 request broker-managed interrupts and enable their device-local interrupt causes only after the broker supplies a route. Timer dispatch remains available as a service/fallback methodology without changing the driver&#x27;s interrupt-delivery abstraction.</p>
+<h2>Current INTx limitation</h2>
+<p>The initial PCI INTx fallback uses the firmware-programmed PCI Interrupt Line field and MADT-discovered I/O APIC ranges. A complete ACPI AML <code>_PRT</code> PCI-routing interpreter remains a future enhancement for machines whose firmware requires namespace routing rather than a usable Interrupt Line value.</p></main><footer>Inu OS SDK 0.2.1 · API 1.2 · ABI 1.0 · bundled with Kath 0.2.1</footer></body></html>

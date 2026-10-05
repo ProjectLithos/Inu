@@ -1,0 +1,36 @@
+{
+  "$schema": "Inu.ComponentDefinition.schema.json",
+  "schemaVersion": 1,
+  "id": "Boot.UefiMemoryMapKey",
+  "displayName": "UEFI memory-map key",
+  "area": "Boot",
+  "selection": {
+    "status": "selectable",
+    "reason": "UEFI map-key information is protocol-specific and should only be included when explicitly required."
+  },
+  "lifecycle": {
+    "ownership": "os",
+    "startup": "boot"
+  },
+  "contracts": {
+    "provides": [
+      "boot.uefi-memory-map-key"
+    ],
+    "requires": [
+      "boot.context"
+    ]
+  },
+  "dependencies": [
+    "Boot.Context.Core"
+  ],
+  "implementations": {
+    "CSharp": {
+      "status": "available",
+      "project": "src/Inu.Kernel.Console/Inu.Kernel.Console.csproj",
+      "sources": [
+        "src/Inu.Kernel.Console/IUefiMemoryMapKeyContext.cs",
+        "src/Inu.Kernel.Console/BootContext.UefiMemoryMapKey.cs"
+      ]
+    }
+  }
+}
