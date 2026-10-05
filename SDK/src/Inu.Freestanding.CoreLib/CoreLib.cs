@@ -2844,6 +2844,7 @@ namespace System
 
 namespace System.Collections
 {
+    /// <summary><inu.api/>Non-generic enumerator contract for freestanding C# collection iteration.</summary>
     public interface IEnumerator
     {
         Object Current { get; }
@@ -2851,11 +2852,13 @@ namespace System.Collections
         void Reset();
     }
 
+    /// <summary><inu.api/>Non-generic enumerable contract for freestanding C# collection iteration.</summary>
     public interface IEnumerable
     {
         IEnumerator GetEnumerator();
     }
 
+    /// <summary><inu.api/>Non-generic collection contract exposing Count and enumeration.</summary>
     public interface ICollection : IEnumerable
     {
         Int32 Count { get; }
@@ -2864,16 +2867,19 @@ namespace System.Collections
 
 namespace System.Collections.Generic
 {
+    /// <summary><inu.api/>Generic enumerator contract compatible with ordinary C# foreach.</summary>
     public interface IEnumerator<out T> : System.Collections.IEnumerator, System.IDisposable
     {
         new T Current { get; }
     }
 
+    /// <summary><inu.api/>Generic enumerable contract compatible with ordinary C# foreach.</summary>
     public interface IEnumerable<out T> : System.Collections.IEnumerable
     {
         new IEnumerator<T> GetEnumerator();
     }
 
+    /// <summary><inu.api/>Generic mutable collection contract supplied by the Inu freestanding CoreLib.</summary>
     public interface ICollection<T> : IEnumerable<T>
     {
         Int32 Count { get; }
@@ -2885,6 +2891,7 @@ namespace System.Collections.Generic
         Boolean Remove(T item);
     }
 
+    /// <summary><inu.api/>Generic indexed list contract supplied by the Inu freestanding CoreLib.</summary>
     public interface IList<T> : ICollection<T>
     {
         T this[Int32 index] { get; set; }
@@ -2893,31 +2900,38 @@ namespace System.Collections.Generic
         void RemoveAt(Int32 index);
     }
 
+    /// <summary><inu.api/>Generic read-only collection contract supplied by the Inu freestanding CoreLib.</summary>
     public interface IReadOnlyCollection<out T> : IEnumerable<T>
     {
         Int32 Count { get; }
     }
 
+    /// <summary><inu.api/>Generic read-only indexed-list contract supplied by the Inu freestanding CoreLib.</summary>
     public interface IReadOnlyList<out T> : IReadOnlyCollection<T>
     {
         T this[Int32 index] { get; }
     }
 
+    /// <summary><inu.api/>Stores one key/value pair for dictionary enumeration.</summary>
     public readonly struct KeyValuePair<TKey, TValue>
     {
         private readonly TKey _key;
         private readonly TValue _value;
 
+        /// <summary><inu.api/></summary>
         public KeyValuePair(TKey key, TValue value)
         {
             _key = key;
             _value = value;
         }
 
+        /// <summary><inu.api/></summary>
         public TKey Key => _key;
+        /// <summary><inu.api/></summary>
         public TValue Value => _value;
     }
 
+    /// <summary><inu.api/>Provides equality and hashing used by freestanding generic collections.</summary>
     public abstract class EqualityComparer<T>
     {
         private sealed class DefaultComparer : EqualityComparer<T>
@@ -2968,25 +2982,33 @@ namespace System.Collections.Generic
         // GC-static comparer bases during module startup. Dictionary<TKey,TValue> caches
         // this result in its readonly _comparer field, so normal dictionary operations do
         // not allocate a comparer repeatedly.
+        /// <summary><inu.api/></summary>
         public static EqualityComparer<T> Default => new DefaultComparer();
+        /// <summary><inu.api/></summary>
         public abstract Boolean Equals(T x, T y);
+        /// <summary><inu.api/></summary>
         public abstract Int32 GetHashCode(T obj);
     }
 
+    /// <summary><inu.api/>Freestanding growable indexed collection compatible with System.Collections.Generic.List&lt;T&gt;.</summary>
     public class List<T> : IList<T>, IReadOnlyList<T>
     {
         private T[] _items;
         private Int32 _size;
         private Int32 _version;
 
+        /// <summary><inu.api/></summary>
         public List() { _items = new T[0]; }
+        /// <summary><inu.api/></summary>
         public List(Int32 capacity)
         {
             if (capacity < 0) throw new ArgumentOutOfRangeException();
             _items = capacity == 0 ? new T[0] : new T[capacity];
         }
 
+        /// <summary><inu.api/></summary>
         public Int32 Count => _size;
+        /// <summary><inu.api/></summary>
         public Int32 Capacity
         {
             get => _items.Length;
@@ -2999,8 +3021,10 @@ namespace System.Collections.Generic
                 _items = replacement;
             }
         }
+        /// <summary><inu.api/></summary>
         public Boolean IsReadOnly => false;
 
+        /// <summary><inu.api/></summary>
         public T this[Int32 index]
         {
             get
@@ -3016,6 +3040,7 @@ namespace System.Collections.Generic
             }
         }
 
+        /// <summary><inu.api/></summary>
         public void Add(T item)
         {
             EnsureCapacity(_size + 1);
@@ -3023,6 +3048,7 @@ namespace System.Collections.Generic
             _version++;
         }
 
+        /// <summary><inu.api/></summary>
         public void AddRange(IEnumerable<T> collection)
         {
             if (collection == null) throw new ArgumentNullException();
@@ -3034,6 +3060,7 @@ namespace System.Collections.Generic
             finally { iterator.Dispose(); }
         }
 
+        /// <summary><inu.api/></summary>
         public void Clear()
         {
             for (Int32 i = 0; i < _size; i++) _items[i] = default(T);
@@ -3041,8 +3068,10 @@ namespace System.Collections.Generic
             _version++;
         }
 
+        /// <summary><inu.api/></summary>
         public Boolean Contains(T item) => IndexOf(item) >= 0;
 
+        /// <summary><inu.api/></summary>
         public Int32 IndexOf(T item)
         {
             EqualityComparer<T> comparer = EqualityComparer<T>.Default;
@@ -3051,6 +3080,7 @@ namespace System.Collections.Generic
             return -1;
         }
 
+        /// <summary><inu.api/></summary>
         public void Insert(Int32 index, T item)
         {
             if ((UInt32)index > (UInt32)_size) throw new ArgumentOutOfRangeException();
@@ -3061,6 +3091,7 @@ namespace System.Collections.Generic
             _version++;
         }
 
+        /// <summary><inu.api/></summary>
         public Boolean Remove(T item)
         {
             Int32 index = IndexOf(item);
@@ -3069,6 +3100,7 @@ namespace System.Collections.Generic
             return true;
         }
 
+        /// <summary><inu.api/></summary>
         public void RemoveAt(Int32 index)
         {
             if ((UInt32)index >= (UInt32)_size) throw new ArgumentOutOfRangeException();
@@ -3078,6 +3110,7 @@ namespace System.Collections.Generic
             _version++;
         }
 
+        /// <summary><inu.api/></summary>
         public void CopyTo(T[] array, Int32 arrayIndex)
         {
             if (array == null) throw new ArgumentNullException();
@@ -3086,6 +3119,7 @@ namespace System.Collections.Generic
             for (Int32 i = 0; i < _size; i++) array[arrayIndex + i] = _items[i];
         }
 
+        /// <summary><inu.api/></summary>
         public T[] ToArray()
         {
             T[] result = new T[_size];
@@ -3101,6 +3135,7 @@ namespace System.Collections.Generic
             Capacity = capacity;
         }
 
+        /// <summary><inu.api/></summary>
         public Enumerator GetEnumerator()
         {
             // 0.0.107: isolate the exact NativeAOT return boundary without changing
@@ -3213,6 +3248,7 @@ namespace System.Collections.Generic
         }
     }
 
+    /// <summary><inu.api/>Freestanding key/value collection compatible with System.Collections.Generic.Dictionary&lt;TKey,TValue&gt;.</summary>
     public class Dictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>
     {
         private struct Entry
@@ -3230,9 +3266,13 @@ namespace System.Collections.Generic
         private Int32 _version;
         private readonly EqualityComparer<TKey> _comparer;
 
+        /// <summary><inu.api/></summary>
         public Dictionary() : this(0, null) { }
+        /// <summary><inu.api/></summary>
         public Dictionary(Int32 capacity) : this(capacity, null) { }
+        /// <summary><inu.api/></summary>
         public Dictionary(EqualityComparer<TKey> comparer) : this(0, comparer) { }
+        /// <summary><inu.api/></summary>
         public Dictionary(Int32 capacity, EqualityComparer<TKey> comparer)
         {
             if (capacity < 0) throw new ArgumentOutOfRangeException();
@@ -3242,8 +3282,10 @@ namespace System.Collections.Generic
             _entries = new Entry[size];
         }
 
+        /// <summary><inu.api/></summary>
         public Int32 Count => _count;
 
+        /// <summary><inu.api/></summary>
         public TValue this[TKey key]
         {
             get
@@ -3255,15 +3297,19 @@ namespace System.Collections.Generic
             set { Insert(key, value, false); }
         }
 
+        /// <summary><inu.api/></summary>
         public void Add(TKey key, TValue value) => Insert(key, value, true);
+        /// <summary><inu.api/></summary>
         public Boolean TryAdd(TKey key, TValue value)
         {
             if (FindEntry(key) >= 0) return false;
             Insert(key, value, true);
             return true;
         }
+        /// <summary><inu.api/></summary>
         public Boolean ContainsKey(TKey key) => FindEntry(key) >= 0;
 
+        /// <summary><inu.api/></summary>
         public Boolean TryGetValue(TKey key, out TValue value)
         {
             Int32 index = FindEntry(key);
@@ -3276,6 +3322,7 @@ namespace System.Collections.Generic
             return false;
         }
 
+        /// <summary><inu.api/></summary>
         public Boolean Remove(TKey key)
         {
             if (IsNullKey(key)) throw new ArgumentNullException();
@@ -3300,6 +3347,7 @@ namespace System.Collections.Generic
             return false;
         }
 
+        /// <summary><inu.api/></summary>
         public void Clear()
         {
             for (Int32 i = 0; i < _buckets.Length; i++) _buckets[i] = 0;
@@ -3381,6 +3429,7 @@ namespace System.Collections.Generic
             _entries = newEntries;
         }
 
+        /// <summary><inu.api/></summary>
         public Enumerator GetEnumerator()
         {
             // 0.0.108: mirror the List<T> return-boundary diagnostics for
@@ -3496,14 +3545,17 @@ namespace System.Collections.Generic
         }
     }
 
+    /// <summary><inu.api/>Freestanding first-in/first-out collection compatible with System.Collections.Generic.Queue&lt;T&gt;.</summary>
     public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>
     {
         private T[] _array = new T[4];
         private Int32 _head;
         private Int32 _tail;
         private Int32 _size;
+        /// <summary><inu.api/></summary>
         public Int32 Count => _size;
 
+        /// <summary><inu.api/></summary>
         public void Enqueue(T item)
         {
             if (_size == _array.Length) Grow();
@@ -3511,6 +3563,7 @@ namespace System.Collections.Generic
             _tail = (_tail + 1) % _array.Length;
             _size++;
         }
+        /// <summary><inu.api/></summary>
         public T Dequeue()
         {
             if (_size == 0) throw new InvalidOperationException("Queue empty.");
@@ -3520,11 +3573,13 @@ namespace System.Collections.Generic
             _size--;
             return item;
         }
+        /// <summary><inu.api/></summary>
         public T Peek()
         {
             if (_size == 0) throw new InvalidOperationException("Queue empty.");
             return _array[_head];
         }
+        /// <summary><inu.api/></summary>
         public void Clear()
         {
             while (_size != 0) Dequeue();
@@ -3537,6 +3592,7 @@ namespace System.Collections.Generic
             _head = 0;
             _tail = _size;
         }
+        /// <summary><inu.api/></summary>
         public Enumerator GetEnumerator() => new Enumerator(this);
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => new InterfaceEnumerator(this);
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => new InterfaceEnumerator(this);
@@ -3564,11 +3620,14 @@ namespace System.Collections.Generic
         }
     }
 
+    /// <summary><inu.api/>Freestanding last-in/first-out collection compatible with System.Collections.Generic.Stack&lt;T&gt;.</summary>
     public class Stack<T> : IEnumerable<T>, IReadOnlyCollection<T>
     {
         private T[] _array = new T[4];
         private Int32 _size;
+        /// <summary><inu.api/></summary>
         public Int32 Count => _size;
+        /// <summary><inu.api/></summary>
         public void Push(T item)
         {
             if (_size == _array.Length)
@@ -3579,6 +3638,7 @@ namespace System.Collections.Generic
             }
             _array[_size++] = item;
         }
+        /// <summary><inu.api/></summary>
         public T Pop()
         {
             if (_size == 0) throw new InvalidOperationException("Stack empty.");
@@ -3586,12 +3646,15 @@ namespace System.Collections.Generic
             _array[_size] = default(T);
             return result;
         }
+        /// <summary><inu.api/></summary>
         public T Peek()
         {
             if (_size == 0) throw new InvalidOperationException("Stack empty.");
             return _array[_size - 1];
         }
+        /// <summary><inu.api/></summary>
         public void Clear() { while (_size != 0) _array[--_size] = default(T); }
+        /// <summary><inu.api/></summary>
         public Enumerator GetEnumerator() => new Enumerator(this);
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => new InterfaceEnumerator(this);
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => new InterfaceEnumerator(this);

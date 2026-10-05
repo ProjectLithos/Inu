@@ -1,6 +1,6 @@
 {
-  "baseVersion": "0.0.58",
-  "version": "0.0.59",
+  "baseVersion": "0.0.59",
+  "version": "0.0.60",
   "changedFiles": [
     "Inu.ApiContract.json",
     "docs/Public-API-Rules.md",

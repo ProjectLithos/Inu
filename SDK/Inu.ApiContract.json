@@ -84,6 +84,39 @@
         "availability": "ring-3 userland",
         "transport": "Event syscall",
         "notes": "Compatibility surface retained for source written against Inu 0.0.58."
+      },
+      {
+        "namespace": "System.Collections",
+        "type": "Collection contracts",
+        "members": [
+          "IEnumerable",
+          "IEnumerator",
+          "ICollection"
+        ],
+        "availability": "freestanding managed code (kernel and ring-3 userland)",
+        "transport": "in-process CoreLib",
+        "notes": "Inu-owned .NET-compatible non-generic collection contracts used by foreach and collection implementations."
+      },
+      {
+        "namespace": "System.Collections.Generic",
+        "type": "Generic collections",
+        "members": [
+          "IEnumerable<T>",
+          "IEnumerator<T>",
+          "ICollection<T>",
+          "IList<T>",
+          "IReadOnlyCollection<T>",
+          "IReadOnlyList<T>",
+          "KeyValuePair<TKey,TValue>",
+          "EqualityComparer<T>",
+          "List<T>",
+          "Dictionary<TKey,TValue>",
+          "Queue<T>",
+          "Stack<T>"
+        ],
+        "availability": "freestanding managed code (kernel and ring-3 userland)",
+        "transport": "in-process CoreLib",
+        "notes": "Inu-owned .NET-compatible generic collections. No desktop .NET runtime dependency."
       }
     ]
   }
