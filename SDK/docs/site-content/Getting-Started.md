@@ -6,16 +6,16 @@ Inu OS SDK is a source-component operating-system SDK. Kath uses the sibling Inu
 
 From Kath, choose **Create New OS**, select Microkernel, Hybrid or Monolithic, complete the authoritative configuration, and let the IDE generate the project. The editable operating-system project lives outside the SDK source tree.
 
-From a terminal you can instead use:
+The supported terminal surface is deliberately small:
 
 ```text
-inu new MyOS
-cd MyOS
 inu build
-inu run
+inu toolchain ensure
+inu version
+inu help
 ```
 
-`inu doctor` validates the SDK, manifests, compatibility baseline and required toolchain.
+Project creation, run and debug are driven through Kath. Inu does not advertise CLI commands that the canonical executable does not implement.
 
 ## Kernel entry point
 
@@ -56,10 +56,10 @@ Inu applications use the documented `.exe`/`.nexe` application format. The packa
 
 ## Debugging and tests
 
-Use **F5** in the IDE for the debugger path or `inu debug` from the CLI. The SDK supports NativeAOT source maps, breakpoints, stepping, CPU/thread/process context, memory/page-table/heap views, crash dumps, tracing and hardware-aware testing.
+Use **F5** in Kath for the debugger path. The SDK supports NativeAOT source maps, breakpoints, stepping, CPU/thread/process context, memory/page-table/heap views, crash dumps, tracing and hardware-aware testing.
 
-Run `inu test` for the SDK test framework. API compatibility checks protect public types, signatures, enum values, syscall IDs, driver ABI and debug formats.
+SDK conformance is validated by the project test/build paths. The published SDK API contains only explicit exports; ordinary public implementation declarations are not compatibility promises.
 
 ## Read the reference
 
-Use the **Assemblies** and **API index** pages in this offline site for source-derived public API reference. The **Guides** section contains the maintained subsystem documentation and samples guide. All links are relative so the site can be copied or opened offline.
+Use the **API index** for explicitly exported SDK declarations. Ordinary public implementation declarations are intentionally not part of the SDK API. The **Guides** section contains the maintained subsystem documentation and samples guide. All links are relative so the site can be copied or opened offline.

@@ -74,6 +74,11 @@ internal static partial class PublicApiCollector
             string name = declaration.Groups[1].Value;
             string xml = string.Join(Environment.NewLine, comments);
             comments.Clear();
+
+            // Public C# visibility is an implementation detail, not an SDK promise.
+            // Only declarations explicitly exported to SDK users are published.
+            if (!ApiExportRegex().IsMatch(xml)) continue;
+
             DocumentationText text = ReadDocumentation(xml);
             string qualified = string.IsNullOrEmpty(currentNamespace) ? name : $"{currentNamespace}.{name}";
             string dependencyText = text.Dependencies.Length == 0 ? string.Join(", ", projectDependencies) : text.Dependencies;
@@ -100,6 +105,7 @@ internal static partial class PublicApiCollector
 
     private static DocumentationText ReadDocumentation(string xml)
     {
+        xml = ApiExportRegex().Replace(xml, string.Empty);
         if (string.IsNullOrWhiteSpace(xml)) return DocumentationText.Empty;
         try
         {
@@ -131,6 +137,9 @@ internal static partial class PublicApiCollector
     }
 
     private static string Clean(string? value) => Regex.Replace(value ?? string.Empty, @"\s+", " ").Trim();
+
+    [GeneratedRegex(@"<inu\.api\s*/?>", RegexOptions.IgnoreCase)]
+    private static partial Regex ApiExportRegex();
 
     [GeneratedRegex(@"^(?:namespace)\s+([A-Za-z_][A-Za-z0-9_.]*)")]
     private static partial Regex NamespaceRegex();

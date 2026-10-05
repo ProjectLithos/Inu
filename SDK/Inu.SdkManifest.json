@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "product": "Inu OS SDK",
-  "sdkVersion": "0.0.50",
-  "apiVersion": "3.0",
+  "sdkVersion": "0.0.51",
+  "apiVersion": "1.0",
   "abiVersion": "1.0",
   "compatibilityPolicy": "additive-within-major",
   "architectures": [
@@ -30,10 +30,8 @@
     "reflectionMetadata": "usage-based runtime mappings; reflection dataflow scan; System.Private.CoreLib dependency-retained (not --root); freestanding NativeFormat dependency anchors; no full reflection rooting"
   },
   "contracts": {
-    "publicApiBaseline": "Inu.ApiBaseline.json",
     "apiPolicy": "Inu.ApiContract.json",
     "driverManifestSchema": 3,
-    "compatibilityChecker": "Compare-InuApiCompatibility.ps1",
     "subsystemContracts": "1.0",
     "subsystemContractManifest": "Inu.SubsystemContracts.json",
     "driverCapabilityModel": "1.2",
@@ -63,8 +61,8 @@
     "userProcessExecution": "1.0"
   },
   "rules": {
-    "majorApiChange": "Breaking public API changes require a new API major version.",
-    "minorApiChange": "Additive public API changes may increment the API minor version.",
+    "majorApiChange": "The user-facing SDK API is the explicit Inu.ApiContract.json command contract plus explicitly exported coding API declarations.",
+    "minorApiChange": "Do not infer SDK API from C# public visibility.",
     "abi": "Kernel/driver/syscall/debug ABI versions are independently versioned.",
     "consumers": "Drivers and applications must declare the API/ABI versions they were built against.",
     "driverCapabilities": "Drivers declare a maximum privilege set; the kernel issues per-binding grants from discovered device resources and privileged operations require live grants.",

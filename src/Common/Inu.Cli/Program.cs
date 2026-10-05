@@ -49,7 +49,8 @@ internal static class Program
         Console.WriteLine("Commands:");
         Console.WriteLine("  inu build [--root <path>] [--force-rebuild]");
         Console.WriteLine("  inu toolchain ensure [--root <path>]");
-        Console.WriteLine("  inu --version");
+        Console.WriteLine("  inu version        (aliases: --version, -v)");
+        Console.WriteLine("  inu help           (aliases: --help, -h)");
     }
 
     private static int Unknown(string command)

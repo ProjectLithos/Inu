@@ -26,8 +26,8 @@ if (validate && configuration.RequireDocumentationForPublicItems)
     failures.AddRange(findings.Select(finding => finding.Message));
 }
 HtmlSiteWriter.Write(root, configuration, projects);
-Console.WriteLine($"[ OK ] Generated Inu SDK usage site with {projects.Count} assemblies and {projects.Sum(project => project.Items.Count)} public items.");
-Console.WriteLine($@"[INFO] Public API documentation audit: {findings.Count} finding(s). See Artifacts\Documentation\PublicApiAudit.json and Inu.ApiCompatibility.json.");
+Console.WriteLine($"[ OK ] Generated Inu SDK usage site with {projects.Count} assemblies and {projects.Sum(project => project.Items.Count)} explicit SDK API items.");
+Console.WriteLine($@"[INFO] Explicit API documentation audit: {findings.Count} finding(s). See Artifacts\Documentation\PublicApiAudit.json and Inu.ApiCompatibility.json.");
 if (failures.Count == 0) return 0;
 foreach (string failure in failures) Console.Error.WriteLine($"[FAIL] {failure}");
 return 1;

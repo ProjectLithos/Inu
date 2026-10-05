@@ -1,26 +1,51 @@
 {
-  "schemaVersion": 1,
-  "apiVersion": "3.0",
-  "policy": "additive-within-major",
-  "publicAssemblyPrefix": "Inu.",
-  "breakingChanges": [
-    "remove-public-item",
-    "rename-public-item",
-    "change-public-signature",
-    "change-enum-value",
-    "narrow-public-visibility"
+  "schemaVersion": 2,
+  "apiVersion": "1.0",
+  "kind": "user-command-api",
+  "authority": "Inu/src/Common/Inu.Cli/Program.cs",
+  "rule": "Only commands accepted by the canonical inu executable are part of the user-facing SDK command API.",
+  "commands": [
+    {
+      "name": "build",
+      "syntax": "inu build [--root <path>] [--force-rebuild]",
+      "description": "Build Inu and Kath from the selected Kath&Inu root.",
+      "options": [
+        "--root <path>",
+        "--force-rebuild"
+      ]
+    },
+    {
+      "name": "toolchain ensure",
+      "syntax": "inu toolchain ensure [--root <path>]",
+      "description": "Verify that the private Inu toolchain required by the current build is present.",
+      "options": [
+        "--root <path>"
+      ]
+    },
+    {
+      "name": "version",
+      "syntax": "inu version",
+      "aliases": [
+        "inu --version",
+        "inu -v"
+      ],
+      "description": "Print the Inu executable version.",
+      "options": []
+    },
+    {
+      "name": "help",
+      "syntax": "inu help",
+      "aliases": [
+        "inu --help",
+        "inu -h"
+      ],
+      "description": "Print the authoritative command list.",
+      "options": []
+    }
   ],
-  "allowedWithinMajor": [
-    "add-public-type",
-    "add-public-member",
-    "add-optional-capability"
-  ],
-  "abiVersions": {
-    "kernel": "1.0",
-    "driver": "1.0",
-    "syscall": "2.0",
-    "debug": "1.0",
-    "crashDump": "1.0",
-    "heapDiagnostics": "1.0"
+  "codingApi": {
+    "status": "explicit-only",
+    "exportMarker": "<inu.api>",
+    "description": "C# declarations are not SDK API merely because they are public. Only declarations explicitly marked for SDK users are published."
   }
 }

@@ -35,11 +35,11 @@ internal static class HtmlSiteWriter
     private static void WriteIndex(string output, DocumentationConfiguration config, IReadOnlyList<ProjectDocumentation> projects)
     {
         string cards = string.Join(Environment.NewLine, projects.Select(project =>
-            $"<a class=\"card\" href=\"assemblies/{EncodeFile(project.Name)}.html\"><strong>{H(project.Name)}</strong><span>{project.Items.Count} public items · {(project.IsToolAssembly ? "tool" : "SDK")}</span></a>"));
+            $"<a class=\"card\" href=\"assemblies/{EncodeFile(project.Name)}.html\"><strong>{H(project.Name)}</strong><span>{project.Items.Count} exported API items · {(project.IsToolAssembly ? "tool" : "SDK")}</span></a>"));
         string publicRows = string.Join(Environment.NewLine, projects.SelectMany(project => project.Items.Select(item =>
             $"<tr><td><a href=\"api/{CreateApiFileName(item)}.html\">{H(item.QualifiedName)}</a></td><td><a href=\"assemblies/{EncodeFile(project.Name)}.html\">{H(project.Name)}</a></td><td>{H(item.Kind)}</td><td>{H(Summary(item))}</td></tr>")));
         Int32 publicItemCount = projects.Sum(project => project.Items.Count);
-        string body = $"<section class=\"hero\"><p class=\"eyebrow\">VERSION</p><h1>Build a freestanding C# kernel.</h1><p>Offline SDK reference generated from the complete Inu src tree. Every site link is relative, so the complete site remains portable when opened directly with file:// or copied elsewhere.</p><div class=\"actions\"><a href=\"guides/Getting-Started.html\">Get started</a><a href=\"guides/Next-Steps.html\">SDK roadmap</a><a href=\"source/index.html\">Public SDK source</a></div></section><section id=\"assemblies\"><h2>SDK assemblies</h2><p>{projects.Count} source projects containing {publicItemCount} public items are indexed below.</p><div class=\"cards\">{cards}</div></section><section id=\"public-items\"><h2>All public items</h2><p>This table is exhaustive for public declarations discovered under <code>src</code>; it is not limited to the configured facade assemblies.</p><table><thead><tr><th>Public item</th><th>Assembly</th><th>Kind</th><th>Purpose</th></tr></thead><tbody>{publicRows}</tbody></table></section>";
+        string body = $"<section class=\"hero\"><p class=\"eyebrow\">VERSION</p><h1>Build a freestanding C# kernel.</h1><p>Offline SDK reference generated from the complete Inu src tree. Every site link is relative, so the complete site remains portable when opened directly with file:// or copied elsewhere.</p><div class=\"actions\"><a href=\"guides/Getting-Started.html\">Get started</a><a href=\"guides/Next-Steps.html\">SDK roadmap</a><a href=\"source/index.html\">Exported SDK source</a></div></section><section id=\"assemblies\"><h2>SDK assemblies</h2><p>{projects.Count} source projects containing {publicItemCount} exported API items are indexed below.</p><div class=\"cards\">{cards}</div></section><section id=\"public-items\"><h2>All exported API items</h2><p>This table contains only declarations explicitly exported to SDK users with the Inu API marker. Ordinary public implementation declarations are intentionally omitted.</p><table><thead><tr><th>API item</th><th>Assembly</th><th>Kind</th><th>Purpose</th></tr></thead><tbody>{publicRows}</tbody></table></section>";
         File.WriteAllText(Path.Combine(output, "index.html"), Page(config, "SDK usage", body, string.Empty));
     }
 
@@ -49,7 +49,7 @@ internal static class HtmlSiteWriter
             $"<tr><td><a href=\"../api/{CreateApiFileName(item)}.html\">{H(item.Name)}</a></td><td>{H(item.Kind)}</td><td>{H(Summary(item))}</td></tr>"));
         string sourceLink = sourceFiles.TryGetValue(project.Name, out IReadOnlyList<string>? files) && files.Count != 0
             ? $"<p><a href=\"../source/index.html#{EncodeFile(project.Name)}\">Browse {files.Count} SDK source files</a></p>" : string.Empty;
-        string body = $"<p class=\"eyebrow\">{(project.IsToolAssembly ? "SDK TOOL" : "PUBLIC ASSEMBLY")}</p><h1>{H(project.Name)}</h1><dl><dt>Project</dt><dd>{H(project.ProjectPath)}</dd><dt>Dependencies</dt><dd>{H(project.Dependencies.Count == 0 ? "None" : string.Join(", ", project.Dependencies))}</dd></dl>{sourceLink}<h2>Public items</h2><table><thead><tr><th>Name</th><th>Kind</th><th>Purpose</th></tr></thead><tbody>{items}</tbody></table>";
+        string body = $"<p class=\"eyebrow\">{(project.IsToolAssembly ? "SDK TOOL" : "PUBLIC ASSEMBLY")}</p><h1>{H(project.Name)}</h1><dl><dt>Project</dt><dd>{H(project.ProjectPath)}</dd><dt>Dependencies</dt><dd>{H(project.Dependencies.Count == 0 ? "None" : string.Join(", ", project.Dependencies))}</dd></dl>{sourceLink}<h2>API items</h2><table><thead><tr><th>Name</th><th>Kind</th><th>Purpose</th></tr></thead><tbody>{items}</tbody></table>";
         File.WriteAllText(Path.Combine(output, "assemblies", EncodeFile(project.Name) + ".html"), Page(config, project.Name, body, "../"));
     }
 
@@ -93,7 +93,7 @@ internal static class HtmlSiteWriter
     private static IReadOnlyDictionary<string, IReadOnlyList<string>> WriteSourceBrowser(string root, string output, DocumentationConfiguration config, IReadOnlyList<ProjectDocumentation> projects)
     {
         Dictionary<string, IReadOnlyList<string>> result = new(StringComparer.Ordinal);
-        StringBuilder index = new("<p class=\"eyebrow\">PORTABLE RELATIVE SOURCE MAP</p><h1>Public SDK source</h1><p>These pages are copied into the generated site and use relative links only. No repository drive path is required.</p>");
+        StringBuilder index = new("<p class=\"eyebrow\">PORTABLE RELATIVE SOURCE MAP</p><h1>Exported SDK source</h1><p>These pages are copied into the generated site and use relative links only. No repository drive path is required.</p>");
         foreach (ProjectDocumentation project in projects.Where(project => project.Items.Count != 0))
         {
             string projectFile = Path.Combine(root, project.ProjectPath.Replace('/', Path.DirectorySeparatorChar));
@@ -113,7 +113,7 @@ internal static class HtmlSiteWriter
             }
             index.Append("</div></section>");
         }
-        File.WriteAllText(Path.Combine(output, "source", "index.html"), Page(config, "Public SDK source", index.ToString(), "../"));
+        File.WriteAllText(Path.Combine(output, "source", "index.html"), Page(config, "Exported SDK source", index.ToString(), "../"));
         return result;
     }
 
