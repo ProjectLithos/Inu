@@ -107,6 +107,22 @@ public static unsafe class UserlandConsole
     public static Boolean Clear()=>UserlandSystem.Call(UserlandOperation.Event,"console.clear",null,0UL,null,0UL)>=0L;
 }
 
+internal static unsafe class UserlandThreading
+{
+    internal static UInt64 MonotonicNanoseconds()
+    {
+        Int64 value = UserlandSystem.Call(UserlandOperation.Get, "time.monotonic", null, 0UL, null, 0UL);
+        return value > 0L ? unchecked((UInt64)value) : 0UL;
+    }
+
+    internal static Boolean Yield()
+    {
+        Int64 result = UserlandSystem.Call(UserlandOperation.Event, "scheduler.yield", null, 0UL, null, 0UL);
+        UserlandSystem.Pause();
+        return result >= 0L;
+    }
+}
+
 public static unsafe class UserlandProcess
 {
     public const UInt64 StandardInput=0UL;

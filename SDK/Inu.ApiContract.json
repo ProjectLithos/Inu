@@ -159,6 +159,18 @@
         "availability": "ring-3 userland",
         "transport": "Get/Set/Event file services",
         "notes": "Initial Inu-owned .NET-compatible whole-file API. Paths are passed to the selected OS filesystem policy; this layer does not impose a path separator, case rule, fixed directory tree, or filesystem format. Initial user/kernel path transport is ASCII."
+      },
+      {
+        "namespace": "System.Threading",
+        "type": "Current-thread coordination",
+        "members": [
+          "Thread.Yield()",
+          "Thread.Sleep(int)",
+          "Timeout.Infinite"
+        ],
+        "availability": "ring-3 userland",
+        "transport": "Get time.monotonic + Event scheduler.yield",
+        "notes": "Initial Inu-owned .NET-compatible threading surface. Coordinates the current userland execution context only; managed user-thread creation is not yet part of the SDK contract."
       }
     ]
   }

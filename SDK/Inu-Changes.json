@@ -1,14 +1,12 @@
 {
-  "baseVersion": "0.0.61",
-  "version": "0.0.62",
+  "baseVersion": "0.0.62",
+  "version": "0.0.63",
   "changedFiles": [
     "Inu.ApiContract.json",
     "docs/Public-API-Rules.md",
-    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-    "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
-    "src/Inu.Userland.Runtime/IO.cs",
+    "src/Inu.Userland.Runtime/Threading.cs",
     "src/Inu.Userland.Runtime/UserlandRuntime.cs"
   ],
   "removedFiles": [],
-  "summary": "Adds the first explicit freestanding System.IO userland surface with File.Exists, whole-file read/write text/bytes, delete, and Inu-owned I/O exceptions over the existing Get/Set/Event syscall model."
+  "summary": "Adds the first explicit freestanding System.Threading userland surface with Thread.Yield, Thread.Sleep(int), and Timeout.Infinite over Inu monotonic time and scheduler-yield Event services."
 }

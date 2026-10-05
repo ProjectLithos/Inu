@@ -25,6 +25,7 @@ The first supported standard namespaces are:
 - `System.Collections.Generic` — `List<T>`, `Dictionary<TKey,TValue>`, `Queue<T>`, `Stack<T>` and their core interfaces/helpers.
 - `System.Text` — `StringBuilder` plus the initial `Encoding`, `ASCIIEncoding`, and `UTF8Encoding` surface.
 - `System.IO` — initial ring-3 whole-file operations through the OS-selected filesystem service.
+- `System.Threading` — initial ring-3 current-thread coordination with `Thread.Yield`, `Thread.Sleep(int)`, and `Timeout.Infinite`.
 
 A `System.*` type is still not an Inu SDK promise merely because it happens to exist in CoreLib. It must carry the same explicit `<inu.api>` export marker as every other coder-facing API.
 
@@ -41,3 +42,10 @@ This first tranche intentionally does not promise culture-aware formatting, enco
 The first `System.IO` tranche deliberately covers whole-file operations: `File.Exists`, `ReadAllBytes`, `ReadAllText`, `WriteAllBytes`, `WriteAllText`, and `Delete`, with `IOException` and `FileNotFoundException`. The surface is implemented by Inu but crosses the normal Get/Set/Event user/kernel boundary; it does not link userland to kernel VFS implementation classes.
 
 `System.IO` does not choose the filesystem format, path separator, case sensitivity, fixed directories, visibility rules, or permissions policy. The path string is owned by the OS policy and is passed to the selected VFS/filesystem implementation. The initial syscall transport accepts ASCII paths; Unicode path transport is not yet part of the SDK contract.
+
+
+## System.Threading baseline
+
+The first `System.Threading` tranche is intentionally limited to coordination of the current ring-3 execution context. `Thread.Yield()` crosses the existing `scheduler.yield` Event service, while `Thread.Sleep(int)` uses the kernel monotonic clock and cooperatively yields until the requested interval has elapsed. `Timeout.Infinite` is supported as the standard `-1` infinite timeout value.
+
+This release does not advertise `new Thread(...)`, managed user-thread creation, joins, priorities, apartment state, monitors, mutexes, semaphores, or task scheduling. Those APIs must not be presented as supported until Inu has a real user-thread lifecycle and conformance coverage for them.
