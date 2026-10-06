@@ -1,5 +1,5 @@
 {
-  "version": "0.0.75",
+  "version": "0.0.76",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -383,7 +383,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "94527608ad46c50488880500debf733691c90ec7176a74617e1e4863add2fbd7"
+      "sha256": "4c01013ecd559af39327a79bd31e5c00ab86784cfb902ae8cc5cf3c96205cecd"
     },
     {
       "path": "Directory.Build.targets",
@@ -415,7 +415,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "862f24fb7efa187bf73ebd2a16901d7bd3e8c623c18d21cc54e42a7cf947eedc"
+      "sha256": "11feb0b88455eec653d5fd6b8900ebaa83394084d11ca51f1524d04892b74595"
     },
     {
       "path": "Inu-Package.bat",
@@ -447,7 +447,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "2d7354237c7749d30e6efdfc5dae42651ad24bf97b8e1958fcde954d3f675db2"
+      "sha256": "9dfad782e95fa348b84a485126f54f6b0e471b9869ff2a30777a3ba9ca28614f"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -987,7 +987,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "10d63717373cc7892e5c53a1063d1fccad25d47dac1b93468399b44618634ed0"
+      "sha256": "3ac2c9a11ea2345caef2d3020f5e4815cfbb948919cfe07b40360a6f8c73f049"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1451,7 +1451,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "0722f025673f4788eb9ed078b60d735b7889d8ba9ea4b75853e9f4a3dc1c6b55"
+      "sha256": "2a31c171b952328c036fb6a4a469a737342a062bf93b2e15e66bc432e8b2152b"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -2215,7 +2215,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "b59359001b530f3a0ef75c834a97f8299ad9e2476dfbfc7198484f1a8c126c93"
+      "sha256": "63493b65a60e59b93d9236588f9790ffcc82240b0cb072dee8449c1bc35012bd"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3367,7 +3367,7 @@
     },
     {
       "path": "src/Inu.Kernel.Processes/KernelProcesses.Runtime.cs",
-      "sha256": "36b60e35ff25bfa63f56dfbcd0c12edfbcef91f0dbb70e8a82180bd8f641ae54"
+      "sha256": "df9dd70c562cb6193754b52c5aaf4598ec85528f16333b086ebba5d50aa018cb"
     },
     {
       "path": "src/Inu.Kernel.Processes/KernelProcesses.SignalFacade.cs",
@@ -4599,7 +4599,7 @@
     },
     {
       "path": "templates/InuKernel/HAL/BootstrapGraphicsTransportStartup.cs",
-      "sha256": "eb23d6972b3820bd293d93ed78a7ec8a772eb4a14f347132cb481fea04861167"
+      "sha256": "4da381cf80740ce7d518a04180c5d3dcb227daf0645dbca26f69b48cb5f0a231"
     },
     {
       "path": "templates/InuKernel/HAL/DriverBindingStartup.cs",
@@ -4675,7 +4675,7 @@
     },
     {
       "path": "templates/InuKernel/Startup/ProcessRuntimeStartup.cs",
-      "sha256": "8df9ea23b1131af717e21f5bc5945bc34b193f10cbd127570ffafecad16d0503"
+      "sha256": "5779fcf5b84d3e82b3d57ffb2b257c212ba553bd32f63f7746781e50893a9425"
     },
     {
       "path": "templates/InuKernel/Startup/TextConsoleSessionStartup.cs",
@@ -4683,7 +4683,7 @@
     },
     {
       "path": "templates/InuKernel/Startup/TimerDispatchStartup.cs",
-      "sha256": "c6b0ce0a523a9fa65a9472e306ba686935a99bfabe381cecb8030b3705a741ec"
+      "sha256": "97c1414c104831c327266682c1021e04e00e585202edc00e34be51412a68619b"
     },
     {
       "path": "templates/InuKernel/Startup/UserlandCommandStartup.cs",

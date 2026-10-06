@@ -1,9 +1,12 @@
 {
-  "baseVersion": "0.0.74",
-  "version": "0.0.75",
+  "baseVersion": "0.0.75",
+  "version": "0.0.76",
   "changedFiles": [
-    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs"
+    "src/Inu.Kernel.Processes/KernelProcesses.Runtime.cs",
+    "templates/InuKernel/Startup/ProcessRuntimeStartup.cs",
+    "templates/InuKernel/Startup/TimerDispatchStartup.cs",
+    "templates/InuKernel/HAL/BootstrapGraphicsTransportStartup.cs"
   ],
   "removedFiles": [],
-  "summary": "Fixes Microkernel text-session startup after path-policy changes by using an absolute bootstrap shell path with VFS fallback and direct ASCII logical-path retrieval; adds precise shell create/start diagnostics."
+  "summary": "Repairs Microkernel post-protection startup by making the auxiliary userland observation worker non-fatal while keeping core process services mandatory, and adds precise startup failure diagnostics for process, timer-dispatch and bootstrap-graphics stages."
 }

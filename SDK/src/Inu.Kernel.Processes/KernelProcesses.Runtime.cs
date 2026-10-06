@@ -1,6 +1,7 @@
 using System;
 using System.Runtime;
 using Inu.Kernel.AddressSpace;
+using Inu.Kernel.Console;
 using Inu.Kernel.Heap;
 using Inu.Kernel.Gui;
 using KernelFaultInjection = Inu.Kernel.Contracts.KernelFaultInjection;
@@ -47,11 +48,38 @@ public static Boolean ConfigureUserlandRuntime(Boolean enabled){if(_initialized)
 
 public static Boolean Initialize()
     {
-        if(_initialized)return true; if(!KernelAddressSpace.IsInitialized()||!KernelProtection.IsInitialized()||!KernelSecurity.IsInitialized()||!KernelSystemCalls.IsInitialized())return false;
-        if(!RegisterSelectedProcessComponents())return false;
+        if(_initialized)return true;
+        if(!KernelAddressSpace.IsInitialized()||!KernelProtection.IsInitialized()||!KernelSecurity.IsInitialized()||!KernelSystemCalls.IsInitialized())
+        {
+            KernelConsole.WriteHostControl("PROCESS_INIT_PREREQ_FAIL");
+            return false;
+        }
+        if(!RegisterSelectedProcessComponents())
+        {
+            KernelConsole.WriteHostControl("PROCESS_INIT_COMPONENT_FAIL");
+            return false;
+        }
         _initialized=true;
-        if(!KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessIdCurrent,&GetCurrentProcessIdSyscall)||!KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ProcessCommandComplete,&CommandCompleteEventSyscall)||!KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ProcessExit,&CommandCompleteEventSyscall)||!KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ProcessControl,&SetProcessControlSyscall)||!KernelSystemCalls.RegisterLinux(LinuxGetPidService,&GetCurrentProcessIdSyscall)||!KernelSystemCalls.RegisterLinux(LinuxExitService,&LinuxExitCompatibilitySyscall)||!KernelSystemCalls.RegisterCSharpancellationHandler(&HandleForegroundCancellationAtSyscallBoundary)||!KernelInterruptDispatch.RegisterUserCancellationHandler(&HandleForegroundCancellationFromInterrupt)){_initialized=false;return false;}
-        if(_userlandRuntimeConfiguration!=1 && KernelScheduler.IsInitialized() && !KernelScheduler.RegisterRoleWorker(KernelCpuRole.Userland,&ServiceUserlandRuntime,KernelThreadPriority.Normal)){_initialized=false;return false;}
+        if(!KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessIdCurrent,&GetCurrentProcessIdSyscall)||
+           !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ProcessCommandComplete,&CommandCompleteEventSyscall)||
+           !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ProcessExit,&CommandCompleteEventSyscall)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ProcessControl,&SetProcessControlSyscall)||
+           !KernelSystemCalls.RegisterLinux(LinuxGetPidService,&GetCurrentProcessIdSyscall)||
+           !KernelSystemCalls.RegisterLinux(LinuxExitService,&LinuxExitCompatibilitySyscall)||
+           !KernelSystemCalls.RegisterCSharpancellationHandler(&HandleForegroundCancellationAtSyscallBoundary)||
+           !KernelInterruptDispatch.RegisterUserCancellationHandler(&HandleForegroundCancellationFromInterrupt))
+        {
+            KernelConsole.WriteHostControl("PROCESS_INIT_REGISTRATION_FAIL");
+            _initialized=false;
+            return false;
+        }
+
+        // The Userland role worker maintains observation/statistics only. Ordinary ring-3 process
+        // creation, execution, syscalls and cancellation do not depend on it. Treat inability to
+        // create this auxiliary worker as degraded telemetry instead of making the OS unbootable.
+        if(_userlandRuntimeConfiguration!=1 && KernelScheduler.IsInitialized() &&
+           !KernelScheduler.RegisterRoleWorker(KernelCpuRole.Userland,&ServiceUserlandRuntime,KernelThreadPriority.Normal))
+            KernelConsole.WriteHostControl("PROCESS_USERLAND_WORKER_DEGRADED");
         return true;
     }
 

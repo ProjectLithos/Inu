@@ -12,15 +12,15 @@ public static class BootstrapGraphicsTransportStartup
     public static Boolean Initialize()
     {
 #if INU_KERNEL_MICROKERNEL
-        if (!KernelDrivers.Initialize()) return false;
+        if (!KernelDrivers.Initialize()) { KernelConsole.WriteHostControl("BOOTSTRAP_GRAPHICS_DRIVERS_FAIL"); return false; }
 #if INU_COMPONENT_PCI_LEGACY_CONFIGURATION
         if (!KernelPciConfigurationServices.IsRegistered(PciConfigurationTransport.LegacyIo) && !KernelPciLegacyConfigurationProvider.Register()) return false;
 #endif
 #if INU_COMPONENT_PCI_ECAM_CONFIGURATION
         if (!KernelPciConfigurationServices.IsRegistered(PciConfigurationTransport.PcieEcam) && !KernelPciEcamConfigurationProvider.Register()) return false;
 #endif
-        if (!KernelPci.Initialize()) return false;
-        if (!KernelVirtioGpu.Initialize()) return false;
+        if (!KernelPci.Initialize()) { KernelConsole.WriteHostControl("BOOTSTRAP_GRAPHICS_PCI_FAIL"); return false; }
+        if (!KernelVirtioGpu.Initialize()) { KernelConsole.WriteHostControl("BOOTSTRAP_GRAPHICS_VIRTIO_FAIL"); return false; }
         VirtioGpuCapabilities virtioGpu = KernelVirtioGpu.GetCapabilities();
         if (virtioGpu.Displays != 0U)
         {
