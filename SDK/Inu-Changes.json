@@ -1,9 +1,9 @@
 {
-  "baseVersion": "0.0.73",
-  "version": "0.0.74",
+  "baseVersion": "0.0.74",
+  "version": "0.0.75",
   "changedFiles": [
-    "templates/InuKernel/Startup/TextConsoleSessionStartup.cs"
+    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs"
   ],
   "removedFiles": [],
-  "summary": "Fixes the coder-facing TextSession compatibility facade to reference the actual Inu.Kernel.Bootstrap.Startup.UserlandRuntimeStartup namespace."
+  "summary": "Fixes Microkernel text-session startup after path-policy changes by using an absolute bootstrap shell path with VFS fallback and direct ASCII logical-path retrieval; adds precise shell create/start diagnostics."
 }

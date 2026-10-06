@@ -93,21 +93,30 @@ public static unsafe class UserlandRuntimeStartup
     public static Boolean RunShellSession()
     {
         if(!_initialized)return false;
-        Byte* shellPath=stackalloc Byte[22];
-        UInt32 shellLength=CopyLiteral("SYSTEM/SHELL/SHELL.EXE",shellPath,22U);
+        Byte* shellPath=stackalloc Byte[23];
+        UInt32 shellLength=CopyLiteral("/SYSTEM/SHELL/SHELL.EXE",shellPath,23U);
         if(shellLength==0U)return false;
 
         // Load the interactive shell once and keep its address space resident. A command spawn
         // still leaves ring 3 so the child can run in its own isolated process, but returning to
         // the prompt no longer reparses and remaps SHELL.EXE after every command.
-        if(!TryCreateExecutable(shellPath,shellLength,KernelProcessOwnership.Foreground,out KernelProcessInfo shell))return false;
+        if(!TryCreateExecutable(shellPath,shellLength,KernelProcessOwnership.Foreground,out KernelProcessInfo shell))
+        {
+            KernelConsole.WriteHostControl("SHELL_CREATE_FAIL");
+            return false;
+        }
         _shellProcessId=shell.Id;
 
         for(;;)
         {
             SetCurrentContext(null,0U,null,0U);
             _shellOutputWritten=false;
-            if(!KernelProcesses.TryStart(shell.Id,0UL)){KernelProcesses.TryTerminate(shell.Id,-1L);return false;}
+            if(!KernelProcesses.TryStart(shell.Id,0UL))
+            {
+                KernelConsole.WriteHostControl("SHELL_START_FAIL");
+                KernelProcesses.TryTerminate(shell.Id,-1L);
+                return false;
+            }
 
             UInt64 childId=_pendingProcessId;
             if(childId==0UL)
@@ -265,11 +274,9 @@ public static unsafe class UserlandRuntimeStartup
     private static Int64 FileSystemLogicalPathGet(KernelSystemCallFrame* frame)
     {
         if(frame==null||frame->NativeMessage.OutputCapacity==0UL||frame->NativeMessage.Value0==0UL||frame->NativeMessage.Value0>10UL)return (Int64)KernelSystemCallError.InvalidArgument;
-        String logicalPath=FileSystem.GetLogicalPath((FileSystemLogicalPath)frame->NativeMessage.Value0);
-        if(logicalPath==null||logicalPath.Length==0)return (Int64)KernelSystemCallError.NotFound;
-        UInt32 length=(UInt32)logicalPath.Length;if(length>PathCapacity||frame->NativeMessage.OutputCapacity<length)return (Int64)KernelSystemCallError.InvalidArgument;
         Byte* path=stackalloc Byte[(Int32)PathCapacity];
-        for(UInt32 i=0U;i<length;i++){Char c=logicalPath[(Int32)i];if(c>0x7F)return (Int64)KernelSystemCallError.Fault;path[i]=(Byte)c;}
+        if(!FileSystemLogicalPaths.TryGetExternalAscii((FileSystemLogicalPath)frame->NativeMessage.Value0,path,PathCapacity,out UInt32 length))return (Int64)KernelSystemCallError.NotFound;
+        if(frame->NativeMessage.OutputCapacity<length)return (Int64)KernelSystemCallError.InvalidArgument;
         return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)path,length)?(Int64)length:(Int64)KernelSystemCallError.Fault;
     }
 
