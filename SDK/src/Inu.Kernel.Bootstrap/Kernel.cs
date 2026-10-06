@@ -864,7 +864,7 @@ public static unsafe partial class Kernel
         KernelTelemetry.KernelBootEvent("Interactive console", 16UL, KernelBootPhase.End);
         KernelTelemetry.KernelProfile("boot", "KMain-postheap", 1UL, KernelTime.GetMonotonicNanoseconds());
         if (!Startup.UserlandRuntimeStartup.Initialize(boot)) return false;
-        if (!Interrupts.Run()) return false;
+        if (!global::Inu.Kernel.InterruptDispatch.Interrupts.Run()) return false;
         // Select the graphical or text session only after the ordinary user-session
         // environment has reached the same point used by the interactive CLI.
         Boolean sessionReady=true;

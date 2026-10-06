@@ -565,6 +565,26 @@
         "availability": "coder-owned kernel source when storage/filesystem is kernel-resident",
         "transport": "in-process VFS policy value",
         "notes": "Stable logical filesystem locations mapped by the OS author to concrete paths. These categories do not themselves grant permissions."
+      },
+      {
+        "namespace": "Inu.Kernel.Processes",
+        "type": "TextSession",
+        "members": [
+          "Run()"
+        ],
+        "availability": "kernel policy when the text-console session component is selected",
+        "transport": "kernel process/session runtime",
+        "notes": "Coder-facing session policy. Starts and supervises the selected shell as an ordinary isolated ring-3 process."
+      },
+      {
+        "namespace": "Inu.Kernel.Processes",
+        "type": "DesktopSession",
+        "members": [
+          "Run()"
+        ],
+        "availability": "kernel policy when the desktop-with-text-fallback session component is selected",
+        "transport": "kernel process/session runtime",
+        "notes": "Coder-facing session policy. Runs the configured graphical session with text-console fallback."
       }
     ]
   }

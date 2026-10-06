@@ -23,8 +23,10 @@ public static unsafe class InputHardwareStartup
 {
 #if INU_KERNELAREA_INPUT
     private static UInt32 _inputTimerHandle;
+#if INU_KERNELAREA_DRIVERS
     private static UInt64 _keyboardIrqHandle;
     private static UInt64 _mouseIrqHandle;
+#endif
 #endif
 
     public static Boolean Initialize()

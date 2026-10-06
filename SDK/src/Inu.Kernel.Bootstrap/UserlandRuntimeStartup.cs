@@ -330,7 +330,7 @@ public static unsafe class UserlandRuntimeStartup
         UInt32 separator=(currentLength==1U&&current[0]=='/')?0U:1U;
         if(currentLength+separator+normalizedLength>capacity)return false;
         for(UInt32 i=0U;i<currentLength;i++)output[i]=current[i];
-        UInt32 offset=currentLength;if(separator!=0U)output[offset++]='/';
+        UInt32 offset=currentLength;if(separator!=0U)output[offset++]=(Byte)'/';
         for(UInt32 i=0U;i<normalizedLength;i++)output[offset+i]=normalized[i];
         resolvedLength=offset+normalizedLength;return true;
     }

@@ -4,8 +4,8 @@ using Inu.Kernel.Internal.X64;
 using Inu.Kernel.Processes;
 using Inu.Kernel.Bootstrap.HAL;
 
-namespace Inu.Kernel.Bootstrap.Startup;
-
+namespace Inu.Kernel.Bootstrap.Startup
+{
 /// <summary>Default Inu session policy: try the selected graphical session and fall back to text.</summary>
 public static class DesktopOrTextSessionStartup
 {
@@ -40,5 +40,21 @@ public static class DesktopOrTextSessionStartup
 
         KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:FALLBACK");
         return UserlandRuntimeStartup.RunShellSession();
+    }
+}
+}
+
+namespace Inu.Kernel.Processes
+{
+    /// <summary><inu.api>Coder-facing graphical-session policy. Runs the selected desktop/login session with text-console fallback.</inu.api></summary>
+    public static class DesktopSession
+    {
+        public static Boolean Run()=>global::Inu.Kernel.Bootstrap.Startup.DesktopOrTextSessionStartup.Run();
+    }
+
+    /// <summary>Compatibility facade for coder-owned Kernel.cs files generated before 0.0.73.</summary>
+    public static class DesktopOrTextSessionStartup
+    {
+        public static Boolean Run()=>DesktopSession.Run();
     }
 }

@@ -36,7 +36,7 @@ public static unsafe class SchedulerRuntimeStartup
             return false;
         }
         // The reschedule IPI must have a live managed dispatcher before Scheduler.Run wakes APs.
-        if (!Interrupts.Initialize())
+        if (!global::Inu.Kernel.InterruptDispatch.Interrupts.Initialize())
         {
             KernelConsole.WriteLine("NOBT:FAIL:SCHEDULER-INTERRUPTS");
             return false;

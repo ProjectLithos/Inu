@@ -6,5 +6,5 @@ namespace Inu.Kernel.Bootstrap.Startup;
 /// <summary>Enables runtime interrupt delivery after the OS-selected handlers are ready.</summary>
 public static class InterruptRuntimeStartup
 {
-    public static Boolean Enable() => Interrupts.Run();
+    public static Boolean Enable() => global::Inu.Kernel.InterruptDispatch.Interrupts.Run();
 }

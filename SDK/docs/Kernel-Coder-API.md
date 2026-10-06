@@ -116,3 +116,14 @@ FileSystem.SetLogicalPath(FileSystemLogicalPath.Commands, ":System:Commands");
 ```
 
 These mappings name locations; they do not themselves grant permissions. The selected filesystem/security policy remains responsible for access control.
+
+## Session policy
+
+Coder-owned `Kernel.cs` uses the selected session facade rather than bootstrap startup implementation types:
+
+```csharp
+TextSession.Run();
+DesktopSession.Run();
+```
+
+`TextConsoleSessionStartup` and `DesktopOrTextSessionStartup` remain compatibility facades for existing coder-owned kernels generated before 0.0.73, but new source should use `TextSession` / `DesktopSession`.

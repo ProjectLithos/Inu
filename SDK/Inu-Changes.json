@@ -1,17 +1,17 @@
 {
-  "baseVersion": "0.0.71",
-  "version": "0.0.72",
+  "baseVersion": "0.0.72",
+  "version": "0.0.73",
   "changedFiles": [
     "Inu.ApiContract.json",
-    "docs/Filesystem-VFS-Contract.md",
     "docs/Kernel-Coder-API.md",
-    "src/Inu.Kernel.Storage/FileSystemLogicalPaths.cs",
-    "src/Inu.Kernel.Storage/FileSystemPathPolicy.cs",
-    "src/Inu.Kernel.Storage/FileSystemLifecycle.cs",
-    "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
     "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-    "src/Userland/Shell/InuShell.cs"
+    "src/Inu.Kernel.Bootstrap/Kernel.cs",
+    "templates/InuKernel/Boot/SchedulerRuntimeStartup.cs",
+    "templates/InuKernel/Startup/InterruptRuntimeStartup.cs",
+    "templates/InuKernel/Startup/TextConsoleSessionStartup.cs",
+    "templates/InuKernel/Startup/DesktopOrTextSessionStartup.cs",
+    "templates/InuKernel/HAL/InputHardwareStartup.cs"
   ],
   "removedFiles": [],
-  "summary": "Adds OS-author logical filesystem path categories and makes the supplied shell discover the configured Commands path rather than hard-coding System/Commands."
+  "summary": "Fixes 0.0.72 kernel compile regressions and introduces compatibility-safe coder-facing text/desktop session policy facades."
 }
