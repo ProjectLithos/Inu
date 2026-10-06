@@ -28,4 +28,18 @@ public static class Scheduler
     public static Boolean Pause()=>KernelScheduler.Pause();
     public static Boolean Resume()=>KernelScheduler.Resume();
     public static Boolean Stop()=>KernelScheduler.Stop();
+
+    /// <summary><inu.api>Gets the scheduler time slice in nanoseconds.</inu.api></summary>
+    public static UInt64 GetQuantumNanoseconds()=>KernelScheduler.GetQuantumNanoseconds();
+
+    /// <summary><inu.api>Sets the scheduler time slice in nanoseconds. Inu clamps the value to the scheduler-supported range.</inu.api></summary>
+    public static Boolean SetQuantumNanoseconds(UInt64 nanoseconds)=>KernelScheduler.SetQuantumNanoseconds(nanoseconds);
+
+    /// <summary><inu.api>Sets the scheduler time slice in milliseconds.</inu.api></summary>
+    public static Boolean SetQuantumMilliseconds(UInt32 milliseconds)
+    {
+        if(milliseconds==0U)return false;
+        UInt64 ns=(UInt64)milliseconds*1000000UL;
+        return KernelScheduler.SetQuantumNanoseconds(ns);
+    }
 }

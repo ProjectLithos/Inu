@@ -76,3 +76,28 @@ Interrupts.Run();
 When kernel-resident drivers are selected, `Inu.Kernel.Hardware.Devices` exposes unified device-tree policy such as counts, matching/start, pause and resume. It deliberately does not make PCI/USB/VirtIO implementation classes part of the default coder API.
 
 `SystemCalls` preserves Inu's native ABI rule: custom native services are registered only as Get, Set or Event messages. No fourth native syscall class is introduced.
+
+
+## Runtime policy controls
+
+The OS author can now express common runtime choices directly in coder-owned `Kernel.cs` instead of editing Inu bootstrap implementation files.
+
+```csharp
+// Scheduler policy
+Scheduler.SetQuantumMilliseconds(5);
+
+// CPU-role policy
+Smp.SetRole(KernelCpuRole.Kernel, 0);
+Smp.SetRole(KernelCpuRole.Userland, KernelCpuSet.All());
+
+// Console buffering policy: 0=automatic, 1=single, 2=double, 3=triple
+Console.SetBufferCount(0);
+
+// Graphical-session startup policy. These remain ordinary isolated ring-3 processes.
+Processes.ConfigureGraphicalSession("/BIN/INU-DESKTOP.EXE", "/BIN/INU-LOGIN.EXE");
+Processes.StartGraphicalSession();
+```
+
+These calls change runtime policy over mechanisms that Kath selected into the OS. They do not cause Kath to regenerate or replace coder-owned source.
+
+Filesystem **path syntax policy is deliberately not exposed by this release**. The current VFS still canonicalises around `/`; advertising a configurable joiner/case policy before the VFS obeys it would make the SDK API untruthful. That policy must be implemented in the VFS first and only then promoted to this coder-facing surface.

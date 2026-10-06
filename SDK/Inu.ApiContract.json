@@ -215,7 +215,9 @@
           "State",
           "Mode",
           "RequestedMode",
-          "IsRunning"
+          "IsRunning",
+          "GetBufferCount()",
+          "SetBufferCount(uint)"
         ],
         "availability": "coder-owned kernel source",
         "transport": "in-process kernel policy facade",
@@ -244,7 +246,12 @@
           "Terminate(ulong, long)",
           "GetForegroundProcessId()",
           "CancelForeground()",
-          "IsForegroundCancellationRequested()"
+          "IsForegroundCancellationRequested()",
+          "ConfigureGraphicalSession(string, string)",
+          "StartGraphicalSession()",
+          "IsGraphicalSessionStarting()",
+          "IsGraphicalSessionActive()",
+          "HasGraphicalSessionFailed()"
         ],
         "availability": "coder-owned kernel source",
         "transport": "in-process process-policy facade",
@@ -327,7 +334,10 @@
           "Resume()",
           "Stop()",
           "IsInitialized()",
-          "GetLifecycleState()"
+          "GetLifecycleState()",
+          "GetQuantumNanoseconds()",
+          "SetQuantumNanoseconds(ulong)",
+          "SetQuantumMilliseconds(uint)"
         ],
         "availability": "coder-owned kernel source when a scheduler is selected",
         "transport": "in-process kernel lifecycle facade",
@@ -343,7 +353,11 @@
           "Resume()",
           "Stop()",
           "Unload()",
-          "GetLifecycleState()"
+          "GetLifecycleState()",
+          "SetRole(KernelCpuRole, KernelCpuSet)",
+          "SetRole(KernelCpuRole, uint)",
+          "GetRole(KernelCpuRole)",
+          "GetProcessorCount()"
         ],
         "availability": "coder-owned kernel source when SMP is selected",
         "transport": "in-process kernel lifecycle facade",
@@ -485,6 +499,27 @@
         "availability": "coder-owned kernel source",
         "transport": "in-process kernel lifecycle facade",
         "notes": "Coordinates power-management lifecycle; hardware/power policy remains OS-owned."
+      },
+      {
+        "namespace": "Inu.Kernel.Smp",
+        "type": "KernelCpuRole / KernelCpuSet",
+        "members": [
+          "KernelCpuRole.Kernel",
+          "KernelCpuRole.Userland",
+          "KernelCpuRole.Gui",
+          "KernelCpuRole.Drivers",
+          "KernelCpuRole.Interrupts",
+          "KernelCpuRole.Networking",
+          "KernelCpuRole.Storage",
+          "KernelCpuRole.Realtime",
+          "KernelCpuRole.Background",
+          "KernelCpuSet.All()",
+          "KernelCpuSet.Single(uint)",
+          "KernelCpuSet.Contains(uint)"
+        ],
+        "availability": "kernel policy when SMP is selected",
+        "transport": "in-kernel policy",
+        "notes": "Stable CPU-role and processor-set value types used by the coder-facing Smp facade."
       }
     ]
   }

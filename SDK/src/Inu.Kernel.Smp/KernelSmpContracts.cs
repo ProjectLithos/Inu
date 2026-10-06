@@ -22,10 +22,10 @@ public readonly struct KernelCpuInfo
 }
 
 
-/// <summary>Execution roles that an OS author can map onto logical CPUs.</summary>
+/// <summary><inu.api>Execution roles that an OS author can map onto logical CPUs.</inu.api></summary>
 public enum KernelCpuRole : Byte { Kernel=0, Userland=1, Gui=2, Drivers=3, Interrupts=4, Networking=5, Storage=6, Realtime=7, Background=8 }
 
-/// <summary>A 256-logical-CPU set used by role assignment and affinity policy.</summary>
+/// <summary><inu.api>A 256-logical-CPU set used by role assignment and affinity policy.</inu.api></summary>
 public readonly struct KernelCpuSet
 {
  public KernelCpuSet(UInt64 cpu0To63,UInt64 cpu64To127,UInt64 cpu128To191,UInt64 cpu192To255){Cpu0To63=cpu0To63;Cpu64To127=cpu64To127;Cpu128To191=cpu128To191;Cpu192To255=cpu192To255;}

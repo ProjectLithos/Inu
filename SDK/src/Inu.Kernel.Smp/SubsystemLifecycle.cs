@@ -12,4 +12,16 @@ public static class Smp
     public static Boolean Start(){Sync();if(_state!=Ready&&_state!=Stopped)return false;_state=Running;return true;} public static Boolean Run(){Sync();if(_state==Paused)return Resume();if(_state==Running)return true;return Start();}
     public static Boolean Pause(){Sync();if(_state!=Running)return false;_state=Paused;return true;} public static Boolean Resume(){Sync();if(_state!=Paused)return false;_state=Running;return true;} public static Boolean Stop(){Sync();if(_state==Stopped||_state==Unloaded)return false;_state=Stopped;return true;}
     public static Boolean Unload(){Sync();if(!KernelSmp.IsInitialized())return false;UInt32 bootstrap=KernelSmp.GetBootstrapProcessorIndex();UInt32 count=KernelSmp.GetProcessorCount();Boolean ok=true;for(UInt32 i=0U;i<count;i++){if(i==bootstrap)continue;if(!KernelSmp.TryShutdownProcessor(i))ok=false;}if(ok){_state=Unloaded;_observed=true;}return ok;}
+
+    /// <summary><inu.api>Assigns one execution role to a set of logical CPUs.</inu.api></summary>
+    public static Boolean SetRole(KernelCpuRole role,KernelCpuSet processors)=>KernelSmp.SetRoleCpuSet(role,processors);
+
+    /// <summary><inu.api>Assigns one execution role to a single logical CPU.</inu.api></summary>
+    public static Boolean SetRole(KernelCpuRole role,UInt32 processor)=>KernelSmp.SetRoleCpuSet(role,KernelCpuSet.Single(processor));
+
+    /// <summary><inu.api>Gets the current CPU set assigned to an execution role.</inu.api></summary>
+    public static KernelCpuSet GetRole(KernelCpuRole role)=>KernelSmp.GetRoleCpuSet(role);
+
+    /// <summary><inu.api>Gets the number of processors discovered by Inu SMP.</inu.api></summary>
+    public static UInt32 GetProcessorCount()=>KernelSmp.GetProcessorCount();
 }

@@ -139,6 +139,16 @@ public static class Console
     /// <summary>Clears the active framebuffer text console when one is enabled.</summary>
     public static Boolean Clear() => _state == ConsoleState.Running && UsesFramebuffer(_activeMode) && KernelConsole.ClearScreen();
 
+    /// <summary><inu.api>Gets the requested framebuffer buffer count. Zero means automatic buffering.</inu.api></summary>
+    public static UInt32 GetBufferCount()=>KernelConsole.GetFramebufferBufferSetting();
+
+    /// <summary><inu.api>Selects automatic (0), single (1), double (2), or triple (3) framebuffer buffering.</inu.api></summary>
+    public static Boolean SetBufferCount(UInt32 count)
+    {
+        if(count>3U)return false;
+        return KernelConsole.SetFramebufferBufferCount(count);
+    }
+
     private static Boolean UsesFramebuffer(ConsoleType type)
     {
         return type == ConsoleType.TextAscii || type == ConsoleType.TextAnsi || type == ConsoleType.FramebufferText || type == ConsoleType.Graphics;

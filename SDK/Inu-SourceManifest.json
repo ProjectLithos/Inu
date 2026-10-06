@@ -1,5 +1,5 @@
 {
-  "version": "0.0.69",
+  "version": "0.0.70",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -795,7 +795,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "758072fad124c4877e5f30085778ef21d675ebf1627f5cac269825fc33138ed4"
+      "sha256": "9806792c4b6fbb44125d0c2c18095eb3832e95d2434008f647e0cda8405a73a7"
     },
     {
       "path": "Directory.Build.targets",
@@ -899,7 +899,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "1072b5e998727ddf3fbfc8df267912c8c9768132c32d21e1e590758ef77e4e35"
+      "sha256": "7321457d7891364dcd08e98d873fd9740c03045d72f22d68daa1acd02d3075e4"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -907,7 +907,7 @@
     },
     {
       "path": "docs/Kernel-Coder-API.md",
-      "sha256": "6df9c956ac538a9de4fc7739a69808036c1bfd43a77acbeeb8fe80af97f790e3"
+      "sha256": "af78dad212d48a207230390788a4193c1a25529940bcef653ecd4c7161218ace"
     },
     {
       "path": "docs/Kernel-Heap.md",
@@ -1303,7 +1303,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "534bcd192298b298c4a71d5aa8a9a0bfcc29b293e69d70562e55d8841f3599f9"
+      "sha256": "869e7bf4d9c01e7ea2ce47bac4b9df77bb89d72b9c7ac4ba7e92217210136ca7"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -1667,7 +1667,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "4f239ca88f627735a0116a247534c1c88922b6a154d632f80754e45c75c384d2"
+      "sha256": "ae13573a9369069031585b184437dffbcaa99eeeacae2f1ddaa59dedc1bbbe0d"
     },
     {
       "path": "Inu-Package.bat",
@@ -1675,7 +1675,7 @@
     },
     {
       "path": "Inu.ApiContract.json",
-      "sha256": "3d6265a09db37086d02fabeaf7e036916d2df843209c671f2c58b7126e030590"
+      "sha256": "5e39beee4041a8eaf6efa50637914b78624642f7465be04cd577e7937fd8be5e"
     },
     {
       "path": "Inu.ArchitectureBoundaries.json",
@@ -1703,7 +1703,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "96bc45e4949816302b69cd23e2b4dc69a5b3b30419c5904fc8c49e2578df5fc9"
+      "sha256": "7be054b6b7012317bc0119f7aa8a4abb4e207367940e1eb7c5298d1732ec0e37"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -2211,7 +2211,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "04cedf0ae7d2f7bc8c4525f8d15701d6280914b43ed5f97651631497bf33c682"
+      "sha256": "c6fb201ca7907f8e4d173cb605bc8bca29a6d81ab776c753f971799c038e3527"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -2623,7 +2623,7 @@
     },
     {
       "path": "src/Inu.Kernel.Console/ConsoleSubsystem.cs",
-      "sha256": "699a18ffc38afdaa80fb6685674ef317608bf6de652b1af9a0a4338b8de06380"
+      "sha256": "e2be5eb57550336e15f80958cbe20426d9cec7c62d38850eb1cf134b148e5678"
     },
     {
       "path": "src/Inu.Kernel.Console/FramebufferBuffering.cs",
@@ -3399,7 +3399,7 @@
     },
     {
       "path": "src/Inu.Kernel.Processes/Processes.cs",
-      "sha256": "67675a758bb5d12bdeef2cb287fc1c3d73378914b0baeb71f21ef3fce807195c"
+      "sha256": "7942deb0ab6e012e703c2d986a3955a59446070528bf7862c625d5be62587d9b"
     },
     {
       "path": "src/Inu.Kernel.Processes/ProcessExecutableMath.cs",
@@ -3607,7 +3607,7 @@
     },
     {
       "path": "src/Inu.Kernel.Scheduler/Scheduler.cs",
-      "sha256": "1b3d734f5c252644b2a04c737c38db59eaeb7712aee557c4051226633fe8c1cb"
+      "sha256": "e4bed31cf2db6609bff4bf561fb521787b5bb931c2bf9ca76dd7af3cec58a412"
     },
     {
       "path": "src/Inu.Kernel.Security/Inu.Kernel.Security.csproj",
@@ -3683,7 +3683,7 @@
     },
     {
       "path": "src/Inu.Kernel.Smp/KernelSmpContracts.cs",
-      "sha256": "361e307b8449dbe6abcfd454ccc5c58a7be53ab40ffb41de4367f84c667a640f"
+      "sha256": "c5250998a6d093165a120c6acbf4e91bec04ca0fbd0662eca5ef13308db9b262"
     },
     {
       "path": "src/Inu.Kernel.Smp/KernelSmpMath.cs",
@@ -3691,7 +3691,7 @@
     },
     {
       "path": "src/Inu.Kernel.Smp/SubsystemLifecycle.cs",
-      "sha256": "b2ece1275eee269030066c53fe5edc2177fd212eda9232cd85fbd8a5dc540d07"
+      "sha256": "bba574718b5603148c5694a7865cc1cd89e97715db3cc6b96fd48f981f4e3b26"
     },
     {
       "path": "src/Inu.Kernel.Storage/FileSystemLifecycle.cs",
