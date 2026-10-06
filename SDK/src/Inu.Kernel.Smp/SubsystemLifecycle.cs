@@ -3,7 +3,7 @@ using Inu.Kernel.Console;
 
 namespace Inu.Kernel.Smp;
 
-/// <summary>Stable public lifecycle facade for SMP services. The bootstrap processor is never unloaded.</summary>
+/// <summary><inu.api>Coder-facing lifecycle facade for SMP services. The bootstrap processor is never unloaded.</inu.api></summary>
 public static class Smp
 {
     private const Byte Stopped=0,Ready=1,Running=2,Paused=3,Unloaded=4; private static Byte _state; private static Boolean _observed;

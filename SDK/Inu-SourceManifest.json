@@ -1,5 +1,5 @@
 {
-  "version": "0.0.65",
+  "version": "0.0.68",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -795,7 +795,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "2a92462d7beaf2b2ad5468c8926cbe25aa0417f71ef1f24f4ae87b6fa60b983d"
+      "sha256": "599e4ae15d4945c5627080bc9bf2908ec3abed1c1d6f379baa58278b6cebd721"
     },
     {
       "path": "Directory.Build.targets",
@@ -899,11 +899,15 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "606681a80dd895954f74e003cd7ab12c190db369c7a568467d89d3e1afd764d3"
+      "sha256": "885f5b9b823bc6ff8018b55c0a0e574eead8d4a75d5abbe84da45a22da555eda"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
       "sha256": "861603a5a124ce72fdf7617a8de988bd1e1021d117ac525b28c5c062fcf3b503"
+    },
+    {
+      "path": "docs/Kernel-Coder-API.md",
+      "sha256": "d1dde0df34498a1ff12c31f058e8ecbb07084d3d0c56d223b5edfa4239529810"
     },
     {
       "path": "docs/Kernel-Heap.md",
@@ -995,7 +999,7 @@
     },
     {
       "path": "docs/Public-API-Rules.md",
-      "sha256": "d94425090edbb96f2a50b205af70185f789dad04a67207418490679cd42e1570"
+      "sha256": "ed682b0cccde132d35cf4f06d6054176ac1c2d698af421bcd10aafe733508a25"
     },
     {
       "path": "docs/Release-0.0.18.md",
@@ -1299,7 +1303,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "ac20b5813698ba48b8ae1f125aff262f5b0c1cecd80466f52818147b0179687d"
+      "sha256": "29f6ceabbfa108e561913c0aa22a0b537ffbf3deca5bfe30270047fff200d90c"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -1663,7 +1667,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "1c51d49978104583c8bf0faf37d85c3e2f63b3d5364113394591afd3760e51f2"
+      "sha256": "3d8cd7ebf162eb5a377fa15f3f379f0b9365b4967bb538c633660b4ff9cbb17b"
     },
     {
       "path": "Inu-Package.bat",
@@ -1671,7 +1675,7 @@
     },
     {
       "path": "Inu.ApiContract.json",
-      "sha256": "6fb4059f1cafbe994773cbf263e2f9d940ac73545beba72cfbe72f8c8a3258e3"
+      "sha256": "fb005539f2a4a6c6ece5832839dac1e5ee18250733b9d4c00f8565c602c66ddc"
     },
     {
       "path": "Inu.ArchitectureBoundaries.json",
@@ -1699,7 +1703,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "4b364bd2ecf0e3747a5cf13a56f35b200c887889f25a928ec7053588638addc5"
+      "sha256": "1b5686e231c91d3363b520cd249b57281f0d5545c1f83f00a15be17c7b56835a"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -2207,7 +2211,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "069e3bc9ceb1e79a5ff34202a21fce2077817c0d04862fa1f1fccc35608516f0"
+      "sha256": "d4f97f8f8b8ea7183be29908845b3bd61642d23a6b98758804912e0378e8b403"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -2515,7 +2519,7 @@
     },
     {
       "path": "src/Inu.Kernel.Audio/SubsystemLifecycle.cs",
-      "sha256": "d0adc3dfb5a229701c3d9d0d48b8c9ab5036c66a109d35b33ad6e6c7542de721"
+      "sha256": "43784931c24c6e3f4212efe37fed596d4303d69795f179bf095a0a95f3277d28"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/Inu.Kernel.Bootstrap.csproj",
@@ -2563,7 +2567,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-      "sha256": "a563e3cd9f7f12d9ded65f2f388cc8850f58ed851c373a42201519b9c3abae66"
+      "sha256": "b4c61217fd9798de26d9a6e037d348d05ef9e1aee8dfdbcb459da11ad651f8d0"
     },
     {
       "path": "src/Inu.Kernel.Console/BitmapFont.cs",
@@ -2619,7 +2623,7 @@
     },
     {
       "path": "src/Inu.Kernel.Console/ConsoleSubsystem.cs",
-      "sha256": "254e5a7546dcb85ecb7af70455638b195e0626b212e8eb2bb2f8ba494b1f7f57"
+      "sha256": "699a18ffc38afdaa80fb6685674ef317608bf6de652b1af9a0a4338b8de06380"
     },
     {
       "path": "src/Inu.Kernel.Console/FramebufferBuffering.cs",
@@ -2787,7 +2791,7 @@
     },
     {
       "path": "src/Inu.Kernel.Drivers/SubsystemLifecycle.cs",
-      "sha256": "029e87c61fea8fbd82e8c84764da86c7aa5275946aba8ed0db6b8d9d1468068f"
+      "sha256": "30ba40a4838cd350ba7998be2b12e1964562fcc55c3f6b73ab396f681e5c5e9a"
     },
     {
       "path": "src/Inu.Kernel.E1000/E1000Contracts.cs",
@@ -2863,7 +2867,7 @@
     },
     {
       "path": "src/Inu.Kernel.Graphics/SubsystemLifecycle.cs",
-      "sha256": "4a5cc7d6b95cc5fa01b66c7882b7208ca43babb89a96c0a5d062fd4aa07f8284"
+      "sha256": "b7748642006a45d6df18158b73bcd7ee3cfe70e05959a12c1c25c197b9b212b6"
     },
     {
       "path": "src/Inu.Kernel.Gui/GuiContracts.cs",
@@ -3155,7 +3159,7 @@
     },
     {
       "path": "src/Inu.Kernel.Networking/SubsystemLifecycle.cs",
-      "sha256": "3b83b5555d9d6a42bbd2bfcbd370565eb6181532ffe54cf1de4199a2a2201dac"
+      "sha256": "c19f25d8ea6be087fd88cff9bacf1d23d945ec9d7b832c62b11d91ce003ea790"
     },
     {
       "path": "src/Inu.Kernel.Nvme/Inu.Kernel.Nvme.csproj",
@@ -3271,7 +3275,7 @@
     },
     {
       "path": "src/Inu.Kernel.Power/SubsystemLifecycle.cs",
-      "sha256": "63b2abc57cf53693896c433ba30e5ff82158a467ce38ebe6982042fdacbce570"
+      "sha256": "e4bfab89881ed99e8f102c61478ba32fe643c1bb5636db76174ed2a1c3234777"
     },
     {
       "path": "src/Inu.Kernel.Processes/GuiAutostart.cs",
@@ -3363,7 +3367,7 @@
     },
     {
       "path": "src/Inu.Kernel.Processes/KernelProcessRecordStore.cs",
-      "sha256": "47ce9e8787863078f9e7567cf049948376d795e04ee377dba257091723f28367"
+      "sha256": "da6f8dea793684ac493252a423f7d68deaa69ccdb274b9a05212520c9e1b172b"
     },
     {
       "path": "src/Inu.Kernel.Processes/KernelProcessServices.cs",
@@ -3403,7 +3407,7 @@
     },
     {
       "path": "src/Inu.Kernel.Ps2/InputLifecycle.cs",
-      "sha256": "3adc170ad566d40bb757dce94cc6020fee06c5d570a06833e114a78a793694c6"
+      "sha256": "21c7a74be7c09c6596ff7001c5994ceaa579f926af49b010fa7f67ba191110e5"
     },
     {
       "path": "src/Inu.Kernel.Ps2/Inu.Kernel.Ps2.csproj",
@@ -3587,7 +3591,7 @@
     },
     {
       "path": "src/Inu.Kernel.Scheduler/Scheduler.cs",
-      "sha256": "456fb5753c7d8ae87ef234961762c400b8c13678bbd5307e6f00a4c7866439f0"
+      "sha256": "1b3d734f5c252644b2a04c737c38db59eaeb7712aee557c4051226633fe8c1cb"
     },
     {
       "path": "src/Inu.Kernel.Security/Inu.Kernel.Security.csproj",
@@ -3671,11 +3675,11 @@
     },
     {
       "path": "src/Inu.Kernel.Smp/SubsystemLifecycle.cs",
-      "sha256": "63599c3e13d52175547638e1d51b3f1d35dfd8481f0cddd71e5b8c2d085be2f7"
+      "sha256": "b2ece1275eee269030066c53fe5edc2177fd212eda9232cd85fbd8a5dc540d07"
     },
     {
       "path": "src/Inu.Kernel.Storage/FileSystemLifecycle.cs",
-      "sha256": "f69e5fcfdfa6be11190bed86feece8f88187f5605372fae62f581c64e6e69d24"
+      "sha256": "d32227b1fec14a3c789ca69d514b69ca4de514880a1ce97ac2c3679bf2ceb9b5"
     },
     {
       "path": "src/Inu.Kernel.Storage/Inu.Kernel.Storage.csproj",
@@ -3815,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
-      "sha256": "3be10c58c171779ed6612b5d45474edadb01634d80f09aa25eb1c6b5e984934b"
+      "sha256": "dc2df79cb9ffa17968d8182a9d92105e6938ca85d3d7d18f5c45aab7bd703ce0"
     },
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCallMath.cs",
@@ -3915,7 +3919,7 @@
     },
     {
       "path": "src/Inu.Kernel.Time/SubsystemLifecycle.cs",
-      "sha256": "4ffc7a8a41210b7d8828a674390f39a878a7c182d658b8561f01ddd475635693"
+      "sha256": "a1ee690e1a0c0bcbe295a126806b1d7fb462859d01e8bbedeadcb42151f83bda"
     },
     {
       "path": "src/Inu.Kernel.TimerDispatch/Inu.Kernel.TimerDispatch.csproj",
@@ -4379,7 +4383,7 @@
     },
     {
       "path": "src/Inu.Userland.Runtime/IO.cs",
-      "sha256": "61ab6401de5e68ce4804eedae11d64d5027c2106bbe2cee2a6ca75c4ba643112"
+      "sha256": "3a00a170c079e6a238ab2d310beb3cc5412800eb2f528acffbe4c4e4632882b1"
     },
     {
       "path": "src/Inu.Userland.Runtime/Threading.cs",
@@ -4387,7 +4391,7 @@
     },
     {
       "path": "src/Inu.Userland.Runtime/UserlandRuntime.cs",
-      "sha256": "fc997504f09891dc45a7cb2f189339a3cc798ae50808bb93f0950b3208828e93"
+      "sha256": "c2bfe30bf6c1fa7ff9fbcdba14dadc8b15b132814e8e854136b90c81e997e0b5"
     },
     {
       "path": "src/Inu.Userland.RuntimeSupport/Inu.Userland.RuntimeSupport.csproj",

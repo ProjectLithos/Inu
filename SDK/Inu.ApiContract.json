@@ -147,7 +147,7 @@
       },
       {
         "namespace": "System.IO",
-        "type": "Whole-file I/O",
+        "type": "Whole-file and directory I/O",
         "members": [
           "File.Exists(string)",
           "File.ReadAllBytes(string)",
@@ -155,12 +155,23 @@
           "File.WriteAllBytes(string, byte[])",
           "File.WriteAllText(string, string)",
           "File.Delete(string)",
+          "Directory.Exists(string)",
+          "Directory.GetCurrentDirectory()",
+          "Directory.SetCurrentDirectory(string)",
+          "Directory.CreateDirectory(string)",
+          "Directory.Delete(string)",
+          "DirectoryInfo(string)",
+          "DirectoryInfo.FullName",
+          "DirectoryInfo.Exists",
+          "DirectoryInfo.Create()",
+          "DirectoryInfo.Delete()",
           "IOException",
-          "FileNotFoundException"
+          "FileNotFoundException",
+          "DirectoryNotFoundException"
         ],
         "availability": "ring-3 userland",
-        "transport": "Get/Set/Event file services",
-        "notes": "Initial Inu-owned .NET-compatible whole-file API. Paths are passed to the selected OS filesystem policy; this layer does not impose a path separator, case rule, fixed directory tree, or filesystem format. Initial user/kernel path transport is ASCII."
+        "transport": "Get/Set/Event file, directory, and per-process current-directory services",
+        "notes": "Inu-owned .NET-compatible whole-file and basic directory API. Current working directory is process-local; spawned child processes inherit the parent working directory, and relative file/directory paths are resolved by the kernel against that process state before reaching the VFS. The current bootstrap starts root userland processes at the mounted VFS namespace root. Filesystem format, permissions and higher-level directory layout remain OS policy. Directory.CreateDirectory creates one directory level; Directory.Delete currently removes empty directories only. Enumeration remains deferred until the selected path-join policy is exposed directly. Initial user/kernel path transport is ASCII."
       },
       {
         "namespace": "System.Threading",
@@ -173,6 +184,229 @@
         "availability": "ring-3 userland",
         "transport": "Get time.monotonic + Event scheduler.yield",
         "notes": "Initial Inu-owned .NET-compatible threading surface. Coordinates the current userland execution context only; managed user-thread creation is not yet part of the SDK contract."
+      },
+      {
+        "namespace": "Inu.Kernel.Console",
+        "type": "ConsoleType",
+        "members": [
+          "Auto",
+          "TextAscii",
+          "TextAnsi",
+          "FramebufferText",
+          "Graphics",
+          "Serial"
+        ],
+        "availability": "coder-owned kernel source",
+        "transport": "in-process kernel policy facade",
+        "notes": "Selects the requested kernel console policy."
+      },
+      {
+        "namespace": "Inu.Kernel.Console",
+        "type": "Console",
+        "members": [
+          "Run(ConsoleType)",
+          "TryPromoteGraphics()",
+          "Stop()",
+          "Resume()",
+          "Unload()",
+          "Write(string)",
+          "WriteLine(string)",
+          "Clear()",
+          "State",
+          "Mode",
+          "RequestedMode",
+          "IsRunning"
+        ],
+        "availability": "coder-owned kernel source",
+        "transport": "in-process kernel policy facade",
+        "notes": "Stable console lifecycle/policy surface. KernelConsole remains implementation/advanced mechanism."
+      },
+      {
+        "namespace": "Inu.Kernel.Time",
+        "type": "Time",
+        "members": [
+          "Initialize()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Unload()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source",
+        "transport": "in-process kernel lifecycle facade",
+        "notes": "Controls timekeeping lifecycle; pausing does not stop the hardware monotonic clock."
+      },
+      {
+        "namespace": "Inu.Kernel.Scheduler",
+        "type": "Scheduler",
+        "members": [
+          "Initialize()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "IsInitialized()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source when a scheduler is selected",
+        "transport": "in-process kernel lifecycle facade",
+        "notes": "Stable scheduler lifecycle surface."
+      },
+      {
+        "namespace": "Inu.Kernel.Smp",
+        "type": "Smp",
+        "members": [
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Unload()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source when SMP is selected",
+        "transport": "in-process kernel lifecycle facade",
+        "notes": "Lifecycle control for SMP after bootstrap initialization; the bootstrap processor is never unloaded."
+      },
+      {
+        "namespace": "Inu.Kernel.Drivers",
+        "type": "Drivers",
+        "members": [
+          "Initialize()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Unload()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source when the selected kernel model owns drivers",
+        "transport": "in-process kernel lifecycle facade",
+        "notes": "Controls the kernel driver framework rather than individual driver implementation classes."
+      },
+      {
+        "namespace": "Inu.Kernel.Storage",
+        "type": "FileSystem",
+        "members": [
+          "Initialize()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Unload()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source when filesystem services are kernel-resident",
+        "transport": "in-process VFS/filesystem lifecycle facade",
+        "notes": "Filesystem format and path policy remain OS-author choices."
+      },
+      {
+        "namespace": "Inu.Kernel.Storage",
+        "type": "Filesystem",
+        "members": [
+          "Initialize()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Unload()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source when filesystem services are kernel-resident",
+        "transport": "alias of FileSystem",
+        "notes": "Spelling-compatible alias."
+      },
+      {
+        "namespace": "Inu.Kernel.Graphics",
+        "type": "Graphics",
+        "members": [
+          "Initialize()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Unload()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source when graphics support is selected",
+        "transport": "in-process kernel lifecycle facade",
+        "notes": "Controls graphics/display lifecycle without exposing framebuffer/driver internals by default."
+      },
+      {
+        "namespace": "Inu.Kernel.Input",
+        "type": "Input",
+        "members": [
+          "Initialize()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Unload()",
+          "Service()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source when kernel input support is present",
+        "transport": "in-process kernel input lifecycle facade",
+        "notes": "Controls kernel-resident input mechanisms."
+      },
+      {
+        "namespace": "Inu.Kernel.Networking",
+        "type": "Networking",
+        "members": [
+          "Initialize()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Unload()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source when networking is kernel-resident",
+        "transport": "in-process kernel lifecycle facade",
+        "notes": "Not imported for userland-resident networking services."
+      },
+      {
+        "namespace": "Inu.Kernel.Audio",
+        "type": "Audio",
+        "members": [
+          "Initialize()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Unload()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source when audio is kernel-resident",
+        "transport": "in-process kernel lifecycle facade",
+        "notes": "Not imported when audio runs outside the kernel."
+      },
+      {
+        "namespace": "Inu.Kernel.Power",
+        "type": "Power",
+        "members": [
+          "Initialize()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Unload()",
+          "GetLifecycleState()"
+        ],
+        "availability": "coder-owned kernel source",
+        "transport": "in-process kernel lifecycle facade",
+        "notes": "Coordinates power-management lifecycle; hardware/power policy remains OS-owned."
       }
     ]
   }

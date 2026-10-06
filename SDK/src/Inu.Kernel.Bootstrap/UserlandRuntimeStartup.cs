@@ -54,12 +54,18 @@ public static unsafe class UserlandRuntimeStartup
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessWait,&ProcessWaitGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessArguments,&ProcessArgumentsGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessEnvironment,&ProcessEnvironmentGet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessCurrentDirectory,&ProcessCurrentDirectoryGet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ProcessCurrentDirectory,&ProcessCurrentDirectorySet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileOpen,&FileOpenGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileRead,&FileReadGet)||
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileWrite,&FileWriteSet)||
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileCreate,&FileCreateSet)||
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileDelete,&FileDeleteSet)||
-           !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.FileClose,&FileCloseEvent))return false;
+           !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.FileClose,&FileCloseEvent)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.DirectoryOpen,&DirectoryOpenGet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.DirectoryCreate,&DirectoryCreateSet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.DirectoryDelete,&DirectoryDeleteSet)||
+           !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.DirectoryClose,&DirectoryCloseEvent))return false;
         if(!KernelSystemCalls.RegisterGet("system.device.inspect",&DeviceInspectGet))return false;
         _initialized=true;return true;
     }
@@ -219,6 +225,12 @@ public static unsafe class UserlandRuntimeStartup
 
         if(!TryCreateExecutable(payload,pathLength,KernelProcessOwnership.Foreground,out KernelProcessInfo process))
             return (Int64)KernelSystemCallError.NotFound;
+        if(KernelProcesses.TryGetCurrentProcessId(out UInt64 parentProcessId)&&parentProcessId!=0UL&&
+           !KernelProcessRecordStore.TryCopyCurrentDirectory(parentProcessId,process.Id))
+        {
+            KernelProcesses.TryTerminate(process.Id,-1L);
+            return (Int64)KernelSystemCallError.Fault;
+        }
 
         fixed(Byte* args=_state.PendingArguments,env=_state.PendingEnvironment)
         {
@@ -248,6 +260,31 @@ public static unsafe class UserlandRuntimeStartup
     private static Int64 ProcessArgumentsGet(KernelSystemCallFrame* frame)=>CopyContextToUser(frame,true);
     private static Int64 ProcessEnvironmentGet(KernelSystemCallFrame* frame)=>CopyContextToUser(frame,false);
 
+    private static Int64 ProcessCurrentDirectoryGet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.OutputCapacity==0UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        if(!KernelProcesses.TryGetCurrentProcessId(out UInt64 processId)||processId==0UL)return (Int64)KernelSystemCallError.NotPermitted;
+        Byte* path=stackalloc Byte[(Int32)PathCapacity];
+        if(!KernelProcessRecordStore.TryGetCurrentDirectoryAscii(processId,path,PathCapacity,out UInt32 length))return (Int64)KernelSystemCallError.NotFound;
+        if(frame->NativeMessage.OutputCapacity<length)return (Int64)KernelSystemCallError.InvalidArgument;
+        if(length!=0U&&!KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)path,length))return (Int64)KernelSystemCallError.Fault;
+        return length;
+    }
+
+    private static Int64 ProcessCurrentDirectorySet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>PathCapacity)return (Int64)KernelSystemCallError.InvalidArgument;
+        if(!KernelProcesses.TryGetCurrentProcessId(out UInt64 processId)||processId==0UL)return (Int64)KernelSystemCallError.NotPermitted;
+        Byte* raw=stackalloc Byte[(Int32)PathCapacity];
+        if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)raw,frame->NativeMessage.DataLength))return (Int64)KernelSystemCallError.Fault;
+        Byte* resolved=stackalloc Byte[(Int32)PathCapacity];
+        if(!TryResolveProcessPath(processId,raw,(UInt32)frame->NativeMessage.DataLength,resolved,PathCapacity,out UInt32 resolvedLength))return (Int64)KernelSystemCallError.InvalidArgument;
+        if(!KernelVfs.OpenDirectoryAscii(KernelVfs.DefaultNamespace,resolved,resolvedLength,out KernelDirectoryHandle handle))return (Int64)KernelSystemCallError.NotFound;
+        Boolean closed=KernelVfs.CloseDirectory(handle);
+        if(!closed)return (Int64)KernelSystemCallError.Fault;
+        return KernelProcessRecordStore.TrySetCurrentDirectoryAscii(processId,resolved,resolvedLength)?0L:(Int64)KernelSystemCallError.Fault;
+    }
+
     private static Int64 CopyContextToUser(KernelSystemCallFrame* frame,Boolean arguments)
     {
         if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
@@ -262,14 +299,48 @@ public static unsafe class UserlandRuntimeStartup
         return length;
     }
 
+    private static Boolean TryResolveProcessPath(UInt64 processId,Byte* path,UInt32 pathLength,Byte* output,UInt32 capacity,out UInt32 resolvedLength)
+    {
+        resolvedLength=0U;if(processId==0UL||path==null||pathLength==0U||output==null||capacity==0U)return false;
+        if(path[0]=='/')
+        {
+            if(pathLength>capacity)return false;
+            for(UInt32 i=0U;i<pathLength;i++)output[i]=path[i];
+            resolvedLength=pathLength;return true;
+        }
+        Byte* current=stackalloc Byte[(Int32)PathCapacity];
+        if(!KernelProcessRecordStore.TryGetCurrentDirectoryAscii(processId,current,PathCapacity,out UInt32 currentLength)||currentLength==0U)return false;
+        UInt32 separator=(currentLength==1U&&current[0]=='/')?0U:1U;
+        if(currentLength+separator+pathLength>capacity)return false;
+        for(UInt32 i=0U;i<currentLength;i++)output[i]=current[i];
+        UInt32 offset=currentLength;if(separator!=0U)output[offset++]='/';
+        for(UInt32 i=0U;i<pathLength;i++)output[offset+i]=path[i];
+        resolvedLength=offset+pathLength;return true;
+    }
+
+    private static Boolean TryCopyResolvedPath(KernelSystemCallFrame* frame,Byte* output,out UInt32 length)
+    {
+        length=0U;if(frame==null||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>PathCapacity||output==null)return false;
+        if(!KernelProcesses.TryGetCurrentProcessId(out UInt64 processId)||processId==0UL)return false;
+        Byte* raw=stackalloc Byte[(Int32)PathCapacity];
+        if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)raw,frame->NativeMessage.DataLength))return false;
+        return TryResolveProcessPath(processId,raw,(UInt32)frame->NativeMessage.DataLength,output,PathCapacity,out length);
+    }
+
     private static Int64 FileOpenGet(KernelSystemCallFrame* frame)
     {
-        if(frame==null||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>PathCapacity)return (Int64)KernelSystemCallError.InvalidArgument;
-        Byte* path=stackalloc Byte[(Int32)frame->NativeMessage.DataLength];
-        if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)path,frame->NativeMessage.DataLength))return (Int64)KernelSystemCallError.Fault;
+        if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
+        if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
         KernelFileAccess access=(KernelFileAccess)(Byte)frame->NativeMessage.Value0;
-        return KernelVfs.OpenAscii(KernelVfs.DefaultNamespace,path,(UInt32)frame->NativeMessage.DataLength,access,out KernelFileHandle handle)?
-            handle.Value:(Int64)KernelSystemCallError.NotFound;
+        if(!KernelVfs.OpenAscii(KernelVfs.DefaultNamespace,path,pathLength,access,out KernelFileHandle handle))
+            return (Int64)KernelSystemCallError.NotFound;
+        if(!KernelVfs.TryGetFileInfo(handle,out KernelVfsFileInfo info)||info.Type!=KernelFileType.File)
+        {
+            KernelVfs.Close(handle);
+            return (Int64)KernelSystemCallError.NotFound;
+        }
+        return handle.Value;
     }
 
     private static Int64 FileReadGet(KernelSystemCallFrame* frame)
@@ -317,19 +388,19 @@ public static unsafe class UserlandRuntimeStartup
 
     private static Int64 FileCreateSet(KernelSystemCallFrame* frame)
     {
-        if(frame==null||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>PathCapacity)return (Int64)KernelSystemCallError.InvalidArgument;
-        Byte* path=stackalloc Byte[(Int32)frame->NativeMessage.DataLength];
-        if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)path,frame->NativeMessage.DataLength))return (Int64)KernelSystemCallError.Fault;
-        return KernelVfs.CreateFileAscii(KernelVfs.DefaultNamespace,path,(UInt32)frame->NativeMessage.DataLength,frame->NativeMessage.Value0!=0UL)?
+        if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
+        if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
+        return KernelVfs.CreateFileAscii(KernelVfs.DefaultNamespace,path,pathLength,frame->NativeMessage.Value0!=0UL)?
             0L:(Int64)KernelSystemCallError.Fault;
     }
 
     private static Int64 FileDeleteSet(KernelSystemCallFrame* frame)
     {
-        if(frame==null||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>PathCapacity)return (Int64)KernelSystemCallError.InvalidArgument;
-        Byte* path=stackalloc Byte[(Int32)frame->NativeMessage.DataLength];
-        if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)path,frame->NativeMessage.DataLength))return (Int64)KernelSystemCallError.Fault;
-        return KernelVfs.DeleteFileAscii(KernelVfs.DefaultNamespace,path,(UInt32)frame->NativeMessage.DataLength)?
+        if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
+        if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
+        return KernelVfs.DeleteFileAscii(KernelVfs.DefaultNamespace,path,pathLength)?
             0L:(Int64)KernelSystemCallError.Fault;
     }
 
@@ -339,6 +410,41 @@ public static unsafe class UserlandRuntimeStartup
         UInt64 handle=frame->NativeMessage.Value0;
         if(handle<=2UL)return 0L;
         return KernelVfs.Close(new KernelFileHandle((UInt32)handle))?0L:(Int64)KernelSystemCallError.NotFound;
+    }
+
+    private static Int64 DirectoryOpenGet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
+        if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
+        return KernelVfs.OpenDirectoryAscii(KernelVfs.DefaultNamespace,path,pathLength,out KernelDirectoryHandle handle)?
+            handle.Value:(Int64)KernelSystemCallError.NotFound;
+    }
+
+    private static Int64 DirectoryCreateSet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
+        if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
+        return KernelVfs.CreateDirectoryAscii(KernelVfs.DefaultNamespace,path,pathLength)?
+            0L:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 DirectoryDeleteSet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
+        if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
+        return KernelVfs.RemoveDirectoryAscii(KernelVfs.DefaultNamespace,path,pathLength)?
+            0L:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 DirectoryCloseEvent(KernelSystemCallFrame* frame)
+    {
+        if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt64 handle=frame->NativeMessage.Value0;
+        if(handle<=2UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        return KernelVfs.CloseDirectory(new KernelDirectoryHandle((UInt32)handle))?0L:(Int64)KernelSystemCallError.NotFound;
     }
 
     private static Boolean TryCreateExecutable(Byte* path,UInt32 pathLength,KernelProcessOwnership ownership,out KernelProcessInfo process)

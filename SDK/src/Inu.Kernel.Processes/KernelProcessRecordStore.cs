@@ -21,12 +21,13 @@ internal static unsafe class KernelProcessRecordStore
     {
         internal UInt64 Id,Root,Entry,StackBase,StackTop,StackGuardBase,ApplicationIdHash,ApplicationNameHash,ApplicationVersionHash,KillRequested;
         internal Int64 ExitCode;
-        internal UInt32 State,Format,Ownership,SyscallAbi,TableCount,AllocationCount;
+        internal UInt32 State,Format,Ownership,SyscallAbi,TableCount,AllocationCount,CurrentDirectoryLength;
+        internal fixed Byte CurrentDirectory[1536];
         internal fixed UInt64 TableTokens[(Int32)KernelProcesses.MaximumTablesPerProcess],TableStarts[(Int32)KernelProcesses.MaximumTablesPerProcess],TablePages[(Int32)KernelProcesses.MaximumTablesPerProcess];
         internal fixed UInt64 AllocationTokens[(Int32)KernelProcesses.MaximumImageAllocations],AllocationStarts[(Int32)KernelProcesses.MaximumImageAllocations],AllocationPages[(Int32)KernelProcesses.MaximumImageAllocations];
     }
 
-    private struct ProcessTable { internal fixed Byte Bytes[(Int32)KernelProcesses.MaximumProcesses*2304]; }
+    private struct ProcessTable { internal fixed Byte Bytes[(Int32)KernelProcesses.MaximumProcesses*4096]; }
 #pragma warning disable CS0169
     private static ProcessTable _table;
 #pragma warning restore CS0169
@@ -72,7 +73,7 @@ internal static unsafe class KernelProcessRecordStore
 
     internal static Boolean TryReserve(KernelProcessOwnership ownership,InuApplicationAbi abi,out KernelProcessRecordHandle handle)
     {
-        handle=default;if(!Acquire())return false;Int32 slot=FindFreeSlot();if(slot<0){Release();return false;}ProcessRecord* r=Record(slot);Clear(r);r->Id=_nextId++;r->State=(UInt32)KernelProcessState.Loading;r->Ownership=(UInt32)ownership;r->SyscallAbi=(UInt32)abi;handle=new KernelProcessRecordHandle((UInt32)slot+1U);Release();return true;
+        handle=default;if(!Acquire())return false;Int32 slot=FindFreeSlot();if(slot<0){Release();return false;}ProcessRecord* r=Record(slot);Clear(r);r->Id=_nextId++;r->State=(UInt32)KernelProcessState.Loading;r->Ownership=(UInt32)ownership;r->SyscallAbi=(UInt32)abi;r->CurrentDirectoryLength=1U;r->CurrentDirectory[0]=(Byte)'/';handle=new KernelProcessRecordHandle((UInt32)slot+1U);Release();return true;
     }
     internal static void Abandon(KernelProcessRecordHandle handle){if(!handle.IsValid||!Acquire())return;ProcessRecord* r=Record(handle);if(r!=null&&r->State==(UInt32)KernelProcessState.Loading)Clear(r);Release();}
     internal static Boolean Activate(KernelProcessRecordHandle handle,out KernelProcessInfo process)
@@ -107,6 +108,30 @@ internal static unsafe class KernelProcessRecordStore
         if(state==KernelProcessState.Running||state==KernelProcessState.Loading||state==KernelProcessState.Terminating){handle=default;Release();return false;}
         if(state==KernelProcessState.Faulted){r->State=(UInt32)KernelProcessState.Terminated;Release();return true;}
         r->State=(UInt32)KernelProcessState.Terminating;Release();return true;
+    }
+
+
+    internal static Boolean TryGetCurrentDirectoryAscii(UInt64 processId,Byte* output,UInt32 capacity,out UInt32 length)
+    {
+        length=0U;if(processId==0UL||output==null||capacity==0U||!Acquire())return false;
+        if(!TryFind(processId,false,out KernelProcessRecordHandle handle)){Release();return false;}
+        ProcessRecord* r=Record(handle);if(r==null||r->CurrentDirectoryLength==0U||r->CurrentDirectoryLength>capacity){Release();return false;}
+        length=r->CurrentDirectoryLength;for(UInt32 i=0U;i<length;i++)output[i]=r->CurrentDirectory[(Int32)i];Release();return true;
+    }
+    internal static Boolean TrySetCurrentDirectoryAscii(UInt64 processId,Byte* path,UInt32 length)
+    {
+        if(processId==0UL||path==null||length==0U||length>1536U||!Acquire())return false;
+        if(!TryFind(processId,false,out KernelProcessRecordHandle handle)){Release();return false;}
+        ProcessRecord* r=Record(handle);if(r==null){Release();return false;}
+        r->CurrentDirectoryLength=length;for(UInt32 i=0U;i<length;i++)r->CurrentDirectory[(Int32)i]=path[i];Release();return true;
+    }
+    internal static Boolean TryCopyCurrentDirectory(UInt64 sourceProcessId,UInt64 destinationProcessId)
+    {
+        if(sourceProcessId==0UL||destinationProcessId==0UL||!Acquire())return false;
+        if(!TryFind(sourceProcessId,false,out KernelProcessRecordHandle sourceHandle)||!TryFind(destinationProcessId,false,out KernelProcessRecordHandle destinationHandle)){Release();return false;}
+        ProcessRecord* source=Record(sourceHandle);ProcessRecord* destination=Record(destinationHandle);
+        if(source==null||destination==null||source->CurrentDirectoryLength==0U||source->CurrentDirectoryLength>1536U){Release();return false;}
+        destination->CurrentDirectoryLength=source->CurrentDirectoryLength;for(UInt32 i=0U;i<source->CurrentDirectoryLength;i++)destination->CurrentDirectory[(Int32)i]=source->CurrentDirectory[(Int32)i];Release();return true;
     }
 
     internal static UInt64 GetId(KernelProcessRecordHandle handle){ProcessRecord* r=Record(handle);return r==null?0UL:r->Id;}

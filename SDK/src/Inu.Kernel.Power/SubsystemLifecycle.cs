@@ -2,7 +2,7 @@ using System;
 
 namespace Inu.Kernel.Power;
 
-/// <summary>Stable public lifecycle facade for coordinated power-management services.</summary>
+/// <summary><inu.api>Coder-facing lifecycle facade for coordinated power-management services.</inu.api></summary>
 public static class Power
 {
     private const Byte Stopped=0,Ready=1,Running=2,Paused=3,Unloaded=4; private static Byte _state; private static Boolean _observed;

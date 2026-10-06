@@ -1,10 +1,15 @@
 {
-  "baseVersion": "0.0.64",
-  "version": "0.0.65",
+  "baseVersion": "0.0.67",
+  "version": "0.0.68",
   "changedFiles": [
     "Inu.ApiContract.json",
-    "src/Inu.Userland.Runtime/UserlandRuntime.cs"
+    "docs/Public-API-Rules.md",
+    "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
+    "src/Inu.Kernel.Processes/KernelProcessRecordStore.cs",
+    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
+    "src/Inu.Userland.Runtime/UserlandRuntime.cs",
+    "src/Inu.Userland.Runtime/IO.cs"
   ],
   "removedFiles": [],
-  "summary": "Makes System.Console the sole coder-facing console input surface and removes the redundant public Inu.Userland.Runtime.Input wrapper while retaining the same Get console.input transport."
+  "summary": "Adds System.IO.Directory.GetCurrentDirectory and SetCurrentDirectory with per-process working-directory state, child inheritance, and relative file/directory path resolution through the existing Get/Set/Event ABI."
 }

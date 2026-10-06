@@ -8,7 +8,7 @@ using Inu.Runtime.NativeAot;
 
 namespace Inu.Kernel.Scheduler;
 
-/// <summary>Stable public scheduler lifecycle facade. Use Scheduler.Run/Pause/Resume/Stop instead of depending on scheduler internals.</summary>
+/// <summary><inu.api>Coder-facing scheduler lifecycle facade. Use Scheduler.Run/Pause/Resume/Stop instead of depending on scheduler internals.</inu.api></summary>
 public static class Scheduler
 {
     public static Boolean Initialize()

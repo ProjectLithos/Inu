@@ -2,7 +2,7 @@ using System;
 
 namespace Inu.Kernel.Console;
 
-/// <summary>Selects the operating policy for the high-level Inu Console subsystem.</summary>
+/// <summary><inu.api>Selects the operating policy for the coder-facing kernel Console subsystem.</inu.api></summary>
 public enum ConsoleType : UInt32
 {
     /// <summary>Selects framebuffer text when available and falls back to the serial console.</summary>
@@ -19,7 +19,7 @@ public enum ConsoleType : UInt32
     Serial = 5
 }
 
-/// <summary>Describes the lifecycle state shared by the beginner-facing Console subsystem API.</summary>
+/// <summary><inu.api>Describes the lifecycle state of the coder-facing kernel Console subsystem.</inu.api></summary>
 public enum ConsoleState : UInt32
 {
     Unloaded = 0,
@@ -33,7 +33,7 @@ public enum ConsoleState : UInt32
 }
 
 /// <summary>
-/// Provides the beginner-facing Inu console lifecycle. Run selects policy; KernelConsole remains the professional low-level API.
+/// <inu.api>Coder-facing kernel console lifecycle and output policy.</inu.api> Run selects policy; KernelConsole remains an implementation/advanced mechanism.
 /// </summary>
 public static class Console
 {

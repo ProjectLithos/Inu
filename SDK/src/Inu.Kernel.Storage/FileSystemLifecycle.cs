@@ -2,7 +2,7 @@ using System;
 
 namespace Inu.Kernel.Storage;
 
-/// <summary>Stable public lifecycle facade for VFS/filesystem services.</summary>
+/// <summary><inu.api>Coder-facing lifecycle facade for VFS/filesystem services.</inu.api></summary>
 public static class FileSystem
 {
     private const Byte Stopped=0,Ready=1,Running=2,Paused=3,Unloaded=4; private static Byte _state; private static Boolean _observed;
@@ -16,7 +16,7 @@ public static class FileSystem
     public static Boolean Stop(){Sync();if(_state==Stopped||_state==Unloaded)return false;_state=Stopped;return true;}
     public static Boolean Unload(){Sync();if(KernelVfs.OpenFileCount!=0U||KernelVfs.MountCount!=0U)return false;_state=Unloaded;_observed=true;return true;}
 }
-/// <summary>Spelling-compatible alias for FileSystem.</summary>
+/// <summary><inu.api>Spelling-compatible alias for the coder-facing FileSystem lifecycle facade.</inu.api></summary>
 public static class Filesystem
 {
     public static Boolean Initialize()=>FileSystem.Initialize(); public static Byte GetLifecycleState()=>FileSystem.GetLifecycleState(); public static Boolean Start()=>FileSystem.Start(); public static Boolean Run()=>FileSystem.Run(); public static Boolean Pause()=>FileSystem.Pause(); public static Boolean Resume()=>FileSystem.Resume(); public static Boolean Stop()=>FileSystem.Stop(); public static Boolean Unload()=>FileSystem.Unload();
