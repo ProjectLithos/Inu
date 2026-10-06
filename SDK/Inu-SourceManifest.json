@@ -1,5 +1,5 @@
 {
-  "version": "0.0.68",
+  "version": "0.0.69",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -795,7 +795,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "599e4ae15d4945c5627080bc9bf2908ec3abed1c1d6f379baa58278b6cebd721"
+      "sha256": "758072fad124c4877e5f30085778ef21d675ebf1627f5cac269825fc33138ed4"
     },
     {
       "path": "Directory.Build.targets",
@@ -899,7 +899,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "885f5b9b823bc6ff8018b55c0a0e574eead8d4a75d5abbe84da45a22da555eda"
+      "sha256": "1072b5e998727ddf3fbfc8df267912c8c9768132c32d21e1e590758ef77e4e35"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -907,7 +907,7 @@
     },
     {
       "path": "docs/Kernel-Coder-API.md",
-      "sha256": "d1dde0df34498a1ff12c31f058e8ecbb07084d3d0c56d223b5edfa4239529810"
+      "sha256": "6df9c956ac538a9de4fc7739a69808036c1bfd43a77acbeeb8fe80af97f790e3"
     },
     {
       "path": "docs/Kernel-Heap.md",
@@ -1303,7 +1303,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "29f6ceabbfa108e561913c0aa22a0b537ffbf3deca5bfe30270047fff200d90c"
+      "sha256": "534bcd192298b298c4a71d5aa8a9a0bfcc29b293e69d70562e55d8841f3599f9"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -1667,7 +1667,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "3d8cd7ebf162eb5a377fa15f3f379f0b9365b4967bb538c633660b4ff9cbb17b"
+      "sha256": "4f239ca88f627735a0116a247534c1c88922b6a154d632f80754e45c75c384d2"
     },
     {
       "path": "Inu-Package.bat",
@@ -1675,7 +1675,7 @@
     },
     {
       "path": "Inu.ApiContract.json",
-      "sha256": "fb005539f2a4a6c6ece5832839dac1e5ee18250733b9d4c00f8565c602c66ddc"
+      "sha256": "3d6265a09db37086d02fabeaf7e036916d2df843209c671f2c58b7126e030590"
     },
     {
       "path": "Inu.ArchitectureBoundaries.json",
@@ -1703,7 +1703,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "1b5686e231c91d3363b520cd249b57281f0d5545c1f83f00a15be17c7b56835a"
+      "sha256": "96bc45e4949816302b69cd23e2b4dc69a5b3b30419c5904fc8c49e2578df5fc9"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -2211,7 +2211,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "d4f97f8f8b8ea7183be29908845b3bd61642d23a6b98758804912e0378e8b403"
+      "sha256": "04cedf0ae7d2f7bc8c4525f8d15701d6280914b43ed5f97651631497bf33c682"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -2746,6 +2746,10 @@
       "sha256": "7c324c25df7ed99702049da2cebd1ef0c018a9053d4202515970f20176e62bdb"
     },
     {
+      "path": "src/Inu.Kernel.Drivers/Devices.cs",
+      "sha256": "4ecd0c181fc8e9692211448da1b09ca1466ee0baf3d0a9bb36ab707b9cfdace4"
+    },
+    {
       "path": "src/Inu.Kernel.Drivers/Inu.Kernel.Drivers.csproj",
       "sha256": "d7c6046b8df138a1240fa8728a1860d9f9e60dd1b2d51684eaab7c11f6f65304"
     },
@@ -2978,6 +2982,10 @@
       "sha256": "14c99a2dbd85cb7f427b1a238896b14daf866cbf67a21ac8d7f95481bb9c2c06"
     },
     {
+      "path": "src/Inu.Kernel.InterruptDispatch/InterruptsApi.cs",
+      "sha256": "d84e38b752bf114a6d2ff899b858c6654b9182f4920787a4c0db6cd24e9a16bc"
+    },
+    {
       "path": "src/Inu.Kernel.InterruptDispatch/Inu.Kernel.InterruptDispatch.csproj",
       "sha256": "1f0694c8b7d7fb5fefa995b7641fd0dd8ee0ba2e9b18146da8e2e1a19fe28e94"
     },
@@ -3023,7 +3031,7 @@
     },
     {
       "path": "src/Inu.Kernel.Memory/KernelPhysicalMemory.cs",
-      "sha256": "4817ca8fd1032ce0450eaa12deaf083b64cc1bccd67ce0a27cea1afd35752007"
+      "sha256": "76b1c8f58e68ced203a9e67bbf7b0e85c539447a1197a59b32813111c21eafb2"
     },
     {
       "path": "src/Inu.Kernel.Memory/KernelPhysicalMemory.Extents.cs",
@@ -3036,6 +3044,10 @@
     {
       "path": "src/Inu.Kernel.Memory/KernelPhysicalMemory.Records.cs",
       "sha256": "98fc84a1542413c455017fc5a6e172bb07f127163d35ac7b15f397e9162d5620"
+    },
+    {
+      "path": "src/Inu.Kernel.Memory/Memory.cs",
+      "sha256": "0a1dc6c208e6a7ec2bf21cb93dfff6ee0737d46d11280ae5eec87534d424009f"
     },
     {
       "path": "src/Inu.Kernel.Networking/Inu.Kernel.Networking.csproj",
@@ -3384,6 +3396,10 @@
     {
       "path": "src/Inu.Kernel.Processes/ProcessContracts.cs",
       "sha256": "fd79fd385da22ecf605149c125e3416684b5f6ccab1d563ab380326202ed406f"
+    },
+    {
+      "path": "src/Inu.Kernel.Processes/Processes.cs",
+      "sha256": "67675a758bb5d12bdeef2cb287fc1c3d73378914b0baeb71f21ef3fce807195c"
     },
     {
       "path": "src/Inu.Kernel.Processes/ProcessExecutableMath.cs",
@@ -3819,7 +3835,7 @@
     },
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
-      "sha256": "dc2df79cb9ffa17968d8182a9d92105e6938ca85d3d7d18f5c45aab7bd703ce0"
+      "sha256": "7c9a99c8487d272cc52b1bdd70700579d74f2184b02293412760491ad01ee476"
     },
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCallMath.cs",
@@ -3848,6 +3864,10 @@
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCalls.UserMemory.cs",
       "sha256": "ccd8d756e7b5361f097c518406d9bcb7822705cb0d7cd9a6241971b00798357d"
+    },
+    {
+      "path": "src/Inu.Kernel.SystemCalls/SystemCalls.cs",
+      "sha256": "9853cfb346fcc793df4c51c60de0d97d3f2f5006681ca047cb53450d8640dc4a"
     },
     {
       "path": "src/Inu.Kernel.Time/Inu.Kernel.Time.csproj",

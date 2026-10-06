@@ -222,6 +222,84 @@
         "notes": "Stable console lifecycle/policy surface. KernelConsole remains implementation/advanced mechanism."
       },
       {
+        "namespace": "Inu.Kernel.Memory",
+        "type": "Memory",
+        "members": [
+          "IsInitialized()",
+          "GetStatistics()",
+          "TryAllocatePages(ulong, out KernelPhysicalAllocation)",
+          "TryAllocatePages(ulong, ulong, out KernelPhysicalAllocation)",
+          "Release(KernelPhysicalAllocation)"
+        ],
+        "availability": "coder-owned kernel source",
+        "transport": "in-process physical-memory policy facade",
+        "notes": "Bootstrap retains ownership of physical-memory initialization; kernel policy may inspect and allocate/release managed physical pages without depending on KernelPhysicalMemory internals."
+      },
+      {
+        "namespace": "Inu.Kernel.Processes",
+        "type": "Processes",
+        "members": [
+          "GetActiveCount()",
+          "TryStart(ulong, ulong)",
+          "Terminate(ulong, long)",
+          "GetForegroundProcessId()",
+          "CancelForeground()",
+          "IsForegroundCancellationRequested()"
+        ],
+        "availability": "coder-owned kernel source",
+        "transport": "in-process process-policy facade",
+        "notes": "Stable process policy without exposing process record-store or image-loader implementation classes by default."
+      },
+      {
+        "namespace": "Inu.Kernel.SystemCalls",
+        "type": "SystemCalls",
+        "members": [
+          "Initialize()",
+          "IsInitialized()",
+          "GetCapabilities()",
+          "RegisterGet(string, handler)",
+          "RegisterSet(string, handler)",
+          "RegisterEvent(string, handler)"
+        ],
+        "availability": "coder-owned kernel source",
+        "transport": "in-process syscall policy facade",
+        "notes": "Native Inu syscall registration remains exactly Get, Set and Event. Handler registration uses the freestanding KernelSystemCallFrame function-pointer contract."
+      },
+      {
+        "namespace": "Inu.Kernel.Interrupts",
+        "type": "Interrupts",
+        "members": [
+          "Initialize()",
+          "IsInitialized()",
+          "GetLifecycleState()",
+          "Start()",
+          "Run()",
+          "Pause()",
+          "Resume()",
+          "Stop()",
+          "Wait()"
+        ],
+        "availability": "coder-owned kernel source",
+        "transport": "in-process interrupt lifecycle facade",
+        "notes": "Stable interrupt policy namespace; interrupt-dispatch implementation details remain internal."
+      },
+      {
+        "namespace": "Inu.Kernel.Hardware",
+        "type": "Devices",
+        "members": [
+          "IsInitialized()",
+          "GetRegisteredDeviceCount()",
+          "GetBoundDeviceCount()",
+          "GetStartedDeviceCount()",
+          "StartMatching()",
+          "PauseAll()",
+          "ResumeAll()"
+        ],
+        "availability": "coder-owned kernel source when drivers are kernel-resident",
+        "transport": "in-process unified device-tree policy facade",
+        "notes": "Bus-specific PCI/USB/VirtIO driver internals are not imported into Kernel.cs by default."
+      },
+      {
         "namespace": "Inu.Kernel.Time",
         "type": "Time",
         "members": [

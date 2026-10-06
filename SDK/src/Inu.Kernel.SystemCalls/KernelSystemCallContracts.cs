@@ -11,7 +11,7 @@ public enum KernelSystemCallAbi : Byte
     Nt = 3
 }
 
-/// <summary>Identifies the only three native Inu syscall classes.</summary>
+/// <summary><inu.api>Identifies the only three native Inu syscall classes: Get, Set and Event.</inu.api></summary>
 public enum KernelSystemCallOperation : Byte
 {
     Get = 0,
@@ -67,11 +67,11 @@ public static class KernelSystemCallMessages
     public const String DirectoryClose = "directory.close";
 }
 
-/// <summary>
+/// <summary><inu.api>
 /// User-visible native Inu syscall envelope. AppName, PID and Message are the common identity/routing
 /// fields; Data, Output, typed values, flags, correlation and capability fields carry operation-specific
 /// information without inventing another syscall number.
-/// </summary>
+/// </inu.api></summary>
 public struct KernelSystemCallMessage
 {
     public const UInt64 CurrentVersion = 1UL;
@@ -120,7 +120,7 @@ public enum KernelNtStatus : UInt32
     AccessViolation = 0xC0000005U
 }
 
-/// <summary>Contains the syscall arguments and, for native Inu calls, the validated message envelope.</summary>
+/// <summary><inu.api>Contains the syscall arguments and, for native Inu calls, the validated message envelope supplied to coder-registered handlers.</inu.api></summary>
 public unsafe struct KernelSystemCallFrame
 {
     internal KernelSystemCallFrame(KernelSystemCallAbi abi, KernelSystemCallOperation operation, UInt32 service, UInt64 a0, UInt64 a1, UInt64 a2, UInt64 a3, UInt64 a4, UInt64 a5, KernelSystemCallMessage message)
@@ -138,7 +138,7 @@ public unsafe struct KernelSystemCallFrame
     public KernelSystemCallMessage NativeMessage { get; }
 }
 
-/// <summary>Reports the active protected syscall environment.</summary>
+/// <summary><inu.api>Reports the active protected syscall environment returned by the coder-facing SystemCalls facade.</inu.api></summary>
 public readonly struct KernelSystemCallCapabilities
 {
     internal KernelSystemCallCapabilities(Boolean syscall, Boolean smap, UInt32 configured, UInt32 processors, UInt64 stackBytes)

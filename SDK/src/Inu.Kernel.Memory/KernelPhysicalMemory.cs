@@ -24,7 +24,7 @@ public enum KernelPhysicalMemoryStatus
     AllocationNotFound = 7
 }
 
-/// <summary>Identifies one live contiguous physical-frame allocation.</summary>
+/// <summary><inu.api>Identifies one live contiguous physical-frame allocation returned by the coder-facing Memory facade.</inu.api></summary>
 public readonly struct KernelPhysicalAllocation
 {
     /// <summary>Creates an allocation descriptor whose values are validated by release operations.</summary>
@@ -43,7 +43,7 @@ public readonly struct KernelPhysicalAllocation
     public UInt64 PageCount { get; }
 }
 
-/// <summary>Provides an immutable snapshot of early physical-memory accounting.</summary>
+/// <summary><inu.api>Provides an immutable physical-memory accounting snapshot returned by the coder-facing Memory facade.</inu.api></summary>
 public readonly struct KernelPhysicalMemoryStatistics
 {
     internal KernelPhysicalMemoryStatistics(UInt64 managedPages, UInt64 freePages, UInt64 allocatedPages, UInt64 largestFreeExtentPages, Int32 freeExtentCount, Int32 liveAllocationCount)
