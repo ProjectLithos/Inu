@@ -65,6 +65,7 @@ public static class KernelSystemCallMessages
     public const String DirectoryCreate = "directory.create";
     public const String DirectoryDelete = "directory.delete";
     public const String DirectoryClose = "directory.close";
+    public const String FileSystemLogicalPath = "filesystem.logical-path";
 }
 
 /// <summary><inu.api>

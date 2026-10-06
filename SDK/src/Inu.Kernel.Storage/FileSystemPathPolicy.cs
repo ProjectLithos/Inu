@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 
 namespace Inu.Kernel.Storage;
 
@@ -94,6 +95,40 @@ public static unsafe partial class FileSystemPathPolicyRuntime
             if(!ValidComponentChar((Char)b)||++componentLength>_maximumComponentLength)return false;
         }
         return componentLength!=0U;
+    }
+
+
+    internal static Boolean TryNormalizeUserPath(String input,out String canonical)
+    {
+        canonical=String.Empty;if(input==null||input.Length==0)return false;
+        Char separator=_separator;if(input[0]!=separator)return false;
+        StringBuilder value=new StringBuilder(input.Length);
+        UInt32 componentLength=0U;
+        for(Int32 i=0;i<input.Length;i++)
+        {
+            Char c=input[i];
+            if(c==separator)
+            {
+                if(i==0){value.Append('/');continue;}
+                if(componentLength==0U||i+1==input.Length)return false;
+                componentLength=0U;value.Append('/');continue;
+            }
+            if(separator!='/'&&c=='/')return false;
+            if(!ValidComponentChar(c)||++componentLength>_maximumComponentLength)return false;
+            value.Append(c);
+        }
+        if(input.Length==1){canonical="/";return true;}
+        if(componentLength==0U)return false;
+        canonical=value.ToString();return ValidateCanonicalPath(canonical);
+    }
+
+    internal static String ExternalizeCanonicalPath(String canonical)
+    {
+        if(canonical==null||canonical.Length==0||!ValidateCanonicalPath(canonical))return String.Empty;
+        if(_separator=='/')return canonical;
+        StringBuilder value=new StringBuilder(canonical.Length);
+        for(Int32 i=0;i<canonical.Length;i++)value.Append(canonical[i]=='/'?_separator:canonical[i]);
+        return value.ToString();
     }
 
     public static Boolean TryNormalizeUserAscii(Byte* input,UInt32 inputLength,Byte* output,UInt32 capacity,out UInt32 outputLength,out Boolean absolute)

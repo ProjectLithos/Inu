@@ -1,17 +1,17 @@
 {
-  "baseVersion": "0.0.70",
-  "version": "0.0.71",
+  "baseVersion": "0.0.71",
+  "version": "0.0.72",
   "changedFiles": [
     "Inu.ApiContract.json",
     "docs/Filesystem-VFS-Contract.md",
     "docs/Kernel-Coder-API.md",
+    "src/Inu.Kernel.Storage/FileSystemLogicalPaths.cs",
     "src/Inu.Kernel.Storage/FileSystemPathPolicy.cs",
     "src/Inu.Kernel.Storage/FileSystemLifecycle.cs",
-    "src/Inu.Kernel.Storage/KernelVfs.Storage.cs",
-    "src/Inu.Kernel.Storage/KernelVfs.Mounts.cs",
+    "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
     "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
     "src/Userland/Shell/InuShell.cs"
   ],
   "removedFiles": [],
-  "summary": "Adds truthful OS-author VFS path syntax policy: configurable external separator, case-sensitivity compatibility, component length, spaces/numbers and invalid characters, with syscall-boundary canonicalization and current-directory externalization."
+  "summary": "Adds OS-author logical filesystem path categories and makes the supplied shell discover the configured Commands path rather than hard-coding System/Commands."
 }

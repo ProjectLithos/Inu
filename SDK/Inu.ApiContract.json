@@ -393,11 +393,14 @@
           "Unload()",
           "GetLifecycleState()",
           "GetPathPolicy()",
-          "SetPathPolicy(FileSystemPathPolicy)"
+          "SetPathPolicy(FileSystemPathPolicy)",
+          "SetLogicalPath(FileSystemLogicalPath, string)",
+          "GetLogicalPath(FileSystemLogicalPath)",
+          "ClearLogicalPath(FileSystemLogicalPath)"
         ],
         "availability": "coder-owned kernel source when filesystem services are kernel-resident",
         "transport": "in-process VFS/filesystem lifecycle facade",
-        "notes": "Stable filesystem lifecycle plus OS-author path syntax policy. Userland paths are normalized at the syscall/VFS boundary; underlying filesystem providers remain implementation choices."
+        "notes": "Stable filesystem lifecycle, OS-author path syntax policy, and logical path mappings. Logical mappings name locations only; they do not grant permissions."
       },
       {
         "namespace": "Inu.Kernel.Storage",
@@ -412,11 +415,14 @@
           "Unload()",
           "GetLifecycleState()",
           "GetPathPolicy()",
-          "SetPathPolicy(FileSystemPathPolicy)"
+          "SetPathPolicy(FileSystemPathPolicy)",
+          "SetLogicalPath(FileSystemLogicalPath, string)",
+          "GetLogicalPath(FileSystemLogicalPath)",
+          "ClearLogicalPath(FileSystemLogicalPath)"
         ],
         "availability": "coder-owned kernel source when filesystem services are kernel-resident",
         "transport": "alias of FileSystem",
-        "notes": "Spelling-compatible alias."
+        "notes": "Stable filesystem lifecycle, OS-author path syntax policy, and logical path mappings. Logical mappings name locations only; they do not grant permissions."
       },
       {
         "namespace": "Inu.Kernel.Graphics",
@@ -540,6 +546,25 @@
         "availability": "coder-owned kernel source when storage/filesystem is kernel-resident",
         "transport": "in-process VFS policy value",
         "notes": "Defines the external path separator and component-validation policy. Case sensitivity is accepted only when mounted providers can honour it."
+      },
+      {
+        "namespace": "Inu.Kernel.Storage",
+        "type": "FileSystemLogicalPath",
+        "members": [
+          "ReadableUser",
+          "WritableUser",
+          "VisibleUser",
+          "ReadableFonts",
+          "WritableFonts",
+          "VisibleFonts",
+          "Commands",
+          "Applications",
+          "Libraries",
+          "Temporary"
+        ],
+        "availability": "coder-owned kernel source when storage/filesystem is kernel-resident",
+        "transport": "in-process VFS policy value",
+        "notes": "Stable logical filesystem locations mapped by the OS author to concrete paths. These categories do not themselves grant permissions."
       }
     ]
   }

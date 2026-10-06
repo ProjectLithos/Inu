@@ -22,9 +22,18 @@ public static class FileSystem
     /// <summary><inu.api>Applies path syntax policy. Case-sensitivity changes are refused when an already-mounted provider cannot honour the requested semantics.</inu.api></summary>
     public static Boolean SetPathPolicy(FileSystemPathPolicy policy)=>FileSystemPathPolicyRuntime.TrySet(policy);
 
+    /// <summary><inu.api>Maps a stable logical filesystem purpose to the OS author's concrete absolute path.</inu.api></summary>
+    public static Boolean SetLogicalPath(FileSystemLogicalPath kind,String path)=>FileSystemLogicalPaths.TrySet(kind,path);
+
+    /// <summary><inu.api>Gets a logical filesystem path using the currently selected external separator, or an empty string when it is unset.</inu.api></summary>
+    public static String GetLogicalPath(FileSystemLogicalPath kind)=>FileSystemLogicalPaths.External(kind);
+
+    /// <summary><inu.api>Removes a logical filesystem-path mapping.</inu.api></summary>
+    public static Boolean ClearLogicalPath(FileSystemLogicalPath kind)=>FileSystemLogicalPaths.Clear(kind);
+
 }
 /// <summary><inu.api>Spelling-compatible alias for the coder-facing FileSystem lifecycle facade.</inu.api></summary>
 public static class Filesystem
 {
-    public static Boolean Initialize()=>FileSystem.Initialize(); public static Byte GetLifecycleState()=>FileSystem.GetLifecycleState(); public static Boolean Start()=>FileSystem.Start(); public static Boolean Run()=>FileSystem.Run(); public static Boolean Pause()=>FileSystem.Pause(); public static Boolean Resume()=>FileSystem.Resume(); public static Boolean Stop()=>FileSystem.Stop(); public static Boolean Unload()=>FileSystem.Unload(); public static FileSystemPathPolicy GetPathPolicy()=>FileSystem.GetPathPolicy(); public static Boolean SetPathPolicy(FileSystemPathPolicy policy)=>FileSystem.SetPathPolicy(policy);
+    public static Boolean Initialize()=>FileSystem.Initialize(); public static Byte GetLifecycleState()=>FileSystem.GetLifecycleState(); public static Boolean Start()=>FileSystem.Start(); public static Boolean Run()=>FileSystem.Run(); public static Boolean Pause()=>FileSystem.Pause(); public static Boolean Resume()=>FileSystem.Resume(); public static Boolean Stop()=>FileSystem.Stop(); public static Boolean Unload()=>FileSystem.Unload(); public static FileSystemPathPolicy GetPathPolicy()=>FileSystem.GetPathPolicy(); public static Boolean SetPathPolicy(FileSystemPathPolicy policy)=>FileSystem.SetPathPolicy(policy); public static Boolean SetLogicalPath(FileSystemLogicalPath kind,String path)=>FileSystem.SetLogicalPath(kind,path); public static String GetLogicalPath(FileSystemLogicalPath kind)=>FileSystem.GetLogicalPath(kind); public static Boolean ClearLogicalPath(FileSystemLogicalPath kind)=>FileSystem.ClearLogicalPath(kind);
 }

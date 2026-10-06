@@ -65,7 +65,8 @@ public static unsafe class UserlandRuntimeStartup
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.DirectoryOpen,&DirectoryOpenGet)||
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.DirectoryCreate,&DirectoryCreateSet)||
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.DirectoryDelete,&DirectoryDeleteSet)||
-           !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.DirectoryClose,&DirectoryCloseEvent))return false;
+           !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.DirectoryClose,&DirectoryCloseEvent)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileSystemLogicalPath,&FileSystemLogicalPathGet))return false;
         if(!KernelSystemCalls.RegisterGet("system.device.inspect",&DeviceInspectGet))return false;
         _initialized=true;return true;
     }
@@ -259,6 +260,18 @@ public static unsafe class UserlandRuntimeStartup
 
     private static Int64 ProcessArgumentsGet(KernelSystemCallFrame* frame)=>CopyContextToUser(frame,true);
     private static Int64 ProcessEnvironmentGet(KernelSystemCallFrame* frame)=>CopyContextToUser(frame,false);
+
+
+    private static Int64 FileSystemLogicalPathGet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.OutputCapacity==0UL||frame->NativeMessage.Value0==0UL||frame->NativeMessage.Value0>10UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        String logicalPath=FileSystem.GetLogicalPath((FileSystemLogicalPath)frame->NativeMessage.Value0);
+        if(logicalPath==null||logicalPath.Length==0)return (Int64)KernelSystemCallError.NotFound;
+        UInt32 length=(UInt32)logicalPath.Length;if(length>PathCapacity||frame->NativeMessage.OutputCapacity<length)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* path=stackalloc Byte[(Int32)PathCapacity];
+        for(UInt32 i=0U;i<length;i++){Char c=logicalPath[(Int32)i];if(c>0x7F)return (Int64)KernelSystemCallError.Fault;path[i]=(Byte)c;}
+        return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)path,length)?(Int64)length:(Int64)KernelSystemCallError.Fault;
+    }
 
     private static Int64 ProcessCurrentDirectoryGet(KernelSystemCallFrame* frame)
     {

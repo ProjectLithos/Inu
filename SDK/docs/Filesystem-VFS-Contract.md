@@ -59,4 +59,14 @@ FileSystem.SetPathPolicy(new FileSystemPathPolicy(
     "*?<>|"));    // additional invalid characters
 ```
 
-With that policy, a userland absolute path is written as `:User:Dave:notes.txt`; the provider still receives the canonical VFS equivalent internally. Fixed logical path categories remain a separate policy layer and are not implied by this syntax policy.
+With that policy, a userland absolute path is written as `:User:Dave:notes.txt`; the provider still receives the canonical VFS equivalent internally.
+
+## 0.0.72 logical path categories
+
+The OS author can map stable filesystem purposes to concrete paths with `FileSystem.SetLogicalPath`. Inu does not assume that users, fonts, commands, applications, libraries, or temporary data live under any particular directory name.
+
+The initial categories are `ReadableUser`, `WritableUser`, `VisibleUser`, `ReadableFonts`, `WritableFonts`, `VisibleFonts`, `Commands`, `Applications`, `Libraries`, and `Temporary`. A mapping may contain policy text such as `{user}`; Inu stores that text but does not invent user-identity expansion before an identity/session policy exists.
+
+Logical mappings are location policy only. They do not grant read/write/visibility permissions by themselves.
+
+The supplied shell now obtains `FileSystemLogicalPath.Commands` through Get(`filesystem.logical-path`) and therefore no longer hard-codes `System/Commands`. The compatibility default remains `/System/Commands` until the OS author replaces or clears it.

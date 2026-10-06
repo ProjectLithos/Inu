@@ -106,4 +106,13 @@ Filesystem path syntax policy is now exposed through `FileSystem.SetPathPolicy(F
 FileSystem.SetPathPolicy(new FileSystemPathPolicy(':', false, 20, false, true, "*?<>|"));
 ```
 
-Fixed logical path categories (for example Writable User or Readable Fonts) remain a separate policy layer and are not yet exposed by this release.
+Logical filesystem purposes are also mapped explicitly rather than inferred from directory names:
+
+```csharp
+FileSystem.SetLogicalPath(FileSystemLogicalPath.WritableUser, ":User");
+FileSystem.SetLogicalPath(FileSystemLogicalPath.VisibleUser, ":User:{user}");
+FileSystem.SetLogicalPath(FileSystemLogicalPath.ReadableFonts, ":System:Fonts");
+FileSystem.SetLogicalPath(FileSystemLogicalPath.Commands, ":System:Commands");
+```
+
+These mappings name locations; they do not themselves grant permissions. The selected filesystem/security policy remains responsible for access control.

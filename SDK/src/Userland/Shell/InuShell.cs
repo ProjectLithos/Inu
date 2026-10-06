@@ -17,8 +17,10 @@ public static unsafe class InuShell
         if(prompt==null)return 7;
         Byte* line=stackalloc Byte[(Int32)MaximumLineBytes];
         Byte* path=stackalloc Byte[(Int32)MaximumPathBytes];
+        Byte* commandRoot=stackalloc Byte[(Int32)MaximumPathBytes];
         if(UserlandSystem.ProcessId()==0UL)return 1;
         Byte pathSeparator=GetPathSeparator();if(pathSeparator==0U)return 8;
+        UInt32 commandRootLength=GetCommandsPath(commandRoot,MaximumPathBytes);if(commandRootLength==0U)return 9;
         for(;;)
         {
             if(!UserlandConsole.Write(prompt))return 2;
@@ -36,12 +38,12 @@ public static unsafe class InuShell
             }
             else
             {
-                UInt32 pathLength=BuildCommandPath(path,MaximumPathBytes,pathSeparator,line+start,commandLength,true);
+                UInt32 pathLength=BuildCommandPath(path,MaximumPathBytes,commandRoot,commandRootLength,pathSeparator,line+start,commandLength,true);
                 if(pathLength==0U)return 4;
                 result=UserlandProcess.SpawnAscii(path,pathLength,line+argumentStart,argumentLength,null,0U);
                 if(result==UserlandError.NotFound)
                 {
-                    pathLength=BuildCommandPath(path,MaximumPathBytes,pathSeparator,line+start,commandLength,false);
+                    pathLength=BuildCommandPath(path,MaximumPathBytes,commandRoot,commandRootLength,pathSeparator,line+start,commandLength,false);
                     result=pathLength==0U?UserlandError.InvalidArgument:UserlandProcess.SpawnAscii(path,pathLength,line+argumentStart,argumentLength,null,0U);
                 }
             }
@@ -59,11 +61,17 @@ public static unsafe class InuShell
         return length>0L?current[0]:(Byte)0;
     }
 
-    private static UInt32 BuildCommandPath(Byte* destination,UInt32 capacity,Byte separator,Byte* command,UInt32 commandLength,Boolean appendExe)
+    private static UInt32 GetCommandsPath(Byte* destination,UInt32 capacity)
     {
-        const String system="System",commands="Commands";
-        UInt32 required=1U+(UInt32)system.Length+1U+(UInt32)commands.Length+1U+commandLength+(appendExe?4U:0U);if(destination==null||command==null||separator==0U||required>=capacity)return 0U;
-        UInt32 o=0U;destination[o++]=separator;for(Int32 i=0;i<system.Length;i++)destination[o++]=(Byte)system[i];destination[o++]=separator;for(Int32 i=0;i<commands.Length;i++)destination[o++]=(Byte)commands[i];destination[o++]=separator;for(UInt32 i=0U;i<commandLength;i++)destination[o++]=command[i];
+        // FileSystemLogicalPath.Commands has the stable ABI id 7.
+        Int64 length=UserlandSystem.Call(UserlandOperation.Get,"filesystem.logical-path",null,0UL,destination,capacity,7UL);
+        return length>0L?(UInt32)length:0U;
+    }
+
+    private static UInt32 BuildCommandPath(Byte* destination,UInt32 capacity,Byte* root,UInt32 rootLength,Byte separator,Byte* command,UInt32 commandLength,Boolean appendExe)
+    {
+        UInt32 required=rootLength+1U+commandLength+(appendExe?4U:0U);if(destination==null||root==null||command==null||rootLength==0U||separator==0U||required>=capacity)return 0U;
+        UInt32 o=0U;for(UInt32 i=0U;i<rootLength;i++)destination[o++]=root[i];destination[o++]=separator;for(UInt32 i=0U;i<commandLength;i++)destination[o++]=command[i];
         if(appendExe){destination[o++]=(Byte)'.';destination[o++]=(Byte)'E';destination[o++]=(Byte)'X';destination[o++]=(Byte)'E';}
         return o;
     }
