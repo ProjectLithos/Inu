@@ -73,7 +73,7 @@
         ],
         "availability": "ring-3 userland",
         "transport": "Get console.input + Event console.output/console.clear",
-        "notes": "Freestanding .NET-compatible console supplied by Inu; output and input are available to ordinary ring-3 source without exposing kernel console classes."
+        "notes": "Freestanding .NET-compatible console supplied by Inu. Console.Read/ReadLine are the coder-facing console input API; lower-level input transport remains internal."
       },
       {
         "namespace": "Inu.Userland.Runtime",
@@ -86,18 +86,6 @@
         "availability": "ring-3 userland",
         "transport": "Event syscall",
         "notes": "Compatibility surface retained for source written against Inu 0.0.58."
-      },
-      {
-        "namespace": "Inu.Userland.Runtime",
-        "type": "Input",
-        "members": [
-          "Read()",
-          "ReadChar()",
-          "ReadLine()"
-        ],
-        "availability": "ring-3 userland",
-        "transport": "Get console.input",
-        "notes": "Coder-facing direct input surface. ReadLine returns an Inu-managed System.String and provides local echo/backspace editing."
       },
       {
         "namespace": "System.Collections",
