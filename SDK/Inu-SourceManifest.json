@@ -1,5 +1,5 @@
 {
-  "version": "0.0.73",
+  "version": "0.0.74",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -383,7 +383,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "e9b6d735f37a53a801943de5b931f56df00c0bbc8afca5310bf8d3c682e9e15f"
+      "sha256": "5a52741639eac9962e9088b3232016114b4a279554b69547c1a0c4fc9861e04c"
     },
     {
       "path": "Directory.Build.targets",
@@ -415,7 +415,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "388ce22b02d514a099b423dc2aa9cdf5d5501c0bcea0fed30b4b35295ad511aa"
+      "sha256": "57f0cd7de2f74f34cc652aacba34e08c640a0785066659f92c3f83f6f8c2e7c6"
     },
     {
       "path": "Inu-Package.bat",
@@ -447,7 +447,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "fd8e9ececf67cc79d7733da9996feff4fb5a900f5c50be490e72ebaff8a6e64f"
+      "sha256": "bb101d85009ccee09652f93ba02cb39336f853c71f6d4ab84102ed8b911beb13"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -987,7 +987,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "bbfb8f66646268e4f961c0741366cfe5aab5f44d7ab00db50b61d8f01ae2803d"
+      "sha256": "9b4c64da4a3248f9888b26c467f27bcb0b2cf7a1f5c81baf949e69de896732bc"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1451,7 +1451,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "945d2e611f2f862bc9fbc66c299908d1e736df6e7c2183f9bc5153c4bc7715a5"
+      "sha256": "d49970b6435110d011acf4f0a9c35359d9a14a6f73ce621eedb970b419fd3fad"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -2215,7 +2215,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "0fb095f660b51265c150121f1f55768ad38d9778c5b748d3ab5c0cbcd26bbf4d"
+      "sha256": "cf92fe8946c81d6a91c2f2235cadf24dd61564c6f9bf49bc396172bff1289d2d"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4679,7 +4679,7 @@
     },
     {
       "path": "templates/InuKernel/Startup/TextConsoleSessionStartup.cs",
-      "sha256": "7f8f5533f4583ac1fee51e31a1f65ebf359e7ce0db48c8c070d4896bcff07859"
+      "sha256": "60958b21e404c87808df6d5100511c70eb18b9a03929c262b641e34e0d911791"
     },
     {
       "path": "templates/InuKernel/Startup/TimerDispatchStartup.cs",

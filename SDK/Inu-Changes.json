@@ -1,17 +1,9 @@
 {
-  "baseVersion": "0.0.72",
-  "version": "0.0.73",
+  "baseVersion": "0.0.73",
+  "version": "0.0.74",
   "changedFiles": [
-    "Inu.ApiContract.json",
-    "docs/Kernel-Coder-API.md",
-    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-    "src/Inu.Kernel.Bootstrap/Kernel.cs",
-    "templates/InuKernel/Boot/SchedulerRuntimeStartup.cs",
-    "templates/InuKernel/Startup/InterruptRuntimeStartup.cs",
-    "templates/InuKernel/Startup/TextConsoleSessionStartup.cs",
-    "templates/InuKernel/Startup/DesktopOrTextSessionStartup.cs",
-    "templates/InuKernel/HAL/InputHardwareStartup.cs"
+    "templates/InuKernel/Startup/TextConsoleSessionStartup.cs"
   ],
   "removedFiles": [],
-  "summary": "Fixes 0.0.72 kernel compile regressions and introduces compatibility-safe coder-facing text/desktop session policy facades."
+  "summary": "Fixes the coder-facing TextSession compatibility facade to reference the actual Inu.Kernel.Bootstrap.Startup.UserlandRuntimeStartup namespace."
 }
