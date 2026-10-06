@@ -18,6 +18,7 @@ public static unsafe class InuShell
         Byte* line=stackalloc Byte[(Int32)MaximumLineBytes];
         Byte* path=stackalloc Byte[(Int32)MaximumPathBytes];
         if(UserlandSystem.ProcessId()==0UL)return 1;
+        Byte pathSeparator=GetPathSeparator();if(pathSeparator==0U)return 8;
         for(;;)
         {
             if(!UserlandConsole.Write(prompt))return 2;
@@ -29,18 +30,18 @@ public static unsafe class InuShell
             UInt32 argumentLength=end-argumentStart;
 
             Int64 result;
-            if(line[start]=='/')
+            if(line[start]==pathSeparator)
             {
                 result=UserlandProcess.SpawnAscii(line+start,commandLength,line+argumentStart,argumentLength,null,0U);
             }
             else
             {
-                UInt32 pathLength=BuildCommandPath(path,MaximumPathBytes,line+start,commandLength,true);
+                UInt32 pathLength=BuildCommandPath(path,MaximumPathBytes,pathSeparator,line+start,commandLength,true);
                 if(pathLength==0U)return 4;
                 result=UserlandProcess.SpawnAscii(path,pathLength,line+argumentStart,argumentLength,null,0U);
                 if(result==UserlandError.NotFound)
                 {
-                    pathLength=BuildCommandPath(path,MaximumPathBytes,line+start,commandLength,false);
+                    pathLength=BuildCommandPath(path,MaximumPathBytes,pathSeparator,line+start,commandLength,false);
                     result=pathLength==0U?UserlandError.InvalidArgument:UserlandProcess.SpawnAscii(path,pathLength,line+argumentStart,argumentLength,null,0U);
                 }
             }
@@ -51,10 +52,18 @@ public static unsafe class InuShell
         }
     }
 
-    private static UInt32 BuildCommandPath(Byte* destination,UInt32 capacity,Byte* command,UInt32 commandLength,Boolean appendExe)
+    private static Byte GetPathSeparator()
     {
-        const String root="/System/Commands/";UInt32 required=(UInt32)root.Length+commandLength+(appendExe?4U:0U);if(destination==null||command==null||required>=capacity)return 0U;
-        UInt32 o=0U;for(Int32 i=0;i<root.Length;i++)destination[o++]=(Byte)root[i];for(UInt32 i=0U;i<commandLength;i++)destination[o++]=command[i];
+        Byte* current=stackalloc Byte[(Int32)MaximumPathBytes];
+        Int64 length=UserlandSystem.Call(UserlandOperation.Get,"process.current-directory",null,0UL,current,MaximumPathBytes);
+        return length>0L?current[0]:(Byte)0;
+    }
+
+    private static UInt32 BuildCommandPath(Byte* destination,UInt32 capacity,Byte separator,Byte* command,UInt32 commandLength,Boolean appendExe)
+    {
+        const String system="System",commands="Commands";
+        UInt32 required=1U+(UInt32)system.Length+1U+(UInt32)commands.Length+1U+commandLength+(appendExe?4U:0U);if(destination==null||command==null||separator==0U||required>=capacity)return 0U;
+        UInt32 o=0U;destination[o++]=separator;for(Int32 i=0;i<system.Length;i++)destination[o++]=(Byte)system[i];destination[o++]=separator;for(Int32 i=0;i<commands.Length;i++)destination[o++]=(Byte)commands[i];destination[o++]=separator;for(UInt32 i=0U;i<commandLength;i++)destination[o++]=command[i];
         if(appendExe){destination[o++]=(Byte)'.';destination[o++]=(Byte)'E';destination[o++]=(Byte)'X';destination[o++]=(Byte)'E';}
         return o;
     }

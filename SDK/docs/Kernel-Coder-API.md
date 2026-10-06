@@ -100,4 +100,10 @@ Processes.StartGraphicalSession();
 
 These calls change runtime policy over mechanisms that Kath selected into the OS. They do not cause Kath to regenerate or replace coder-owned source.
 
-Filesystem **path syntax policy is deliberately not exposed by this release**. The current VFS still canonicalises around `/`; advertising a configurable joiner/case policy before the VFS obeys it would make the SDK API untruthful. That policy must be implemented in the VFS first and only then promoted to this coder-facing surface.
+Filesystem path syntax policy is now exposed through `FileSystem.SetPathPolicy(FileSystemPathPolicy)`. The external separator, maximum component length, spaces/numbers policy and invalid characters are enforced at the userland/VFS boundary. Case-sensitivity changes are accepted only when the mounted filesystem providers advertise matching semantics. The VFS keeps `/` as its internal canonical separator, so selecting another external joiner does not require filesystem-driver rewrites.
+
+```csharp
+FileSystem.SetPathPolicy(new FileSystemPathPolicy(':', false, 20, false, true, "*?<>|"));
+```
+
+Fixed logical path categories (for example Writable User or Readable Fonts) remain a separate policy layer and are not yet exposed by this release.

@@ -36,3 +36,27 @@ A driver supplies `KernelFileSystemCallbacks`: probe, mount/unmount, open, read/
 ## 0.37.0 freestanding userland path API
 
 The VFS exposes allocation-free normalized ASCII path calls for open, directory open, create file, create directory, delete file, remove empty directory and rename. These calls are intended for syscall/service boundaries where constructing managed `String` instances is inappropriate. Filesystem providers advertise `Create`, `Delete`, `Rename`, `Extend`, and `AsciiPaths` feature bits when implemented.
+
+## 0.0.71 OS-author path syntax policy
+
+`FileSystem.SetPathPolicy(FileSystemPathPolicy)` makes the external userland path syntax an OS-author policy rather than a hard-coded `/` convention. The policy controls the external separator, case-sensitivity requirement, maximum component length, whether spaces and numbers are permitted, and an additional invalid-character set.
+
+The VFS keeps an internal canonical `/` representation so filesystem drivers do not need to be rewritten for each user-facing separator. The userland syscall boundary normalizes the selected separator to that canonical form before VFS dispatch and converts process current-directory paths back to the selected external separator on return. A non-selected joiner is rejected rather than silently accepted.
+
+Case sensitivity is only accepted when every mounted provider advertises matching semantics. This prevents the kernel API from claiming case-sensitive behaviour over a filesystem provider that cannot provide it.
+
+The supplied shell discovers the active separator from its process current directory before constructing `/System/Commands`-equivalent paths, so changing the external joiner does not silently break command lookup.
+
+Example:
+
+```csharp
+FileSystem.SetPathPolicy(new FileSystemPathPolicy(
+    ':',          // external joiner
+    false,        // case-insensitive
+    20,           // maximum component length
+    false,        // spaces not allowed
+    true,         // numbers allowed
+    "*?<>|"));    // additional invalid characters
+```
+
+With that policy, a userland absolute path is written as `:User:Dave:notes.txt`; the provider still receives the canonical VFS equivalent internally. Fixed logical path categories remain a separate policy layer and are not implied by this syntax policy.

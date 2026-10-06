@@ -8,14 +8,14 @@ public static unsafe partial class KernelVfs
     private static Boolean CallUnmount(ProviderRecord* p,UInt64 cookie){delegate*<UInt64,Boolean> fn=(delegate*<UInt64,Boolean>)(void*)p->Unmount;return fn(cookie);}
     private static Boolean CallClose(ProviderRecord* p,UInt64 cookie){delegate*<UInt64,Boolean> fn=(delegate*<UInt64,Boolean>)(void*)p->Close;return fn(cookie);}
     private static Boolean ValidAccess(KernelFileAccess a)=>a==KernelFileAccess.Read||a==KernelFileAccess.Write||a==KernelFileAccess.ReadWrite;
-    private static Boolean ValidAbsolutePath(String path)=>path!=null&&path.Length>0&&path[0]=='/'&&path.IndexOf('\\')<0;
-    private static Boolean ValidAbsoluteAsciiPath(Byte* path,UInt32 length){if(path==null||length==0U||path[0]!='/')return false;for(UInt32 i=0;i<length;i++)if(path[i]=='\\'||path[i]==0)return false;return true;}
+    private static Boolean ValidAbsolutePath(String path)=>FileSystemPathPolicyRuntime.ValidateCanonicalPath(path);
+    private static Boolean ValidAbsoluteAsciiPath(Byte* path,UInt32 length)=>FileSystemPathPolicyRuntime.ValidateCanonicalAscii(path,length);
     private static Int32 FindProvider(KernelFileSystemType type){for(Int32 i=0;i<(Int32)_providerCapacity;i++)if((_providers+i)->Used!=0&&(_providers+i)->Type==(Byte)type)return i;return -1;}
     private static Int32 FindExactMount(KernelMountNamespaceHandle ns,String path,UInt32 length){for(Int32 i=0;i<(Int32)_mountCapacity;i++){MountRecord* m=_mounts+i;if(m->Used!=0&&m->Namespace==ns.Value&&m->PathLength==length&&MountPathEquals(m,path,length))return i;}return -1;}
     private static Int32 FindMount(KernelMountNamespaceHandle ns,String path){Int32 best=-1;UInt32 bestLength=0;for(Int32 i=0;i<(Int32)_mountCapacity;i++){MountRecord* m=_mounts+i;if(m->Used==0||m->Namespace!=ns.Value||m->PathLength>(UInt32)path.Length||m->PathLength<bestLength)continue;if(!MountPathEquals(m,path,m->PathLength))continue;if(m->PathLength>1&&path.Length>m->PathLength&&path[(Int32)m->PathLength]!='/')continue;best=i;bestLength=m->PathLength;}return best;}
     private static Int32 FindMountAscii(KernelMountNamespaceHandle ns,Byte* path,UInt32 length){Int32 best=-1;UInt32 bestLength=0;for(Int32 i=0;i<(Int32)_mountCapacity;i++){MountRecord* m=_mounts+i;if(m->Used==0||m->Namespace!=ns.Value||m->PathLength>length||m->PathLength<bestLength)continue;if(!MountPathEqualsAscii(m,path,length,m->PathLength))continue;if(m->PathLength>1&&length>m->PathLength&&path[m->PathLength]!='/')continue;best=i;bestLength=m->PathLength;}return best;}
-    private static Boolean MountPathEquals(MountRecord* m,String path,UInt32 length){if(m->PathAllocation.Address==0||length!=m->PathLength)return false;Char* saved=(Char*)(nuint)m->PathAllocation.Address;for(UInt32 i=0;i<length;i++){Char a=saved[i],b=path[(Int32)i];if(a>='A'&&a<='Z')a=(Char)(a+32);if(b>='A'&&b<='Z')b=(Char)(b+32);if(a!=b)return false;}return true;}
-    private static Boolean MountPathEqualsAscii(MountRecord* m,Byte* path,UInt32 pathLength,UInt32 length){if(m->PathAllocation.Address==0||path==null||pathLength<length||length!=m->PathLength)return false;Char* saved=(Char*)(nuint)m->PathAllocation.Address;for(UInt32 i=0;i<length;i++){Char a=saved[i];Byte b=path[i];if(a>='A'&&a<='Z')a=(Char)(a+32);if(b>='A'&&b<='Z')b=(Byte)(b+32);if(a!=(Char)b)return false;}return true;}
+    private static Boolean MountPathEquals(MountRecord* m,String path,UInt32 length){if(m->PathAllocation.Address==0||length!=m->PathLength)return false;Char* saved=(Char*)(nuint)m->PathAllocation.Address;for(UInt32 i=0;i<length;i++){Char a=saved[i],b=path[(Int32)i];if(!FileSystemPathPolicyRuntime.CaseSensitive){if(a>='A'&&a<='Z')a=(Char)(a+32);if(b>='A'&&b<='Z')b=(Char)(b+32);}if(a!=b)return false;}return true;}
+    private static Boolean MountPathEqualsAscii(MountRecord* m,Byte* path,UInt32 pathLength,UInt32 length){if(m->PathAllocation.Address==0||path==null||pathLength<length||length!=m->PathLength)return false;Char* saved=(Char*)(nuint)m->PathAllocation.Address;for(UInt32 i=0;i<length;i++){Char a=saved[i];Byte b=path[i];if(!FileSystemPathPolicyRuntime.CaseSensitive){if(a>='A'&&a<='Z')a=(Char)(a+32);if(b>='A'&&b<='Z')b=(Byte)(b+32);}if(a!=(Char)b)return false;}return true;}
     private static Boolean AllocateMountPath(String path,UInt32 length,out KernelHeapAllocation allocation){allocation=default;UInt64 bytes=((UInt64)length+1UL)*2UL;if(!KernelHeap.TryAllocate(bytes,16,true,out allocation))return false;Char* d=(Char*)(nuint)allocation.Address;for(UInt32 i=0;i<length;i++)d[i]=path[(Int32)i];d[length]='\0';return true;}
     private static Int32 NormalizeMountLength(String path){Int32 n=path.Length;while(n>1&&path[n-1]=='/')n--;return n;}
     private static Boolean TryNamespace(KernelMountNamespaceHandle h){Int32 i=(Int32)h.Value-1;return _initialized&&i>=0&&(UInt32)i<_namespaceCapacity&&(_namespaces+i)->Used!=0;}
@@ -34,4 +34,17 @@ public static unsafe partial class KernelVfs
     private static Boolean AllocFiles(UInt32 n,out KernelHeapAllocation a,out FileRecord* p){a=default;p=null;if(!KernelHeap.TryAllocate((UInt64)n*(UInt64)sizeof(FileRecord),64,true,out a))return false;p=(FileRecord*)(nuint)a.Address;return true;}
     private static void Clear(Byte* p,Int32 n){for(Int32 i=0;i<n;i++)p[i]=0;}
     private static void Copy(Byte* s,Byte* d,UInt64 n){for(UInt64 i=0;i<n;i++)d[i]=s[i];}
+
+    internal static Boolean CanAdoptCaseSensitivity(Boolean caseSensitive)
+    {
+        if(!_initialized||_mountCount==0U)return true;
+        for(Int32 i=0;i<(Int32)_mountCapacity;i++)
+        {
+            MountRecord* m=_mounts+i;if(m->Used==0)continue;
+            ProviderRecord* p=_providers+(Int32)m->Provider-1;
+            Boolean providerCaseSensitive=(((KernelFileSystemFeatures)p->Features)&KernelFileSystemFeatures.CaseSensitive)!=0;
+            if(providerCaseSensitive!=caseSensitive)return false;
+        }
+        return true;
+    }
 }

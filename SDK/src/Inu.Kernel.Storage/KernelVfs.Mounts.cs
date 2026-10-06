@@ -10,7 +10,7 @@ public static unsafe partial class KernelVfs
         handle=default;if(!TryNamespace(ns)||volume.Value==0||!ValidAbsolutePath(path))return false;
         UInt32 pathLength=(UInt32)NormalizeMountLength(path);
         if(FindExactMount(ns,path,pathLength)>=0)return false;
-        Int32 provider=FindProvider(type);if(provider<0)return false;ProviderRecord* p=_providers+provider;
+        Int32 provider=FindProvider(type);if(provider<0)return false;ProviderRecord* p=_providers+provider;Boolean providerCaseSensitive=(((KernelFileSystemFeatures)p->Features)&KernelFileSystemFeatures.CaseSensitive)!=0;if(providerCaseSensitive!=FileSystemPathPolicyRuntime.CaseSensitive)return false;
         delegate*<KernelStorageVolumeHandle,Boolean> probe=(delegate*<KernelStorageVolumeHandle,Boolean>)(void*)p->Probe;if(!probe(volume))return false;
         UInt64 cookie=0;delegate*<KernelStorageVolumeHandle,UInt64*,Boolean> mount=(delegate*<KernelStorageVolumeHandle,UInt64*,Boolean>)(void*)p->Mount;if(!mount(volume,&cookie))return false;
         KernelHeapAllocation pathAllocation=default;if(!AllocateMountPath(path,pathLength,out pathAllocation)){CallUnmount(p,cookie);return false;}

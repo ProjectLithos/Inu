@@ -264,8 +264,10 @@ public static unsafe class UserlandRuntimeStartup
     {
         if(frame==null||frame->NativeMessage.OutputCapacity==0UL)return (Int64)KernelSystemCallError.InvalidArgument;
         if(!KernelProcesses.TryGetCurrentProcessId(out UInt64 processId)||processId==0UL)return (Int64)KernelSystemCallError.NotPermitted;
+        Byte* canonical=stackalloc Byte[(Int32)PathCapacity];
+        if(!KernelProcessRecordStore.TryGetCurrentDirectoryAscii(processId,canonical,PathCapacity,out UInt32 canonicalLength))return (Int64)KernelSystemCallError.NotFound;
         Byte* path=stackalloc Byte[(Int32)PathCapacity];
-        if(!KernelProcessRecordStore.TryGetCurrentDirectoryAscii(processId,path,PathCapacity,out UInt32 length))return (Int64)KernelSystemCallError.NotFound;
+        if(!FileSystemPathPolicyRuntime.TryExternalizeCanonicalAscii(canonical,canonicalLength,path,PathCapacity,out UInt32 length))return (Int64)KernelSystemCallError.Fault;
         if(frame->NativeMessage.OutputCapacity<length)return (Int64)KernelSystemCallError.InvalidArgument;
         if(length!=0U&&!KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)path,length))return (Int64)KernelSystemCallError.Fault;
         return length;
@@ -302,20 +304,22 @@ public static unsafe class UserlandRuntimeStartup
     private static Boolean TryResolveProcessPath(UInt64 processId,Byte* path,UInt32 pathLength,Byte* output,UInt32 capacity,out UInt32 resolvedLength)
     {
         resolvedLength=0U;if(processId==0UL||path==null||pathLength==0U||output==null||capacity==0U)return false;
-        if(path[0]=='/')
+        Byte* normalized=stackalloc Byte[(Int32)PathCapacity];
+        if(!FileSystemPathPolicyRuntime.TryNormalizeUserAscii(path,pathLength,normalized,PathCapacity,out UInt32 normalizedLength,out Boolean absolute))return false;
+        if(absolute)
         {
-            if(pathLength>capacity)return false;
-            for(UInt32 i=0U;i<pathLength;i++)output[i]=path[i];
-            resolvedLength=pathLength;return true;
+            if(normalizedLength>capacity)return false;
+            for(UInt32 i=0U;i<normalizedLength;i++)output[i]=normalized[i];
+            resolvedLength=normalizedLength;return true;
         }
         Byte* current=stackalloc Byte[(Int32)PathCapacity];
         if(!KernelProcessRecordStore.TryGetCurrentDirectoryAscii(processId,current,PathCapacity,out UInt32 currentLength)||currentLength==0U)return false;
         UInt32 separator=(currentLength==1U&&current[0]=='/')?0U:1U;
-        if(currentLength+separator+pathLength>capacity)return false;
+        if(currentLength+separator+normalizedLength>capacity)return false;
         for(UInt32 i=0U;i<currentLength;i++)output[i]=current[i];
         UInt32 offset=currentLength;if(separator!=0U)output[offset++]='/';
-        for(UInt32 i=0U;i<pathLength;i++)output[offset+i]=path[i];
-        resolvedLength=offset+pathLength;return true;
+        for(UInt32 i=0U;i<normalizedLength;i++)output[offset+i]=normalized[i];
+        resolvedLength=offset+normalizedLength;return true;
     }
 
     private static Boolean TryCopyResolvedPath(KernelSystemCallFrame* frame,Byte* output,out UInt32 length)

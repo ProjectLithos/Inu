@@ -391,11 +391,13 @@
           "Resume()",
           "Stop()",
           "Unload()",
-          "GetLifecycleState()"
+          "GetLifecycleState()",
+          "GetPathPolicy()",
+          "SetPathPolicy(FileSystemPathPolicy)"
         ],
         "availability": "coder-owned kernel source when filesystem services are kernel-resident",
         "transport": "in-process VFS/filesystem lifecycle facade",
-        "notes": "Filesystem format and path policy remain OS-author choices."
+        "notes": "Stable filesystem lifecycle plus OS-author path syntax policy. Userland paths are normalized at the syscall/VFS boundary; underlying filesystem providers remain implementation choices."
       },
       {
         "namespace": "Inu.Kernel.Storage",
@@ -408,7 +410,9 @@
           "Resume()",
           "Stop()",
           "Unload()",
-          "GetLifecycleState()"
+          "GetLifecycleState()",
+          "GetPathPolicy()",
+          "SetPathPolicy(FileSystemPathPolicy)"
         ],
         "availability": "coder-owned kernel source when filesystem services are kernel-resident",
         "transport": "alias of FileSystem",
@@ -520,6 +524,22 @@
         "availability": "kernel policy when SMP is selected",
         "transport": "in-kernel policy",
         "notes": "Stable CPU-role and processor-set value types used by the coder-facing Smp facade."
+      },
+      {
+        "namespace": "Inu.Kernel.Storage",
+        "type": "FileSystemPathPolicy",
+        "members": [
+          "FileSystemPathPolicy(char, bool, uint, bool, bool, string)",
+          "Separator",
+          "CaseSensitive",
+          "MaximumComponentLength",
+          "AllowSpaces",
+          "AllowNumbers",
+          "InvalidCharacters"
+        ],
+        "availability": "coder-owned kernel source when storage/filesystem is kernel-resident",
+        "transport": "in-process VFS policy value",
+        "notes": "Defines the external path separator and component-validation policy. Case sensitivity is accepted only when mounted providers can honour it."
       }
     ]
   }

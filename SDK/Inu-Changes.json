@@ -1,15 +1,17 @@
 {
-  "baseVersion": "0.0.69",
-  "version": "0.0.70",
+  "baseVersion": "0.0.70",
+  "version": "0.0.71",
   "changedFiles": [
     "Inu.ApiContract.json",
-    "docs/Public-API-Rules.md",
-    "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
-    "src/Inu.Kernel.Processes/KernelProcessRecordStore.cs",
+    "docs/Filesystem-VFS-Contract.md",
+    "docs/Kernel-Coder-API.md",
+    "src/Inu.Kernel.Storage/FileSystemPathPolicy.cs",
+    "src/Inu.Kernel.Storage/FileSystemLifecycle.cs",
+    "src/Inu.Kernel.Storage/KernelVfs.Storage.cs",
+    "src/Inu.Kernel.Storage/KernelVfs.Mounts.cs",
     "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-    "src/Inu.Userland.Runtime/UserlandRuntime.cs",
-    "src/Inu.Userland.Runtime/IO.cs"
+    "src/Userland/Shell/InuShell.cs"
   ],
   "removedFiles": [],
-  "summary": "Adds System.IO.Directory.GetCurrentDirectory and SetCurrentDirectory with per-process working-directory state, child inheritance, and relative file/directory path resolution through the existing Get/Set/Event ABI."
+  "summary": "Adds truthful OS-author VFS path syntax policy: configurable external separator, case-sensitivity compatibility, component length, spaces/numbers and invalid characters, with syscall-boundary canonicalization and current-directory externalization."
 }
