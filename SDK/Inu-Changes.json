@@ -1,8 +1,8 @@
 {
-  "baseVersion": "0.0.87",
-  "version": "0.0.88",
+  "baseVersion": "0.0.88",
+  "version": "0.0.89",
   "changedFiles": [
-    "src/Inu.UserlandCompiler/Program.cs"
+    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs"
   ],
-  "summary": "Fix generated ring-3 application entry points so shell-only Configure/Run lifecycle state is emitted only for the shell executable. Ordinary commands no longer receive an unused _configured field, preventing CS0169 when warnings are treated as errors."
+  "summary": "Normalize OS-facing executable paths to Inu canonical paths before asset-catalogue and VFS lookup, so shell commands remain discoverable with configurable path separators and command search paths."
 }

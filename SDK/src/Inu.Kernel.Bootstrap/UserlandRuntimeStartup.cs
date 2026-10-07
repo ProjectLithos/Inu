@@ -535,14 +535,22 @@ public static unsafe class UserlandRuntimeStartup
 
     private static Boolean TryCreateExecutable(Byte* path,UInt32 pathLength,KernelProcessOwnership ownership,out KernelProcessInfo process)
     {
-        process=default;if(path==null||pathLength==0U)return false;
-        Byte* assetPath=path;UInt32 assetLength=pathLength;
-        while(assetLength!=0U&&(*assetPath=='/'||*assetPath=='\\')){assetPath++;assetLength--;}
-        if(assetLength!=0U&&SystemAssetCatalog.TryFindAscii(assetPath,assetLength,out Byte* image,out UInt32 imageLength))
+        process=default;if(path==null||pathLength==0U||pathLength>PathCapacity)return false;
+
+        // Userland paths use the OS-selected external separator. SystemAssetCatalog and the VFS
+        // use Inu's canonical '/' form internally. Never compare an external policy path directly
+        // with the canonical asset catalogue, otherwise commands disappear when a shell selects
+        // '\\', ':', or another supported separator.
+        Byte* canonical=stackalloc Byte[(Int32)PathCapacity];
+        if(!FileSystemPathPolicyRuntime.TryNormalizeUserAscii(path,pathLength,canonical,PathCapacity,out UInt32 canonicalLength,out Boolean absolute)||
+           !absolute||canonicalLength<=1U)return false;
+
+        Byte* assetPath=canonical+1;
+        UInt32 assetLength=canonicalLength-1U;
+        if(SystemAssetCatalog.TryFindAscii(assetPath,assetLength,out Byte* image,out UInt32 imageLength))
             return KernelProcesses.TryCreateFromImage((UInt64)(nuint)image,imageLength,ownership,out process);
 
-        if(*path!='/')return false;
-        return KernelProcesses.TryCreateFromFileAscii(KernelVfs.DefaultNamespace,path,pathLength,ownership,out process);
+        return KernelProcesses.TryCreateFromFileAscii(KernelVfs.DefaultNamespace,canonical,canonicalLength,ownership,out process);
     }
 
     private static void PromotePendingContext()
