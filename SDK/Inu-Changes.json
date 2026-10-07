@@ -1,8 +1,12 @@
 {
-  "baseVersion": "0.0.88",
-  "version": "0.0.89",
+  "baseVersion": "0.0.89",
+  "version": "0.0.90",
   "changedFiles": [
-    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs"
+    "Inu.ApiContract.json",
+    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
+    "src/Inu.Kernel.Storage/FileSystemLogicalPaths.cs",
+    "src/Inu.Userland.Runtime/FileSystemPaths.cs",
+    "src/Inu.Userland.Runtime/Process.cs"
   ],
-  "summary": "Normalize OS-facing executable paths to Inu canonical paths before asset-catalogue and VFS lookup, so shell commands remain discoverable with configurable path separators and command search paths."
+  "summary": "Resolve bare shell command names against kernel-authoritative CommandsPath(s), retain compatibility with older generated path-search shells, and make Kath deterministically await opening a newly created OS workspace."
 }

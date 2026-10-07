@@ -113,6 +113,7 @@ internal static unsafe class FileSystemLogicalPaths
     }
 
     internal static UInt32 CommandCount=>_commandCount;
+    internal static String CanonicalCommand(UInt32 index)=>index>=_commandCount?String.Empty:_commands[(Int32)index];
     internal static String ExternalCommand(UInt32 index)=>index>=_commandCount?String.Empty:FileSystemPathPolicyRuntime.ExternalizeCanonicalPath(_commands[(Int32)index]);
 
     internal static Boolean TryGetExternalAscii(FileSystemLogicalPath kind,Byte* output,UInt32 capacity,out UInt32 length)

@@ -537,13 +537,75 @@ public static unsafe class UserlandRuntimeStartup
     {
         process=default;if(path==null||pathLength==0U||pathLength>PathCapacity)return false;
 
-        // Userland paths use the OS-selected external separator. SystemAssetCatalog and the VFS
-        // use Inu's canonical '/' form internally. Never compare an external policy path directly
-        // with the canonical asset catalogue, otherwise commands disappear when a shell selects
-        // '\\', ':', or another supported separator.
+        Byte externalSeparator=(Byte)FileSystem.GetPathSeparator();
+        Boolean absolute=path[0]==externalSeparator;
+
+        // A bare executable name is a command request. Resolve it against the configured
+        // CommandsPath(s) inside the kernel, where canonical filesystem paths and the boot
+        // asset catalogue already live. This avoids round-tripping a logical path through
+        // userland merely to convert it back into canonical form here.
+        if(!absolute)
+            return TryCreateCommandExecutable(path,pathLength,ownership,out process);
+
+        // Userland absolute paths use the OS-selected external separator. SystemAssetCatalog
+        // and the VFS use Inu's canonical '/' form internally.
         Byte* canonical=stackalloc Byte[(Int32)PathCapacity];
-        if(!FileSystemPathPolicyRuntime.TryNormalizeUserAscii(path,pathLength,canonical,PathCapacity,out UInt32 canonicalLength,out Boolean absolute)||
-           !absolute||canonicalLength<=1U)return false;
+        if(!FileSystemPathPolicyRuntime.TryNormalizeUserAscii(path,pathLength,canonical,PathCapacity,out UInt32 canonicalLength,out Boolean normalizedAbsolute)||
+           !normalizedAbsolute||canonicalLength<=1U)return false;
+        if(TryCreateCanonicalExecutable(canonical,canonicalLength,ownership,out process))return true;
+
+        // If the caller supplied a command candidate assembled in userland, retry its final
+        // component against the kernel-authoritative CommandsPath(s). This keeps older generated
+        // shells working while path policy remains entirely owned by the OS.
+        UInt32 componentStart=canonicalLength;
+        while(componentStart>1U&&canonical[componentStart-1U]!=(Byte)'/')componentStart--;
+        if(componentStart<canonicalLength)
+            return TryCreateCommandExecutable(canonical+componentStart,canonicalLength-componentStart,ownership,out process);
+        return false;
+    }
+
+    private static Boolean TryCreateCommandExecutable(Byte* command,UInt32 commandLength,KernelProcessOwnership ownership,out KernelProcessInfo process)
+    {
+        process=default;
+        if(command==null||commandLength==0U||commandLength>255U)return false;
+
+        Byte externalSeparator=(Byte)FileSystem.GetPathSeparator();
+        for(UInt32 i=0U;i<commandLength;i++)
+        {
+            Byte b=command[i];
+            if(b==0U||b>0x7FU||b==(Byte)'/'||b==externalSeparator)return false;
+        }
+
+        Byte* candidate=stackalloc Byte[(Int32)PathCapacity];
+        UInt32 count=FileSystemLogicalPaths.CommandCount;
+        for(UInt32 rootIndex=0U;rootIndex<count;rootIndex++)
+        {
+            String root=FileSystemLogicalPaths.CanonicalCommand(rootIndex);
+            if(root==null||root.Length==0||root[0]!='/'||(UInt32)root.Length+1U+commandLength+4U>PathCapacity)continue;
+
+            UInt32 length=0U;
+            for(Int32 i=0;i<root.Length;i++)
+            {
+                Char c=root[i];if(c>0x7F){length=0U;break;}
+                candidate[length++]=(Byte)c;
+            }
+            if(length==0U)continue;
+            if(candidate[length-1U]!=(Byte)'/')candidate[length++]=(Byte)'/';
+            for(UInt32 i=0U;i<commandLength;i++)candidate[length++]=command[i];
+
+            UInt32 plainLength=length;
+            candidate[length++]=(Byte)'.';candidate[length++]=(Byte)'E';candidate[length++]=(Byte)'X';candidate[length++]=(Byte)'E';
+            if(TryCreateCanonicalExecutable(candidate,length,ownership,out process))return true;
+            if(TryCreateCanonicalExecutable(candidate,plainLength,ownership,out process))return true;
+        }
+        return false;
+    }
+
+    private static Boolean TryCreateCanonicalExecutable(Byte* canonical,UInt32 canonicalLength,KernelProcessOwnership ownership,out KernelProcessInfo process)
+    {
+        process=default;
+        if(canonical==null||canonicalLength<=1U||canonicalLength>PathCapacity||canonical[0]!=(Byte)'/'||
+           !FileSystemPathPolicyRuntime.ValidateCanonicalAscii(canonical,canonicalLength))return false;
 
         Byte* assetPath=canonical+1;
         UInt32 assetLength=canonicalLength-1U;

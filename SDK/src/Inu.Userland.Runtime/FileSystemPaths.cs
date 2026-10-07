@@ -84,7 +84,8 @@ public static unsafe class FileSystemPaths
             if(root[root.Length-1]!=separator)path.Append(separator);path.Append(command);
             String plain=path.ToString();StringBuilder executable=new StringBuilder(plain.Length+4);executable.Append(plain);executable.Append(".EXE");result[output++]=executable.ToString();result[output++]=plain;
         }
-        if(output==result.Length)return result;
+        if(output==result.Length&&output!=0)return result;
+        if(output==0)return new[]{command};
         String[] exact=new String[output];for(Int32 i=0;i<output;i++)exact[i]=result[i];return exact;
     }
 

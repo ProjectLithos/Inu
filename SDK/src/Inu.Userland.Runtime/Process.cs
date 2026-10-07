@@ -6,7 +6,7 @@ namespace Inu.Userland.Runtime;
 /// <summary><inu.api>High-level process-launch helpers for ordinary ring-3 applications. The native process syscall transport is hidden behind this surface.</inu.api></summary>
 public static unsafe class Process
 {
-    /// <summary><inu.api>Attempts to start an executable with raw argument text.</inu.api></summary>
+    /// <summary><inu.api>Attempts to start an executable with raw argument text. A bare executable name is resolved against the configured CommandsPath(s); an absolute path is used directly.</inu.api></summary>
     public static Boolean TryStart(String path,String arguments)
     {
         if(path==null||path.Length==0||path.Length>1024)return false;if(arguments==null)arguments=String.Empty;if(arguments.Length>2048)return false;
