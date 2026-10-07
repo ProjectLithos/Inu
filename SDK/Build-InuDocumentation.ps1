@@ -50,8 +50,9 @@ if ($LASTEXITCODE -ne 0) { throw "Documentation generation failed with exit code
 
 $index = Join-Path $siteRoot "index.html"
 $search = Join-Path $siteRoot "assets\search-index.js"
-$sourceIndex = Join-Path $siteRoot "source\index.html"
-if (-not (Test-Path -LiteralPath $index -PathType Leaf) -or -not (Test-Path -LiteralPath $search -PathType Leaf) -or -not (Test-Path -LiteralPath $sourceIndex -PathType Leaf)) {
-    throw "Documentation generator did not produce the required portable site, search, and source-browser outputs beneath $siteRoot."
+$apiIndex = Join-Path $siteRoot "api\index.html"
+$assemblyIndex = Join-Path $siteRoot "assemblies\index.html"
+if (-not (Test-Path -LiteralPath $index -PathType Leaf) -or -not (Test-Path -LiteralPath $search -PathType Leaf) -or -not (Test-Path -LiteralPath $apiIndex -PathType Leaf) -or -not (Test-Path -LiteralPath $assemblyIndex -PathType Leaf)) {
+    throw "Documentation generator did not produce the required current API site outputs beneath $siteRoot."
 }
 Write-Host "[ OK ] Inu SDK usage site: $index"

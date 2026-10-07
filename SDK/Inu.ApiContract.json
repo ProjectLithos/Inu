@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "apiVersion": "0.0.81",
+  "apiVersion": "0.0.85",
   "kind": "user-command-api",
   "authority": "Inu/src/Common/Inu.Cli/Program.cs",
   "rule": "Only commands accepted by the canonical inu executable are part of the user-facing SDK command API.",
@@ -46,8 +46,136 @@
   "codingApi": {
     "status": "explicit-only",
     "exportMarker": "<inu.api>",
-    "description": "C# declarations are not SDK API merely because they are public. Only declarations explicitly marked for SDK users are published.",
+    "description": "The coder-facing Inu API. SDK users program against these .NET-compatible and high-level Inu surfaces; native Get/Set/Event transport is an internal implementation detail.",
     "exports": [
+      {
+        "namespace": "System",
+        "type": "Primitive types",
+        "members": [
+          "Boolean",
+          "Char",
+          "SByte",
+          "Byte",
+          "Int16",
+          "UInt16",
+          "Int32",
+          "UInt32",
+          "Int64",
+          "UInt64",
+          "Single",
+          "Double",
+          "IntPtr",
+          "UIntPtr"
+        ],
+        "availability": "freestanding managed code (kernel and ring-3 userland)",
+        "transport": "in-process CoreLib",
+        "notes": "Freestanding CLR-compatible value types supplied by Inu. These are the normal C# primitive/runtime value types; no desktop .NET runtime is present.",
+        "assembly": "System.Private.CoreLib",
+        "kind": "Primitive/value types",
+        "category": "Freestanding .NET",
+        "status": "recommended",
+        "compiledInto": "System.Private.CoreLib",
+        "example": "int count = 4;\nulong ticks = 125000UL;\nbool ready = count > 0;\nchar separator = '/';",
+        "implementation": "Implemented directly by the Inu freestanding CoreLib.",
+        "memberExamples": {
+          "Boolean": "bool value = true;\nConsole.WriteLine(value);",
+          "Char": "char value = '/';\nConsole.WriteLine(value);",
+          "SByte": "sbyte value = -1;\nConsole.WriteLine((int)value);",
+          "Byte": "byte value = 255;\nConsole.WriteLine((uint)value);",
+          "Int16": "short value = -42;\nConsole.WriteLine((int)value);",
+          "UInt16": "ushort value = 42;\nConsole.WriteLine((uint)value);",
+          "Int32": "int value = 42;\nConsole.WriteLine(value);",
+          "UInt32": "uint value = 42U;\nConsole.WriteLine(value);",
+          "Int64": "long value = 42L;\nConsole.WriteLine(value);",
+          "UInt64": "ulong value = 42UL;\nConsole.WriteLine(value);",
+          "Single": "float value = 1.5f;",
+          "Double": "double value = 1.5;",
+          "IntPtr": "IntPtr address = (IntPtr)0x1000;",
+          "UIntPtr": "UIntPtr address = (UIntPtr)0x1000;"
+        }
+      },
+      {
+        "namespace": "System",
+        "type": "String",
+        "members": [
+          "String.Empty",
+          "Length",
+          "this[int]",
+          "GetPinnableReference()",
+          "ToString()",
+          "IsNullOrEmpty(string)",
+          "IsNullOrWhiteSpace(string)",
+          "Equals(string,string)",
+          "Equals(string)",
+          "CompareOrdinal(string,string)",
+          "IndexOf(char)",
+          "Contains(char)",
+          "StartsWith(string)",
+          "EndsWith(string)",
+          "Substring(int)",
+          "Substring(int,int)",
+          "Concat(string,string)",
+          "Concat(string,string,string)",
+          "Concat(string,string,string,string)"
+        ],
+        "availability": "freestanding managed code (kernel and ring-3 userland)",
+        "transport": "in-process CoreLib",
+        "notes": "Freestanding System.String implementation used by current Inu C# code. Operations are ordinal/culture-free unless explicitly documented otherwise.",
+        "assembly": "System.Private.CoreLib",
+        "kind": "Class",
+        "category": "Freestanding .NET",
+        "status": "recommended",
+        "compiledInto": "System.Private.CoreLib",
+        "example": "string commandLine = \"echo hello\";\nint split = commandLine.IndexOf(' ');\nstring command = commandLine.Substring(0, split);\nstring arguments = commandLine.Substring(split + 1);\nConsole.WriteLine(String.Concat(command, \": \", arguments));",
+        "implementation": "Implemented directly by the Inu freestanding CoreLib.",
+        "memberExamples": {
+          "String.Empty": "string value = String.Empty;",
+          "Length": "string value = \"Inu\";\nint length = value.Length;",
+          "this[int]": "string value = \"Inu\";\nchar first = value[0];",
+          "GetPinnableReference()": "string value = \"Inu\";\nref readonly char first = ref value.GetPinnableReference();",
+          "ToString()": "string value = \"Inu\";\nstring text = value.ToString();",
+          "IsNullOrEmpty(string)": "bool empty = String.IsNullOrEmpty(value);",
+          "IsNullOrWhiteSpace(string)": "bool blank = String.IsNullOrWhiteSpace(value);",
+          "Equals(string,string)": "bool same = String.Equals(\"Inu\", \"Inu\");",
+          "Equals(string)": "string value = \"Inu\";\nbool same = value.Equals(\"Inu\");",
+          "CompareOrdinal(string,string)": "int order = String.CompareOrdinal(\"A\", \"B\");",
+          "IndexOf(char)": "string value = \"Inu\";\nint index = value.IndexOf('n');",
+          "Contains(char)": "string value = \"Inu\";\nbool found = value.Contains('n');",
+          "StartsWith(string)": "bool starts = \"Inu SDK\".StartsWith(\"Inu\");",
+          "EndsWith(string)": "bool ends = \"Shell.exe\".EndsWith(\".exe\");",
+          "Substring(int)": "string arguments = \"echo hello\".Substring(5);",
+          "Substring(int,int)": "string command = \"echo hello\".Substring(0, 4);",
+          "Concat(string,string)": "string path = String.Concat(\"/User/\", \"Dave\");",
+          "Concat(string,string,string)": "string line = String.Concat(\"Name: \", name, \"\\n\");",
+          "Concat(string,string,string,string)": "string path = String.Concat(root, \"/\", folder, \"/file.txt\");"
+        }
+      },
+      {
+        "namespace": "System",
+        "type": "Array",
+        "members": [
+          "Length",
+          "Rank",
+          "GetLength(int)",
+          "Empty<T>()"
+        ],
+        "availability": "freestanding managed code (kernel and ring-3 userland)",
+        "transport": "in-process CoreLib",
+        "notes": "Freestanding managed-array base support required by C# arrays and Inu collection code.",
+        "assembly": "System.Private.CoreLib",
+        "kind": "Abstract class",
+        "category": "Freestanding .NET",
+        "status": "recommended",
+        "compiledInto": "System.Private.CoreLib",
+        "example": "string[] paths = new string[2];\npaths[0] = \"/System/Commands\";\npaths[1] = \"/User/Commands\";\nConsole.WriteLine(paths.Length);",
+        "implementation": "Implemented directly by the Inu freestanding CoreLib.",
+        "memberExamples": {
+          "Length": "string[] values = new string[2];\nint count = values.Length;",
+          "Rank": "int[,] grid = new int[2, 3];\nint dimensions = grid.Rank;",
+          "GetLength(int)": "int[,] grid = new int[2, 3];\nint rows = grid.GetLength(0);",
+          "Empty<T>()": "string[] values = Array.Empty<string>();"
+        }
+      },
       {
         "namespace": "System",
         "type": "Console",
@@ -73,7 +201,34 @@
         ],
         "availability": "ring-3 userland",
         "transport": "Get console.input + Event console.output/console.clear",
-        "notes": "Freestanding .NET-compatible console supplied by Inu. Console.Read/ReadLine are the coder-facing console input API; lower-level input transport remains internal."
+        "notes": "Freestanding .NET-compatible console supplied by Inu. Console.Read/ReadLine are the coder-facing console input API; lower-level input transport remains internal.",
+        "assembly": "Inu.Userland.Runtime",
+        "kind": "Static class",
+        "category": "Freestanding .NET",
+        "status": "recommended",
+        "compiledInto": "Inu.Userland.Runtime",
+        "example": "Console.Clear();\nConsole.Write(\"home: \");\nstring input = Console.ReadLine();\nConsole.WriteLine(input);",
+        "implementation": "Implemented by Inu; native Get/Set/Event transport is internal to the SDK.",
+        "memberExamples": {
+          "Write(string)": "Console.Write(\"Hello from Inu\");",
+          "Write(char)": "Console.Write('>');",
+          "Write(bool)": "Console.Write(true);",
+          "Write(int)": "Console.Write(42);",
+          "Write(uint)": "Console.Write(42U);",
+          "Write(long)": "Console.Write(42L);",
+          "Write(ulong)": "Console.Write(42UL);",
+          "WriteLine()": "Console.WriteLine();",
+          "WriteLine(string)": "Console.WriteLine(\"Hello from Inu\");",
+          "WriteLine(char)": "Console.WriteLine('>');",
+          "WriteLine(bool)": "Console.WriteLine(true);",
+          "WriteLine(int)": "Console.WriteLine(42);",
+          "WriteLine(uint)": "Console.WriteLine(42U);",
+          "WriteLine(long)": "Console.WriteLine(42L);",
+          "WriteLine(ulong)": "Console.WriteLine(42UL);",
+          "Read()": "int character = Console.Read();",
+          "ReadLine()": "Console.Write(\"home: \");\nstring input = Console.ReadLine();",
+          "Clear()": "Console.Clear();"
+        }
       },
       {
         "namespace": "Inu.Userland.Runtime",
@@ -85,7 +240,19 @@
         ],
         "availability": "ring-3 userland",
         "transport": "Event syscall",
-        "notes": "Compatibility surface retained for source written against Inu 0.0.58."
+        "notes": "Compatibility surface retained for source written against Inu 0.0.58.",
+        "assembly": "Inu.Userland.Runtime",
+        "kind": "Static class (legacy compatibility)",
+        "category": "Userland",
+        "status": "legacy",
+        "compiledInto": "Inu.Userland.Runtime",
+        "example": "// Legacy compatibility only. New code should use System.Console.\nOutput.WriteLine(\"Hello\");",
+        "implementation": "Implemented by Inu; native Get/Set/Event transport is internal to the SDK.",
+        "memberExamples": {
+          "Write(string)": "Output.Write(\"Hello\");",
+          "WriteLine(string)": "Output.WriteLine(\"Hello\");",
+          "Clear()": "Output.Clear();"
+        }
       },
       {
         "namespace": "System.Collections",
@@ -97,7 +264,19 @@
         ],
         "availability": "freestanding managed code (kernel and ring-3 userland)",
         "transport": "in-process CoreLib",
-        "notes": "Inu-owned .NET-compatible non-generic collection contracts used by foreach and collection implementations."
+        "notes": "Inu-owned .NET-compatible non-generic collection contracts used by foreach and collection implementations.",
+        "assembly": "System.Private.CoreLib",
+        "kind": "Interfaces",
+        "category": "Freestanding .NET",
+        "status": "recommended",
+        "compiledInto": "System.Private.CoreLib",
+        "example": "IEnumerable values = collection;\nforeach (object value in values)\n    Console.WriteLine(value.ToString());",
+        "implementation": "Implemented directly by the Inu freestanding CoreLib.",
+        "memberExamples": {
+          "IEnumerable": "IEnumerable values = collection;\nforeach (object value in values) { }",
+          "IEnumerator": "IEnumerator iterator = values.GetEnumerator();\nwhile (iterator.MoveNext()) { }",
+          "ICollection": "ICollection values = collection;\nint count = values.Count;"
+        }
       },
       {
         "namespace": "System.Collections.Generic",
@@ -118,7 +297,28 @@
         ],
         "availability": "freestanding managed code (kernel and ring-3 userland)",
         "transport": "in-process CoreLib",
-        "notes": "Inu-owned .NET-compatible generic collections. No desktop .NET runtime dependency."
+        "notes": "Inu-owned .NET-compatible generic collections. No desktop .NET runtime dependency.",
+        "assembly": "System.Private.CoreLib",
+        "kind": "Interfaces and classes",
+        "category": "Freestanding .NET",
+        "status": "recommended",
+        "compiledInto": "System.Private.CoreLib",
+        "example": "List<string> commands = new List<string>();\ncommands.Add(\"dir\");\ncommands.Add(\"type\");\nforeach (string command in commands)\n    Console.WriteLine(command);",
+        "implementation": "Implemented directly by the Inu freestanding CoreLib.",
+        "memberExamples": {
+          "IEnumerable<T>": "IEnumerable<string> values = list;\nforeach (string value in values) { }",
+          "IEnumerator<T>": "IEnumerator<string> iterator = values.GetEnumerator();",
+          "ICollection<T>": "ICollection<string> values = list;\nvalues.Add(\"Inu\");",
+          "IList<T>": "IList<string> values = list;\nvalues[0] = \"Inu\";",
+          "IReadOnlyCollection<T>": "IReadOnlyCollection<string> values = list;\nint count = values.Count;",
+          "IReadOnlyList<T>": "IReadOnlyList<string> values = list;\nstring first = values[0];",
+          "KeyValuePair<TKey,TValue>": "KeyValuePair<string,int> item = new KeyValuePair<string,int>(\"cpu\", 4);",
+          "EqualityComparer<T>": "bool same = EqualityComparer<string>.Default.Equals(\"Inu\", \"Inu\");",
+          "List<T>": "List<string> values = new List<string>();\nvalues.Add(\"Inu\");",
+          "Dictionary<TKey,TValue>": "Dictionary<string,int> values = new Dictionary<string,int>();\nvalues.Add(\"cpus\", 4);",
+          "Queue<T>": "Queue<string> queue = new Queue<string>();\nqueue.Enqueue(\"work\");",
+          "Stack<T>": "Stack<string> stack = new Stack<string>();\nstack.Push(\"work\");"
+        }
       },
       {
         "namespace": "System.Text",
@@ -143,7 +343,32 @@
         ],
         "availability": "freestanding managed code (kernel and ring-3 userland)",
         "transport": "in-process CoreLib",
-        "notes": "Inu-owned .NET-compatible StringBuilder plus initial ASCII and UTF-8 encoding support. No desktop .NET runtime dependency."
+        "notes": "Inu-owned .NET-compatible StringBuilder plus initial ASCII and UTF-8 encoding support. No desktop .NET runtime dependency.",
+        "assembly": "System.Private.CoreLib",
+        "kind": "Classes",
+        "category": "Freestanding .NET",
+        "status": "recommended",
+        "compiledInto": "System.Private.CoreLib",
+        "example": "StringBuilder text = new StringBuilder();\ntext.Append(\"CPU count: \");\ntext.Append(4);\nConsole.WriteLine(text.ToString());",
+        "implementation": "Implemented directly by the Inu freestanding CoreLib.",
+        "memberExamples": {
+          "StringBuilder": "StringBuilder builder = new StringBuilder();",
+          "StringBuilder.Append(string)": "StringBuilder builder = new StringBuilder();\nbuilder.Append(\"Inu\");",
+          "StringBuilder.Append(char)": "StringBuilder builder = new StringBuilder();\nbuilder.Append('/');",
+          "StringBuilder.Append(bool)": "StringBuilder builder = new StringBuilder();\nbuilder.Append(true);",
+          "StringBuilder.Append(int/uint/long/ulong)": "StringBuilder builder = new StringBuilder();\nbuilder.Append(42);",
+          "StringBuilder.AppendLine()": "StringBuilder builder = new StringBuilder();\nbuilder.AppendLine();",
+          "StringBuilder.AppendLine(string)": "StringBuilder builder = new StringBuilder();\nbuilder.AppendLine(\"Inu\");",
+          "StringBuilder.Clear()": "StringBuilder builder = new StringBuilder();\nbuilder.Clear();",
+          "StringBuilder.ToString()": "StringBuilder builder = new StringBuilder();\nbuilder.Append(\"Inu\");\nstring value = builder.ToString();",
+          "Encoding.ASCII": "Encoding encoding = Encoding.ASCII;",
+          "Encoding.UTF8": "Encoding encoding = Encoding.UTF8;",
+          "Encoding.GetByteCount(string)": "int count = Encoding.UTF8.GetByteCount(\"Inu\");",
+          "Encoding.GetBytes(string)": "byte[] bytes = Encoding.UTF8.GetBytes(\"Inu\");",
+          "Encoding.GetString(byte[])": "string value = Encoding.UTF8.GetString(bytes);",
+          "ASCIIEncoding": "ASCIIEncoding encoding = new ASCIIEncoding();",
+          "UTF8Encoding": "UTF8Encoding encoding = new UTF8Encoding();"
+        }
       },
       {
         "namespace": "System.IO",
@@ -171,7 +396,35 @@
         ],
         "availability": "ring-3 userland",
         "transport": "Get/Set/Event file, directory, and per-process current-directory services",
-        "notes": "Inu-owned .NET-compatible whole-file and basic directory API. Current working directory is process-local; spawned child processes inherit the parent working directory, and relative file/directory paths are resolved by the kernel against that process state before reaching the VFS. The current bootstrap starts root userland processes at the mounted VFS namespace root. Filesystem format, permissions and higher-level directory layout remain OS policy. Directory.CreateDirectory creates one directory level; Directory.Delete currently removes empty directories only. Enumeration remains deferred until the selected path-join policy is exposed directly. Initial user/kernel path transport is ASCII."
+        "notes": "Inu-owned .NET-compatible whole-file and basic directory API. Current working directory is process-local; spawned child processes inherit the parent working directory, and relative file/directory paths are resolved by the kernel against that process state before reaching the VFS. The current bootstrap starts root userland processes at the mounted VFS namespace root. Filesystem format, permissions and higher-level directory layout remain OS policy. Directory.CreateDirectory creates one directory level; Directory.Delete currently removes empty directories only. Enumeration remains deferred until the selected path-join policy is exposed directly. Initial user/kernel path transport is ASCII.",
+        "assembly": "Inu.Userland.Runtime",
+        "kind": "Static classes, class, exceptions",
+        "category": "Freestanding .NET",
+        "status": "recommended",
+        "compiledInto": "Inu.Userland.Runtime",
+        "example": "string path = \"/User/readme.txt\";\nFile.WriteAllText(path, \"Hello from Inu\");\nif (File.Exists(path))\n    Console.WriteLine(File.ReadAllText(path));",
+        "implementation": "Implemented by Inu; native Get/Set/Event transport is internal to the SDK.",
+        "memberExamples": {
+          "File.Exists(string)": "bool exists = File.Exists(\"/User/settings.txt\");",
+          "File.ReadAllBytes(string)": "byte[] data = File.ReadAllBytes(\"/User/data.bin\");",
+          "File.ReadAllText(string)": "string text = File.ReadAllText(\"/User/readme.txt\");",
+          "File.WriteAllBytes(string, byte[])": "File.WriteAllBytes(\"/User/data.bin\", data);",
+          "File.WriteAllText(string, string)": "File.WriteAllText(\"/User/readme.txt\", \"Hello\");",
+          "File.Delete(string)": "File.Delete(\"/User/old.txt\");",
+          "Directory.Exists(string)": "bool exists = Directory.Exists(\"/User\");",
+          "Directory.GetCurrentDirectory()": "string path = Directory.GetCurrentDirectory();",
+          "Directory.SetCurrentDirectory(string)": "Directory.SetCurrentDirectory(\"/User\");",
+          "Directory.CreateDirectory(string)": "Directory.CreateDirectory(\"/User/NewFolder\");",
+          "Directory.Delete(string)": "Directory.Delete(\"/User/OldFolder\");",
+          "DirectoryInfo(string)": "DirectoryInfo info = new DirectoryInfo(\"/User\");",
+          "DirectoryInfo.FullName": "DirectoryInfo info = new DirectoryInfo(\"/User\");\nstring path = info.FullName;",
+          "DirectoryInfo.Exists": "DirectoryInfo info = new DirectoryInfo(\"/User\");\nbool exists = info.Exists;",
+          "DirectoryInfo.Create()": "DirectoryInfo info = new DirectoryInfo(\"/User/NewFolder\");\ninfo.Create();",
+          "DirectoryInfo.Delete()": "DirectoryInfo info = new DirectoryInfo(\"/User/OldFolder\");\ninfo.Delete();",
+          "IOException": "try { File.ReadAllText(path); } catch (IOException) { }",
+          "FileNotFoundException": "try { File.ReadAllText(path); } catch (FileNotFoundException) { }",
+          "DirectoryNotFoundException": "try { Directory.SetCurrentDirectory(path); } catch (DirectoryNotFoundException) { }"
+        }
       },
       {
         "namespace": "System.Threading",
@@ -183,7 +436,19 @@
         ],
         "availability": "ring-3 userland",
         "transport": "Get time.monotonic + Event scheduler.yield",
-        "notes": "Initial Inu-owned .NET-compatible threading surface. Coordinates the current userland execution context only; managed user-thread creation is not yet part of the SDK contract."
+        "notes": "Initial Inu-owned .NET-compatible threading surface. Coordinates the current userland execution context only; managed user-thread creation is not yet part of the SDK contract.",
+        "assembly": "Inu.Userland.Runtime",
+        "kind": "Class and constant",
+        "category": "Freestanding .NET",
+        "status": "recommended",
+        "compiledInto": "Inu.Userland.Runtime",
+        "example": "while (!ready)\n{\n    Thread.Yield();\n}\nThread.Sleep(10);",
+        "implementation": "Implemented by Inu; native Get/Set/Event transport is internal to the SDK.",
+        "memberExamples": {
+          "Thread.Yield()": "Thread.Yield();",
+          "Thread.Sleep(int)": "Thread.Sleep(10);",
+          "Timeout.Infinite": "Thread.Sleep(Timeout.Infinite);"
+        }
       },
       {
         "namespace": "Inu.Kernel.Console",
@@ -198,7 +463,22 @@
         ],
         "availability": "coder-owned kernel source",
         "transport": "in-process kernel policy facade",
-        "notes": "Selects the requested kernel console policy."
+        "notes": "Selects the requested kernel console policy.",
+        "assembly": "Inu.Kernel.Console",
+        "kind": "Enum",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Console.Run(ConsoleType.FramebufferText);",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Auto": "ConsoleType mode = ConsoleType.Auto;",
+          "TextAscii": "ConsoleType mode = ConsoleType.TextAscii;",
+          "TextAnsi": "ConsoleType mode = ConsoleType.TextAnsi;",
+          "FramebufferText": "ConsoleType mode = ConsoleType.FramebufferText;",
+          "Graphics": "ConsoleType mode = ConsoleType.Graphics;",
+          "Serial": "ConsoleType mode = ConsoleType.Serial;"
+        }
       },
       {
         "namespace": "Inu.Kernel.Console",
@@ -221,7 +501,30 @@
         ],
         "availability": "coder-owned kernel source",
         "transport": "in-process kernel policy facade",
-        "notes": "Stable console lifecycle/policy surface. KernelConsole remains implementation/advanced mechanism."
+        "notes": "Stable console lifecycle/policy surface. KernelConsole remains implementation/advanced mechanism.",
+        "assembly": "Inu.Kernel.Console",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Console.Run(ConsoleType.FramebufferText);\nConsole.SetBufferCount(2);\nConsole.WriteLine(\"Kernel console online\");",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Run(ConsoleType)": "Console.Run(ConsoleType.Auto);",
+          "TryPromoteGraphics()": "bool promoted = Console.TryPromoteGraphics();",
+          "Stop()": "Console.Stop();",
+          "Resume()": "Console.Resume();",
+          "Unload()": "Console.Unload();",
+          "Write(string)": "Console.Write(\"Kernel: \");",
+          "WriteLine(string)": "Console.WriteLine(\"online\");",
+          "Clear()": "Console.Clear();",
+          "State": "var state = Console.State;",
+          "Mode": "ConsoleType mode = Console.Mode;",
+          "RequestedMode": "ConsoleType requested = Console.RequestedMode;",
+          "IsRunning": "bool running = Console.IsRunning;",
+          "GetBufferCount()": "uint buffers = Console.GetBufferCount();",
+          "SetBufferCount(uint)": "Console.SetBufferCount(2U);"
+        }
       },
       {
         "namespace": "Inu.Kernel.Memory",
@@ -235,7 +538,21 @@
         ],
         "availability": "coder-owned kernel source",
         "transport": "in-process physical-memory policy facade",
-        "notes": "Bootstrap retains ownership of physical-memory initialization; kernel policy may inspect and allocate/release managed physical pages without depending on KernelPhysicalMemory internals."
+        "notes": "Bootstrap retains ownership of physical-memory initialization; kernel policy may inspect and allocate/release managed physical pages without depending on KernelPhysicalMemory internals.",
+        "assembly": "Inu.Kernel.Memory",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "KernelPhysicalMemoryStatistics stats = Memory.GetStatistics();\nKernelPhysicalAllocation allocation;\nif (Memory.TryAllocatePages(4, out allocation))\n    Memory.Release(allocation);",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "IsInitialized()": "bool ready = Memory.IsInitialized();",
+          "GetStatistics()": "var statistics = Memory.GetStatistics();",
+          "TryAllocatePages(ulong, out KernelPhysicalAllocation)": "KernelPhysicalAllocation allocation;\nbool ok = Memory.TryAllocatePages(4UL, out allocation);",
+          "TryAllocatePages(ulong, ulong, out KernelPhysicalAllocation)": "KernelPhysicalAllocation allocation;\nbool ok = Memory.TryAllocatePages(4UL, 0x1000UL, out allocation);",
+          "Release(KernelPhysicalAllocation)": "Memory.Release(allocation);"
+        }
       },
       {
         "namespace": "Inu.Kernel.Processes",
@@ -255,22 +572,27 @@
         ],
         "availability": "coder-owned kernel source",
         "transport": "in-process process-policy facade",
-        "notes": "Stable process policy without exposing process record-store or image-loader implementation classes by default."
-      },
-      {
-        "namespace": "Inu.Kernel.SystemCalls",
-        "type": "SystemCalls",
-        "members": [
-          "Initialize()",
-          "IsInitialized()",
-          "GetCapabilities()",
-          "RegisterGet(string, handler)",
-          "RegisterSet(string, handler)",
-          "RegisterEvent(string, handler)"
-        ],
-        "availability": "coder-owned kernel source",
-        "transport": "in-process syscall policy facade",
-        "notes": "Native Inu syscall registration remains exactly Get, Set and Event. Handler registration uses the freestanding KernelSystemCallFrame function-pointer contract."
+        "notes": "Stable process policy without exposing process record-store or image-loader implementation classes by default.",
+        "assembly": "Inu.Kernel.Processes",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Processes.ConfigureGraphicalSession(\n    \"/System/GUI/Desktop.exe\",\n    \"/System/GUI/Login.exe\");\nProcesses.StartGraphicalSession();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "GetActiveCount()": "uint count = Processes.GetActiveCount();",
+          "TryStart(ulong, ulong)": "bool started = Processes.TryStart(processId, entryAddress);",
+          "Terminate(ulong, long)": "Processes.Terminate(processId, 0L);",
+          "GetForegroundProcessId()": "ulong pid = Processes.GetForegroundProcessId();",
+          "CancelForeground()": "Processes.CancelForeground();",
+          "IsForegroundCancellationRequested()": "bool cancelled = Processes.IsForegroundCancellationRequested();",
+          "ConfigureGraphicalSession(string, string)": "Processes.ConfigureGraphicalSession(\"/System/Login.exe\", \"/System/Desktop.exe\");",
+          "StartGraphicalSession()": "Processes.StartGraphicalSession();",
+          "IsGraphicalSessionStarting()": "bool starting = Processes.IsGraphicalSessionStarting();",
+          "IsGraphicalSessionActive()": "bool active = Processes.IsGraphicalSessionActive();",
+          "HasGraphicalSessionFailed()": "bool failed = Processes.HasGraphicalSessionFailed();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Interrupts",
@@ -288,7 +610,25 @@
         ],
         "availability": "coder-owned kernel source",
         "transport": "in-process interrupt lifecycle facade",
-        "notes": "Stable interrupt policy namespace; interrupt-dispatch implementation details remain internal."
+        "notes": "Stable interrupt policy namespace; interrupt-dispatch implementation details remain internal.",
+        "assembly": "Inu.Kernel.InterruptDispatch",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "if (!Interrupts.IsInitialized())\n    Interrupts.Initialize();\nInterrupts.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "Interrupts.Initialize();",
+          "IsInitialized()": "bool ready = Interrupts.IsInitialized();",
+          "GetLifecycleState()": "var state = Interrupts.GetLifecycleState();",
+          "Start()": "Interrupts.Start();",
+          "Run()": "Interrupts.Run();",
+          "Pause()": "Interrupts.Pause();",
+          "Resume()": "Interrupts.Resume();",
+          "Stop()": "Interrupts.Stop();",
+          "Wait()": "Interrupts.Wait();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Hardware",
@@ -304,7 +644,23 @@
         ],
         "availability": "coder-owned kernel source when drivers are kernel-resident",
         "transport": "in-process unified device-tree policy facade",
-        "notes": "Bus-specific PCI/USB/VirtIO driver internals are not imported into Kernel.cs by default."
+        "notes": "Bus-specific PCI/USB/VirtIO driver internals are not imported into Kernel.cs by default.",
+        "assembly": "Inu.Kernel.Drivers",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "uint devices = Devices.GetRegisteredDeviceCount();\nDevices.StartMatching();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "IsInitialized()": "bool ready = Devices.IsInitialized();",
+          "GetRegisteredDeviceCount()": "uint count = Devices.GetRegisteredDeviceCount();",
+          "GetBoundDeviceCount()": "uint count = Devices.GetBoundDeviceCount();",
+          "GetStartedDeviceCount()": "uint count = Devices.GetStartedDeviceCount();",
+          "StartMatching()": "Devices.StartMatching();",
+          "PauseAll()": "Devices.PauseAll();",
+          "ResumeAll()": "Devices.ResumeAll();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Time",
@@ -321,7 +677,24 @@
         ],
         "availability": "coder-owned kernel source",
         "transport": "in-process kernel lifecycle facade",
-        "notes": "Controls timekeeping lifecycle; pausing does not stop the hardware monotonic clock."
+        "notes": "Controls timekeeping lifecycle; pausing does not stop the hardware monotonic clock.",
+        "assembly": "Inu.Kernel.Time",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Time.Initialize();\nTime.Start();\nTime.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "Time.Initialize();",
+          "Start()": "Time.Start();",
+          "Run()": "Time.Run();",
+          "Pause()": "Time.Pause();",
+          "Resume()": "Time.Resume();",
+          "Stop()": "Time.Stop();",
+          "Unload()": "Time.Unload();",
+          "GetLifecycleState()": "var state = Time.GetLifecycleState();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Scheduler",
@@ -341,7 +714,27 @@
         ],
         "availability": "coder-owned kernel source when a scheduler is selected",
         "transport": "in-process kernel lifecycle facade",
-        "notes": "Stable scheduler lifecycle surface."
+        "notes": "Stable scheduler lifecycle surface.",
+        "assembly": "Inu.Kernel.Scheduler",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Scheduler.SetQuantumMilliseconds(5);\nScheduler.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "Scheduler.Initialize();",
+          "Start()": "Scheduler.Start();",
+          "Run()": "Scheduler.Run();",
+          "Pause()": "Scheduler.Pause();",
+          "Resume()": "Scheduler.Resume();",
+          "Stop()": "Scheduler.Stop();",
+          "IsInitialized()": "bool ready = Scheduler.IsInitialized();",
+          "GetLifecycleState()": "var state = Scheduler.GetLifecycleState();",
+          "GetQuantumNanoseconds()": "Scheduler.GetQuantumNanoseconds();",
+          "SetQuantumNanoseconds(ulong)": "Scheduler.SetQuantumNanoseconds(ulong);",
+          "SetQuantumMilliseconds(uint)": "Scheduler.SetQuantumMilliseconds(uint);"
+        }
       },
       {
         "namespace": "Inu.Kernel.Smp",
@@ -361,7 +754,27 @@
         ],
         "availability": "coder-owned kernel source when SMP is selected",
         "transport": "in-process kernel lifecycle facade",
-        "notes": "Lifecycle control for SMP after bootstrap initialization; the bootstrap processor is never unloaded."
+        "notes": "Lifecycle control for SMP after bootstrap initialization; the bootstrap processor is never unloaded.",
+        "assembly": "Inu.Kernel.Smp",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Smp.SetRole(KernelCpuRole.Kernel, 0);\nSmp.SetRole(KernelCpuRole.Userland, KernelCpuSet.All());",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Start()": "Smp.Start();",
+          "Run()": "Smp.Run();",
+          "Pause()": "Smp.Pause();",
+          "Resume()": "Smp.Resume();",
+          "Stop()": "Smp.Stop();",
+          "Unload()": "Smp.Unload();",
+          "GetLifecycleState()": "var state = Smp.GetLifecycleState();",
+          "SetRole(KernelCpuRole, KernelCpuSet)": "Smp.SetRole(KernelCpuRole.Userland, KernelCpuSet.All());",
+          "SetRole(KernelCpuRole, uint)": "Smp.SetRole(KernelCpuRole.Gui, 1U);",
+          "GetRole(KernelCpuRole)": "KernelCpuSet cpus = Smp.GetRole(KernelCpuRole.Userland);",
+          "GetProcessorCount()": "uint count = Smp.GetProcessorCount();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Drivers",
@@ -378,7 +791,24 @@
         ],
         "availability": "coder-owned kernel source when the selected kernel model owns drivers",
         "transport": "in-process kernel lifecycle facade",
-        "notes": "Controls the kernel driver framework rather than individual driver implementation classes."
+        "notes": "Controls the kernel driver framework rather than individual driver implementation classes.",
+        "assembly": "Inu.Kernel.Drivers",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Drivers.Initialize();\nDrivers.Start();\nDrivers.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "Drivers.Initialize();",
+          "Start()": "Drivers.Start();",
+          "Run()": "Drivers.Run();",
+          "Pause()": "Drivers.Pause();",
+          "Resume()": "Drivers.Resume();",
+          "Stop()": "Drivers.Stop();",
+          "Unload()": "Drivers.Unload();",
+          "GetLifecycleState()": "var state = Drivers.GetLifecycleState();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Storage",
@@ -406,7 +836,35 @@
         ],
         "availability": "coder-owned kernel source when filesystem services are kernel-resident",
         "transport": "in-process VFS/filesystem lifecycle facade",
-        "notes": "Stable filesystem lifecycle, OS-author path syntax policy, and logical path mappings. Logical mappings name locations only; they do not grant permissions."
+        "notes": "Stable filesystem lifecycle, OS-author path syntax policy, and logical path mappings. Logical mappings name locations only; they do not grant permissions.",
+        "assembly": "Inu.Kernel.Storage",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "FileSystem.SetPathSeparator('/');\nFileSystem.SetCommandsPaths(new[]\n{\n    \"/System/Commands\",\n    \"/User/Commands\"\n});",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "FileSystem.Initialize();",
+          "Start()": "FileSystem.Start();",
+          "Run()": "FileSystem.Run();",
+          "Pause()": "FileSystem.Pause();",
+          "Resume()": "FileSystem.Resume();",
+          "Stop()": "FileSystem.Stop();",
+          "Unload()": "FileSystem.Unload();",
+          "GetLifecycleState()": "var state = FileSystem.GetLifecycleState();",
+          "GetPathPolicy()": "FileSystemPathPolicy policy = FileSystem.GetPathPolicy();",
+          "SetPathPolicy(FileSystemPathPolicy)": "FileSystem.SetPathPolicy(policy);",
+          "SetLogicalPath(FileSystemLogicalPath, string)": "FileSystem.SetLogicalPath(FileSystemLogicalPath.Commands, \"/System/Commands\");",
+          "GetLogicalPath(FileSystemLogicalPath)": "string path = FileSystem.GetLogicalPath(FileSystemLogicalPath.Commands);",
+          "ClearLogicalPath(FileSystemLogicalPath)": "FileSystem.ClearLogicalPath(FileSystemLogicalPath.Commands);",
+          "GetPathSeparator()": "char separator = FileSystem.GetPathSeparator();",
+          "SetPathSeparator(char)": "FileSystem.SetPathSeparator('/');",
+          "GetCommandsPath()": "string path = FileSystem.GetCommandsPath();",
+          "GetCommandsPaths()": "string[] paths = FileSystem.GetCommandsPaths();",
+          "SetCommandsPath(string)": "FileSystem.SetCommandsPath(\"/System/Commands\");",
+          "SetCommandsPaths(string[])": "FileSystem.SetCommandsPaths(new[] { \"/System/Commands\", \"/User/Commands\" });"
+        }
       },
       {
         "namespace": "Inu.Kernel.Storage",
@@ -434,7 +892,35 @@
         ],
         "availability": "coder-owned kernel source when filesystem services are kernel-resident",
         "transport": "alias of FileSystem",
-        "notes": "Stable filesystem lifecycle, OS-author path syntax policy, and logical path mappings. Logical mappings name locations only; they do not grant permissions."
+        "notes": "Stable filesystem lifecycle, OS-author path syntax policy, and logical path mappings. Logical mappings name locations only; they do not grant permissions.",
+        "assembly": "Inu.Kernel.Storage",
+        "kind": "Static class alias",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "// Spelling-compatible alias. Prefer FileSystem in new code.\nFilesystem.SetPathSeparator('/');",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "Filesystem.Initialize();",
+          "Start()": "Filesystem.Start();",
+          "Run()": "Filesystem.Run();",
+          "Pause()": "Filesystem.Pause();",
+          "Resume()": "Filesystem.Resume();",
+          "Stop()": "Filesystem.Stop();",
+          "Unload()": "Filesystem.Unload();",
+          "GetLifecycleState()": "var state = Filesystem.GetLifecycleState();",
+          "GetPathPolicy()": "FileSystemPathPolicy policy = Filesystem.GetPathPolicy();",
+          "SetPathPolicy(FileSystemPathPolicy)": "Filesystem.SetPathPolicy(policy);",
+          "SetLogicalPath(FileSystemLogicalPath, string)": "Filesystem.SetLogicalPath(FileSystemLogicalPath.Commands, \"/System/Commands\");",
+          "GetLogicalPath(FileSystemLogicalPath)": "string path = Filesystem.GetLogicalPath(FileSystemLogicalPath.Commands);",
+          "ClearLogicalPath(FileSystemLogicalPath)": "Filesystem.ClearLogicalPath(FileSystemLogicalPath.Commands);",
+          "GetPathSeparator()": "char separator = Filesystem.GetPathSeparator();",
+          "SetPathSeparator(char)": "Filesystem.SetPathSeparator('/');",
+          "GetCommandsPath()": "string path = Filesystem.GetCommandsPath();",
+          "GetCommandsPaths()": "string[] paths = Filesystem.GetCommandsPaths();",
+          "SetCommandsPath(string)": "Filesystem.SetCommandsPath(\"/System/Commands\");",
+          "SetCommandsPaths(string[])": "Filesystem.SetCommandsPaths(new[] { \"/System/Commands\", \"/User/Commands\" });"
+        }
       },
       {
         "namespace": "Inu.Kernel.Graphics",
@@ -451,7 +937,24 @@
         ],
         "availability": "coder-owned kernel source when graphics support is selected",
         "transport": "in-process kernel lifecycle facade",
-        "notes": "Controls graphics/display lifecycle without exposing framebuffer/driver internals by default."
+        "notes": "Controls graphics/display lifecycle without exposing framebuffer/driver internals by default.",
+        "assembly": "Inu.Kernel.Graphics",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Graphics.Initialize();\nGraphics.Start();\nGraphics.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "Graphics.Initialize();",
+          "Start()": "Graphics.Start();",
+          "Run()": "Graphics.Run();",
+          "Pause()": "Graphics.Pause();",
+          "Resume()": "Graphics.Resume();",
+          "Stop()": "Graphics.Stop();",
+          "Unload()": "Graphics.Unload();",
+          "GetLifecycleState()": "var state = Graphics.GetLifecycleState();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Input",
@@ -469,7 +972,25 @@
         ],
         "availability": "coder-owned kernel source when kernel input support is present",
         "transport": "in-process kernel input lifecycle facade",
-        "notes": "Controls kernel-resident input mechanisms."
+        "notes": "Controls kernel-resident input mechanisms.",
+        "assembly": "Inu.Kernel.Input",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Input.Initialize();\nInput.Start();\nInput.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "Input.Initialize();",
+          "Start()": "Input.Start();",
+          "Run()": "Input.Run();",
+          "Pause()": "Input.Pause();",
+          "Resume()": "Input.Resume();",
+          "Stop()": "Input.Stop();",
+          "Unload()": "Input.Unload();",
+          "Service()": "Input.Service();",
+          "GetLifecycleState()": "var state = Input.GetLifecycleState();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Networking",
@@ -486,7 +1007,24 @@
         ],
         "availability": "coder-owned kernel source when networking is kernel-resident",
         "transport": "in-process kernel lifecycle facade",
-        "notes": "Not imported for userland-resident networking services."
+        "notes": "Not imported for userland-resident networking services.",
+        "assembly": "Inu.Kernel.Networking",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Networking.Initialize();\nNetworking.Start();\nNetworking.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "Networking.Initialize();",
+          "Start()": "Networking.Start();",
+          "Run()": "Networking.Run();",
+          "Pause()": "Networking.Pause();",
+          "Resume()": "Networking.Resume();",
+          "Stop()": "Networking.Stop();",
+          "Unload()": "Networking.Unload();",
+          "GetLifecycleState()": "var state = Networking.GetLifecycleState();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Audio",
@@ -503,7 +1041,24 @@
         ],
         "availability": "coder-owned kernel source when audio is kernel-resident",
         "transport": "in-process kernel lifecycle facade",
-        "notes": "Not imported when audio runs outside the kernel."
+        "notes": "Not imported when audio runs outside the kernel.",
+        "assembly": "Inu.Kernel.Audio",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Audio.Initialize();\nAudio.Start();\nAudio.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "Audio.Initialize();",
+          "Start()": "Audio.Start();",
+          "Run()": "Audio.Run();",
+          "Pause()": "Audio.Pause();",
+          "Resume()": "Audio.Resume();",
+          "Stop()": "Audio.Stop();",
+          "Unload()": "Audio.Unload();",
+          "GetLifecycleState()": "var state = Audio.GetLifecycleState();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Power",
@@ -520,7 +1075,24 @@
         ],
         "availability": "coder-owned kernel source",
         "transport": "in-process kernel lifecycle facade",
-        "notes": "Coordinates power-management lifecycle; hardware/power policy remains OS-owned."
+        "notes": "Coordinates power-management lifecycle; hardware/power policy remains OS-owned.",
+        "assembly": "Inu.Kernel.Power",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "Power.Initialize();\nPower.Start();\nPower.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Initialize()": "Power.Initialize();",
+          "Start()": "Power.Start();",
+          "Run()": "Power.Run();",
+          "Pause()": "Power.Pause();",
+          "Resume()": "Power.Resume();",
+          "Stop()": "Power.Stop();",
+          "Unload()": "Power.Unload();",
+          "GetLifecycleState()": "var state = Power.GetLifecycleState();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Smp",
@@ -541,7 +1113,28 @@
         ],
         "availability": "kernel policy when SMP is selected",
         "transport": "in-kernel policy",
-        "notes": "Stable CPU-role and processor-set value types used by the coder-facing Smp facade."
+        "notes": "Stable CPU-role and processor-set value types used by the coder-facing Smp facade.",
+        "assembly": "Inu.Kernel.Smp",
+        "kind": "Enum and readonly struct",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "KernelCpuSet userCpus = KernelCpuSet.All();\nSmp.SetRole(KernelCpuRole.Userland, userCpus);",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "KernelCpuRole.Kernel": "KernelCpuRole role = KernelCpuRole.Kernel;",
+          "KernelCpuRole.Userland": "KernelCpuRole role = KernelCpuRole.Userland;",
+          "KernelCpuRole.Gui": "KernelCpuRole role = KernelCpuRole.Gui;",
+          "KernelCpuRole.Drivers": "KernelCpuRole role = KernelCpuRole.Drivers;",
+          "KernelCpuRole.Interrupts": "KernelCpuRole role = KernelCpuRole.Interrupts;",
+          "KernelCpuRole.Networking": "KernelCpuRole role = KernelCpuRole.Networking;",
+          "KernelCpuRole.Storage": "KernelCpuRole role = KernelCpuRole.Storage;",
+          "KernelCpuRole.Realtime": "KernelCpuRole role = KernelCpuRole.Realtime;",
+          "KernelCpuRole.Background": "KernelCpuRole role = KernelCpuRole.Background;",
+          "KernelCpuSet.All()": "KernelCpuSet cpus = KernelCpuSet.All();",
+          "KernelCpuSet.Single(uint)": "KernelCpuSet cpus = KernelCpuSet.Single(1U);",
+          "KernelCpuSet.Contains(uint)": "bool containsCpu1 = cpus.Contains(1U);"
+        }
       },
       {
         "namespace": "Inu.Kernel.Storage",
@@ -557,7 +1150,23 @@
         ],
         "availability": "coder-owned kernel source when storage/filesystem is kernel-resident",
         "transport": "in-process VFS policy value",
-        "notes": "Defines the external path separator and component-validation policy. Case sensitivity is accepted only when mounted providers can honour it."
+        "notes": "Defines the external path separator and component-validation policy. Case sensitivity is accepted only when mounted providers can honour it.",
+        "assembly": "Inu.Kernel.Storage",
+        "kind": "Readonly struct",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "FileSystemPathPolicy policy = new FileSystemPathPolicy(\n    '/', true, 255, true, true, \"\");\nFileSystem.SetPathPolicy(policy);",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "FileSystemPathPolicy(char, bool, uint, bool, bool, string)": "FileSystemPathPolicy policy = new FileSystemPathPolicy('/', false, 255U, true, true, \"\");",
+          "Separator": "FileSystemPathPolicy policy = FileSystem.GetPathPolicy();\nvar value = policy.Separator;",
+          "CaseSensitive": "FileSystemPathPolicy policy = FileSystem.GetPathPolicy();\nvar value = policy.CaseSensitive;",
+          "MaximumComponentLength": "FileSystemPathPolicy policy = FileSystem.GetPathPolicy();\nvar value = policy.MaximumComponentLength;",
+          "AllowSpaces": "FileSystemPathPolicy policy = FileSystem.GetPathPolicy();\nvar value = policy.AllowSpaces;",
+          "AllowNumbers": "FileSystemPathPolicy policy = FileSystem.GetPathPolicy();\nvar value = policy.AllowNumbers;",
+          "InvalidCharacters": "FileSystemPathPolicy policy = FileSystem.GetPathPolicy();\nvar value = policy.InvalidCharacters;"
+        }
       },
       {
         "namespace": "Inu.Kernel.Storage",
@@ -576,7 +1185,26 @@
         ],
         "availability": "coder-owned kernel source when storage/filesystem is kernel-resident",
         "transport": "in-process VFS policy value",
-        "notes": "Stable logical filesystem locations mapped by the OS author to concrete paths. These categories do not themselves grant permissions."
+        "notes": "Stable logical filesystem locations mapped by the OS author to concrete paths. These categories do not themselves grant permissions.",
+        "assembly": "Inu.Kernel.Storage",
+        "kind": "Enum",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "FileSystem.SetLogicalPath(\n    FileSystemLogicalPath.Commands,\n    \"/System/Commands\");",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "ReadableUser": "FileSystemLogicalPath path = FileSystemLogicalPath.ReadableUser;",
+          "WritableUser": "FileSystemLogicalPath path = FileSystemLogicalPath.WritableUser;",
+          "VisibleUser": "FileSystemLogicalPath path = FileSystemLogicalPath.VisibleUser;",
+          "ReadableFonts": "FileSystemLogicalPath path = FileSystemLogicalPath.ReadableFonts;",
+          "WritableFonts": "FileSystemLogicalPath path = FileSystemLogicalPath.WritableFonts;",
+          "VisibleFonts": "FileSystemLogicalPath path = FileSystemLogicalPath.VisibleFonts;",
+          "Commands": "FileSystemLogicalPath path = FileSystemLogicalPath.Commands;",
+          "Applications": "FileSystemLogicalPath path = FileSystemLogicalPath.Applications;",
+          "Libraries": "FileSystemLogicalPath path = FileSystemLogicalPath.Libraries;",
+          "Temporary": "FileSystemLogicalPath path = FileSystemLogicalPath.Temporary;"
+        }
       },
       {
         "namespace": "Inu.Kernel.Processes",
@@ -586,7 +1214,17 @@
         ],
         "availability": "kernel policy when the text-console session component is selected",
         "transport": "kernel process/session runtime",
-        "notes": "Coder-facing session policy. Starts and supervises the selected shell as an ordinary isolated ring-3 process."
+        "notes": "Coder-facing session policy. Starts and supervises the selected shell as an ordinary isolated ring-3 process.",
+        "assembly": "Inu.Kernel.Entry.X64",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64",
+        "example": "// Kernel.Start():\nreturn TextSession.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Run()": "TextSession.Run();"
+        }
       },
       {
         "namespace": "Inu.Kernel.Processes",
@@ -596,7 +1234,17 @@
         ],
         "availability": "kernel policy when the desktop-with-text-fallback session component is selected",
         "transport": "kernel process/session runtime",
-        "notes": "Coder-facing session policy. Runs the configured graphical session with text-console fallback."
+        "notes": "Coder-facing session policy. Runs the configured graphical session with text-console fallback.",
+        "assembly": "Inu.Kernel.Entry.X64",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64",
+        "example": "Processes.ConfigureGraphicalSession(\n    \"/System/GUI/Desktop.exe\",\n    \"/System/GUI/Login.exe\");\nreturn DesktopSession.Run();",
+        "implementation": "Implemented by the selected Inu kernel source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "Run()": "DesktopSession.Run();"
+        }
       },
       {
         "namespace": "Inu.Userland.Runtime",
@@ -613,7 +1261,24 @@
         ],
         "availability": "ring-3 userland",
         "transport": "internal Get/Set wrappers",
-        "notes": "High-level path policy. Applications do not call native syscalls directly."
+        "notes": "High-level path policy. Applications do not call native syscalls directly.",
+        "assembly": "Inu.Userland.Runtime",
+        "kind": "Static class",
+        "category": "Userland",
+        "status": "recommended",
+        "compiledInto": "Inu.Userland.Runtime",
+        "example": "FileSystemPaths.SetPathSeparator('/');\nFileSystemPaths.SetCommandsPaths(new[]\n{\n    \"/System/Commands\",\n    \"/User/Commands\"\n});\nstring[] candidates = FileSystemPaths.BuildCommandsPaths(\"dir\");",
+        "implementation": "Implemented by Inu; native Get/Set/Event transport is internal to the SDK.",
+        "memberExamples": {
+          "GetPathSeparator()": "char separator = FileSystemPaths.GetPathSeparator();",
+          "SetPathSeparator(char)": "FileSystemPaths.SetPathSeparator('/');",
+          "GetCommandsPath()": "string path = FileSystemPaths.GetCommandsPath();",
+          "GetCommandsPaths()": "string[] paths = FileSystemPaths.GetCommandsPaths();",
+          "SetCommandsPath(string)": "FileSystemPaths.SetCommandsPath(\"/System/Commands\");",
+          "SetCommandsPaths(string[])": "FileSystemPaths.SetCommandsPaths(new[] { \"/System/Commands\", \"/User/Commands\" });",
+          "BuildCommandsPath(string)": "string path = FileSystemPaths.BuildCommandsPath(\"dir\");",
+          "BuildCommandsPaths(string)": "string[] candidates = FileSystemPaths.BuildCommandsPaths(\"dir\");"
+        }
       },
       {
         "namespace": "Inu.Userland.Runtime",
@@ -623,7 +1288,17 @@
         ],
         "availability": "ring-3 userland",
         "transport": "internal Event wrapper",
-        "notes": "High-level process launch surface."
+        "notes": "High-level process launch surface.",
+        "assembly": "Inu.Userland.Runtime",
+        "kind": "Static class",
+        "category": "Userland",
+        "status": "recommended",
+        "compiledInto": "Inu.Userland.Runtime",
+        "example": "if (!Process.TryStart(commandPath, arguments))\n    Console.WriteLine(\"Unable to start command.\");",
+        "implementation": "Implemented by Inu; native Get/Set/Event transport is internal to the SDK.",
+        "memberExamples": {
+          "TryStart(string,string)": "bool started = Process.TryStart(commandPath, arguments);"
+        }
       },
       {
         "namespace": "Inu.Userland.Runtime",
@@ -633,7 +1308,17 @@
         ],
         "availability": "ring-3 userland",
         "transport": "internal Get wrapper",
-        "notes": "High-level command-line argument access."
+        "notes": "High-level command-line argument access.",
+        "assembly": "Inu.Userland.Runtime",
+        "kind": "Static class",
+        "category": "Userland",
+        "status": "recommended",
+        "compiledInto": "Inu.Userland.Runtime",
+        "example": "string arguments = CommandLine.GetRawArguments();\nConsole.WriteLine(arguments);",
+        "implementation": "Implemented by Inu; native Get/Set/Event transport is internal to the SDK.",
+        "memberExamples": {
+          "GetRawArguments()": "string arguments = CommandLine.GetRawArguments();"
+        }
       },
       {
         "namespace": "Inu.Userland.Runtime",
@@ -645,7 +1330,19 @@
         ],
         "availability": "ring-3 userland",
         "transport": "internal Get wrappers",
-        "notes": "High-level system information surface."
+        "notes": "High-level system information surface.",
+        "assembly": "Inu.Userland.Runtime",
+        "kind": "Static class",
+        "category": "Userland",
+        "status": "recommended",
+        "compiledInto": "Inu.Userland.Runtime",
+        "example": "uint cpus = SystemInformation.GetOnlineProcessorCount();\nConsole.Write(\"CPUs: \");\nConsole.WriteLine(cpus);",
+        "implementation": "Implemented by Inu; native Get/Set/Event transport is internal to the SDK.",
+        "memberExamples": {
+          "GetOnlineProcessorCount()": "uint cpus = SystemInformation.GetOnlineProcessorCount();",
+          "GetSchedulerQuantumNanoseconds()": "ulong quantum = SystemInformation.GetSchedulerQuantumNanoseconds();",
+          "TryGetDevice(uint,out DeviceInfo)": "DeviceInfo device;\nif (SystemInformation.TryGetDevice(0U, out device))\n    Console.WriteLine(device.Driver);"
+        }
       },
       {
         "namespace": "Inu.Userland.Runtime",
@@ -662,8 +1359,30 @@
         ],
         "availability": "ring-3 userland",
         "transport": "in-process value type",
-        "notes": "Device inventory snapshot."
+        "notes": "Device inventory snapshot.",
+        "assembly": "Inu.Userland.Runtime",
+        "kind": "Readonly struct",
+        "category": "Userland",
+        "status": "recommended",
+        "compiledInto": "Inu.Userland.Runtime",
+        "example": "DeviceInfo device;\nif (SystemInformation.TryGetDevice(0, out device))\n{\n    Console.WriteLine(device.Driver);\n}",
+        "implementation": "Implemented by Inu; native Get/Set/Event transport is internal to the SDK.",
+        "memberExamples": {
+          "Bus": "DeviceInfo device;\nif (SystemInformation.TryGetDevice(0U, out device))\n    Console.WriteLine(device.Bus.ToString());",
+          "Vendor": "DeviceInfo device;\nif (SystemInformation.TryGetDevice(0U, out device))\n    Console.WriteLine(device.Vendor.ToString());",
+          "Device": "DeviceInfo device;\nif (SystemInformation.TryGetDevice(0U, out device))\n    Console.WriteLine(device.Device.ToString());",
+          "ClassCode": "DeviceInfo device;\nif (SystemInformation.TryGetDevice(0U, out device))\n    Console.WriteLine(device.ClassCode.ToString());",
+          "State": "DeviceInfo device;\nif (SystemInformation.TryGetDevice(0U, out device))\n    Console.WriteLine(device.State.ToString());",
+          "Driver": "DeviceInfo device;\nif (SystemInformation.TryGetDevice(0U, out device))\n    Console.WriteLine(device.Driver.ToString());",
+          "Failure": "DeviceInfo device;\nif (SystemInformation.TryGetDevice(0U, out device))\n    Console.WriteLine(device.Failure.ToString());",
+          "Handle": "DeviceInfo device;\nif (SystemInformation.TryGetDevice(0U, out device))\n    Console.WriteLine(device.Handle.ToString());"
+        }
       }
-    ]
+    ],
+    "internalTransport": {
+      "name": "Get / Set / Event",
+      "visibility": "SDK implementation detail",
+      "note": "Not part of the normal coder-facing API site. High-level .NET/Inu APIs own transport."
+    }
   }
 }

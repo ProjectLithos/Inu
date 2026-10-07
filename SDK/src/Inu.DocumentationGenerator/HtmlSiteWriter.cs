@@ -14,203 +14,231 @@ internal static class HtmlSiteWriter
         if (Directory.Exists(output)) Directory.Delete(output, true);
         Directory.CreateDirectory(output);
         Directory.CreateDirectory(Path.Combine(output, "assets"));
-        Directory.CreateDirectory(Path.Combine(output, "assemblies"));
         Directory.CreateDirectory(Path.Combine(output, "api"));
-        Directory.CreateDirectory(Path.Combine(output, "guides"));
-        Directory.CreateDirectory(Path.Combine(output, "source"));
+        Directory.CreateDirectory(Path.Combine(output, "api", "members"));
+        Directory.CreateDirectory(Path.Combine(output, "assemblies"));
 
+        IReadOnlyList<ApiSiteEntry> entries = ReadApiContract(root);
         File.WriteAllText(Path.Combine(output, "assets", "site.css"), Css);
         File.WriteAllText(Path.Combine(output, "assets", "site.js"), JavaScript.Replace("__INU_RELEASE__", configuration.Version, StringComparison.Ordinal));
-        IReadOnlyDictionary<string, IReadOnlyList<string>> sourceFiles = WriteSourceBrowser(root, output, configuration, projects);
-        foreach (ProjectDocumentation project in projects)
+
+        WriteHome(output, configuration, entries);
+        WriteApiIndex(output, configuration, entries);
+        WriteAssemblyIndex(output, configuration, entries);
+        foreach (ApiSiteEntry entry in entries)
         {
-            WriteAssembly(output, configuration, project, sourceFiles);
-            foreach (ApiDocumentation item in project.Items) WriteApi(output, configuration, item);
+            WriteApiPage(output, configuration, entry);
+            foreach (string member in entry.Members) WriteMemberPage(output, configuration, entry, member);
         }
-        CopyGuides(root, output, configuration);
-        WriteIndex(output, configuration, projects);
-        WriteSearchIndex(output, projects);
+        foreach (IGrouping<string, ApiSiteEntry> assembly in entries.GroupBy(entry => entry.Assembly, StringComparer.Ordinal).OrderBy(group => group.Key, StringComparer.Ordinal))
+            WriteAssemblyPage(output, configuration, assembly.Key, assembly.OrderBy(entry => entry.QualifiedName, StringComparer.Ordinal).ToArray());
+        WriteSearchIndex(output, entries);
     }
 
-    private static void WriteIndex(string output, DocumentationConfiguration config, IReadOnlyList<ProjectDocumentation> projects)
+    private static IReadOnlyList<ApiSiteEntry> ReadApiContract(string root)
     {
-        string cards = string.Join(Environment.NewLine, projects.Select(project =>
-            $"<a class=\"card\" href=\"assemblies/{EncodeFile(project.Name)}.html\"><strong>{H(project.Name)}</strong><span>{project.Items.Count} exported API items · {(project.IsToolAssembly ? "tool" : "SDK")}</span></a>"));
-        string publicRows = string.Join(Environment.NewLine, projects.SelectMany(project => project.Items.Select(item =>
-            $"<tr><td><a href=\"api/{CreateApiFileName(item)}.html\">{H(item.QualifiedName)}</a></td><td><a href=\"assemblies/{EncodeFile(project.Name)}.html\">{H(project.Name)}</a></td><td>{H(item.Kind)}</td><td>{H(Summary(item))}</td></tr>")));
-        Int32 publicItemCount = projects.Sum(project => project.Items.Count);
-        string body = $"<section class=\"hero\"><p class=\"eyebrow\">VERSION</p><h1>Build a freestanding C# kernel.</h1><p>Offline SDK reference generated from the complete Inu src tree. Every site link is relative, so the complete site remains portable when opened directly with file:// or copied elsewhere.</p><div class=\"actions\"><a href=\"guides/Getting-Started.html\">Get started</a><a href=\"guides/Next-Steps.html\">SDK roadmap</a><a href=\"source/index.html\">Exported SDK source</a></div></section><section id=\"assemblies\"><h2>SDK assemblies</h2><p>{projects.Count} source projects containing {publicItemCount} exported API items are indexed below.</p><div class=\"cards\">{cards}</div></section><section id=\"public-items\"><h2>All exported API items</h2><p>This table contains only declarations explicitly exported to SDK users with the Inu API marker. Ordinary public implementation declarations are intentionally omitted.</p><table><thead><tr><th>API item</th><th>Assembly</th><th>Kind</th><th>Purpose</th></tr></thead><tbody>{publicRows}</tbody></table></section>";
-        File.WriteAllText(Path.Combine(output, "index.html"), Page(config, "SDK usage", body, string.Empty));
-    }
-
-    private static void WriteAssembly(string output, DocumentationConfiguration config, ProjectDocumentation project, IReadOnlyDictionary<string, IReadOnlyList<string>> sourceFiles)
-    {
-        string items = string.Join(Environment.NewLine, project.Items.Select(item =>
-            $"<tr><td><a href=\"../api/{CreateApiFileName(item)}.html\">{H(item.Name)}</a></td><td>{H(item.Kind)}</td><td>{H(Summary(item))}</td></tr>"));
-        string sourceLink = sourceFiles.TryGetValue(project.Name, out IReadOnlyList<string>? files) && files.Count != 0
-            ? $"<p><a href=\"../source/index.html#{EncodeFile(project.Name)}\">Browse {files.Count} SDK source files</a></p>" : string.Empty;
-        string body = $"<p class=\"eyebrow\">{(project.IsToolAssembly ? "SDK TOOL" : "PUBLIC ASSEMBLY")}</p><h1>{H(project.Name)}</h1><dl><dt>Project</dt><dd>{H(project.ProjectPath)}</dd><dt>Dependencies</dt><dd>{H(project.Dependencies.Count == 0 ? "None" : string.Join(", ", project.Dependencies))}</dd></dl>{sourceLink}<h2>API items</h2><table><thead><tr><th>Name</th><th>Kind</th><th>Purpose</th></tr></thead><tbody>{items}</tbody></table>";
-        File.WriteAllText(Path.Combine(output, "assemblies", EncodeFile(project.Name) + ".html"), Page(config, project.Name, body, "../"));
-    }
-
-    private static void WriteApi(string output, DocumentationConfiguration config, ApiDocumentation item)
-    {
-        string sourceUrl = "../source/files/" + SourcePagePath(item.SourcePath) + ".html#L" + item.SourceLine;
-        string body = $"<p class=\"eyebrow\">{H(item.Assembly)} · {H(item.Kind)}</p><h1>{H(item.QualifiedName)}</h1><pre><code>{H(item.Signature)}</code></pre>{Section("What it does", item.Summary, item)}{Section("When to use it", item.WhenToUse, item)}{Section("Details", item.Remarks, item)}{Section("Dependencies", item.Dependencies, item)}{Section("Return value", item.Returns, item)}{CodeSection("Example", item.Example)}<h2>Source</h2><p><a href=\"{sourceUrl}\"><code>{H(item.SourcePath)}:{item.SourceLine}</code></a></p>";
-        File.WriteAllText(Path.Combine(output, "api", CreateApiFileName(item) + ".html"), Page(config, item.Name, body, "../"));
-    }
-
-    private static void CopyGuides(string root, string output, DocumentationConfiguration config)
-    {
-        string content = Path.Combine(root, "docs", "site-content");
-        if (!Directory.Exists(content)) return;
-        foreach (string markdown in Directory.EnumerateFiles(content, "*.md", SearchOption.TopDirectoryOnly))
+        string path = Path.Combine(root, "Inu.ApiContract.json");
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+        List<ApiSiteEntry> entries = [];
+        foreach (JsonElement item in document.RootElement.GetProperty("codingApi").GetProperty("exports").EnumerateArray())
         {
-            string title = Path.GetFileNameWithoutExtension(markdown).Replace('-', ' ');
-            string html = Markdown(File.ReadAllText(markdown));
-            File.WriteAllText(Path.Combine(output, "guides", Path.GetFileNameWithoutExtension(markdown) + ".html"), Page(config, title, html, "../"));
+            string ns = Required(item, "namespace");
+            string type = Required(item, "type");
+            entries.Add(new ApiSiteEntry(
+                ns,
+                type,
+                Required(item, "assembly"),
+                Required(item, "kind"),
+                Required(item, "category"),
+                Required(item, "availability"),
+                Optional(item, "status", "recommended"),
+                Optional(item, "compiledInto", Required(item, "assembly")),
+                Optional(item, "implementation", string.Empty),
+                Optional(item, "notes", string.Empty),
+                item.GetProperty("members").EnumerateArray().Select(member => member.GetString() ?? string.Empty).Where(member => member.Length != 0).ToArray(),
+                ReadMemberExamples(item),
+                Optional(item, "example", string.Empty)));
         }
+        foreach (ApiSiteEntry entry in entries)
+            foreach (string member in entry.Members)
+                if (!entry.MemberExamples.TryGetValue(member, out string? example) || string.IsNullOrWhiteSpace(example))
+                    throw new InvalidDataException($"API member '{entry.QualifiedName}.{member}' requires a member-specific documentation example.");
+        return entries.OrderBy(entry => CategoryOrder(entry.Category)).ThenBy(entry => entry.QualifiedName, StringComparer.Ordinal).ToArray();
     }
 
-    private static void WriteSearchIndex(string output, IReadOnlyList<ProjectDocumentation> projects)
+    private static void WriteHome(string output, DocumentationConfiguration config, IReadOnlyList<ApiSiteEntry> entries)
     {
-        object[] entries = projects.SelectMany(project => project.Items.Select(item => new
+        string categories = string.Join(Environment.NewLine, new[] { "Freestanding .NET", "Userland", "Kernel" }.Select(category =>
         {
-            title = item.QualifiedName,
-            assembly = item.Assembly,
-            kind = item.Kind,
-            summary = item.Summary,
-            url = $"api/{CreateApiFileName(item)}.html"
-        })).Cast<object>().ToArray();
-        string json = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = false });
+            ApiSiteEntry[] categoryEntries = entries.Where(entry => entry.Category == category && entry.Status != "legacy").ToArray();
+            string cards = string.Join(Environment.NewLine, categoryEntries.Take(8).Select(entry => ApiCard(entry, string.Empty)));
+            return $"<section><div class=\"section-heading\"><div><p class=\"eyebrow\">{H(category)}</p><h2>{H(CategoryTitle(category))}</h2></div><a href=\"api/index.html#{Slug(category)}\">View all {categoryEntries.Length}</a></div><div class=\"cards\">{cards}</div></section>";
+        }));
+        int legacyCount = entries.Count(entry => entry.Status == "legacy");
+        string body = $"""
+<section class="hero">
+  <p class="eyebrow">INU SDK {H(config.Version)} · CURRENT API</p>
+  <h1>The API your OS code actually uses.</h1>
+  <p>This reference is generated from the current Inu public API contract. It documents the freestanding .NET surface, high-level ring-3 APIs, and coder-facing kernel APIs. Native Get/Set/Event transport is intentionally not a programming surface for SDK users.</p>
+  <div class="actions"><a class="primary" href="api/index.html">Browse the API</a><a href="assemblies/index.html">Browse assemblies</a></div>
+</section>
+<section class="facts"><div><strong>{entries.Count}</strong><span>type/API overview pages</span></div><div><strong>{entries.Sum(entry => entry.Members.Count)}</strong><span>individual member pages</span></div><div><strong>{entries.Select(entry => entry.Assembly).Distinct(StringComparer.Ordinal).Count()}</strong><span>assemblies/source components</span></div><div><strong>{legacyCount}</strong><span>legacy compatibility page{(legacyCount == 1 ? string.Empty : "s")}</span></div></section>
+{categories}
+<section class="boundary"><p class="eyebrow">BOUNDARY</p><h2>You write against the SDK, not the syscall transport.</h2><p>For ring-3 code, use <code>System.Console</code>, <code>System.IO</code>, <code>FileSystemPaths</code>, <code>Process</code>, <code>CommandLine</code>, and <code>SystemInformation</code>. Inu translates those operations to the kernel internally.</p></section>
+""";
+        File.WriteAllText(Path.Combine(output, "index.html"), Page(config, "API reference", body, string.Empty));
+    }
+
+    private static void WriteApiIndex(string output, DocumentationConfiguration config, IReadOnlyList<ApiSiteEntry> entries)
+    {
+        StringBuilder body = new();
+        body.Append("<p class=\"eyebrow\">CURRENT PUBLIC SURFACE</p><h1>API index</h1><p>Every entry below is a coder-facing API overview. Every listed public member links to its own page with its exact signature and a member-specific usage example.</p>");
+        foreach (string category in new[] { "Freestanding .NET", "Userland", "Kernel" })
+        {
+            body.Append("<section id=\"").Append(Slug(category)).Append("\"><div class=\"section-heading\"><div><p class=\"eyebrow\">").Append(H(category)).Append("</p><h2>").Append(H(CategoryTitle(category))).Append("</h2></div></div><div class=\"cards\">");
+            foreach (ApiSiteEntry entry in entries.Where(entry => entry.Category == category && entry.Status != "legacy")) body.Append(ApiCard(entry, "../"));
+            body.Append("</div></section>");
+        }
+        ApiSiteEntry[] legacy = entries.Where(entry => entry.Status == "legacy").ToArray();
+        if (legacy.Length != 0)
+        {
+            body.Append("<section id=\"legacy\"><div class=\"section-heading\"><div><p class=\"eyebrow\">LEGACY</p><h2>Compatibility APIs</h2></div></div><p>These remain present for existing source but are not the recommended surface for new SDK code.</p><div class=\"cards\">");
+            foreach (ApiSiteEntry entry in legacy) body.Append(ApiCard(entry, "../"));
+            body.Append("</div></section>");
+        }
+        File.WriteAllText(Path.Combine(output, "api", "index.html"), Page(config, "API index", body.ToString(), "../"));
+    }
+
+    private static void WriteApiPage(string output, DocumentationConfiguration config, ApiSiteEntry entry)
+    {
+        string rows = string.Join(Environment.NewLine, entry.Members.Select(member => $"<tr><td><a href=\"members/{MemberFile(entry, member)}.html\"><code>{H(member)}</code></a></td><td>{H(MemberKind(member, entry.Kind))}</td></tr>"));
+        string example = entry.Example.Length == 0 ? "// No example is currently defined." : entry.Example;
+        string status = entry.Status == "legacy" ? "<span class=\"badge legacy\">Legacy compatibility</span>" : "<span class=\"badge\">Recommended</span>";
+        string body = $"""
+<p class="eyebrow">{H(entry.Category)} API</p>
+<div class="title-row"><div><h1>{H(entry.QualifiedName)}</h1><p class="lede">{H(entry.Notes)}</p></div>{status}</div>
+<section class="metadata">
+  <div><span>Assembly / source component</span><strong><a href="../assemblies/{Slug(entry.Assembly)}.html">{H(entry.Assembly)}.dll</a></strong></div>
+  <div><span>Namespace</span><strong>{H(entry.Namespace)}</strong></div>
+  <div><span>API kind</span><strong>{H(entry.Kind)}</strong></div>
+  <div><span>Available in</span><strong>{H(entry.Availability)}</strong></div>
+  <div class="wide"><span>Compiled into / loaded as</span><strong>{H(entry.CompiledInto)}</strong></div>
+</section>
+<h2>Public API</h2>
+<p>These are the members Inu currently documents as part of this public surface.</p>
+<table><thead><tr><th>Member</th><th>Kind</th></tr></thead><tbody>{rows}</tbody></table>
+<h2>How it is provided</h2><p>{H(entry.Implementation)}</p>
+<h2>Example</h2><pre><code>{H(example)}</code></pre>
+""";
+        File.WriteAllText(Path.Combine(output, "api", ApiFile(entry) + ".html"), Page(config, entry.QualifiedName, body, "../"));
+    }
+
+    private static void WriteMemberPage(string output, DocumentationConfiguration config, ApiSiteEntry entry, string member)
+    {
+        string kind = MemberKind(member, entry.Kind);
+        string status = entry.Status == "legacy" ? "<span class=\"badge legacy\">Legacy compatibility</span>" : "<span class=\"badge\">Recommended</span>";
+        string example = entry.MemberExamples.TryGetValue(member, out string? specific) && specific.Length != 0 ? specific : entry.Example;
+        string body = $"""
+<p class="eyebrow">{H(entry.Category)} · {H(kind)}</p>
+<div class="title-row"><div><h1>{H(MemberQualifiedName(entry, member))}</h1><p class="lede">Public member of <a href="../{ApiFile(entry)}.html"><code>{H(entry.QualifiedName)}</code></a>.</p></div>{status}</div>
+<section class="metadata">
+  <div><span>Assembly / source component</span><strong><a href="../../assemblies/{Slug(entry.Assembly)}.html">{H(entry.Assembly)}.dll</a></strong></div>
+  <div><span>Namespace</span><strong>{H(entry.Namespace)}</strong></div>
+  <div><span>Owning API</span><strong><a href="../{ApiFile(entry)}.html">{H(entry.QualifiedName)}</a></strong></div>
+  <div><span>Member kind</span><strong>{H(kind)}</strong></div>
+  <div><span>Available in</span><strong>{H(entry.Availability)}</strong></div>
+  <div class="wide"><span>Compiled into / loaded as</span><strong>{H(entry.CompiledInto)}</strong></div>
+</section>
+<h2>Signature</h2><pre><code>{H(member)}</code></pre>
+<h2>How to use it</h2><pre><code>{H(example)}</code></pre>
+<h2>How it is provided</h2><p>{H(entry.Implementation)}</p>
+""";
+        File.WriteAllText(Path.Combine(output, "api", "members", MemberFile(entry, member) + ".html"), Page(config, MemberQualifiedName(entry, member), body, "../../"));
+    }
+
+    private static void WriteAssemblyIndex(string output, DocumentationConfiguration config, IReadOnlyList<ApiSiteEntry> entries)
+    {
+        string cards = string.Join(Environment.NewLine, entries.GroupBy(entry => entry.Assembly, StringComparer.Ordinal).OrderBy(group => group.Key, StringComparer.Ordinal).Select(group =>
+            $"<a class=\"card\" href=\"{Slug(group.Key)}.html\"><span class=\"card-kicker\">ASSEMBLY / COMPONENT</span><strong>{H(group.Key)}.dll</strong><span>{group.Count()} API page{(group.Count() == 1 ? string.Empty : "s")} · {group.Sum(entry => entry.Members.Count)} members</span></a>"));
+        string body = $"<p class=\"eyebrow\">ASSEMBLIES</p><h1>Assemblies and source components</h1><p>Inu kernel components are copied as source into the generated kernel. Their logical SDK assembly/component name is shown here together with the final compilation target on each API page.</p><div class=\"cards\">{cards}</div>";
+        File.WriteAllText(Path.Combine(output, "assemblies", "index.html"), Page(config, "Assemblies", body, "../"));
+    }
+
+    private static void WriteAssemblyPage(string output, DocumentationConfiguration config, string assembly, IReadOnlyList<ApiSiteEntry> entries)
+    {
+        string rows = string.Join(Environment.NewLine, entries.Select(entry => $"<tr><td><a href=\"../api/{ApiFile(entry)}.html\">{H(entry.QualifiedName)}</a></td><td>{H(entry.Kind)}</td><td>{H(entry.Availability)}</td><td>{entry.Members.Count}</td></tr>"));
+        string compiled = string.Join("; ", entries.Select(entry => entry.CompiledInto).Distinct(StringComparer.Ordinal));
+        string body = $"<p class=\"eyebrow\">ASSEMBLY / SOURCE COMPONENT</p><h1>{H(assembly)}.dll</h1><section class=\"metadata\"><div class=\"wide\"><span>Current compilation/load target</span><strong>{H(compiled)}</strong></div><div><span>API pages</span><strong>{entries.Count}</strong></div><div><span>Documented members</span><strong>{entries.Sum(entry => entry.Members.Count)}</strong></div></section><h2>Public API pages</h2><table><thead><tr><th>API</th><th>Kind</th><th>Availability</th><th>Members</th></tr></thead><tbody>{rows}</tbody></table>";
+        File.WriteAllText(Path.Combine(output, "assemblies", Slug(assembly) + ".html"), Page(config, assembly, body, "../"));
+    }
+
+    private static void WriteSearchIndex(string output, IReadOnlyList<ApiSiteEntry> entries)
+    {
+        object[] items = entries.Select(entry => new { title = entry.QualifiedName, assembly = entry.Assembly, kind = entry.Kind, category = entry.Category, members = string.Join(" ", entry.Members), url = "api/" + ApiFile(entry) + ".html" })
+            .Concat(entries.SelectMany(entry => entry.Members.Select(member => new { title = MemberQualifiedName(entry, member), assembly = entry.Assembly, kind = MemberKind(member, entry.Kind), category = entry.Category, members = member, url = "api/members/" + MemberFile(entry, member) + ".html" }))).ToArray();
+        string json = JsonSerializer.Serialize(items);
+        File.WriteAllText(Path.Combine(output, "search-index.json"), json);
         File.WriteAllText(Path.Combine(output, "assets", "search-index.js"), "window.InuSearchIndex=" + json + ";");
     }
 
+    private static string ApiCard(ApiSiteEntry entry, string root) => $"<a class=\"card\" href=\"{root}api/{ApiFile(entry)}.html\"><span class=\"card-kicker\">{H(entry.Kind)}</span><strong>{H(entry.QualifiedName)}</strong><span>{H(entry.Assembly)} · {entry.Members.Count} public member{(entry.Members.Count == 1 ? string.Empty : "s")}</span></a>";
+    private static string ApiFile(ApiSiteEntry entry)
+    {
+        string readable = Slug(entry.Namespace + "-" + entry.Type);
+        byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes(entry.Namespace + "|" + entry.Type));
+        return readable + "-" + Convert.ToHexString(digest.AsSpan(0, 4)).ToLowerInvariant();
+    }
+    private static string MemberFile(ApiSiteEntry entry, string member)
+    {
+        string readable = Slug(entry.Namespace + "-" + entry.Type + "-" + member);
+        byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes(entry.Namespace + "|" + entry.Type + "|" + member));
+        return readable + "-" + Convert.ToHexString(digest.AsSpan(0, 4)).ToLowerInvariant();
+    }
+    private static string MemberQualifiedName(ApiSiteEntry entry, string member)
+    {
+        string head = member.Contains('(') ? member[..member.IndexOf('(')] : member;
+        if (head.Contains('.')) return entry.Namespace + "." + member;
+        return entry.QualifiedName + "." + member;
+    }
+    private static IReadOnlyDictionary<string, string> ReadMemberExamples(JsonElement item)
+    {
+        Dictionary<string, string> examples = new(StringComparer.Ordinal);
+        if (!item.TryGetProperty("memberExamples", out JsonElement map) || map.ValueKind != JsonValueKind.Object) return examples;
+        foreach (JsonProperty property in map.EnumerateObject())
+            if (property.Value.ValueKind == JsonValueKind.String) examples[property.Name] = property.Value.GetString() ?? string.Empty;
+        return examples;
+    }
+    private static string CategoryTitle(string category) => category switch { "Freestanding .NET" => "Freestanding .NET API", "Userland" => "Ring-3 userland API", "Kernel" => "Kernel coder API", _ => category };
+    private static int CategoryOrder(string category) => category switch { "Freestanding .NET" => 0, "Userland" => 1, "Kernel" => 2, _ => 9 };
+    private static string MemberKind(string member, string pageKind)
+    {
+        if (pageKind.Contains("Primitive", StringComparison.OrdinalIgnoreCase)) return "Primitive/value type";
+        if (member.Contains('(')) return member.StartsWith("FileSystemPathPolicy(", StringComparison.Ordinal) ? "Constructor" : "Method";
+        if (member.Contains('.') && (pageKind.Contains("Enum", StringComparison.OrdinalIgnoreCase) || member.Contains("KernelCpuRole.", StringComparison.Ordinal))) return "Enum value";
+        if (pageKind.Contains("Interfaces", StringComparison.OrdinalIgnoreCase) || pageKind == "Interfaces and classes") return "Type";
+        return "Property / value";
+    }
+    private static string Required(JsonElement item, string name) => item.GetProperty(name).GetString() ?? throw new InvalidDataException($"API contract property '{name}' is required.");
+    private static string Optional(JsonElement item, string name, string fallback) => item.TryGetProperty(name, out JsonElement value) && value.ValueKind == JsonValueKind.String ? value.GetString() ?? fallback : fallback;
+    private static string H(string value) => WebUtility.HtmlEncode(value);
+    private static string Slug(string value) => Regex.Replace(value.ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
+
     private static string Page(DocumentationConfiguration config, string title, string body, string root) => $"""
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{H(title)} · {H(config.Product)}</title><link rel="stylesheet" href="{root}assets/site.css"><script defer src="{root}assets/search-index.js"></script><script defer src="{root}assets/site.js"></script></head><body><header><a class="brand" href="{root}index.html">Inu <span>OS SDK</span></a><nav><a href="{root}guides/Getting-Started.html">Guides</a><a href="{root}index.html#assemblies">API</a></nav><label class="search"><span>Search</span><input id="site-search" data-root="{root}" placeholder="Type a public item"><div id="search-results"></div></label></header><main>{body}</main><footer>Generated from Inu source.</footer></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{H(title)} · {H(config.Product)}</title><link rel="stylesheet" href="{root}assets/site.css"><script defer src="{root}assets/search-index.js"></script><script defer src="{root}assets/site.js"></script></head><body>
+<header><a class="brand" href="{root}index.html">Inu <span>SDK</span></a><nav><a href="{root}api/index.html">API</a><a href="{root}assemblies/index.html">Assemblies</a></nav><label class="search"><span>Search API</span><input id="site-search" data-root="{root}" placeholder="Search type, function or assembly"><div id="search-results"></div></label></header>
+<main>{body}</main><footer>Inu SDK {H(config.Version)} · current source/API contract</footer></body></html>
 """;
 
-    private static IReadOnlyDictionary<string, IReadOnlyList<string>> WriteSourceBrowser(string root, string output, DocumentationConfiguration config, IReadOnlyList<ProjectDocumentation> projects)
+    private sealed record ApiSiteEntry(string Namespace, string Type, string Assembly, string Kind, string Category, string Availability, string Status, string CompiledInto, string Implementation, string Notes, IReadOnlyList<string> Members, IReadOnlyDictionary<string, string> MemberExamples, string Example)
     {
-        Dictionary<string, IReadOnlyList<string>> result = new(StringComparer.Ordinal);
-        StringBuilder index = new("<p class=\"eyebrow\">PORTABLE RELATIVE SOURCE MAP</p><h1>Exported SDK source</h1><p>These pages are copied into the generated site and use relative links only. No repository drive path is required.</p>");
-        foreach (ProjectDocumentation project in projects.Where(project => project.Items.Count != 0))
-        {
-            string projectFile = Path.Combine(root, project.ProjectPath.Replace('/', Path.DirectorySeparatorChar));
-            string? projectDirectory = Path.GetDirectoryName(projectFile);
-            if (projectDirectory is null || !Directory.Exists(projectDirectory)) continue;
-            List<string> files = Directory.EnumerateFiles(projectDirectory, "*", SearchOption.AllDirectories)
-                .Where(file => !file.Contains(Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-                .Where(file => !file.Contains(Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-                .Where(file => string.Equals(Path.GetExtension(file), ".cs", StringComparison.OrdinalIgnoreCase) || string.Equals(Path.GetExtension(file), ".csproj", StringComparison.OrdinalIgnoreCase))
-                .Select(file => Path.GetRelativePath(root, file).Replace('\\', '/')).OrderBy(file => file, StringComparer.OrdinalIgnoreCase).ToList();
-            result[project.Name] = files;
-            index.Append("<section id=\"").Append(EncodeFile(project.Name)).Append("\"><h2>").Append(H(project.Name)).Append("</h2><div class=\"source-list\">");
-            foreach (string relative in files)
-            {
-                WriteSourcePage(root, output, config, relative);
-                index.Append("<a href=\"files/").Append(SourcePagePath(relative)).Append(".html\"><code>").Append(H(relative)).Append("</code></a>");
-            }
-            index.Append("</div></section>");
-        }
-        File.WriteAllText(Path.Combine(output, "source", "index.html"), Page(config, "Exported SDK source", index.ToString(), "../"));
-        return result;
-    }
-
-    private static void WriteSourcePage(string root, string output, DocumentationConfiguration config, string relative)
-    {
-        string source = File.ReadAllText(Path.Combine(root, relative.Replace('/', Path.DirectorySeparatorChar)));
-        string[] lines = source.Replace("\r\n", "\n").Split('\n');
-        StringBuilder code = new();
-        for (Int32 line = 0; line < lines.Length; line++)
-            code.Append("<span class=\"source-line\" id=\"L").Append(line + 1).Append("\"><a class=\"line-number\" href=\"#L").Append(line + 1).Append("\">").Append(line + 1).Append("</a>").Append(H(lines[line])).AppendLine("</span>");
-        Int32 depth = relative.Count(ch => ch == '/') + 2;
-        string rootPrefix = string.Concat(Enumerable.Repeat("../", depth));
-        string body = $"<p class=\"eyebrow\">PUBLIC SDK SOURCE</p><h1>{H(relative)}</h1><p><a href=\"{rootPrefix}source/index.html\">Source index</a></p><pre class=\"source-code\"><code>{code}</code></pre>";
-        string target = Path.Combine(output, "source", "files", SourcePagePath(relative).Replace('/', Path.DirectorySeparatorChar) + ".html");
-        Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-        File.WriteAllText(target, Page(config, relative, body, rootPrefix));
-    }
-
-    private static string SourcePagePath(string relative) => relative.Replace('\\', '/');
-
-    private static string Section(string title, string value, ApiDocumentation? item = null)
-    {
-        string text = value;
-        if (text.Length == 0 && item is not null)
-        {
-            text = title switch
-            {
-                "What it does" => Summary(item),
-                "When to use it" => $"Use this {item.Kind.ToLowerInvariant()} when working with {item.Assembly} functionality exposed by the Inu SDK.",
-                "Details" => $"Declared as {item.Signature}. The authoritative declaration is in {item.SourcePath} at line {item.SourceLine}.",
-                "Dependencies" => "No additional API-specific dependency is declared for this item beyond its containing assembly and project references.",
-                "Return value" => ReturnSummary(item),
-                _ => Summary(item)
-            };
-        }
-        return $"<h2>{H(title)}</h2><p>{H(text)}</p>";
-    }
-
-    private static string CodeSection(string title, string value) => value.Length == 0 ? string.Empty : $"<h2>{H(title)}</h2><pre><code>{H(value)}</code></pre>";
-
-    private static string Summary(ApiDocumentation item)
-    {
-        if (item.Summary.Length != 0) return item.Summary;
-        string kind = item.Kind.ToLowerInvariant();
-        if (kind == "method") return $"Provides the {item.Name} operation in {item.Assembly}. Its public contract is {item.Signature}.";
-        if (kind == "property") return $"Exposes the {item.Name} property from {item.QualifiedName} in {item.Assembly}.";
-        if (kind == "enum") return $"Defines the {item.QualifiedName} enumeration used by {item.Assembly}.";
-        if (kind == "interface") return $"Defines the public {item.QualifiedName} interface contract provided by {item.Assembly}.";
-        return $"Defines the public {kind} {item.QualifiedName} in {item.Assembly}.";
-    }
-
-    private static string ReturnSummary(ApiDocumentation item)
-    {
-        if (item.Returns.Length != 0) return item.Returns;
-        string signature = item.Signature;
-        if (Regex.IsMatch(signature, @"\bvoid\b", RegexOptions.CultureInvariant)) return "No value is returned.";
-        if (Regex.IsMatch(signature, @"\bbool\b|\bBoolean\b", RegexOptions.CultureInvariant)) return "Returns a Boolean result; the operation-specific success conditions are defined by the method contract and signature.";
-        return $"Returns the value described by the declared signature: {signature}.";
-    }
-    private static string H(string value) => WebUtility.HtmlEncode(value);
-    private static string EncodeFile(string value) => Regex.Replace(value.ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
-
-    private static string CreateApiFileName(ApiDocumentation item)
-    {
-        string readable = EncodeFile(item.Name);
-        if (readable.Length == 0) readable = "item";
-        if (readable.Length > 48) readable = readable[..48].TrimEnd('-');
-
-        string identity = string.Join("|", item.Assembly, item.Kind, item.QualifiedName, item.Signature);
-        byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes(identity));
-        string suffix = Convert.ToHexString(digest.AsSpan(0, 8)).ToLowerInvariant();
-        return $"{readable}-{suffix}";
-    }
-
-    private static string Markdown(string text)
-    {
-        StringBuilder html = new();
-        bool code = false;
-        foreach (string raw in text.Replace("\r\n", "\n").Split('\n'))
-        {
-            string line = raw.TrimEnd();
-            if (line.StartsWith("```", StringComparison.Ordinal)) { html.AppendLine(code ? "</code></pre>" : "<pre><code>"); code = !code; continue; }
-            if (code) { html.AppendLine(H(raw)); continue; }
-            if (line.StartsWith("### ")) html.Append("<h3>").Append(H(line[4..])).AppendLine("</h3>");
-            else if (line.StartsWith("## ")) html.Append("<h2>").Append(H(line[3..])).AppendLine("</h2>");
-            else if (line.StartsWith("# ")) html.Append("<h1>").Append(H(line[2..])).AppendLine("</h1>");
-            else if (line.StartsWith("- ")) html.Append("<p class=\"bullet\">• ").Append(H(line[2..])).AppendLine("</p>");
-            else if (line.Length != 0) html.Append("<p>").Append(H(line)).AppendLine("</p>");
-        }
-        return html.ToString();
+        internal string QualifiedName => Namespace + "." + Type;
     }
 
     private const string Css = """
-:root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#eaf0ff;background:#07101d;line-height:1.55}*{box-sizing:border-box}body{margin:0}header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:2rem;padding:1rem 5vw;background:#07101dee;border-bottom:1px solid #20304a;backdrop-filter:blur(12px)}a{color:#73c7ff;text-decoration:none}.brand{font-weight:800;color:#fff;font-size:1.15rem}.brand span{color:#73c7ff}nav{display:flex;gap:1rem}.search{margin-left:auto;position:relative}.search span{position:absolute;left:-9999px}.search input{width:min(28vw,24rem);padding:.7rem .9rem;border:1px solid #314662;border-radius:.6rem;background:#0d1929;color:#fff}#search-results{position:absolute;right:0;width:32rem;max-width:85vw;background:#0d1929;border:1px solid #314662;border-radius:.6rem;box-shadow:0 1rem 3rem #0008}#search-results a{display:block;padding:.7rem .9rem;border-bottom:1px solid #20304a}main{max-width:76rem;margin:auto;padding:4rem 5vw 7rem}.hero{padding:4rem 0}.hero h1{font-size:clamp(2.6rem,7vw,5.8rem);line-height:.95;max-width:12ch;margin:.2em 0}.hero p{max-width:48rem;font-size:1.2rem;color:#b7c5d9}.eyebrow{letter-spacing:.14em;text-transform:uppercase;color:#73c7ff;font-weight:700}.actions{display:flex;gap:1rem;margin-top:2rem}.actions a,.card{border:1px solid #314662;border-radius:.8rem;padding:1rem 1.2rem;background:#0d1929}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem}.card{display:flex;flex-direction:column}.card span{color:#9fafc3;font-size:.9rem}h1{font-size:2.7rem}h2{margin-top:2.4rem}pre{overflow:auto;background:#020711;border:1px solid #20304a;padding:1rem;border-radius:.7rem}code{font-family:Cascadia Code,Consolas,monospace}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:.75rem;border-bottom:1px solid #20304a;vertical-align:top}dt{color:#8da0b9;font-weight:700}dd{margin:0 0 1rem}.bullet{margin:.3rem 0}footer{padding:2rem 5vw;color:#7f90a7;border-top:1px solid #20304a}.source-list{display:flex;flex-direction:column;gap:.35rem}.source-code{padding:0}.source-line{display:block;white-space:pre}.source-line:target{background:#16314a}.line-number{display:inline-block;width:4rem;padding-right:1rem;text-align:right;color:#6f829b;user-select:none}@media(max-width:700px){header{flex-wrap:wrap}.search{order:3;width:100%}.search input{width:100%}nav{margin-left:auto}}
+:root{font-family:Inter,Segoe UI,Arial,sans-serif;color:#e8eef8;background:#08101a;line-height:1.55}*{box-sizing:border-box}body{margin:0}a{color:#6fd0ff;text-decoration:none}header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:2rem;padding:1rem 5vw;background:#08101af2;border-bottom:1px solid #223044;backdrop-filter:blur(14px)}.brand{font-weight:800;color:#fff;font-size:1.2rem}.brand span{color:#6fd0ff}nav{display:flex;gap:1.1rem}.search{margin-left:auto;position:relative}.search>span{position:absolute;left:-9999px}.search input{width:min(30vw,28rem);padding:.75rem .9rem;border:1px solid #33465e;border-radius:.65rem;background:#0e1a28;color:#fff}#search-results{position:absolute;right:0;top:3rem;width:34rem;max-width:88vw;background:#0e1a28;border:1px solid #33465e;border-radius:.7rem;box-shadow:0 1rem 3rem #0009;overflow:hidden}#search-results a{display:block;padding:.75rem .9rem;border-bottom:1px solid #223044}main{max-width:80rem;margin:auto;padding:4rem 5vw 7rem}.hero{padding:3.5rem 0 2rem}.hero h1{font-size:clamp(3rem,7vw,6rem);line-height:.95;letter-spacing:-.04em;max-width:13ch;margin:.15em 0}.hero>p:not(.eyebrow){max-width:52rem;font-size:1.2rem;color:#b8c5d6}.eyebrow,.card-kicker{letter-spacing:.13em;text-transform:uppercase;color:#6fd0ff;font-size:.78rem;font-weight:800}.actions{display:flex;gap:.9rem;margin-top:2rem}.actions a{padding:.85rem 1.1rem;border:1px solid #33465e;border-radius:.7rem}.actions .primary{background:#6fd0ff;color:#07101b;border-color:#6fd0ff;font-weight:800}.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:1rem 0 4rem}.facts div,.metadata div{padding:1rem;border:1px solid #26374d;border-radius:.8rem;background:#0c1724}.facts strong{display:block;font-size:2rem}.facts span,.metadata span{display:block;color:#8fa2b8;font-size:.85rem}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-top:4rem}.section-heading h2{margin:.15rem 0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:1rem}.card{display:flex;flex-direction:column;gap:.35rem;padding:1.1rem;border:1px solid #26374d;border-radius:.8rem;background:#0c1724}.card strong{font-size:1.05rem;color:#fff}.card span:last-child{color:#9eb0c4;font-size:.9rem}.boundary{margin-top:5rem;padding:2rem;border:1px solid #314a66;border-radius:1rem;background:#0d1c2b}h1{font-size:clamp(2.2rem,5vw,4rem);line-height:1.05;letter-spacing:-.03em}h2{margin-top:2.8rem}.lede{max-width:58rem;color:#b8c5d6;font-size:1.08rem}.title-row{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}.badge{display:inline-block;padding:.35rem .6rem;border-radius:999px;background:#153650;color:#83d9ff;font-size:.78rem;font-weight:800;white-space:nowrap}.badge.legacy{background:#3b2e19;color:#ffd88e}.metadata{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin:2rem 0}.metadata .wide{grid-column:span 2}.metadata strong{display:block;margin-top:.25rem;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse;margin:1rem 0}th,td{text-align:left;padding:.8rem;border-bottom:1px solid #26374d;vertical-align:top}th{color:#9eb0c4;font-size:.85rem}pre{overflow:auto;background:#03070c;border:1px solid #26374d;padding:1.1rem;border-radius:.8rem}code{font-family:Cascadia Code,Consolas,monospace}@media(max-width:800px){header{flex-wrap:wrap}.search{order:3;width:100%}.search input{width:100%}.facts{grid-template-columns:repeat(2,1fr)}.metadata{grid-template-columns:1fr 1fr}.metadata .wide{grid-column:span 2}.title-row{display:block}.badge{margin-bottom:1rem}}@media(max-width:520px){main{padding-top:2rem}.facts,.metadata{grid-template-columns:1fr}.metadata .wide{grid-column:span 1}}
 """;
 
     private const string JavaScript = """
-(()=>{const release='__INU_RELEASE__';const applyRelease=()=>{const footer=document.querySelector('footer');if(footer)footer.textContent=`Generated from Inu ${release} source.`;const version=document.querySelector('.hero .eyebrow');if(version&&version.textContent==='VERSION')version.textContent=`VERSION ${release}`};document.addEventListener('DOMContentLoaded',()=>{applyRelease();const input=document.querySelector('#site-search');const box=document.querySelector('#search-results');if(!input||!box)return;const root=input.dataset.root||'';const items=window.InuSearchIndex||[];input.addEventListener('input',()=>{const q=input.value.trim().toLowerCase();box.innerHTML='';if(q.length<2)return;for(const item of items.filter(x=>(x.title+' '+x.assembly+' '+x.summary).toLowerCase().includes(q)).slice(0,8)){const a=document.createElement('a');a.href=root+item.url;a.textContent=item.title+' — '+item.assembly;box.appendChild(a)}})})})();
+(()=>{document.addEventListener('DOMContentLoaded',()=>{const input=document.querySelector('#site-search');const box=document.querySelector('#search-results');if(!input||!box)return;const root=input.dataset.root||'';const items=window.InuSearchIndex||[];input.addEventListener('input',()=>{const q=input.value.trim().toLowerCase();box.innerHTML='';if(q.length<2)return;for(const item of items.filter(x=>(x.title+' '+x.assembly+' '+x.kind+' '+x.category+' '+x.members).toLowerCase().includes(q)).slice(0,10)){const a=document.createElement('a');a.href=root+item.url;a.textContent=item.title+' — '+item.assembly;box.appendChild(a)}})})})();
 """;
 }

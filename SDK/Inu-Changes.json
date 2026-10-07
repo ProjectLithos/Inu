@@ -1,9 +1,6 @@
 {
-  "baseVersion": "0.0.82",
-  "version": "0.0.83",
-  "changedFiles": [
-    "src/Inu.Freestanding.CoreLib/CoreLib.cs"
-  ],
-  "removedFiles": [],
-  "summary": "Complete the freestanding System.String surface required by generated shell code by adding Substring overloads and common String.Concat overloads for normal .NET-style C#."
+  "baseVersion": "0.0.86",
+  "version": "0.0.87",
+  "changedFiles": [],
+  "summary": "Fix Version.ps1 after the API-site rewrite so release propagation no longer expects or rewrites a version marker in docs/site/assets/site.js. Generated site assets remain version-independent; documentation version identity is maintained in Inu.Documentation.json."
 }
