@@ -21,6 +21,7 @@ namespace Inu.Kernel.Bootstrap.HAL;
 /// <summary>Owns only the selected keyboard/mouse providers and their event routing.</summary>
 public static unsafe class InputHardwareStartup
 {
+    private static Boolean _initialized;
 #if INU_KERNELAREA_INPUT
     private static UInt32 _inputTimerHandle;
 #if INU_KERNELAREA_DRIVERS
@@ -31,6 +32,7 @@ public static unsafe class InputHardwareStartup
 
     public static Boolean Initialize()
     {
+        if (_initialized) return true;
 #if INU_KERNELAREA_INPUT
         // The transport consumes scan codes through the decoder contract. Register
         // the supplied decoder only when the OS has not installed its own provider.
@@ -46,8 +48,12 @@ public static unsafe class InputHardwareStartup
         if (!KernelPs2.SetMouseEventHandler(&HandlePs2MouseEvent)) return false;
         if (!KernelTimerDispatch.Register(1000000UL, &ServiceInput, 0UL, out _inputTimerHandle)) return false;
 #endif
+        _initialized = true;
         return true;
     }
+
+    /// <summary>Ensures the selected text-input providers and timer-service drain are ready for an interactive shell.</summary>
+    public static Boolean EnsureTextInputProviders() => Initialize();
 
     /// <summary>Attaches hardware IRQ delivery after the selected interrupt broker is online.</summary>
     public static Boolean EnableHardwareInterrupts()
@@ -64,6 +70,7 @@ public static unsafe class InputHardwareStartup
     /// <summary>Ensures selected input providers are connected before a graphical session begins.</summary>
     public static Boolean EnsureGraphicalInputProviders()
     {
+        if (!Initialize()) return false;
 #if INU_KERNELAREA_INPUT
         if (!KernelKeyboardDecoderServices.IsAvailable && !KernelKeyboardDecoder.Initialize()) return false;
         if (!KernelPs2.IsInitialized() && !KernelPs2.Initialize())
