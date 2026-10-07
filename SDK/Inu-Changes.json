@@ -1,6 +1,8 @@
 {
-  "baseVersion": "0.0.86",
-  "version": "0.0.87",
-  "changedFiles": [],
-  "summary": "Fix Version.ps1 after the API-site rewrite so release propagation no longer expects or rewrites a version marker in docs/site/assets/site.js. Generated site assets remain version-independent; documentation version identity is maintained in Inu.Documentation.json."
+  "baseVersion": "0.0.87",
+  "version": "0.0.88",
+  "changedFiles": [
+    "src/Inu.UserlandCompiler/Program.cs"
+  ],
+  "summary": "Fix generated ring-3 application entry points so shell-only Configure/Run lifecycle state is emitted only for the shell executable. Ordinary commands no longer receive an unused _configured field, preventing CS0169 when warnings are treated as errors."
 }
