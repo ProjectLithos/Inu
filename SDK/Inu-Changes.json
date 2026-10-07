@@ -1,12 +1,9 @@
 {
-  "baseVersion": "0.0.75",
-  "version": "0.0.76",
+  "baseVersion": "0.0.76",
+  "version": "0.0.77",
   "changedFiles": [
-    "src/Inu.Kernel.Processes/KernelProcesses.Runtime.cs",
-    "templates/InuKernel/Startup/ProcessRuntimeStartup.cs",
-    "templates/InuKernel/Startup/TimerDispatchStartup.cs",
-    "templates/InuKernel/HAL/BootstrapGraphicsTransportStartup.cs"
+    "templates/InuKernel/Startup/ProcessRuntimeStartup.cs"
   ],
   "removedFiles": [],
-  "summary": "Repairs Microkernel post-protection startup by making the auxiliary userland observation worker non-fatal while keeping core process services mandatory, and adds precise startup failure diagnostics for process, timer-dispatch and bootstrap-graphics stages."
+  "summary": "Fixes the 0.0.76 ProcessRuntimeStartup diagnostic compile regression by fully qualifying the kernel console reference; runtime process-startup behaviour is unchanged."
 }

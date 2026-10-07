@@ -9,7 +9,7 @@ public static class ProcessRuntimeStartup
     public static Boolean Initialize()
     {
         if (KernelProcesses.Initialize()) return true;
-        KernelConsole.WriteHostControl("PROCESS_RUNTIME_STARTUP_FAIL");
+        global::Inu.Kernel.Console.KernelConsole.WriteHostControl("PROCESS_RUNTIME_STARTUP_FAIL");
         return false;
     }
 }
