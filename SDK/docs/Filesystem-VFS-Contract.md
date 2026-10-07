@@ -70,3 +70,9 @@ The initial categories are `ReadableUser`, `WritableUser`, `VisibleUser`, `Reada
 Logical mappings are location policy only. They do not grant read/write/visibility permissions by themselves.
 
 The supplied shell now obtains `FileSystemLogicalPath.Commands` through Get(`filesystem.logical-path`) and therefore no longer hard-codes `System/Commands`. The compatibility default remains `/System/Commands` until the OS author replaces or clears it.
+
+## 0.0.81 path and command-search SDK surface
+
+Userland code no longer needs to send `filesystem.*` Get/Set messages directly. `Inu.Userland.Runtime.FileSystemPaths` exposes `GetPathSeparator`, `SetPathSeparator`, `GetCommandsPath`, `GetCommandsPaths`, `SetCommandsPath`, `SetCommandsPaths`, and `BuildCommandsPath`.
+
+Command directories are now an ordered search list rather than one fixed location. `BuildCommandsPath(command)` returns executable candidates for each configured directory in search order, including `.EXE` and extensionless forms. The compatibility default remains `/System/Commands` until OS policy changes it.

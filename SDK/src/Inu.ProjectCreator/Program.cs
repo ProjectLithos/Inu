@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 
@@ -181,6 +182,11 @@ static int MainEntry(string[] args)
         }
     }
 
+    if (!MaterializeCoderCommands(sdkRoot, output, projectName)) return 1;
+    MigrateGeneratedShellSurface(output, projectName);
+    MigrateGeneratedCommandSurface(output, projectName, sdkRoot);
+    HideProvidedWorkspaceFolders(output);
+
     File.WriteAllText(manifestPath, JsonSerializer.Serialize(new
     {
         Name = projectName,
@@ -301,6 +307,126 @@ static bool MaterializeCanonicalUserlandWorkspace(string sdkRoot, string output)
         Console.WriteLine($"[ OK ] Materialized userland workspace file from canonical SDK source: {relative}");
     }
     return true;
+}
+
+static string SafeProjectSegment(string value)
+{
+    char[] chars = value.Select(c => char.IsLetterOrDigit(c) || c == '_' ? c : '_').ToArray();
+    return chars.Length == 0 ? "OS" : new string(chars);
+}
+
+static void MigrateGeneratedShellSurface(string output, string projectName)
+{
+    string root = Path.Combine(output, "Userland", SafeProjectSegment(projectName));
+    string file = Path.Combine(root, "Shell.cs");
+    if (!File.Exists(file)) return;
+    string source = File.ReadAllText(file);
+    // Only migrate the stock 0.0.80 shell shape. Hand-written shells are never replaced.
+    if (!source.Contains("private static Byte GetPathSeparator()", StringComparison.Ordinal) ||
+        !source.Contains("UserlandSystem.Call(UserlandOperation.Get", StringComparison.Ordinal) ||
+        !source.Contains("Coder-owned shell behaviour. Configure runs once", StringComparison.Ordinal)) return;
+
+    string ns = "Generated.Userland";
+    foreach (string line in source.Split('\n'))
+    {
+        string t = line.Trim();
+        if (t.StartsWith("namespace ", StringComparison.Ordinal) && t.EndsWith(";", StringComparison.Ordinal))
+        { ns = t[10..^1].Trim(); break; }
+    }
+    string prompt = "> ";
+    const string promptNeedle = "public const string Prompt = \"";
+    int promptStart = source.IndexOf(promptNeedle, StringComparison.Ordinal);
+    if (promptStart >= 0)
+    {
+        promptStart += promptNeedle.Length; int promptEnd = source.IndexOf("\";", promptStart, StringComparison.Ordinal);
+        if (promptEnd > promptStart) prompt = source[promptStart..promptEnd];
+    }
+    string configureBody = "        // Console.Clear();\n        // Console.WriteLine(\"Howdy\");";
+    int configure = source.IndexOf("public static void Configure()", StringComparison.Ordinal);
+    if (configure >= 0)
+    {
+        int open = source.IndexOf('{', configure); if (open >= 0)
+        {
+            int depth = 1, cursor = open + 1;
+            while (cursor < source.Length && depth != 0) { if (source[cursor] == '{') depth++; else if (source[cursor] == '}') depth--; cursor++; }
+            if (depth == 0) configureBody = source[(open + 1)..(cursor - 1)].Trim('\r','\n');
+        }
+    }
+    string escapedPrompt = prompt.Replace("\\", "\\\\").Replace("\"", "\\\"");
+    string migrated = $"using System;\nusing Inu.Userland.Runtime;\n\nnamespace {ns};\n\n" +
+        "/// <summary>Coder-owned shell behaviour. Configure runs once for the lifetime of the shell; Run owns the visible command loop.</summary>\n" +
+        "public static class Shell\n{\n" +
+        $"    public const string Prompt = \"{escapedPrompt}\";\n\n" +
+        "    public static void Configure()\n    {\n" + configureBody + "\n    }\n\n" +
+        "    public static void Run()\n    {\n        while (true)\n        {\n" +
+        "            Console.Write(Prompt);\n            String input = Console.ReadLine();\n            if (String.IsNullOrWhiteSpace(input)) continue;\n" +
+        "            Int32 start=0,end=input.Length; while(start<end&&input[start]==' ')start++; while(end>start&&input[end-1]==' ')end--; if(start==end)continue;\n" +
+        "            Int32 split=start;while(split<end&&input[split]!=' ')split++;Int32 argumentStart=split;while(argumentStart<end&&input[argumentStart]==' ')argumentStart++;\n" +
+        "            String command=input.Substring(start,split-start);String arguments=argumentStart<end?input.Substring(argumentStart,end-argumentStart):String.Empty;\n" +
+        "            String[] candidates=FileSystemPaths.BuildCommandsPath(command);Boolean launched=false;\n" +
+        "            for(Int32 index=0;index<candidates.Length;index++)if(Process.TryStart(candidates[index],arguments)){launched=true;break;}\n" +
+        "            if(!launched)Console.WriteLine(\"Command not found.\");\n        }\n    }\n}\n";
+    File.WriteAllText(file, migrated);
+    Console.WriteLine($"[ OK ] Migrated stock shell source to high-level SDK APIs: {file}");
+}
+
+static void MigrateGeneratedCommandSurface(string output, string projectName, string sdkRoot)
+{
+    string root = Path.Combine(output, "Userland", SafeProjectSegment(projectName), "Commands");
+    if (!Directory.Exists(root)) return;
+    foreach (string name in new[] { "Echo.cs", "SysInfo.cs" })
+    {
+        string destination = Path.Combine(root, name); string canonical = Path.Combine(sdkRoot, "src", "Userland", "Commands", name);
+        if (!File.Exists(destination) || !File.Exists(canonical)) continue;
+        string current = File.ReadAllText(destination);
+        if (!current.Contains("UserlandSystem.Call", StringComparison.Ordinal) && !current.Contains("UserlandArguments.ReadRaw", StringComparison.Ordinal)) continue;
+        string ns = "Inu.Userland.Commands";
+        foreach (string line in current.Split('\n')) { string t=line.Trim(); if(t.StartsWith("namespace ",StringComparison.Ordinal)&&t.EndsWith(";",StringComparison.Ordinal)){ns=t[10..^1].Trim();break;} }
+        string replacement = File.ReadAllText(canonical).Replace("namespace Inu.Userland.Commands;", $"namespace {ns};", StringComparison.Ordinal);
+        File.WriteAllText(destination, replacement);
+        Console.WriteLine($"[ OK ] Migrated stock command source to high-level SDK APIs: {destination}");
+    }
+}
+
+static bool MaterializeCoderCommands(string sdkRoot, string output, string projectName)
+{
+    string sourceRoot = Path.Combine(sdkRoot, "src", "Userland", "Commands");
+    if (!Directory.Exists(sourceRoot)) return true;
+    string safeName = SafeProjectSegment(projectName);
+    string destinationRoot = Path.Combine(output, "Userland", safeName, "Commands");
+    Directory.CreateDirectory(destinationRoot);
+    foreach (string source in Directory.EnumerateFiles(sourceRoot, "*.cs", SearchOption.TopDirectoryOnly))
+    {
+        string destination = Path.Combine(destinationRoot, Path.GetFileName(source));
+        if (File.Exists(destination)) continue;
+        File.Copy(source, destination, false);
+        Console.WriteLine($"[ OK ] Added coder-visible command source: {destination}");
+    }
+    return true;
+}
+
+static void HideProvidedWorkspaceFolders(string output)
+{
+    try
+    {
+        string directory = Path.Combine(output, ".theia");
+        string file = Path.Combine(directory, "settings.json");
+        Dictionary<string, object?> settings = new(StringComparer.OrdinalIgnoreCase);
+        if (File.Exists(file))
+        {
+            try
+            {
+                using JsonDocument doc = JsonDocument.Parse(File.ReadAllText(file));
+                foreach (JsonProperty property in doc.RootElement.EnumerateObject()) settings[property.Name] = JsonSerializer.Deserialize<object>(property.Value.GetRawText());
+            }
+            catch { }
+        }
+        Dictionary<string, bool> excludes = new(StringComparer.OrdinalIgnoreCase) { ["**/Provided"] = true };
+        settings["files.exclude"] = excludes;
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(file, JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true }) + Environment.NewLine);
+    }
+    catch { }
 }
 
 static string FindSdkRoot(string start)

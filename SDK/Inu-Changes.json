@@ -1,9 +1,21 @@
 {
-  "baseVersion": "0.0.79",
-  "version": "0.0.80",
+  "baseVersion": "0.0.80",
+  "version": "0.0.81",
   "changedFiles": [
-    "src/Inu.UserlandCompiler/Program.cs"
+    "src/Inu.Userland.Runtime/FileSystemPaths.cs",
+    "src/Inu.Userland.Runtime/Process.cs",
+    "src/Inu.Userland.Runtime/SystemInformation.cs",
+    "src/Inu.Userland.Runtime/IO.cs",
+    "src/Inu.Userland.Runtime/UserlandRuntime.cs",
+    "src/Inu.UserlandCompiler/Program.cs",
+    "src/Inu.ProjectCreator/Program.cs",
+    "src/Inu.Kernel.Storage/FileSystemLogicalPaths.cs",
+    "src/Inu.Kernel.Storage/FileSystemLifecycle.cs",
+    "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
+    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
+    "src/Userland/Commands",
+    "src/Userland/SysInfo/SysInfo.cs"
   ],
   "removedFiles": [],
-  "summary": "Makes coder-owned Shell.cs own the complete interactive shell: Configure() runs once and Run() runs once with the visible prompt/input/command loop. The userland compiler uses the new contract while preserving legacy Prompt-based shells."
+  "summary": "High-level userland SDK path/process APIs, persistent shell configuration, multiple command search paths, coder-visible command source, and hidden SDK Provided folders."
 }

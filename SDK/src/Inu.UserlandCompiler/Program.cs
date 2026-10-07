@@ -52,7 +52,7 @@ static int MainEntry(string[] args)
         string shellType=FindTypeWithMethod(shellSource,"Configure")??returnFail($"Could not find Shell.Configure in {shellSource}");
         if(FindTypeWithMethod(shellSource,"Run") is string runType && string.Equals(runType,shellType,StringComparison.Ordinal))
         {
-            rc=CompileApp("Shell",[shellSource],$"global::{shellType}.Configure(); global::{shellType}.Run(); return 0;",Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
+            rc=CompileApp("Shell",[shellSource],$"if(!_configured){{global::{shellType}.Configure();_configured=true;}} global::{shellType}.Run(); return 0;",Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
         }
         else
         {
@@ -61,7 +61,7 @@ static int MainEntry(string[] args)
             string shellRuntime=Path.Combine(projectRoot,"Userland","Provided","Shell","InuShell.cs");
             if(!File.Exists(shellRuntime))shellRuntime=Path.Combine(sdkRoot,"src","Userland","Shell","InuShell.cs");
             if(!HasPromptMember(shellSource))return Fail($"Coder-owned shell source must define public static Run() (preferred) or the legacy Prompt string: {shellSource}");
-            rc=CompileApp("Shell",[shellRuntime,shellSource],$"global::{shellType}.Configure(); return global::Inu.Userland.Shell.InuShell.Run(global::{shellType}.Prompt);",Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
+            rc=CompileApp("Shell",[shellRuntime,shellSource],$"if(!_configured){{global::{shellType}.Configure();_configured=true;}} return global::Inu.Userland.Shell.InuShell.Run(global::{shellType}.Prompt);",Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
         }
         if(rc!=0)return rc;
     }
@@ -107,6 +107,7 @@ using Inu.Userland.Runtime;
 
 internal static unsafe class InuUserApplicationEntry
 {
+    private static Boolean _configured;
     [RuntimeExport("InuUserManagedEntry")]
     private static Int32 Entry(UInt64 imageBase, UInt64 readyToRunHeader)
     {

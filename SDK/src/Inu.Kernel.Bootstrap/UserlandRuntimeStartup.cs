@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Inu.Kernel.Console;
 using Inu.Kernel.Internal.X64;
 using Inu.Kernel.Processes;
@@ -66,7 +67,13 @@ public static unsafe class UserlandRuntimeStartup
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.DirectoryCreate,&DirectoryCreateSet)||
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.DirectoryDelete,&DirectoryDeleteSet)||
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.DirectoryClose,&DirectoryCloseEvent)||
-           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileSystemLogicalPath,&FileSystemLogicalPathGet))return false;
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.DirectoryRead,&DirectoryReadGet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileSystemLogicalPath,&FileSystemLogicalPathGet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileSystemPathSeparator,&FileSystemPathSeparatorGet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileSystemPathSeparator,&FileSystemPathSeparatorSet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileSystemCommandsPathCount,&FileSystemCommandsPathCountGet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileSystemCommandsPath,&FileSystemCommandsPathGet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileSystemCommandsPath,&FileSystemCommandsPathSet))return false;
         if(!KernelSystemCalls.RegisterGet("system.device.inspect",&DeviceInspectGet))return false;
         _initialized=true;return true;
     }
@@ -271,6 +278,52 @@ public static unsafe class UserlandRuntimeStartup
     private static Int64 ProcessEnvironmentGet(KernelSystemCallFrame* frame)=>CopyContextToUser(frame,false);
 
 
+
+    private static Int64 FileSystemPathSeparatorGet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        return (Int64)(UInt16)FileSystem.GetPathSeparator();
+    }
+
+    private static Int64 FileSystemPathSeparatorSet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.Value0==0UL||frame->NativeMessage.Value0>0x7FUL)return (Int64)KernelSystemCallError.InvalidArgument;
+        return FileSystem.SetPathSeparator((Char)frame->NativeMessage.Value0)?0L:(Int64)KernelSystemCallError.InvalidArgument;
+    }
+
+    private static Int64 FileSystemCommandsPathCountGet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        return (Int64)FileSystemLogicalPaths.CommandCount;
+    }
+
+    private static Int64 FileSystemCommandsPathGet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.OutputCapacity==0UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt64 requested=frame->NativeMessage.Value0;if(requested>UInt32.MaxValue)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* path=stackalloc Byte[(Int32)PathCapacity];
+        if(!FileSystemLogicalPaths.TryGetCommandExternalAscii((UInt32)requested,path,PathCapacity,out UInt32 length))return (Int64)KernelSystemCallError.NotFound;
+        if(frame->NativeMessage.OutputCapacity<length)return (Int64)KernelSystemCallError.InvalidArgument;
+        return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)path,length)?(Int64)length:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 FileSystemCommandsPathSet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>(UInt64)(PathCapacity*FileSystemLogicalPaths.MaximumCommandPaths))return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt32 bytes=(UInt32)frame->NativeMessage.DataLength;Byte* payload=stackalloc Byte[(Int32)bytes];
+        if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)payload,bytes))return (Int64)KernelSystemCallError.Fault;
+        String[] paths=new String[(Int32)FileSystemLogicalPaths.MaximumCommandPaths];UInt32 count=0U,start=0U;
+        for(UInt32 i=0U;i<=bytes;i++)
+        {
+            if(i!=bytes&&payload[i]!=0U)continue;
+            UInt32 length=i-start;if(length==0U||count>=FileSystemLogicalPaths.MaximumCommandPaths)return (Int64)KernelSystemCallError.InvalidArgument;
+            StringBuilder path=new StringBuilder((Int32)length);
+            for(UInt32 j=0U;j<length;j++){Byte b=payload[start+j];if(b==0U||b>0x7FU)return (Int64)KernelSystemCallError.InvalidArgument;path.Append((Char)b);}
+            paths[(Int32)count++]=path.ToString();start=i+1U;
+        }
+        String[] exact=new String[(Int32)count];for(UInt32 i=0U;i<count;i++)exact[(Int32)i]=paths[(Int32)i];
+        return FileSystem.SetCommandsPaths(exact)?0L:(Int64)KernelSystemCallError.InvalidArgument;
+    }
     private static Int64 FileSystemLogicalPathGet(KernelSystemCallFrame* frame)
     {
         if(frame==null||frame->NativeMessage.OutputCapacity==0UL||frame->NativeMessage.Value0==0UL||frame->NativeMessage.Value0>10UL)return (Int64)KernelSystemCallError.InvalidArgument;
@@ -461,6 +514,15 @@ public static unsafe class UserlandRuntimeStartup
         if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
         return KernelVfs.RemoveDirectoryAscii(KernelVfs.DefaultNamespace,path,pathLength)?
             0L:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 DirectoryReadGet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.Value0==0UL||frame->NativeMessage.OutputCapacity==0UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt64 capacity=frame->NativeMessage.OutputCapacity;if(capacity>512UL)capacity=512UL;Char* name=stackalloc Char[(Int32)capacity];
+        if(!KernelVfs.ReadDirectory(new KernelDirectoryHandle((UInt32)frame->NativeMessage.Value0),name,(UInt32)capacity,out UInt32 length,out _,out _,out _))return 0L;
+        Byte* ascii=stackalloc Byte[(Int32)capacity];for(UInt32 i=0U;i<length;i++){Char c=name[i];if(c>0x7F)return (Int64)KernelSystemCallError.Fault;ascii[i]=(Byte)c;}
+        return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)ascii,length)?(Int64)length:(Int64)KernelSystemCallError.Fault;
     }
 
     private static Int64 DirectoryCloseEvent(KernelSystemCallFrame* frame)

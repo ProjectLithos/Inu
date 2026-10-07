@@ -31,9 +31,36 @@ public static class FileSystem
     /// <summary><inu.api>Removes a logical filesystem-path mapping.</inu.api></summary>
     public static Boolean ClearLogicalPath(FileSystemLogicalPath kind)=>FileSystemLogicalPaths.Clear(kind);
 
+    /// <summary><inu.api>Gets the active external path separator.</inu.api></summary>
+    public static Char GetPathSeparator()=>FileSystemPathPolicyRuntime.Current.Separator;
+
+    /// <summary><inu.api>Changes only the external path separator while preserving the rest of the active path policy.</inu.api></summary>
+    public static Boolean SetPathSeparator(Char separator)
+    {
+        FileSystemPathPolicy current=FileSystemPathPolicyRuntime.Current;
+        return FileSystemPathPolicyRuntime.TrySet(new FileSystemPathPolicy(separator,current.CaseSensitive,current.MaximumComponentLength,current.AllowSpaces,current.AllowNumbers,current.InvalidCharacters));
+    }
+
+    /// <summary><inu.api>Gets the first configured command search path, or an empty string if none is configured.</inu.api></summary>
+    public static String GetCommandsPath()=>FileSystemLogicalPaths.ExternalCommand(0U);
+
+    /// <summary><inu.api>Gets all configured command search paths in search order.</inu.api></summary>
+    public static String[] GetCommandsPaths()
+    {
+        UInt32 count=FileSystemLogicalPaths.CommandCount;String[] result=new String[(Int32)count];
+        for(UInt32 i=0U;i<count;i++)result[(Int32)i]=FileSystemLogicalPaths.ExternalCommand(i);
+        return result;
+    }
+
+    /// <summary><inu.api>Replaces the command search path list with one location.</inu.api></summary>
+    public static Boolean SetCommandsPath(String path)=>FileSystemLogicalPaths.TrySetCommands(new[]{path});
+
+    /// <summary><inu.api>Replaces the command search path list. Paths are searched in the supplied order.</inu.api></summary>
+    public static Boolean SetCommandsPaths(String[] paths)=>FileSystemLogicalPaths.TrySetCommands(paths);
+
 }
 /// <summary><inu.api>Spelling-compatible alias for the coder-facing FileSystem lifecycle facade.</inu.api></summary>
 public static class Filesystem
 {
-    public static Boolean Initialize()=>FileSystem.Initialize(); public static Byte GetLifecycleState()=>FileSystem.GetLifecycleState(); public static Boolean Start()=>FileSystem.Start(); public static Boolean Run()=>FileSystem.Run(); public static Boolean Pause()=>FileSystem.Pause(); public static Boolean Resume()=>FileSystem.Resume(); public static Boolean Stop()=>FileSystem.Stop(); public static Boolean Unload()=>FileSystem.Unload(); public static FileSystemPathPolicy GetPathPolicy()=>FileSystem.GetPathPolicy(); public static Boolean SetPathPolicy(FileSystemPathPolicy policy)=>FileSystem.SetPathPolicy(policy); public static Boolean SetLogicalPath(FileSystemLogicalPath kind,String path)=>FileSystem.SetLogicalPath(kind,path); public static String GetLogicalPath(FileSystemLogicalPath kind)=>FileSystem.GetLogicalPath(kind); public static Boolean ClearLogicalPath(FileSystemLogicalPath kind)=>FileSystem.ClearLogicalPath(kind);
+    public static Boolean Initialize()=>FileSystem.Initialize(); public static Byte GetLifecycleState()=>FileSystem.GetLifecycleState(); public static Boolean Start()=>FileSystem.Start(); public static Boolean Run()=>FileSystem.Run(); public static Boolean Pause()=>FileSystem.Pause(); public static Boolean Resume()=>FileSystem.Resume(); public static Boolean Stop()=>FileSystem.Stop(); public static Boolean Unload()=>FileSystem.Unload(); public static FileSystemPathPolicy GetPathPolicy()=>FileSystem.GetPathPolicy(); public static Boolean SetPathPolicy(FileSystemPathPolicy policy)=>FileSystem.SetPathPolicy(policy); public static Boolean SetLogicalPath(FileSystemLogicalPath kind,String path)=>FileSystem.SetLogicalPath(kind,path); public static String GetLogicalPath(FileSystemLogicalPath kind)=>FileSystem.GetLogicalPath(kind); public static Boolean ClearLogicalPath(FileSystemLogicalPath kind)=>FileSystem.ClearLogicalPath(kind); public static Char GetPathSeparator()=>FileSystem.GetPathSeparator(); public static Boolean SetPathSeparator(Char separator)=>FileSystem.SetPathSeparator(separator); public static String GetCommandsPath()=>FileSystem.GetCommandsPath(); public static String[] GetCommandsPaths()=>FileSystem.GetCommandsPaths(); public static Boolean SetCommandsPath(String path)=>FileSystem.SetCommandsPath(path); public static Boolean SetCommandsPaths(String[] paths)=>FileSystem.SetCommandsPaths(paths);
 }

@@ -18,3 +18,11 @@ The canonical SDK source mirrors this layout:
 `stress` and `selftest` are ordinary command implementations directly under `src/System/Commands`; the command line host supplies generic command dispatch, output presentation and process lifecycle services. Their ring-3 process image source is colocated with those commands rather than in the core process-manager source file.
 
 The older `Inu.Userland.Font`, `Inu.Userland.Buffering`, and `Inu.Userland.Keyboard` assemblies are retained as compatibility facades that forward to the canonical `System/Commands` command library.
+
+## 0.0.81 coder-visible shell and commands
+
+Shell/application authors use high-level SDK APIs (`System.Console`, `System.IO`, `FileSystemPaths`, `Process`, `CommandLine`, `SystemInformation`). Native Get/Set/Event envelopes are implementation details and are not required in coder-owned shell or command source.
+
+`Userland/<OSName>/Shell.cs` owns `Configure()` and `Run()`. `Configure()` is guarded by the compiled shell entry and runs once for the lifetime of the resident shell image; command completion does not rerun it. `Run()` owns the visible prompt/input/dispatch loop.
+
+The complete shipped starter command source is copied into `Userland/<OSName>/Commands`. These files are coder-owned after generation. SDK implementation under `Boot/Provided`, `Kernel/Provided`, and `Userland/Provided` remains on disk for compilation but is hidden from Kath's normal workspace explorer.

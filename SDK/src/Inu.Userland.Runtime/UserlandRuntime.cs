@@ -187,6 +187,7 @@ internal static unsafe class UserlandDirectory
     internal static Int64 OpenAscii(Byte* path,UInt32 pathLength)=>UserlandSystem.Call(UserlandOperation.Get,"directory.open",path,pathLength,null,0UL);
     internal static Int64 CreateAscii(Byte* path,UInt32 pathLength)=>UserlandSystem.Call(UserlandOperation.Set,"directory.create",path,pathLength,null,0UL);
     internal static Int64 DeleteAscii(Byte* path,UInt32 pathLength)=>UserlandSystem.Call(UserlandOperation.Set,"directory.delete",path,pathLength,null,0UL);
+    internal static Int32 ReadAscii(UInt64 handle,Byte* output,UInt32 capacity){Int64 r=UserlandSystem.Call(UserlandOperation.Get,"directory.read",null,0UL,output,capacity,handle);return r<0L?-1:(Int32)r;}
     internal static Int32 GetCurrentDirectoryAscii(Byte* output,UInt32 capacity){Int64 r=UserlandSystem.Call(UserlandOperation.Get,"process.current-directory",null,0UL,output,capacity);return r<0L?-1:(Int32)r;}
     internal static Int64 SetCurrentDirectoryAscii(Byte* path,UInt32 pathLength)=>UserlandSystem.Call(UserlandOperation.Set,"process.current-directory",path,pathLength,null,0UL);
     internal static Int64 Close(UInt64 handle)=>UserlandSystem.Call(UserlandOperation.Event,"directory.close",null,0UL,null,0UL,handle);

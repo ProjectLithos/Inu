@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "apiVersion": "1.0",
+  "apiVersion": "0.0.81",
   "kind": "user-command-api",
   "authority": "Inu/src/Common/Inu.Cli/Program.cs",
   "rule": "Only commands accepted by the canonical inu executable are part of the user-facing SDK command API.",
@@ -396,7 +396,13 @@
           "SetPathPolicy(FileSystemPathPolicy)",
           "SetLogicalPath(FileSystemLogicalPath, string)",
           "GetLogicalPath(FileSystemLogicalPath)",
-          "ClearLogicalPath(FileSystemLogicalPath)"
+          "ClearLogicalPath(FileSystemLogicalPath)",
+          "GetPathSeparator()",
+          "SetPathSeparator(char)",
+          "GetCommandsPath()",
+          "GetCommandsPaths()",
+          "SetCommandsPath(string)",
+          "SetCommandsPaths(string[])"
         ],
         "availability": "coder-owned kernel source when filesystem services are kernel-resident",
         "transport": "in-process VFS/filesystem lifecycle facade",
@@ -418,7 +424,13 @@
           "SetPathPolicy(FileSystemPathPolicy)",
           "SetLogicalPath(FileSystemLogicalPath, string)",
           "GetLogicalPath(FileSystemLogicalPath)",
-          "ClearLogicalPath(FileSystemLogicalPath)"
+          "ClearLogicalPath(FileSystemLogicalPath)",
+          "GetPathSeparator()",
+          "SetPathSeparator(char)",
+          "GetCommandsPath()",
+          "GetCommandsPaths()",
+          "SetCommandsPath(string)",
+          "SetCommandsPaths(string[])"
         ],
         "availability": "coder-owned kernel source when filesystem services are kernel-resident",
         "transport": "alias of FileSystem",
@@ -585,6 +597,72 @@
         "availability": "kernel policy when the desktop-with-text-fallback session component is selected",
         "transport": "kernel process/session runtime",
         "notes": "Coder-facing session policy. Runs the configured graphical session with text-console fallback."
+      },
+      {
+        "namespace": "Inu.Userland.Runtime",
+        "type": "FileSystemPaths",
+        "members": [
+          "GetPathSeparator()",
+          "SetPathSeparator(char)",
+          "GetCommandsPath()",
+          "GetCommandsPaths()",
+          "SetCommandsPath(string)",
+          "SetCommandsPaths(string[])",
+          "BuildCommandsPath(string)",
+          "BuildCommandsPaths(string)"
+        ],
+        "availability": "ring-3 userland",
+        "transport": "internal Get/Set wrappers",
+        "notes": "High-level path policy. Applications do not call native syscalls directly."
+      },
+      {
+        "namespace": "Inu.Userland.Runtime",
+        "type": "Process",
+        "members": [
+          "TryStart(string,string)"
+        ],
+        "availability": "ring-3 userland",
+        "transport": "internal Event wrapper",
+        "notes": "High-level process launch surface."
+      },
+      {
+        "namespace": "Inu.Userland.Runtime",
+        "type": "CommandLine",
+        "members": [
+          "GetRawArguments()"
+        ],
+        "availability": "ring-3 userland",
+        "transport": "internal Get wrapper",
+        "notes": "High-level command-line argument access."
+      },
+      {
+        "namespace": "Inu.Userland.Runtime",
+        "type": "SystemInformation",
+        "members": [
+          "GetOnlineProcessorCount()",
+          "GetSchedulerQuantumNanoseconds()",
+          "TryGetDevice(uint,out DeviceInfo)"
+        ],
+        "availability": "ring-3 userland",
+        "transport": "internal Get wrappers",
+        "notes": "High-level system information surface."
+      },
+      {
+        "namespace": "Inu.Userland.Runtime",
+        "type": "DeviceInfo",
+        "members": [
+          "Bus",
+          "Vendor",
+          "Device",
+          "ClassCode",
+          "State",
+          "Driver",
+          "Failure",
+          "Handle"
+        ],
+        "availability": "ring-3 userland",
+        "transport": "in-process value type",
+        "notes": "Device inventory snapshot."
       }
     ]
   }
