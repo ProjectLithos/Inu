@@ -1,10 +1,9 @@
 {
-  "baseVersion": "0.0.78",
-  "version": "0.0.79",
+  "baseVersion": "0.0.79",
+  "version": "0.0.80",
   "changedFiles": [
-    "templates/InuKernel/HAL/InputHardwareStartup.cs",
-    "templates/InuKernel/Startup/TextConsoleSessionStartup.cs"
+    "src/Inu.UserlandCompiler/Program.cs"
   ],
   "removedFiles": [],
-  "summary": "Fixes Microkernel text-shell input by ensuring the selected input providers are initialized at text-session startup; input initialization is now idempotent, and generated shell guidance explicitly shows System.Console.Clear()."
+  "summary": "Makes coder-owned Shell.cs own the complete interactive shell: Configure() runs once and Run() runs once with the visible prompt/input/command loop. The userland compiler uses the new contract while preserving legacy Prompt-based shells."
 }

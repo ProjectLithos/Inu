@@ -1,5 +1,5 @@
 {
-  "version": "0.0.79",
+  "version": "0.0.80",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -383,7 +383,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "e2fabac6dcead2fb882f41524a2f9221696e3337cb2d80f38112d0d14f294c03"
+      "sha256": "dca93315eed8f2518f60eb1097cec935ae0188e719c018eaf8db7f95e8a898cc"
     },
     {
       "path": "Directory.Build.targets",
@@ -415,7 +415,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "53edf71e6d677edb19937fa79a72baa1669630cdceee87a93fe9f6179a95a0d8"
+      "sha256": "a2fe186b51f7e0941b6bfccb7c342c708a0a16616170edda864666db5cb6ce1b"
     },
     {
       "path": "Inu-Package.bat",
@@ -447,7 +447,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "25338347100f7fa0f47608d585a39788a3afdd583226b9223b490eb59527c070"
+      "sha256": "4208422fba895bd13fb9b86d2b7ac5479774c29d745a533d1d9e6041ffe4fd15"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -987,7 +987,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "5ce7011ec45bd31f9d1316d6dddc81a1ea54140b5dcf41b669b4c9c33e412883"
+      "sha256": "0d8e8db831ea0017fe95f5ff5324b4a392035cbefc506fed0345525188b9df92"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1451,7 +1451,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "716fa6528d46bcc6534808700f5ce69316b35e54ad8cfddb079e802d8022d732"
+      "sha256": "f71ce50170c2eb0ec89227fa82be66bd07e93415e4a548b87184bdf6598ca638"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -2215,7 +2215,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "f7e450cb0753a8872c147709d5855f59244f6e0976a28d0db86a0d7b526bc693"
+      "sha256": "0482ae24f6296a6af7a214bf71a0f8c633029aa550ca07d5127ba623e5c82614"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4439,7 +4439,7 @@
     },
     {
       "path": "src/Inu.UserlandCompiler/Program.cs",
-      "sha256": "0f13d036b7498b2defd9a64108ed2686b5f867f7bc0b71bfaafb0bbbf7f33ab0"
+      "sha256": "e7aa3102d566d57cf7618314a574b7fa6ca21e2dc45b8b517c999cd9aca63098"
     },
     {
       "path": "src/Inu.UserlandCompiler/UserlandStageCache.cs",

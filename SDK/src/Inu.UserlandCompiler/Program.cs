@@ -49,11 +49,20 @@ static int MainEntry(string[] args)
     string shellSource=Path.Combine(coderRoot,"Shell.cs");
     if(File.Exists(shellSource))
     {
-        string shellRuntime=Path.Combine(projectRoot,"Userland","Provided","Shell","InuShell.cs");
-        if(!File.Exists(shellRuntime))shellRuntime=Path.Combine(sdkRoot,"src","Userland","Shell","InuShell.cs");
         string shellType=FindTypeWithMethod(shellSource,"Configure")??returnFail($"Could not find Shell.Configure in {shellSource}");
-        if(!HasPromptMember(shellSource))return Fail($"Coder-owned shell source must define a Prompt string: {shellSource}");
-        rc=CompileApp("Shell",[shellRuntime,shellSource],$"global::{shellType}.Configure(); return global::Inu.Userland.Shell.InuShell.Run(global::{shellType}.Prompt);",Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
+        if(FindTypeWithMethod(shellSource,"Run") is string runType && string.Equals(runType,shellType,StringComparison.Ordinal))
+        {
+            rc=CompileApp("Shell",[shellSource],$"global::{shellType}.Configure(); global::{shellType}.Run(); return 0;",Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
+        }
+        else
+        {
+            // Compatibility for coder-owned shells generated before 0.0.80. New shells own their
+            // complete Run() loop directly in Shell.cs and do not use this provided runtime.
+            string shellRuntime=Path.Combine(projectRoot,"Userland","Provided","Shell","InuShell.cs");
+            if(!File.Exists(shellRuntime))shellRuntime=Path.Combine(sdkRoot,"src","Userland","Shell","InuShell.cs");
+            if(!HasPromptMember(shellSource))return Fail($"Coder-owned shell source must define public static Run() (preferred) or the legacy Prompt string: {shellSource}");
+            rc=CompileApp("Shell",[shellRuntime,shellSource],$"global::{shellType}.Configure(); return global::Inu.Userland.Shell.InuShell.Run(global::{shellType}.Prompt);",Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
+        }
         if(rc!=0)return rc;
     }
 
