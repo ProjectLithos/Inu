@@ -13,12 +13,22 @@ public static class BootstrapGraphicsTransportStartup
     {
 #if INU_KERNEL_MICROKERNEL
         if (!KernelDrivers.Initialize()) { KernelConsole.WriteHostControl("BOOTSTRAP_GRAPHICS_DRIVERS_FAIL"); return false; }
-#if INU_COMPONENT_PCI_LEGACY_CONFIGURATION
-        if (!KernelPciConfigurationServices.IsRegistered(PciConfigurationTransport.LegacyIo) && !KernelPciLegacyConfigurationProvider.Register()) return false;
-#endif
-#if INU_COMPONENT_PCI_ECAM_CONFIGURATION
-        if (!KernelPciConfigurationServices.IsRegistered(PciConfigurationTransport.PcieEcam) && !KernelPciEcamConfigurationProvider.Register()) return false;
-#endif
+        // Early VirtIO-GPU is a deliberate Microkernel bootstrap exception. It needs
+        // PCI discovery even when the general driver framework is placed outside the
+        // kernel, so the bootstrap component must register its own configuration
+        // transports instead of depending on INU_WORKAREA_DRIVERS.
+        if (!KernelPciConfigurationServices.IsRegistered(PciConfigurationTransport.LegacyIo)
+            && !KernelPciLegacyConfigurationProvider.Register())
+        {
+            KernelConsole.WriteHostControl("BOOTSTRAP_GRAPHICS_PCI_LEGACY_REGISTER_FAIL");
+            return false;
+        }
+        if (!KernelPciConfigurationServices.IsRegistered(PciConfigurationTransport.PcieEcam)
+            && !KernelPciEcamConfigurationProvider.Register())
+        {
+            KernelConsole.WriteHostControl("BOOTSTRAP_GRAPHICS_PCI_ECAM_REGISTER_FAIL");
+            return false;
+        }
         if (!KernelPci.Initialize()) { KernelConsole.WriteHostControl("BOOTSTRAP_GRAPHICS_PCI_FAIL"); return false; }
         if (!KernelVirtioGpu.Initialize()) { KernelConsole.WriteHostControl("BOOTSTRAP_GRAPHICS_VIRTIO_FAIL"); return false; }
         VirtioGpuCapabilities virtioGpu = KernelVirtioGpu.GetCapabilities();

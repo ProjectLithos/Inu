@@ -1,5 +1,5 @@
 {
-  "version": "0.0.77",
+  "version": "0.0.78",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -383,7 +383,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "2869d851197f4165d6df739e1fa3641885a8430c19749fafd79f812ca740ec7e"
+      "sha256": "395cf2c1d319618fce2bc732a09e3d6db7adfc7ed94552ed88a130a8da9f107d"
     },
     {
       "path": "Directory.Build.targets",
@@ -415,7 +415,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "52a26439370a5a7403a1c8882cebe1e2ed491d2069c3f45aa8d289c0092d3573"
+      "sha256": "10d66a65854adbf7d9e3e49219d5bf48abbbc1c2a3d054f19a9c9617bbd04d49"
     },
     {
       "path": "Inu-Package.bat",
@@ -447,7 +447,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "abb4278afefe4d0d10e230be3c1ebc56276a8bf5f965649fdf54ca80abd487f1"
+      "sha256": "c98966b37e5be0189486855e7f7afaf970962daef8592090dbe90215462b6954"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -987,7 +987,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "2cef1633633a9a3f04af5b3b94fb8f707258ca0e2221bcce05224c46c7348993"
+      "sha256": "4c98ed93150a43d5d48d6e9048688fccf040a11341683c763fd2ea411ff9ae2d"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1451,7 +1451,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "6b1c663f9947f5dab7319fc3901f740cf0e4617f057cfa9d158d32797ee823d9"
+      "sha256": "3c0f1de6526eff05415e650092ed682833684748ba069e7191ca017d8f57d780"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -2215,7 +2215,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "3e9583ffda90a6a29661d5d39be8577a559712d2c268d0e252a2e77da7cb0fe2"
+      "sha256": "17eb900e48048ae1529229e03a97d2687658f837ba2ac1cc050edc27e2ee74f6"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4599,7 +4599,7 @@
     },
     {
       "path": "templates/InuKernel/HAL/BootstrapGraphicsTransportStartup.cs",
-      "sha256": "4da381cf80740ce7d518a04180c5d3dcb227daf0645dbca26f69b48cb5f0a231"
+      "sha256": "857ab3339472149dcb7099e03a1f0420d1112fb3ce67de17dabb4c9322d559fa"
     },
     {
       "path": "templates/InuKernel/HAL/DriverBindingStartup.cs",

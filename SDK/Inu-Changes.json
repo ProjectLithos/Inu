@@ -1,9 +1,9 @@
 {
-  "baseVersion": "0.0.76",
-  "version": "0.0.77",
+  "baseVersion": "0.0.77",
+  "version": "0.0.78",
   "changedFiles": [
-    "templates/InuKernel/Startup/ProcessRuntimeStartup.cs"
+    "templates/InuKernel/HAL/BootstrapGraphicsTransportStartup.cs"
   ],
   "removedFiles": [],
-  "summary": "Fixes the 0.0.76 ProcessRuntimeStartup diagnostic compile regression by fully qualifying the kernel console reference; runtime process-startup behaviour is unchanged."
+  "summary": "Fixes Microkernel early VirtIO-GPU bootstrap PCI discovery by registering the PCI configuration transports owned by the early graphics exception even when general drivers are outside the kernel."
 }
