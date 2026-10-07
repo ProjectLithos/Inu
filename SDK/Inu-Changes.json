@@ -1,10 +1,9 @@
 {
-  "baseVersion": "0.0.81",
-  "version": "0.0.82",
+  "baseVersion": "0.0.82",
+  "version": "0.0.83",
   "changedFiles": [
-    "src/Inu.Userland.Runtime/IO.cs",
-    "src/Inu.Userland.Runtime/FileSystemPaths.cs"
+    "src/Inu.Freestanding.CoreLib/CoreLib.cs"
   ],
   "removedFiles": [],
-  "summary": "Fix freestanding userland compilation for high-level filesystem APIs by removing compiler-generated String.Concat dependencies and correcting byte-buffer separator assignment."
+  "summary": "Complete the freestanding System.String surface required by generated shell code by adding Substring overloads and common String.Concat overloads for normal .NET-style C#."
 }

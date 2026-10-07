@@ -1,5 +1,5 @@
 {
-  "version": "0.0.82",
+  "version": "0.0.83",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -795,7 +795,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "9aff9ecbe877b173f6a37d878668d01939d829f14a5806d6fd4a288ad6a3605b"
+      "sha256": "f46969a4f58d19965ae4761d5a9243964fdb2cc3abe385829a739224400cb878"
     },
     {
       "path": "Directory.Build.targets",
@@ -899,7 +899,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "10604da540902c5455c467beba7185e74fc66f5177a097ed822be2401aee77f2"
+      "sha256": "5d68d401b10f76f5377dcc28a76ade84d09f433943c01422386b31d02b48f865"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1303,7 +1303,7 @@
     },
     {
       "path": "docs/site/assets/site.js",
-      "sha256": "628627f42ff5e15e6240fc7559a761887abf73f64b36de1c872a1855a81daf99"
+      "sha256": "5629c5ef102b4741c5dc1cdd203673ea5e3b7ad44da43f9684271e643ba98f80"
     },
     {
       "path": "docs/site/crash-dump-format.html",
@@ -1667,7 +1667,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "5e00477ddcf925141e0ed9b56e996f8beaa4dbfa9d31fabdef73c2b9e16c0dc7"
+      "sha256": "983687237626c87f35eeaaac78b97ce26f57b75f8f2c62d9fc23cb4d5250b874"
     },
     {
       "path": "Inu-Package.bat",
@@ -1703,7 +1703,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "3d3915294790ea99b4983253b18edc0adf6bafce3cf00e55b8d4107d4eedd9a8"
+      "sha256": "23f42899d0ac23bb5adcb70dc6607227572a01b7cd23aec8e0ef1c467c20993a"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -2211,7 +2211,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "c8b58e1279febf69257339def5722c69b8cdf86033581c885b3e1c3a446495ca"
+      "sha256": "55fa26284640a31a6d2bd5909f6a868afc794914ff769b9c3882693d3897b127"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -2291,7 +2291,7 @@
     },
     {
       "path": "src/Inu.Freestanding.CoreLib/CoreLib.cs",
-      "sha256": "55201002c3d3bc53ae8c9e7d7402539d386e8f5a35449e8c5c5cab04615b164f"
+      "sha256": "279de68d933e00789be4ffa4474e639d934096db77735f330b0ce3cfce59d68c"
     },
     {
       "path": "src/Inu.Freestanding.CoreLib/Inu.Freestanding.CoreLib.csproj",

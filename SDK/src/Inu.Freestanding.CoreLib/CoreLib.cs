@@ -589,6 +589,63 @@ namespace System
             return true;
         }
 
+        /// <summary>Returns the substring beginning at the supplied character index.</summary>
+        public String Substring(Int32 startIndex)
+        {
+            Int32 sourceLength = Length;
+            if ((UInt32)startIndex > (UInt32)sourceLength) throw new ArgumentOutOfRangeException();
+            return Substring(startIndex, sourceLength - startIndex);
+        }
+
+        /// <summary>Returns a substring of the supplied character length.</summary>
+        public String Substring(Int32 startIndex, Int32 length)
+        {
+            Int32 sourceLength = Length;
+            if ((UInt32)startIndex > (UInt32)sourceLength) throw new ArgumentOutOfRangeException();
+            if (length < 0 || length > sourceLength - startIndex) throw new ArgumentOutOfRangeException();
+            if (length == 0) return Empty;
+            if (startIndex == 0 && length == sourceLength) return this;
+
+            void* address = AllocateRuntimeString(global::Internal.Runtime.MethodTable.Of<String>(), length);
+            if (address == null) throw new OutOfMemoryException();
+            UInt64 raw = (UInt64)(nuint)address;
+            String result = Runtime.CompilerServices.Unsafe.As<UInt64, String>(ref raw);
+            ref Char destination = ref result.GetRawStringData();
+            Char* destinationPointer = (Char*)Runtime.CompilerServices.Unsafe.AsPointer(ref destination);
+            for (Int32 index = 0; index < length; index++)
+                destinationPointer[index] = ReadRuntimeChar(this, startIndex + index);
+            return result;
+        }
+
+        /// <summary>Concatenates two strings, treating null as an empty string.</summary>
+        public static String Concat(String first, String second)
+        {
+            Int32 firstLength = Object.ReferenceEquals(first, null) ? 0 : first.Length;
+            Int32 secondLength = Object.ReferenceEquals(second, null) ? 0 : second.Length;
+            Int32 totalLength = firstLength + secondLength;
+            if (totalLength == 0) return Empty;
+            if (totalLength < firstLength || totalLength > MaxLength) throw new OutOfMemoryException();
+
+            void* address = AllocateRuntimeString(global::Internal.Runtime.MethodTable.Of<String>(), totalLength);
+            if (address == null) throw new OutOfMemoryException();
+            UInt64 raw = (UInt64)(nuint)address;
+            String result = Runtime.CompilerServices.Unsafe.As<UInt64, String>(ref raw);
+            ref Char destination = ref result.GetRawStringData();
+            Char* destinationPointer = (Char*)Runtime.CompilerServices.Unsafe.AsPointer(ref destination);
+            Int32 offset = 0;
+            for (Int32 index = 0; index < firstLength; index++) destinationPointer[offset++] = ReadRuntimeChar(first, index);
+            for (Int32 index = 0; index < secondLength; index++) destinationPointer[offset++] = ReadRuntimeChar(second, index);
+            return result;
+        }
+
+        /// <summary>Concatenates three strings, treating null as an empty string.</summary>
+        public static String Concat(String first, String second, String third)
+            => Concat(Concat(first, second), third);
+
+        /// <summary>Concatenates four strings, treating null as an empty string.</summary>
+        public static String Concat(String first, String second, String third, String fourth)
+            => Concat(Concat(first, second, third), fourth);
+
         public Char this[Int32 index]
         {
             [Runtime.CompilerServices.Intrinsic]
