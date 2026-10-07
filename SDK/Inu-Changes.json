@@ -1,21 +1,10 @@
 {
-  "baseVersion": "0.0.80",
-  "version": "0.0.81",
+  "baseVersion": "0.0.81",
+  "version": "0.0.82",
   "changedFiles": [
-    "src/Inu.Userland.Runtime/FileSystemPaths.cs",
-    "src/Inu.Userland.Runtime/Process.cs",
-    "src/Inu.Userland.Runtime/SystemInformation.cs",
     "src/Inu.Userland.Runtime/IO.cs",
-    "src/Inu.Userland.Runtime/UserlandRuntime.cs",
-    "src/Inu.UserlandCompiler/Program.cs",
-    "src/Inu.ProjectCreator/Program.cs",
-    "src/Inu.Kernel.Storage/FileSystemLogicalPaths.cs",
-    "src/Inu.Kernel.Storage/FileSystemLifecycle.cs",
-    "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
-    "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-    "src/Userland/Commands",
-    "src/Userland/SysInfo/SysInfo.cs"
+    "src/Inu.Userland.Runtime/FileSystemPaths.cs"
   ],
   "removedFiles": [],
-  "summary": "High-level userland SDK path/process APIs, persistent shell configuration, multiple command search paths, coder-visible command source, and hidden SDK Provided folders."
+  "summary": "Fix freestanding userland compilation for high-level filesystem APIs by removing compiler-generated String.Concat dependencies and correcting byte-buffer separator assignment."
 }

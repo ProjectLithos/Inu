@@ -231,7 +231,8 @@ public static unsafe class Directory
         for(;;)
         {
             Int32 length=UserlandDirectory.ReadAscii((UInt64)opened,name,512U);if(length<0){UserlandDirectory.Close((UInt64)opened);throw new IOException("The directory could not be read.");}if(length==0)break;
-            Byte[] bytes=new Byte[length];for(Int32 i=0;i<length;i++)bytes[i]=name[i];String entry=Encoding.ASCII.GetString(bytes);Char separator=FileSystemPaths.GetPathSeparator();String prefix=path[path.Length-1]==separator?path:path+separator;entries.Add(prefix+entry);
+            Byte[] bytes=new Byte[length];for(Int32 i=0;i<length;i++)bytes[i]=name[i];String entry=Encoding.ASCII.GetString(bytes);Char separator=FileSystemPaths.GetPathSeparator();
+            StringBuilder combined=new StringBuilder(path.Length+entry.Length+1);combined.Append(path);if(path[path.Length-1]!=separator)combined.Append(separator);combined.Append(entry);entries.Add(combined.ToString());
         }
         UserlandDirectory.Close((UInt64)opened);return entries.ToArray();
     }

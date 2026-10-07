@@ -65,7 +65,7 @@ public static unsafe class FileSystemPaths
         {
             String path=paths[i];
             for(Int32 j=0;j<path.Length;j++){Char c=path[j];if(c>0x7F)return false;payload[offset++]=(Byte)c;}
-            if(i+1<paths.Length)payload[offset++]=0U;
+            if(i+1<paths.Length)payload[offset++]=(Byte)0;
         }
         return UserlandSystem.Call(UserlandOperation.Set,"filesystem.commands-path",payload,bytes,null,0UL)>=0L;
     }
@@ -82,7 +82,7 @@ public static unsafe class FileSystemPaths
             String root=roots[i];if(root==null||root.Length==0)continue;
             StringBuilder path=new StringBuilder(root.Length+command.Length+5);path.Append(root);
             if(root[root.Length-1]!=separator)path.Append(separator);path.Append(command);
-            String plain=path.ToString();result[output++]=plain+".EXE";result[output++]=plain;
+            String plain=path.ToString();StringBuilder executable=new StringBuilder(plain.Length+4);executable.Append(plain);executable.Append(".EXE");result[output++]=executable.ToString();result[output++]=plain;
         }
         if(output==result.Length)return result;
         String[] exact=new String[output];for(Int32 i=0;i<output;i++)exact[i]=result[i];return exact;
