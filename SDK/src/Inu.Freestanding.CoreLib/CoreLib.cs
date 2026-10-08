@@ -226,15 +226,27 @@ namespace System
     public class NotSupportedException : SystemException { public NotSupportedException() { } public NotSupportedException(String message) : base(message) { } }
     public class PlatformNotSupportedException : NotSupportedException { public PlatformNotSupportedException() { } }
     public class NotImplementedException : SystemException { public NotImplementedException() { } }
+    public class OverflowException : SystemException { public OverflowException() { } }
     public class OutOfMemoryException : SystemException { public OutOfMemoryException() { } }
     public class VerificationException : SystemException { public VerificationException() { } }
     public class InvalidProgramException : SystemException { public InvalidProgramException() { } public InvalidProgramException(String message) : base(message) { } }
     // 0.0.84: required by the freestanding NativeFormat/interface-dispatch decoder.
     public class BadImageFormatException : SystemException { public BadImageFormatException() { } public BadImageFormatException(String message) : base(message) { } }
+    public class FormatException : SystemException { public FormatException() { } }
     public class InvalidOperationException : SystemException { public InvalidOperationException() { } public InvalidOperationException(String message) : base(message) { } }
     public class KeyNotFoundException : SystemException { public KeyNotFoundException() { } public KeyNotFoundException(String message) : base(message) { } }
 
     public struct Void { }
+
+    /// <summary><inu.api/>Non-generic ordering contract used by primitive and SDK value types.</summary>
+    public interface IComparable { Int32 CompareTo(Object obj); }
+    /// <summary><inu.api/>Strongly typed ordering contract.</summary>
+    public interface IComparable<T> { Int32 CompareTo(T other); }
+    /// <summary><inu.api/>Strongly typed equality contract.</summary>
+    public interface IEquatable<T> { Boolean Equals(T other); }
+    /// <summary><inu.api/>Minimal formatting contract used by primitive values.</summary>
+    public interface IFormattable { String ToString(String format, IFormatProvider formatProvider); }
+    public interface IFormatProvider { Object GetFormat(Type formatType); }
 
     // CONTRACT with .NET 10 NativeAOT Runtime.Base Primitives.cs. These are not
     // decorative fields: ILC/runtime layout, boxing and generic value-type layout
@@ -269,7 +281,7 @@ namespace System
     [StructLayout(LayoutKind.Sequential)]
     public struct UInt16 { private ushort _value; public const UInt16 MinValue = 0; public const UInt16 MaxValue = 65535; }
     [StructLayout(LayoutKind.Sequential)]
-    public struct Int32
+    public struct Int32 : IComparable, IComparable<Int32>, IEquatable<Int32>, IFormattable
     {
         private int _value;
         public const Int32 MinValue = -2147483648;
@@ -277,17 +289,83 @@ namespace System
         public Boolean Equals(Int32 other) => _value == other._value;
         public override Boolean Equals(Object obj) => obj is Int32 && Equals((Int32)obj);
         public override Int32 GetHashCode() => _value;
+        public Int32 CompareTo(Int32 other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
+        public Int32 CompareTo(Object obj)
+        {
+            if (obj == null) return 1;
+            if (!(obj is Int32)) throw new ArgumentException();
+            return CompareTo((Int32)obj);
+        }
+        public override String ToString() => NumberFormatting.FormatInt64(_value);
+        public String ToString(String format, IFormatProvider formatProvider)
+        {
+            if (String.IsNullOrEmpty(format) || String.Equals(format, "G") || String.Equals(format, "D")) return ToString();
+            throw new FormatException();
+        }
     }
     [StructLayout(LayoutKind.Sequential)]
-    public struct UInt32 { private uint _value; public const UInt32 MinValue = 0U; public const UInt32 MaxValue = 0xFFFFFFFFU; }
+    public struct UInt32 { private uint _value; public const UInt32 MinValue = 0U; public const UInt32 MaxValue = 0xFFFFFFFFU; public override String ToString() => NumberFormatting.FormatUInt64(_value); }
     [StructLayout(LayoutKind.Sequential)]
-    public struct Int64 { private long _value; public const Int64 MinValue = -9223372036854775808L; public const Int64 MaxValue = 9223372036854775807L; }
+    public struct Int64 { private long _value; public const Int64 MinValue = -9223372036854775808L; public const Int64 MaxValue = 9223372036854775807L; public override String ToString() => NumberFormatting.FormatInt64(_value); }
     [StructLayout(LayoutKind.Sequential)]
-    public struct UInt64 { private ulong _value; public const UInt64 MinValue = 0UL; public const UInt64 MaxValue = 0xFFFFFFFFFFFFFFFFUL; }
+    public struct UInt64 { private ulong _value; public const UInt64 MinValue = 0UL; public const UInt64 MaxValue = 0xFFFFFFFFFFFFFFFFUL; public override String ToString() => NumberFormatting.FormatUInt64(_value); }
     [StructLayout(LayoutKind.Sequential)]
     public struct Single { private float _value; }
     [StructLayout(LayoutKind.Sequential)]
     public struct Double { private double _value; }
+    internal static class NumberFormatting
+    {
+        internal static String FormatInt64(Int64 value)
+        {
+            if (value >= 0) return FormatUInt64((UInt64)value);
+            UInt64 magnitude = unchecked(0UL - (UInt64)value);
+            Char[] digits = FormatUInt64Chars(magnitude, true);
+            return String.CreateFromChars(digits, digits.Length);
+        }
+        internal static String FormatUInt64(UInt64 value)
+        {
+            Char[] digits = FormatUInt64Chars(value, false);
+            return String.CreateFromChars(digits, digits.Length);
+        }
+        private static Char[] FormatUInt64Chars(UInt64 value, Boolean negative)
+        {
+            Char[] reverse = new Char[20];
+            Int32 count = 0;
+            do { reverse[count++] = (Char)('0' + (Char)(value % 10UL)); value /= 10UL; } while (value != 0UL);
+            Char[] result = new Char[count + (negative ? 1 : 0)];
+            Int32 output = 0;
+            if (negative) result[output++] = '-';
+            while (count != 0) result[output++] = reverse[--count];
+            return result;
+        }
+    }
+
+    /// <summary><inu.api/>Integer-first mathematical primitives for freestanding code.</summary>
+    public static class Math
+    {
+        public static Int32 Abs(Int32 value) { if (value == Int32.MinValue) throw new OverflowException(); return value < 0 ? -value : value; }
+        public static Int64 Abs(Int64 value) { if (value == Int64.MinValue) throw new OverflowException(); return value < 0 ? -value : value; }
+        public static Int32 Min(Int32 left, Int32 right) => left < right ? left : right;
+        public static Int32 Max(Int32 left, Int32 right) => left > right ? left : right;
+        public static Int32 Sign(Int32 value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
+        public static Int32 Clamp(Int32 value, Int32 min, Int32 max)
+        {
+            if (min > max) throw new ArgumentException();
+            return value < min ? min : (value > max ? max : value);
+        }
+    }
+
+    /// <summary><inu.api/>Primitive conversion helpers that do not require globalization.</summary>
+    public static class Convert
+    {
+        public static Int32 ToInt32(Boolean value) => value ? 1 : 0;
+        public static Int64 ToInt64(Int32 value) => value;
+        public static Boolean ToBoolean(Int32 value) => value != 0;
+        public static String ToString(Int32 value) => value.ToString();
+        public static String ToString(Int64 value) => value.ToString();
+        public static String ToString(Boolean value) => value.ToString();
+    }
+
     // CONTRACT with Roslyn / .NET 10 NativeAOT:
     // IntPtr and UIntPtr are compiler-known primitive structs.  Keep each as exactly one
     // pointer-sized field and provide the conversion/operator surface Roslyn binds for
@@ -746,6 +824,65 @@ namespace System
         }
     }
     public class MulticastDelegate : Delegate { }
+    public delegate void Action();
+    public delegate void Action<in T>(T obj);
+    public delegate TResult Func<out TResult>();
+    public delegate TResult Func<in T, out TResult>(T arg);
+
+    /// <summary><inu.api/>Array-backed mutable span for the first freestanding BCL target.</summary>
+    public ref struct Span<T>
+    {
+        private T[] _array;
+        private Int32 _start;
+        private Int32 _length;
+        public Span(T[] array)
+        {
+            _array = array ?? throw new ArgumentNullException();
+            _start = 0; _length = array.Length;
+        }
+        private Span(T[] array, Int32 start, Int32 length) { _array = array; _start = start; _length = length; }
+        public Int32 Length => _length;
+        public Boolean IsEmpty => _length == 0;
+        public ref T this[Int32 index]
+        {
+            get { if ((UInt32)index >= (UInt32)_length) throw new IndexOutOfRangeException(); return ref _array[_start + index]; }
+        }
+        public Span<T> Slice(Int32 start) => Slice(start, _length - start);
+        public Span<T> Slice(Int32 start, Int32 length)
+        {
+            if (start < 0 || length < 0 || start > _length - length) throw new ArgumentOutOfRangeException();
+            return new Span<T>(_array, _start + start, length);
+        }
+        public T[] ToArray() { T[] copy = new T[_length]; for (Int32 i = 0; i < _length; i++) copy[i] = _array[_start + i]; return copy; }
+        public void Clear() { for (Int32 i = 0; i < _length; i++) _array[_start + i] = default; }
+        public static implicit operator Span<T>(T[] array) => new Span<T>(array);
+        public static implicit operator ReadOnlySpan<T>(Span<T> span) => new ReadOnlySpan<T>(span._array, span._start, span._length);
+    }
+
+    /// <summary><inu.api/>Array-backed read-only span for the first freestanding BCL target.</summary>
+    public readonly ref struct ReadOnlySpan<T>
+    {
+        private readonly T[] _array;
+        private readonly Int32 _start;
+        private readonly Int32 _length;
+        public ReadOnlySpan(T[] array) { _array = array ?? throw new ArgumentNullException(); _start = 0; _length = array.Length; }
+        internal ReadOnlySpan(T[] array, Int32 start, Int32 length) { _array = array; _start = start; _length = length; }
+        public Int32 Length => _length;
+        public Boolean IsEmpty => _length == 0;
+        public ref readonly T this[Int32 index]
+        {
+            get { if ((UInt32)index >= (UInt32)_length) throw new IndexOutOfRangeException(); return ref _array[_start + index]; }
+        }
+        public ReadOnlySpan<T> Slice(Int32 start) => Slice(start, _length - start);
+        public ReadOnlySpan<T> Slice(Int32 start, Int32 length)
+        {
+            if (start < 0 || length < 0 || start > _length - length) throw new ArgumentOutOfRangeException();
+            return new ReadOnlySpan<T>(_array, _start + start, length);
+        }
+        public T[] ToArray() { T[] copy = new T[_length]; for (Int32 i = 0; i < _length; i++) copy[i] = _array[_start + i]; return copy; }
+        public static implicit operator ReadOnlySpan<T>(T[] array) => new ReadOnlySpan<T>(array);
+    }
+
     public class Attribute { }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate, Inherited = false)]

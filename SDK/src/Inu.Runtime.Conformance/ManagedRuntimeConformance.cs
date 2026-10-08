@@ -560,6 +560,13 @@ public static unsafe class ManagedRuntimeConformance
         Record(!missing.HasValue && missing.GetValueOrDefault() == 0, ref passed, ref failed);
         NativeAotExceptionRuntime.TraceStage(0xCCUL);
 
+        // 0.0.95: BCL compatibility now has a fixed, named target instead of an
+        // open-ended "CoreLib works" claim. Every item in Inu.BCL.Core.v1 is also
+        // exercised by SDK/tests/Inu.DotNetConformance.Tests against the reference BCL.
+        NativeAotExceptionRuntime.TraceStage(0xBC10UL);
+        RunBclCoreV1Checks(ref passed, ref failed);
+        NativeAotExceptionRuntime.TraceStage(0xBC11UL);
+
         NativeAotRuntimeStatistics statistics = NativeAotRuntime.GetStatistics();
         NativeAotExceptionRuntime.TraceStage(0xCDUL);
         Record(statistics.Phase == NativeAotRuntimePhase.Managed, ref passed, ref failed);
@@ -598,6 +605,200 @@ public static unsafe class ManagedRuntimeConformance
         _ = methodTableAbiOk;
         _ = runtimeTypeHandleAbiOk;
         return failed == 0U;
+    }
+
+    private static Int32 _bclDelegateObserved;
+    private static void BclCapture(Int32 value) => _bclDelegateObserved = value;
+    private static Int32 BclDouble(Int32 value) => value * 2;
+    private static Int32 BclConstant() => 11;
+
+    /// <summary>Name of the fixed BCL compatibility target enforced by this release.</summary>
+    public const String BclTargetName = "Inu.BCL.Core.v1";
+
+    /// <summary>Number of type-level BCL items in <see cref="BclTargetName"/>.</summary>
+    public const Int32 BclTargetItemCount = 26;
+
+    /// <summary>
+    /// Hard in-kernel gate for the named BCL subset. Keep this list in lock-step with
+    /// SDK/tests/Inu.DotNetConformance.Tests/Program.cs and docs/BCL-Conformance-Target.md.
+    /// One Record call equals one advertised target item; a failed item rejects boot.
+    /// </summary>
+    private static void RunBclCoreV1Checks(ref UInt32 passed, ref UInt32 failed)
+    {
+        UInt32 before = passed + failed;
+        NativeAotExceptionRuntime.TraceStage(0xBC20UL);
+
+        // 01 System.Object
+        Object objectValue = new Object();
+        Object objectAlias = objectValue;
+        Object objectOther = new Object();
+        Record(Object.ReferenceEquals(objectValue, objectAlias)
+            && !Object.ReferenceEquals(objectValue, objectOther)
+            && objectValue.Equals(objectAlias)
+            && String.Equals(objectValue.ToString(), "System.Object"), ref passed, ref failed);
+
+        // 02 System.Boolean
+        Record(String.Equals(true.ToString(), "True") && String.Equals(false.ToString(), "False"), ref passed, ref failed);
+
+        // 03 System.Char
+        Record(Char.IsWhiteSpace(' ') && Char.IsWhiteSpace('\n') && !Char.IsWhiteSpace('X')
+            && Char.MinValue == (Char)0 && Char.MaxValue == (Char)0xFFFF, ref passed, ref failed);
+
+        // 04 System.Int32
+        Int32 integer = 12345;
+        Record(integer.Equals((Int32)12345) && !integer.Equals((Int32)12346)
+            && integer.GetHashCode() == 12345 && Int32.MinValue < 0 && Int32.MaxValue > 0, ref passed, ref failed);
+
+        // 05 System.IntPtr
+        IntPtr signedPointer = new IntPtr(100);
+        IntPtr signedAdvanced = IntPtr.Add(signedPointer, 23);
+        Record((IntPtr.Size == 4 || IntPtr.Size == 8) && signedAdvanced.ToInt64() == 123
+            && IntPtr.Subtract(signedAdvanced, 23) == signedPointer, ref passed, ref failed);
+
+        // 06 System.UIntPtr
+        UIntPtr unsignedPointer = new UIntPtr((UInt64)200UL);
+        UIntPtr unsignedAdvanced = UIntPtr.Add(unsignedPointer, 17);
+        Record((UIntPtr.Size == 4 || UIntPtr.Size == 8) && unsignedAdvanced.ToUInt64() == 217UL
+            && UIntPtr.Subtract(unsignedAdvanced, 17) == unsignedPointer, ref passed, ref failed);
+
+        // 07 System.Array
+        Int32[] array = new Int32[3];
+        array[1] = 9;
+        Int32[] emptyArray = Array.Empty<Int32>();
+        Record(array.Length == 3 && array.LongLength == 3L && array[1] == 9
+            && emptyArray != null && emptyArray.Length == 0, ref passed, ref failed);
+
+        // 08 System.String
+        String text = "Inu kernel";
+        String concatenated = String.Concat("Inu", " ", "kernel");
+        Record(String.Empty.Length == 0 && text.Length == 10 && text[0] == 'I'
+            && String.Equals(text, concatenated) && String.CompareOrdinal("abc", "abd") < 0
+            && text.IndexOf('k') == 4 && text.Contains('u') && text.StartsWith("Inu") && text.EndsWith("kernel")
+            && String.Equals(text.Substring(4, 6), "kernel")
+            && String.IsNullOrEmpty("") && String.IsNullOrWhiteSpace(" \t\r\n"), ref passed, ref failed);
+
+        // 09 System.Nullable<T>
+        Nullable<Int32> present = new Nullable<Int32>(55);
+        Nullable<Int32> absent = default;
+        Record(present.HasValue && present.Value == 55 && present.GetValueOrDefault() == 55
+            && !absent.HasValue && absent.GetValueOrDefault() == 0 && absent.GetValueOrDefault(7) == 7, ref passed, ref failed);
+
+        // 10 System.Type
+        Type intType = typeof(Int32);
+        Type arrayType = typeof(Int32[]);
+        Record(intType.IsValueType && intType.IsPrimitive && !intType.IsArray
+            && arrayType.IsArray && arrayType.IsSZArray && arrayType.GetElementType() == intType
+            && arrayType.BaseType == typeof(Array)
+            && typeof(Object).IsAssignableFrom(typeof(Probe)) && typeof(Probe).IsSubclassOf(typeof(Object)), ref passed, ref failed);
+
+        // 11 System.Collections.Generic.KeyValuePair<TKey,TValue>
+        KeyValuePair<String, Int32> pair = new KeyValuePair<String, Int32>("answer", 42);
+        Record(String.Equals(pair.Key, "answer") && pair.Value == 42, ref passed, ref failed);
+
+        // 12 System.Collections.Generic.EqualityComparer<T>
+        EqualityComparer<Int32> intComparer = EqualityComparer<Int32>.Default;
+        EqualityComparer<String> stringComparer = EqualityComparer<String>.Default;
+        Record(intComparer.Equals(7, 7) && !intComparer.Equals(7, 8)
+            && stringComparer.Equals("same", "same") && !stringComparer.Equals("same", "other")
+            && stringComparer.GetHashCode("same") == stringComparer.GetHashCode("same"), ref passed, ref failed);
+
+        // 13 System.Collections.Generic.List<T>
+        List<Int32> list = new List<Int32>();
+        list.Add(1); list.Add(3); list.Insert(1, 2);
+        Int32[] listCopy = list.ToArray();
+        Record(list.Count == 3 && list[1] == 2 && list.Contains(3) && list.IndexOf(2) == 1
+            && listCopy.Length == 3 && listCopy[2] == 3 && list.Remove(2) && list.Count == 2, ref passed, ref failed);
+
+        // 14 System.Collections.Generic.Dictionary<TKey,TValue>
+        Dictionary<String, Int32> dictionary = new Dictionary<String, Int32>();
+        dictionary.Add("one", 1);
+        dictionary["two"] = 2;
+        Int32 dictionaryValue;
+        Record(dictionary.Count == 2 && dictionary.ContainsKey("one")
+            && dictionary.TryGetValue("two", out dictionaryValue) && dictionaryValue == 2
+            && !dictionary.TryAdd("one", 11) && dictionary.Remove("one") && !dictionary.ContainsKey("one"), ref passed, ref failed);
+
+        // 15 System.Collections.Generic.Queue<T>
+        Queue<Int32> queue = new Queue<Int32>();
+        queue.Enqueue(4); queue.Enqueue(5); queue.Enqueue(6);
+        Record(queue.Count == 3 && queue.Peek() == 4 && queue.Dequeue() == 4 && queue.Peek() == 5 && queue.Count == 2, ref passed, ref failed);
+
+        // 16 System.Collections.Generic.Stack<T>
+        Stack<Int32> stack = new Stack<Int32>();
+        stack.Push(4); stack.Push(5); stack.Push(6);
+        Record(stack.Count == 3 && stack.Peek() == 6 && stack.Pop() == 6 && stack.Peek() == 5 && stack.Count == 2, ref passed, ref failed);
+
+        // 17 System.Text.StringBuilder
+        StringBuilder builder = new StringBuilder();
+        builder.Append("Inu").Append(' ').Append(95).AppendLine();
+        Record(builder.Length == 8 && builder[0] == 'I' && String.Equals(builder.ToString(), "Inu 95\r\n")
+            && builder.Clear().Append(true).EnsureCapacity(32) >= 32 && String.Equals(builder.ToString(), "True"), ref passed, ref failed);
+
+        // 18 System.Text.Encoding (factory contract)
+        Encoding asciiFactory = Encoding.ASCII;
+        Encoding utf8Factory = Encoding.UTF8;
+        Record(asciiFactory != null && utf8Factory != null
+            && asciiFactory.GetByteCount("Inu") == 3 && utf8Factory.GetByteCount("Inu") == 3, ref passed, ref failed);
+
+        // 19 System.Text.ASCIIEncoding
+        ASCIIEncoding ascii = new ASCIIEncoding();
+        Byte[] asciiBytes = ascii.GetBytes("Inu");
+        Record(asciiBytes.Length == 3 && asciiBytes[0] == (Byte)'I' && asciiBytes[2] == (Byte)'u'
+            && String.Equals(ascii.GetString(asciiBytes), "Inu"), ref passed, ref failed);
+
+        // 20 System.Text.UTF8Encoding
+        UTF8Encoding utf8 = new UTF8Encoding();
+        String unicode = "\u00A3\u20AC";
+        Byte[] utf8Bytes = utf8.GetBytes(unicode);
+        Record(utf8Bytes.Length == 5 && utf8Bytes[0] == 0xC2 && utf8Bytes[1] == 0xA3
+            && utf8Bytes[2] == 0xE2 && utf8Bytes[3] == 0x82 && utf8Bytes[4] == 0xAC
+            && String.Equals(utf8.GetString(utf8Bytes), unicode), ref passed, ref failed);
+
+        // 21 Primitive formatting
+        Record(String.Equals(((Int32)12345).ToString(), "12345")
+            && String.Equals(((Int32)(-42)).ToString(), "-42")
+            && String.Equals(((Int32)12345).ToString("G", null), "12345")
+            && String.Equals(((UInt32)99U).ToString(), "99")
+            && String.Equals(((Int64)(-9000000000L)).ToString(), "-9000000000"), ref passed, ref failed);
+
+        // 22 System.Math
+        Record(Math.Abs(-17) == 17 && Math.Min(5, 9) == 5 && Math.Max(5, 9) == 9
+            && Math.Sign(-8) == -1 && Math.Sign(0) == 0 && Math.Sign(8) == 1
+            && Math.Clamp(15, 0, 10) == 10 && Math.Clamp(-4, 0, 10) == 0, ref passed, ref failed);
+
+        // 23 System.Convert
+        Record(Convert.ToInt32(true) == 1 && Convert.ToInt32(false) == 0
+            && Convert.ToInt64(-123) == -123L && Convert.ToBoolean(1) && !Convert.ToBoolean(0)
+            && String.Equals(Convert.ToString(-321), "-321") && String.Equals(Convert.ToString(true), "True"), ref passed, ref failed);
+
+        // 24 System.IComparable / System.IComparable<T>
+        IComparable nonGenericComparable = (Int32)7;
+        IComparable<Int32> genericComparable = (Int32)7;
+        Record(nonGenericComparable.CompareTo((Int32)6) > 0 && nonGenericComparable.CompareTo((Int32)7) == 0
+            && genericComparable.CompareTo(8) < 0 && ((IComparable<Int32>)(Int32)8).CompareTo(7) > 0, ref passed, ref failed);
+
+        // 25 System.Delegate / Action / Func
+        _bclDelegateObserved = 0;
+        Action<Int32> bclAction = BclCapture;
+        Func<Int32, Int32> bclTwice = BclDouble;
+        Func<Int32> bclConstant = BclConstant;
+        bclAction(9);
+        Record(_bclDelegateObserved == 9 && bclTwice(6) == 12 && bclConstant() == 11, ref passed, ref failed);
+
+        // 26 System.Span<T> / System.ReadOnlySpan<T>
+        Int32[] spanValues = new Int32[] { 1, 2, 3, 4 };
+        Span<Int32> span = spanValues;
+        span[1] = 20;
+        Span<Int32> middle = span.Slice(1, 2);
+        ReadOnlySpan<Int32> readOnlySpan = span;
+        Int32[] spanCopy = readOnlySpan.Slice(1, 2).ToArray();
+        middle[1] = 30;
+        Record(span.Length == 4 && span[1] == 20 && span[2] == 30
+            && readOnlySpan.Length == 4 && spanCopy.Length == 2 && spanCopy[0] == 20 && spanCopy[1] == 3, ref passed, ref failed);
+
+        UInt32 exercised = (passed + failed) - before;
+        Record(exercised == (UInt32)BclTargetItemCount, ref passed, ref failed);
+        NativeAotExceptionRuntime.TraceValue(0xBC21UL, exercised);
     }
 
     /// <summary>

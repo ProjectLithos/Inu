@@ -1,13 +1,27 @@
 {
-  "baseVersion": "0.0.93",
-  "version": "0.0.94",
+  "baseVersion": "0.0.95",
+  "version": "0.0.96",
   "changedFiles": [
-    "Inu/README.md",
-    "Kath/README.md",
-    "Kath/packages/kath/src/node/inu-project-generation.ts",
-    "Inu/SDK/src/Inu.Kernel.Storage/KernelStorage.DeviceRegistry.cs",
-    "Inu/SDK/src/Inu.Kernel.Storage/KernelStorage.Partitions.cs",
-    "Inu/SDK/src/Inu.Kernel.Bootstrap/Kernel.cs"
+    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
+    "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
+    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
+    "Inu/SDK/docs/BCL-Conformance-Target.md",
+    "Inu/SDK/docs/Managed-Runtime.md",
+    "Inu/SDK/Inu.SdkManifest.json",
+    "Inu/SDK/Inu-SourceManifest.json",
+    "Inu/SDK/Inu-Changes.json",
+    "Inu/SDK/docs/Inu.Documentation.json",
+    "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
+    "Inu/SDK/Directory.Build.props",
+    "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
+    "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
+    "Kath/JSON/package.json",
+    "Kath/applications/electron/package.json",
+    "Kath/packages/kath/package.json",
+    "VERSION",
+    "Inu/VERSION",
+    "Kath/VERSION",
+    "CHANGED-0.0.96.txt"
   ],
-  "summary": "Make the supplied Inu/Kath Markdown files the repository READMEs and restore VFS-backed userland commands by discovering partitions when block devices register, installing the selected FAT provider, and mounting the first compatible volume at the canonical VFS root."
+  "summary": "Add the primitive BCL dependency layer first: numeric formatting/IFormattable, Math, Convert, comparable interfaces, Action/Func delegates, and Span<T>/ReadOnlySpan<T>, with each contract paired between Inu.DotNetConformance.Tests and the hard in-kernel conformance gate."
 }

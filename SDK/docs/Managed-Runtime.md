@@ -84,7 +84,7 @@ NativeAOT physical vtables are dependency-driven and may omit unused trailing sl
 - string length/data offsets (`+8` / `+12`);
 - MethodTable header field boundaries through byte 23.
 
-`SDK/tests/Inu.DotNetConformance.Tests` is a normal .NET 10 executable that acts as the reference side of the contract. It additionally checks semantics that the freestanding phase has not enabled yet, including string concatenation and array bounds exceptions.
+BCL compatibility is now a fixed named target rather than an open-ended claim. The current target is **`Inu.BCL.Core.v1`**, documented in `BCL-Conformance-Target.md`. Every target item is exercised twice: once by the normal .NET 10 reference executable at `SDK/tests/Inu.DotNetConformance.Tests`, and once by the hard in-kernel `RunBclCoreV1Checks` gate. An item is not part of the advertised subset unless both sides contain the corresponding executable check. The primitive dependency layer is deliberately first: numeric formatting, `Math`, `Convert`, comparables, managed delegates, and array-backed `Span<T>`/`ReadOnlySpan<T>` are paired before higher-level BCL expansion.
 
 Run the reference executable on the Windows SDK toolchain with:
 
