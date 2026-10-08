@@ -1,12 +1,8 @@
 {
-  "baseVersion": "0.0.95",
-  "version": "0.0.96",
+  "baseVersion": "0.0.97",
+  "version": "0.0.98",
   "changedFiles": [
     "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
-    "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
-    "Inu/SDK/docs/BCL-Conformance-Target.md",
-    "Inu/SDK/docs/Managed-Runtime.md",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu-Changes.json",
@@ -21,7 +17,7 @@
     "VERSION",
     "Inu/VERSION",
     "Kath/VERSION",
-    "CHANGED-0.0.96.txt"
+    "CHANGED-0.0.98.txt"
   ],
-  "summary": "Add the primitive BCL dependency layer first: numeric formatting/IFormattable, Math, Convert, comparable interfaces, Action/Func delegates, and Span<T>/ReadOnlySpan<T>, with each contract paired between Inu.DotNetConformance.Tests and the hard in-kernel conformance gate."
+  "summary": "Fix the 0.0.97 primitive/runtime regression by removing the duplicate System.OverflowException declaration while preserving the correct ArithmeticException inheritance required by .NET semantics."
 }

@@ -226,7 +226,6 @@ namespace System
     public class NotSupportedException : SystemException { public NotSupportedException() { } public NotSupportedException(String message) : base(message) { } }
     public class PlatformNotSupportedException : NotSupportedException { public PlatformNotSupportedException() { } }
     public class NotImplementedException : SystemException { public NotImplementedException() { } }
-    public class OverflowException : SystemException { public OverflowException() { } }
     public class OutOfMemoryException : SystemException { public OutOfMemoryException() { } }
     public class VerificationException : SystemException { public VerificationException() { } }
     public class InvalidProgramException : SystemException { public InvalidProgramException() { } public InvalidProgramException(String message) : base(message) { } }
@@ -252,16 +251,21 @@ namespace System
     // decorative fields: ILC/runtime layout, boxing and generic value-type layout
     // are permitted to rely on each primitive's canonical one-field data contract.
 #pragma warning disable CS0169, CS0649 // Primitive backing fields are consumed by compiler/runtime ABI.
-    public struct Boolean
+    public struct Boolean : IComparable, IComparable<Boolean>, IEquatable<Boolean>
     {
         private bool _value;
 
         /// <summary>Returns the normal .NET Boolean text without allocating a new string.</summary>
         public override String ToString() => this ? "True" : "False";
+        public Boolean Equals(Boolean other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is Boolean && Equals((Boolean)obj);
+        public override Int32 GetHashCode() => this ? 1 : 0;
+        public Int32 CompareTo(Boolean other) => this == other ? 0 : (this ? 1 : -1);
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Boolean)) throw new ArgumentException(); return CompareTo((Boolean)obj); }
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct Char
+    public struct Char : IComparable, IComparable<Char>, IEquatable<Char>
     {
         private char _value;
         public const Char MaxValue = (Char)0xFFFF;
@@ -270,16 +274,61 @@ namespace System
         /// <summary>Returns whether the character is one of the ASCII whitespace characters supported during freestanding bootstrap.</summary>
         public static Boolean IsWhiteSpace(Char value)
             => value == ' ' || value == '\t' || value == '\r' || value == '\n' || value == '\f' || value == '\v';
+        public Boolean Equals(Char other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is Char && Equals((Char)obj);
+        public override Int32 GetHashCode() => _value;
+        public Int32 CompareTo(Char other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Char)) throw new ArgumentException(); return CompareTo((Char)obj); }
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct SByte { private sbyte _value; public const SByte MinValue = -128; public const SByte MaxValue = 127; }
+    public struct SByte : IComparable, IComparable<SByte>, IEquatable<SByte>, IFormattable
+    {
+        private sbyte _value; public const SByte MinValue = -128; public const SByte MaxValue = 127;
+        public Boolean Equals(SByte other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is SByte && Equals((SByte)obj);
+        public override Int32 GetHashCode() => _value;
+        public Int32 CompareTo(SByte other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is SByte)) throw new ArgumentException(); return CompareTo((SByte)obj); }
+        public override String ToString() => NumberFormatting.FormatInt64(_value);
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatSigned(_value, 8, format);
+    }
     [StructLayout(LayoutKind.Sequential)]
-    public struct Byte { private byte _value; public const Byte MinValue = 0; public const Byte MaxValue = 255; }
+    public struct Byte : IComparable, IComparable<Byte>, IEquatable<Byte>, IFormattable
+    {
+        private byte _value; public const Byte MinValue = 0; public const Byte MaxValue = 255;
+        public Boolean Equals(Byte other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is Byte && Equals((Byte)obj);
+        public override Int32 GetHashCode() => _value;
+        public Int32 CompareTo(Byte other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Byte)) throw new ArgumentException(); return CompareTo((Byte)obj); }
+        public override String ToString() => NumberFormatting.FormatUInt64(_value);
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatUnsigned(_value, 8, format);
+    }
     [StructLayout(LayoutKind.Sequential)]
-    public struct Int16 { private short _value; public const Int16 MinValue = -32768; public const Int16 MaxValue = 32767; }
+    public struct Int16 : IComparable, IComparable<Int16>, IEquatable<Int16>, IFormattable
+    {
+        private short _value; public const Int16 MinValue = -32768; public const Int16 MaxValue = 32767;
+        public Boolean Equals(Int16 other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is Int16 && Equals((Int16)obj);
+        public override Int32 GetHashCode() => _value;
+        public Int32 CompareTo(Int16 other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Int16)) throw new ArgumentException(); return CompareTo((Int16)obj); }
+        public override String ToString() => NumberFormatting.FormatInt64(_value);
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatSigned(_value, 16, format);
+    }
     [StructLayout(LayoutKind.Sequential)]
-    public struct UInt16 { private ushort _value; public const UInt16 MinValue = 0; public const UInt16 MaxValue = 65535; }
+    public struct UInt16 : IComparable, IComparable<UInt16>, IEquatable<UInt16>, IFormattable
+    {
+        private ushort _value; public const UInt16 MinValue = 0; public const UInt16 MaxValue = 65535;
+        public Boolean Equals(UInt16 other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is UInt16 && Equals((UInt16)obj);
+        public override Int32 GetHashCode() => _value;
+        public Int32 CompareTo(UInt16 other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is UInt16)) throw new ArgumentException(); return CompareTo((UInt16)obj); }
+        public override String ToString() => NumberFormatting.FormatUInt64(_value);
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatUnsigned(_value, 16, format);
+    }
     [StructLayout(LayoutKind.Sequential)]
     public struct Int32 : IComparable, IComparable<Int32>, IEquatable<Int32>, IFormattable
     {
@@ -290,79 +339,392 @@ namespace System
         public override Boolean Equals(Object obj) => obj is Int32 && Equals((Int32)obj);
         public override Int32 GetHashCode() => _value;
         public Int32 CompareTo(Int32 other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
-        public Int32 CompareTo(Object obj)
-        {
-            if (obj == null) return 1;
-            if (!(obj is Int32)) throw new ArgumentException();
-            return CompareTo((Int32)obj);
-        }
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Int32)) throw new ArgumentException(); return CompareTo((Int32)obj); }
         public override String ToString() => NumberFormatting.FormatInt64(_value);
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatSigned(_value, 32, format);
+    }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct UInt32 : IComparable, IComparable<UInt32>, IEquatable<UInt32>, IFormattable
+    {
+        private uint _value; public const UInt32 MinValue = 0U; public const UInt32 MaxValue = 0xFFFFFFFFU;
+        public Boolean Equals(UInt32 other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is UInt32 && Equals((UInt32)obj);
+        public override Int32 GetHashCode() => unchecked((Int32)_value);
+        public Int32 CompareTo(UInt32 other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is UInt32)) throw new ArgumentException(); return CompareTo((UInt32)obj); }
+        public override String ToString() => NumberFormatting.FormatUInt64(_value);
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatUnsigned(_value, 32, format);
+    }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Int64 : IComparable, IComparable<Int64>, IEquatable<Int64>, IFormattable
+    {
+        private long _value; public const Int64 MinValue = -9223372036854775808L; public const Int64 MaxValue = 9223372036854775807L;
+        public Boolean Equals(Int64 other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is Int64 && Equals((Int64)obj);
+        public override Int32 GetHashCode() => unchecked((Int32)_value ^ (Int32)(_value >> 32));
+        public Int32 CompareTo(Int64 other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Int64)) throw new ArgumentException(); return CompareTo((Int64)obj); }
+        public override String ToString() => NumberFormatting.FormatInt64(_value);
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatSigned(_value, 64, format);
+    }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct UInt64 : IComparable, IComparable<UInt64>, IEquatable<UInt64>, IFormattable
+    {
+        private ulong _value; public const UInt64 MinValue = 0UL; public const UInt64 MaxValue = 0xFFFFFFFFFFFFFFFFUL;
+        public Boolean Equals(UInt64 other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is UInt64 && Equals((UInt64)obj);
+        public override Int32 GetHashCode() => unchecked((Int32)_value ^ (Int32)(_value >> 32));
+        public Int32 CompareTo(UInt64 other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is UInt64)) throw new ArgumentException(); return CompareTo((UInt64)obj); }
+        public override String ToString() => NumberFormatting.FormatUInt64(_value);
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatUnsigned(_value, 64, format);
+    }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Single : IComparable, IComparable<Single>, IEquatable<Single>, IFormattable
+    {
+        private float _value;
+        public Boolean Equals(Single other) => _value == other._value || (_value != _value && other._value != other._value);
+        public override Boolean Equals(Object obj) => obj is Single && Equals((Single)obj);
+        public override Int32 GetHashCode() => _value == 0 ? 0 : (Int32)_value;
+        public Int32 CompareTo(Single other) { if (_value < other._value) return -1; if (_value > other._value) return 1; if (_value == other._value) return 0; return _value != _value ? (other._value != other._value ? 0 : -1) : 1; }
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Single)) throw new ArgumentException(); return CompareTo((Single)obj); }
+        public override String ToString() => NumberFormatting.FormatDouble(_value);
         public String ToString(String format, IFormatProvider formatProvider)
         {
-            if (String.IsNullOrEmpty(format) || String.Equals(format, "G") || String.Equals(format, "D")) return ToString();
+            if (String.IsNullOrEmpty(format) || String.Equals(format, "G")) return ToString();
             throw new FormatException();
         }
     }
     [StructLayout(LayoutKind.Sequential)]
-    public struct UInt32 { private uint _value; public const UInt32 MinValue = 0U; public const UInt32 MaxValue = 0xFFFFFFFFU; public override String ToString() => NumberFormatting.FormatUInt64(_value); }
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Int64 { private long _value; public const Int64 MinValue = -9223372036854775808L; public const Int64 MaxValue = 9223372036854775807L; public override String ToString() => NumberFormatting.FormatInt64(_value); }
-    [StructLayout(LayoutKind.Sequential)]
-    public struct UInt64 { private ulong _value; public const UInt64 MinValue = 0UL; public const UInt64 MaxValue = 0xFFFFFFFFFFFFFFFFUL; public override String ToString() => NumberFormatting.FormatUInt64(_value); }
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Single { private float _value; }
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Double { private double _value; }
+    public struct Double : IComparable, IComparable<Double>, IEquatable<Double>, IFormattable
+    {
+        private double _value;
+        public Boolean Equals(Double other) => _value == other._value || (_value != _value && other._value != other._value);
+        public override Boolean Equals(Object obj) => obj is Double && Equals((Double)obj);
+        public override Int32 GetHashCode() => _value == 0 ? 0 : (Int32)_value;
+        public Int32 CompareTo(Double other) { if (_value < other._value) return -1; if (_value > other._value) return 1; if (_value == other._value) return 0; return _value != _value ? (other._value != other._value ? 0 : -1) : 1; }
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Double)) throw new ArgumentException(); return CompareTo((Double)obj); }
+        public override String ToString() => NumberFormatting.FormatDouble(_value);
+        public String ToString(String format, IFormatProvider formatProvider)
+        {
+            if (String.IsNullOrEmpty(format) || String.Equals(format, "G")) return ToString();
+            throw new FormatException();
+        }
+    }
+
     internal static class NumberFormatting
     {
         internal static String FormatInt64(Int64 value)
         {
             if (value >= 0) return FormatUInt64((UInt64)value);
             UInt64 magnitude = unchecked(0UL - (UInt64)value);
-            Char[] digits = FormatUInt64Chars(magnitude, true);
+            Char[] digits = FormatUInt64Chars(magnitude, true, 0);
             return String.CreateFromChars(digits, digits.Length);
         }
+
         internal static String FormatUInt64(UInt64 value)
         {
-            Char[] digits = FormatUInt64Chars(value, false);
+            Char[] digits = FormatUInt64Chars(value, false, 0);
             return String.CreateFromChars(digits, digits.Length);
         }
-        private static Char[] FormatUInt64Chars(UInt64 value, Boolean negative)
+
+        internal static String FormatSigned(Int64 value, Int32 bitWidth, String format)
+        {
+            Char specifier; Int32 precision;
+            ParseFormat(format, out specifier, out precision);
+            if (specifier == 'G' || specifier == 'g') return FormatInt64(value);
+            if (specifier == 'D' || specifier == 'd')
+            {
+                Boolean negative = value < 0;
+                UInt64 magnitude = negative ? unchecked(0UL - (UInt64)value) : (UInt64)value;
+                Char[] digits = FormatUInt64Chars(magnitude, negative, precision);
+                return String.CreateFromChars(digits, digits.Length);
+            }
+            if (specifier == 'X' || specifier == 'x')
+            {
+                UInt64 bits = (UInt64)value;
+                if (bitWidth < 64) bits &= (1UL << bitWidth) - 1UL;
+                return FormatHex(bits, precision, specifier == 'x');
+            }
+            throw new FormatException();
+        }
+
+        internal static String FormatUnsigned(UInt64 value, Int32 bitWidth, String format)
+        {
+            Char specifier; Int32 precision;
+            ParseFormat(format, out specifier, out precision);
+            if (specifier == 'G' || specifier == 'g') return FormatUInt64(value);
+            if (specifier == 'D' || specifier == 'd')
+            {
+                Char[] digits = FormatUInt64Chars(value, false, precision);
+                return String.CreateFromChars(digits, digits.Length);
+            }
+            if (specifier == 'X' || specifier == 'x') return FormatHex(value, precision, specifier == 'x');
+            throw new FormatException();
+        }
+
+        // Deliberately invariant and allocation-small. Core v1 promises a bounded general
+        // floating format, not culture-aware/custom numeric formatting. Six fractional
+        // places are enough for the bootstrap/runtime diagnostics this surface targets.
+        internal static String FormatDouble(Double value)
+        {
+            if (value == 0.0) return "0";
+            Boolean negative = value < 0.0;
+            if (negative) value = -value;
+            UInt64 whole = (UInt64)value;
+            Double fraction = value - (Double)whole;
+            Char[] wholeChars = FormatUInt64Chars(whole, negative, 0);
+            if (fraction == 0.0) return String.CreateFromChars(wholeChars, wholeChars.Length);
+
+            Char[] result = new Char[wholeChars.Length + 1 + 6];
+            Int32 pos = 0;
+            for (Int32 i = 0; i < wholeChars.Length; i++) result[pos++] = wholeChars[i];
+            result[pos++] = '.';
+            Int32 fractionalStart = pos;
+            for (Int32 i = 0; i < 6; i++)
+            {
+                fraction *= 10.0;
+                Int32 digit = (Int32)fraction;
+                if (digit < 0) digit = 0; else if (digit > 9) digit = 9;
+                result[pos++] = (Char)('0' + digit);
+                fraction -= digit;
+            }
+            while (pos > fractionalStart + 1 && result[pos - 1] == '0') pos--;
+            Char[] trimmed = new Char[pos];
+            for (Int32 i = 0; i < pos; i++) trimmed[i] = result[i];
+            return String.CreateFromChars(trimmed, trimmed.Length);
+        }
+
+        private static void ParseFormat(String format, out Char specifier, out Int32 precision)
+        {
+            if (String.IsNullOrEmpty(format)) { specifier = 'G'; precision = 0; return; }
+            specifier = format[0]; precision = 0;
+            for (Int32 i = 1; i < format.Length; i++)
+            {
+                Char c = format[i];
+                if (c < '0' || c > '9') throw new FormatException();
+                precision = precision * 10 + (c - '0');
+                if (precision > 99) throw new FormatException();
+            }
+        }
+
+        private static Char[] FormatUInt64Chars(UInt64 value, Boolean negative, Int32 minimumDigits)
         {
             Char[] reverse = new Char[20];
             Int32 count = 0;
             do { reverse[count++] = (Char)('0' + (Char)(value % 10UL)); value /= 10UL; } while (value != 0UL);
+            while (count < minimumDigits && count < reverse.Length) reverse[count++] = '0';
             Char[] result = new Char[count + (negative ? 1 : 0)];
             Int32 output = 0;
             if (negative) result[output++] = '-';
             while (count != 0) result[output++] = reverse[--count];
             return result;
         }
+
+        private static String FormatHex(UInt64 value, Int32 minimumDigits, Boolean lower)
+        {
+            Char[] reverse = new Char[16]; Int32 count = 0;
+            do
+            {
+                Int32 nibble = (Int32)(value & 0xFUL);
+                reverse[count++] = (Char)(nibble < 10 ? '0' + nibble : (lower ? 'a' : 'A') + nibble - 10);
+                value >>= 4;
+            } while (value != 0UL);
+            while (count < minimumDigits && count < reverse.Length) reverse[count++] = '0';
+            Char[] result = new Char[count]; Int32 output = 0;
+            while (count != 0) result[output++] = reverse[--count];
+            return String.CreateFromChars(result, result.Length);
+        }
     }
 
-    /// <summary><inu.api/>Integer-first mathematical primitives for freestanding code.</summary>
+    /// <summary><inu.api/>Primitive mathematical operations used by the Core v1 freestanding runtime.</summary>
     public static class Math
     {
         public static Int32 Abs(Int32 value) { if (value == Int32.MinValue) throw new OverflowException(); return value < 0 ? -value : value; }
         public static Int64 Abs(Int64 value) { if (value == Int64.MinValue) throw new OverflowException(); return value < 0 ? -value : value; }
+        public static Single Abs(Single value) => value < 0 ? -value : value;
+        public static Double Abs(Double value) => value < 0 ? -value : value;
         public static Int32 Min(Int32 left, Int32 right) => left < right ? left : right;
+        public static Int64 Min(Int64 left, Int64 right) => left < right ? left : right;
+        public static Single Min(Single left, Single right) => left < right ? left : right;
+        public static Double Min(Double left, Double right) => left < right ? left : right;
         public static Int32 Max(Int32 left, Int32 right) => left > right ? left : right;
+        public static Int64 Max(Int64 left, Int64 right) => left > right ? left : right;
+        public static Single Max(Single left, Single right) => left > right ? left : right;
+        public static Double Max(Double left, Double right) => left > right ? left : right;
         public static Int32 Sign(Int32 value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
-        public static Int32 Clamp(Int32 value, Int32 min, Int32 max)
+        public static Int32 Sign(Int64 value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
+        public static Int32 Sign(Single value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
+        public static Int32 Sign(Double value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
+        public static Int32 Clamp(Int32 value, Int32 min, Int32 max) { if (min > max) throw new ArgumentException(); return value < min ? min : (value > max ? max : value); }
+        public static Int64 Clamp(Int64 value, Int64 min, Int64 max) { if (min > max) throw new ArgumentException(); return value < min ? min : (value > max ? max : value); }
+        public static Single Clamp(Single value, Single min, Single max) { if (min > max) throw new ArgumentException(); return value < min ? min : (value > max ? max : value); }
+        public static Double Clamp(Double value, Double min, Double max) { if (min > max) throw new ArgumentException(); return value < min ? min : (value > max ? max : value); }
+        public static Double Truncate(Double value) => value >= 0 ? (Double)(Int64)value : (Double)(Int64)value;
+        public static Double Floor(Double value) { Int64 truncated = (Int64)value; return value < truncated ? truncated - 1 : truncated; }
+        public static Double Ceiling(Double value) { Int64 truncated = (Int64)value; return value > truncated ? truncated + 1 : truncated; }
+        public static Double Round(Double value)
         {
-            if (min > max) throw new ArgumentException();
-            return value < min ? min : (value > max ? max : value);
+            Int64 truncated = (Int64)value; Double fraction = value - truncated;
+            if (fraction > 0.5 || (fraction == 0.5 && (truncated & 1L) != 0)) return truncated + 1;
+            if (fraction < -0.5 || (fraction == -0.5 && (truncated & 1L) != 0)) return truncated - 1;
+            return truncated;
+        }
+        public static Double Sqrt(Double value)
+        {
+            if (value < 0.0) return 0.0 / 0.0;
+            if (value == 0.0) return 0.0;
+            Double guess = value >= 1.0 ? value : 1.0;
+            for (Int32 i = 0; i < 24; i++) guess = (guess + value / guess) * 0.5;
+            return guess;
         }
     }
 
-    /// <summary><inu.api/>Primitive conversion helpers that do not require globalization.</summary>
+    /// <summary><inu.api/>Invariant primitive conversions for the Core v1 freestanding runtime.</summary>
     public static class Convert
     {
-        public static Int32 ToInt32(Boolean value) => value ? 1 : 0;
-        public static Int64 ToInt64(Int32 value) => value;
+        public static Boolean ToBoolean(Boolean value) => value;
+        public static Boolean ToBoolean(SByte value) => value != 0;
+        public static Boolean ToBoolean(Byte value) => value != 0;
+        public static Boolean ToBoolean(Int16 value) => value != 0;
+        public static Boolean ToBoolean(UInt16 value) => value != 0;
         public static Boolean ToBoolean(Int32 value) => value != 0;
+        public static Boolean ToBoolean(UInt32 value) => value != 0;
+        public static Boolean ToBoolean(Int64 value) => value != 0;
+        public static Boolean ToBoolean(UInt64 value) => value != 0;
+        public static Boolean ToBoolean(Single value) => value != 0;
+        public static Boolean ToBoolean(Double value) => value != 0;
+
+        public static SByte ToSByte(Boolean value) => value ? (SByte)1 : (SByte)0;
+        public static SByte ToSByte(SByte value) => value;
+        public static SByte ToSByte(Byte value) => checked((SByte)value);
+        public static SByte ToSByte(Int16 value) => checked((SByte)value);
+        public static SByte ToSByte(UInt16 value) => checked((SByte)value);
+        public static SByte ToSByte(Int32 value) => checked((SByte)value);
+        public static SByte ToSByte(UInt32 value) => checked((SByte)value);
+        public static SByte ToSByte(Int64 value) => checked((SByte)value);
+        public static SByte ToSByte(UInt64 value) => checked((SByte)value);
+        public static SByte ToSByte(Single value) => checked((SByte)Math.Round(value));
+        public static SByte ToSByte(Double value) => checked((SByte)Math.Round(value));
+
+        public static Byte ToByte(Boolean value) => value ? (Byte)1 : (Byte)0;
+        public static Byte ToByte(SByte value) => checked((Byte)value);
+        public static Byte ToByte(Byte value) => value;
+        public static Byte ToByte(Int16 value) => checked((Byte)value);
+        public static Byte ToByte(UInt16 value) => checked((Byte)value);
+        public static Byte ToByte(Int32 value) => checked((Byte)value);
+        public static Byte ToByte(UInt32 value) => checked((Byte)value);
+        public static Byte ToByte(Int64 value) => checked((Byte)value);
+        public static Byte ToByte(UInt64 value) => checked((Byte)value);
+        public static Byte ToByte(Single value) => checked((Byte)Math.Round(value));
+        public static Byte ToByte(Double value) => checked((Byte)Math.Round(value));
+
+        public static Int16 ToInt16(Boolean value) => value ? (Int16)1 : (Int16)0;
+        public static Int16 ToInt16(SByte value) => checked((Int16)value);
+        public static Int16 ToInt16(Byte value) => checked((Int16)value);
+        public static Int16 ToInt16(Int16 value) => value;
+        public static Int16 ToInt16(UInt16 value) => checked((Int16)value);
+        public static Int16 ToInt16(Int32 value) => checked((Int16)value);
+        public static Int16 ToInt16(UInt32 value) => checked((Int16)value);
+        public static Int16 ToInt16(Int64 value) => checked((Int16)value);
+        public static Int16 ToInt16(UInt64 value) => checked((Int16)value);
+        public static Int16 ToInt16(Single value) => checked((Int16)Math.Round(value));
+        public static Int16 ToInt16(Double value) => checked((Int16)Math.Round(value));
+
+        public static UInt16 ToUInt16(Boolean value) => value ? (UInt16)1 : (UInt16)0;
+        public static UInt16 ToUInt16(SByte value) => checked((UInt16)value);
+        public static UInt16 ToUInt16(Byte value) => checked((UInt16)value);
+        public static UInt16 ToUInt16(Int16 value) => checked((UInt16)value);
+        public static UInt16 ToUInt16(UInt16 value) => value;
+        public static UInt16 ToUInt16(Int32 value) => checked((UInt16)value);
+        public static UInt16 ToUInt16(UInt32 value) => checked((UInt16)value);
+        public static UInt16 ToUInt16(Int64 value) => checked((UInt16)value);
+        public static UInt16 ToUInt16(UInt64 value) => checked((UInt16)value);
+        public static UInt16 ToUInt16(Single value) => checked((UInt16)Math.Round(value));
+        public static UInt16 ToUInt16(Double value) => checked((UInt16)Math.Round(value));
+
+        public static Int32 ToInt32(Boolean value) => value ? (Int32)1 : (Int32)0;
+        public static Int32 ToInt32(SByte value) => checked((Int32)value);
+        public static Int32 ToInt32(Byte value) => checked((Int32)value);
+        public static Int32 ToInt32(Int16 value) => checked((Int32)value);
+        public static Int32 ToInt32(UInt16 value) => checked((Int32)value);
+        public static Int32 ToInt32(Int32 value) => value;
+        public static Int32 ToInt32(UInt32 value) => checked((Int32)value);
+        public static Int32 ToInt32(Int64 value) => checked((Int32)value);
+        public static Int32 ToInt32(UInt64 value) => checked((Int32)value);
+        public static Int32 ToInt32(Single value) => checked((Int32)Math.Round(value));
+        public static Int32 ToInt32(Double value) => checked((Int32)Math.Round(value));
+
+        public static UInt32 ToUInt32(Boolean value) => value ? (UInt32)1 : (UInt32)0;
+        public static UInt32 ToUInt32(SByte value) => checked((UInt32)value);
+        public static UInt32 ToUInt32(Byte value) => checked((UInt32)value);
+        public static UInt32 ToUInt32(Int16 value) => checked((UInt32)value);
+        public static UInt32 ToUInt32(UInt16 value) => checked((UInt32)value);
+        public static UInt32 ToUInt32(Int32 value) => checked((UInt32)value);
+        public static UInt32 ToUInt32(UInt32 value) => value;
+        public static UInt32 ToUInt32(Int64 value) => checked((UInt32)value);
+        public static UInt32 ToUInt32(UInt64 value) => checked((UInt32)value);
+        public static UInt32 ToUInt32(Single value) => checked((UInt32)Math.Round(value));
+        public static UInt32 ToUInt32(Double value) => checked((UInt32)Math.Round(value));
+
+        public static Int64 ToInt64(Boolean value) => value ? (Int64)1 : (Int64)0;
+        public static Int64 ToInt64(SByte value) => checked((Int64)value);
+        public static Int64 ToInt64(Byte value) => checked((Int64)value);
+        public static Int64 ToInt64(Int16 value) => checked((Int64)value);
+        public static Int64 ToInt64(UInt16 value) => checked((Int64)value);
+        public static Int64 ToInt64(Int32 value) => checked((Int64)value);
+        public static Int64 ToInt64(UInt32 value) => checked((Int64)value);
+        public static Int64 ToInt64(Int64 value) => value;
+        public static Int64 ToInt64(UInt64 value) => checked((Int64)value);
+        public static Int64 ToInt64(Single value) => checked((Int64)Math.Round(value));
+        public static Int64 ToInt64(Double value) => checked((Int64)Math.Round(value));
+
+        public static UInt64 ToUInt64(Boolean value) => value ? (UInt64)1 : (UInt64)0;
+        public static UInt64 ToUInt64(SByte value) => checked((UInt64)value);
+        public static UInt64 ToUInt64(Byte value) => checked((UInt64)value);
+        public static UInt64 ToUInt64(Int16 value) => checked((UInt64)value);
+        public static UInt64 ToUInt64(UInt16 value) => checked((UInt64)value);
+        public static UInt64 ToUInt64(Int32 value) => checked((UInt64)value);
+        public static UInt64 ToUInt64(UInt32 value) => checked((UInt64)value);
+        public static UInt64 ToUInt64(Int64 value) => checked((UInt64)value);
+        public static UInt64 ToUInt64(UInt64 value) => value;
+        public static UInt64 ToUInt64(Single value) => checked((UInt64)Math.Round(value));
+        public static UInt64 ToUInt64(Double value) => checked((UInt64)Math.Round(value));
+
+        public static Single ToSingle(Boolean value) => value ? 1F : 0F;
+        public static Single ToSingle(SByte value) => (Single)value;
+        public static Single ToSingle(Byte value) => (Single)value;
+        public static Single ToSingle(Int16 value) => (Single)value;
+        public static Single ToSingle(UInt16 value) => (Single)value;
+        public static Single ToSingle(Int32 value) => (Single)value;
+        public static Single ToSingle(UInt32 value) => (Single)value;
+        public static Single ToSingle(Int64 value) => (Single)value;
+        public static Single ToSingle(UInt64 value) => (Single)value;
+        public static Single ToSingle(Single value) => value;
+        public static Single ToSingle(Double value) => (Single)value;
+
+        public static Double ToDouble(Boolean value) => value ? 1D : 0D;
+        public static Double ToDouble(SByte value) => (Double)value;
+        public static Double ToDouble(Byte value) => (Double)value;
+        public static Double ToDouble(Int16 value) => (Double)value;
+        public static Double ToDouble(UInt16 value) => (Double)value;
+        public static Double ToDouble(Int32 value) => (Double)value;
+        public static Double ToDouble(UInt32 value) => (Double)value;
+        public static Double ToDouble(Int64 value) => (Double)value;
+        public static Double ToDouble(UInt64 value) => (Double)value;
+        public static Double ToDouble(Single value) => (Double)value;
+        public static Double ToDouble(Double value) => value;
+
+        public static String ToString(SByte value) => value.ToString();
+        public static String ToString(Byte value) => value.ToString();
+        public static String ToString(Int16 value) => value.ToString();
+        public static String ToString(UInt16 value) => value.ToString();
         public static String ToString(Int32 value) => value.ToString();
+        public static String ToString(UInt32 value) => value.ToString();
         public static String ToString(Int64 value) => value.ToString();
+        public static String ToString(UInt64 value) => value.ToString();
+        public static String ToString(Single value) => value.ToString();
+        public static String ToString(Double value) => value.ToString();
         public static String ToString(Boolean value) => value.ToString();
     }
 
@@ -826,21 +1188,46 @@ namespace System
     public class MulticastDelegate : Delegate { }
     public delegate void Action();
     public delegate void Action<in T>(T obj);
+    public delegate void Action<in T1, in T2>(T1 arg1, T2 arg2);
+    public delegate void Action<in T1, in T2, in T3>(T1 arg1, T2 arg2, T3 arg3);
+    public delegate void Action<in T1, in T2, in T3, in T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
     public delegate TResult Func<out TResult>();
     public delegate TResult Func<in T, out TResult>(T arg);
+    public delegate TResult Func<in T1, in T2, out TResult>(T1 arg1, T2 arg2);
+    public delegate TResult Func<in T1, in T2, in T3, out TResult>(T1 arg1, T2 arg2, T3 arg3);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
+    public delegate Boolean Predicate<in T>(T obj);
+    public delegate Int32 Comparison<in T>(T x, T y);
+    public delegate TOutput Converter<in TInput, out TOutput>(TInput input);
 
-    /// <summary><inu.api/>Array-backed mutable span for the first freestanding BCL target.</summary>
+    /// <summary><inu.api/>Array-backed mutable span for the Core v1 freestanding target.</summary>
     public ref struct Span<T>
     {
         private T[] _array;
         private Int32 _start;
         private Int32 _length;
+
         public Span(T[] array)
         {
-            _array = array ?? throw new ArgumentNullException();
-            _start = 0; _length = array.Length;
+            if (array == null) { _array = null; _start = 0; _length = 0; return; }
+            _array = array; _start = 0; _length = array.Length;
         }
-        private Span(T[] array, Int32 start, Int32 length) { _array = array; _start = start; _length = length; }
+
+        public Span(T[] array, Int32 start, Int32 length)
+        {
+            if (array == null)
+            {
+                if (start != 0 || length != 0) throw new ArgumentOutOfRangeException();
+                _array = null; _start = 0; _length = 0; return;
+            }
+            if (start < 0 || length < 0 || start > array.Length - length) throw new ArgumentOutOfRangeException();
+            _array = array; _start = start; _length = length;
+        }
+
+        internal Span(T[] array, Int32 start, Int32 length, Boolean trusted)
+        { _array = array; _start = start; _length = length; }
+
+        public static Span<T> Empty => default;
         public Int32 Length => _length;
         public Boolean IsEmpty => _length == 0;
         public ref T this[Int32 index]
@@ -851,22 +1238,62 @@ namespace System
         public Span<T> Slice(Int32 start, Int32 length)
         {
             if (start < 0 || length < 0 || start > _length - length) throw new ArgumentOutOfRangeException();
-            return new Span<T>(_array, _start + start, length);
+            return new Span<T>(_array, _start + start, length, true);
         }
         public T[] ToArray() { T[] copy = new T[_length]; for (Int32 i = 0; i < _length; i++) copy[i] = _array[_start + i]; return copy; }
         public void Clear() { for (Int32 i = 0; i < _length; i++) _array[_start + i] = default; }
+        public void Fill(T value) { for (Int32 i = 0; i < _length; i++) _array[_start + i] = value; }
+        public void CopyTo(Span<T> destination)
+        {
+            if (!TryCopyTo(destination)) throw new ArgumentException();
+        }
+        public Boolean TryCopyTo(Span<T> destination)
+        {
+            if (destination._length < _length) return false;
+            if (_length == 0) return true;
+            if (Object.ReferenceEquals(_array, destination._array)
+                && destination._start > _start && destination._start < _start + _length)
+            {
+                for (Int32 i = _length - 1; i >= 0; i--) destination._array[destination._start + i] = _array[_start + i];
+            }
+            else
+            {
+                for (Int32 i = 0; i < _length; i++) destination._array[destination._start + i] = _array[_start + i];
+            }
+            return true;
+        }
         public static implicit operator Span<T>(T[] array) => new Span<T>(array);
-        public static implicit operator ReadOnlySpan<T>(Span<T> span) => new ReadOnlySpan<T>(span._array, span._start, span._length);
+        public static implicit operator ReadOnlySpan<T>(Span<T> span) => new ReadOnlySpan<T>(span._array, span._start, span._length, true);
     }
 
-    /// <summary><inu.api/>Array-backed read-only span for the first freestanding BCL target.</summary>
+    /// <summary><inu.api/>Array-backed read-only span for the Core v1 freestanding target.</summary>
     public readonly ref struct ReadOnlySpan<T>
     {
         private readonly T[] _array;
         private readonly Int32 _start;
         private readonly Int32 _length;
-        public ReadOnlySpan(T[] array) { _array = array ?? throw new ArgumentNullException(); _start = 0; _length = array.Length; }
-        internal ReadOnlySpan(T[] array, Int32 start, Int32 length) { _array = array; _start = start; _length = length; }
+
+        public ReadOnlySpan(T[] array)
+        {
+            if (array == null) { _array = null; _start = 0; _length = 0; return; }
+            _array = array; _start = 0; _length = array.Length;
+        }
+
+        public ReadOnlySpan(T[] array, Int32 start, Int32 length)
+        {
+            if (array == null)
+            {
+                if (start != 0 || length != 0) throw new ArgumentOutOfRangeException();
+                _array = null; _start = 0; _length = 0; return;
+            }
+            if (start < 0 || length < 0 || start > array.Length - length) throw new ArgumentOutOfRangeException();
+            _array = array; _start = start; _length = length;
+        }
+
+        internal ReadOnlySpan(T[] array, Int32 start, Int32 length, Boolean trusted)
+        { _array = array; _start = start; _length = length; }
+
+        public static ReadOnlySpan<T> Empty => default;
         public Int32 Length => _length;
         public Boolean IsEmpty => _length == 0;
         public ref readonly T this[Int32 index]
@@ -877,10 +1304,94 @@ namespace System
         public ReadOnlySpan<T> Slice(Int32 start, Int32 length)
         {
             if (start < 0 || length < 0 || start > _length - length) throw new ArgumentOutOfRangeException();
-            return new ReadOnlySpan<T>(_array, _start + start, length);
+            return new ReadOnlySpan<T>(_array, _start + start, length, true);
         }
         public T[] ToArray() { T[] copy = new T[_length]; for (Int32 i = 0; i < _length; i++) copy[i] = _array[_start + i]; return copy; }
+        public void CopyTo(Span<T> destination)
+        {
+            if (!TryCopyTo(destination)) throw new ArgumentException();
+        }
+        public Boolean TryCopyTo(Span<T> destination)
+        {
+            if (destination.Length < _length) return false;
+            for (Int32 i = 0; i < _length; i++) destination[i] = _array[_start + i];
+            return true;
+        }
         public static implicit operator ReadOnlySpan<T>(T[] array) => new ReadOnlySpan<T>(array);
+    }
+
+    /// <summary><inu.api/>Array-backed storable memory window whose Span property provides temporary byref access.</summary>
+    public readonly struct Memory<T>
+    {
+        private readonly T[] _array;
+        private readonly Int32 _start;
+        private readonly Int32 _length;
+
+        public Memory(T[] array)
+        {
+            if (array == null) { _array = null; _start = 0; _length = 0; return; }
+            _array = array; _start = 0; _length = array.Length;
+        }
+        public Memory(T[] array, Int32 start, Int32 length)
+        {
+            if (array == null)
+            {
+                if (start != 0 || length != 0) throw new ArgumentOutOfRangeException();
+                _array = null; _start = 0; _length = 0; return;
+            }
+            if (start < 0 || length < 0 || start > array.Length - length) throw new ArgumentOutOfRangeException();
+            _array = array; _start = start; _length = length;
+        }
+        internal Memory(T[] array, Int32 start, Int32 length, Boolean trusted) { _array = array; _start = start; _length = length; }
+        public static Memory<T> Empty => default;
+        public Int32 Length => _length;
+        public Boolean IsEmpty => _length == 0;
+        public Span<T> Span => new Span<T>(_array, _start, _length, true);
+        public Memory<T> Slice(Int32 start) => Slice(start, _length - start);
+        public Memory<T> Slice(Int32 start, Int32 length)
+        {
+            if (start < 0 || length < 0 || start > _length - length) throw new ArgumentOutOfRangeException();
+            return new Memory<T>(_array, _start + start, length, true);
+        }
+        public T[] ToArray() => Span.ToArray();
+        public static implicit operator Memory<T>(T[] array) => new Memory<T>(array);
+        public static implicit operator ReadOnlyMemory<T>(Memory<T> memory) => new ReadOnlyMemory<T>(memory._array, memory._start, memory._length, true);
+    }
+
+    /// <summary><inu.api/>Array-backed storable read-only memory window.</summary>
+    public readonly struct ReadOnlyMemory<T>
+    {
+        private readonly T[] _array;
+        private readonly Int32 _start;
+        private readonly Int32 _length;
+        public ReadOnlyMemory(T[] array)
+        {
+            if (array == null) { _array = null; _start = 0; _length = 0; return; }
+            _array = array; _start = 0; _length = array.Length;
+        }
+        public ReadOnlyMemory(T[] array, Int32 start, Int32 length)
+        {
+            if (array == null)
+            {
+                if (start != 0 || length != 0) throw new ArgumentOutOfRangeException();
+                _array = null; _start = 0; _length = 0; return;
+            }
+            if (start < 0 || length < 0 || start > array.Length - length) throw new ArgumentOutOfRangeException();
+            _array = array; _start = start; _length = length;
+        }
+        internal ReadOnlyMemory(T[] array, Int32 start, Int32 length, Boolean trusted) { _array = array; _start = start; _length = length; }
+        public static ReadOnlyMemory<T> Empty => default;
+        public Int32 Length => _length;
+        public Boolean IsEmpty => _length == 0;
+        public ReadOnlySpan<T> Span => new ReadOnlySpan<T>(_array, _start, _length, true);
+        public ReadOnlyMemory<T> Slice(Int32 start) => Slice(start, _length - start);
+        public ReadOnlyMemory<T> Slice(Int32 start, Int32 length)
+        {
+            if (start < 0 || length < 0 || start > _length - length) throw new ArgumentOutOfRangeException();
+            return new ReadOnlyMemory<T>(_array, _start + start, length, true);
+        }
+        public T[] ToArray() => Span.ToArray();
+        public static implicit operator ReadOnlyMemory<T>(T[] array) => new ReadOnlyMemory<T>(array);
     }
 
     public class Attribute { }
@@ -3146,6 +3657,26 @@ namespace System.Collections.Generic
         public TKey Key => _key;
         /// <summary><inu.api/></summary>
         public TValue Value => _value;
+    }
+
+    /// <summary><inu.api/>Provides the default strongly typed ordering used by freestanding generic code.</summary>
+    public abstract class Comparer<T>
+    {
+        private sealed class DefaultComparer : Comparer<T>
+        {
+            public override Int32 Compare(T x, T y)
+            {
+                Object left = x; Object right = y;
+                if (Object.ReferenceEquals(left, right)) return 0;
+                if (Object.ReferenceEquals(left, null)) return -1;
+                if (Object.ReferenceEquals(right, null)) return 1;
+                if (left is IComparable<T>) return ((IComparable<T>)left).CompareTo(y);
+                if (left is IComparable) return ((IComparable)left).CompareTo(right);
+                throw new ArgumentException();
+            }
+        }
+        public static Comparer<T> Default => new DefaultComparer();
+        public abstract Int32 Compare(T x, T y);
     }
 
     /// <summary><inu.api/>Provides equality and hashing used by freestanding generic collections.</summary>
