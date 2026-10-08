@@ -1,6 +1,6 @@
 {
-  "baseVersion": "0.0.91",
-  "version": "0.0.92",
+  "baseVersion": "0.0.92",
+  "version": "0.0.93",
   "changedFiles": [],
   "summary": "Make Kath npm dependency cache hits constant-time by validating dependency manifests, toolchain identity, completion markers and a small required-file sentinel set instead of recursively hashing node_modules."
 }
