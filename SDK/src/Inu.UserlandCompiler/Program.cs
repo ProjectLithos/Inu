@@ -20,6 +20,7 @@ static int MainEntry(string[] args)
     string projectRoot=Path.GetDirectoryName(Path.GetFullPath(args[1]))!;
     string osName=project.Name;
     string coderRoot=FindCoderUserlandRoot(projectRoot,osName);
+    Console.WriteLine($"[INFO] Coder userland source: {coderRoot}");
     string outputRoot=Path.Combine(Path.GetFullPath(project.OutputDirectory),"UserlandApps");
     if(!Directory.Exists(coderRoot))
     {
@@ -136,7 +137,29 @@ internal static unsafe class InuUserApplicationEntry
 
 static string FindCoderUserlandRoot(string projectRoot,string osName)
 {
-    string exact=Path.Combine(projectRoot,"Userland",osName);if(Directory.Exists(exact))return exact;string root=Path.Combine(projectRoot,"Userland");if(!Directory.Exists(root))return exact;return Directory.GetDirectories(root).FirstOrDefault(d=>!string.Equals(Path.GetFileName(d),"Provided",StringComparison.OrdinalIgnoreCase))??exact;
+    string root=Path.Combine(projectRoot,"Userland");
+    string safeName=SafeProjectSegment(osName);
+    string canonical=Path.Combine(root,safeName);
+    if(Directory.Exists(canonical))return canonical;
+
+    // Compatibility with projects created before Kath and Inu shared the same
+    // filesystem-safe OS-name rule. Never silently select an arbitrary userland
+    // tree: doing so can compile stale/empty commands from another generated OS.
+    string legacy=Path.Combine(root,osName);
+    if(!string.Equals(legacy,canonical,StringComparison.OrdinalIgnoreCase)&&Directory.Exists(legacy))return legacy;
+    if(!Directory.Exists(root))return canonical;
+
+    string[] candidates=Directory.GetDirectories(root)
+        .Where(d=>!string.Equals(Path.GetFileName(d),"Provided",StringComparison.OrdinalIgnoreCase))
+        .ToArray();
+    if(candidates.Length==0)return canonical;
+    if(candidates.Length==1)return candidates[0];
+    throw new InvalidOperationException($"Could not select coder userland source for OS '{osName}'. Expected '{canonical}', but found multiple OS userland directories: {string.Join(", ",candidates.Select(Path.GetFileName))}");
+}
+static string SafeProjectSegment(string value)
+{
+    char[] chars=value.Select(c=>char.IsLetterOrDigit(c)||c=='_'?c:'_').ToArray();
+    return chars.Length==0?"OS":new string(chars);
 }
 static string? FindTypeWithMethod(string file,string method)
 {
