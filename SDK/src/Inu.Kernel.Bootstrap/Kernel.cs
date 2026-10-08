@@ -22,6 +22,9 @@ using Inu.Kernel.Ps2;
 using Inu.Kernel.Processes;
 using Inu.Kernel.Drivers;
 using Inu.Kernel.Storage;
+#if INU_COMPONENT_FILESYSTEM_FATFS
+using Inu.Filesystem.FatFs;
+#endif
 using Inu.Kernel.Networking;
 using Inu.Kernel.Pci;
 #if INU_COMPONENT_STORAGE_NVME_DRIVER
@@ -65,6 +68,25 @@ public static unsafe partial class Kernel
     private static Byte _usbRepeatUsage;
     private static Char _usbRepeatCharacter;
     private static UInt64 _usbRepeatDeadline;
+#if INU_COMPONENT_FILESYSTEM_FATFS
+    private static Boolean TryMountSelectedFatRoot()
+    {
+        if(KernelVfs.MountCount!=0U)return true;
+        KernelStorageCapabilities capabilities=KernelStorage.GetCapabilities();
+        for(UInt32 ordinal=0U;ordinal<capabilities.Volumes;ordinal++)
+        {
+            if(!KernelStorage.TryGetVolumeByOrdinal(ordinal,out KernelStorageVolumeHandle volume))continue;
+            if(KernelVfs.Mount(KernelVfs.DefaultNamespace,volume,KernelFileSystemType.Fat32,"/",out _))return true;
+            if(KernelVfs.Mount(KernelVfs.DefaultNamespace,volume,KernelFileSystemType.Fat16,"/",out _))return true;
+            if(KernelVfs.Mount(KernelVfs.DefaultNamespace,volume,KernelFileSystemType.Fat12,"/",out _))return true;
+        }
+        // The boot asset catalogue still permits the shell to run without a disk. A selected
+        // filesystem with no compatible volume is therefore non-fatal, but VFS-backed commands
+        // will correctly report that no mounted root exists.
+        return true;
+    }
+#endif
+
     /// <summary>Initializes the kernel platform and enters the interrupt-driven interactive console.</summary>
     public static Boolean KMain<TBoot>(TBoot boot)
         where TBoot : IBootContext, IFinalMemoryMapBufferContext, IMemoryDescriptorLayoutContext, IBootstrapPageTableWorkspaceContext, IAcpiRootPointerContext, IApplicationProcessorTrampolineContext, ISystemAssetBundleContext, IKernelImageContext, IBootFramebufferContext
@@ -662,7 +684,12 @@ public static unsafe partial class Kernel
 #if INU_COMPONENT_STORAGE_PARTITION_DISCOVERY
         if (!KernelPartitionDiscovery.Initialize()) return false;
 #endif
-        if (!KernelStructuredLogging.InfoLine("kernel","Kernel.KMain","Filesystem providers: none selected by the base kernel; add the filesystem project(s) required by this OS.")) return false;
+#if INU_COMPONENT_FILESYSTEM_FATFS
+        if (!FatFs.Install()) return false;
+        if (!KernelStructuredLogging.InfoLine("kernel","Kernel.KMain","Selected FAT filesystem provider installed; the first compatible discovered volume will be mounted at the canonical VFS root.")) return false;
+#else
+        if (!KernelStructuredLogging.InfoLine("kernel","Kernel.KMain","Filesystem providers: none selected by this OS configuration.")) return false;
+#endif
         if (!UsbHub.Initialize()) return false;
         if (!UsbHub.EnumerateDownstream()) return false;
         if (!UsbHid.Initialize()) return false;
@@ -783,6 +810,9 @@ public static unsafe partial class Kernel
         }
         else if (KernelVirtioGpu.GetDetectedPciDeviceCount()!=0U && !KernelStructuredLogging.WarningLine("graphics","Kernel.KMain","VirtIO-GPU PCI device was detected but the driver could not start a scan-out; retaining UEFI GOP. Use 'display' for detected/start-failure counts.")) return false;
         if (!KernelDrivers.BindAndStartMatchingDevices()) return false;
+#if INU_COMPONENT_FILESYSTEM_FATFS
+        if (!TryMountSelectedFatRoot()) return false;
+#endif
 #if INU_COMPONENT_NETWORK_E1000_DRIVER
         if (!KernelE1000.Initialize()) return false;
 #endif

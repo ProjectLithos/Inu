@@ -1,6 +1,13 @@
 {
-  "baseVersion": "0.0.92",
-  "version": "0.0.93",
-  "changedFiles": [],
-  "summary": "Make Kath npm dependency cache hits constant-time by validating dependency manifests, toolchain identity, completion markers and a small required-file sentinel set instead of recursively hashing node_modules."
+  "baseVersion": "0.0.93",
+  "version": "0.0.94",
+  "changedFiles": [
+    "Inu/README.md",
+    "Kath/README.md",
+    "Kath/packages/kath/src/node/inu-project-generation.ts",
+    "Inu/SDK/src/Inu.Kernel.Storage/KernelStorage.DeviceRegistry.cs",
+    "Inu/SDK/src/Inu.Kernel.Storage/KernelStorage.Partitions.cs",
+    "Inu/SDK/src/Inu.Kernel.Bootstrap/Kernel.cs"
+  ],
+  "summary": "Make the supplied Inu/Kath Markdown files the repository READMEs and restore VFS-backed userland commands by discovering partitions when block devices register, installing the selected FAT provider, and mounting the first compatible volume at the canonical VFS root."
 }
