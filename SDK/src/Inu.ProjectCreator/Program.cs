@@ -184,6 +184,7 @@ static int MainEntry(string[] args)
 
     if (!MaterializeCoderCommands(sdkRoot, output, projectName)) return 1;
     MigrateGeneratedShellSurface(output, projectName);
+    RepairMalformedGeneratedStockShellSurface(output, projectName);
     MigrateGeneratedCommandSurface(output, projectName, sdkRoot);
     HideProvidedWorkspaceFolders(output);
 
@@ -368,6 +369,109 @@ static void MigrateGeneratedShellSurface(string output, string projectName)
         "            if(!launched)Console.WriteLine(\"Command not found.\");\n        }\n    }\n}\n";
     File.WriteAllText(file, migrated);
     Console.WriteLine($"[ OK ] Migrated stock shell source to high-level SDK APIs: {file}");
+}
+
+static void RepairMalformedGeneratedStockShellSurface(string output, string projectName)
+{
+    string root = Path.Combine(output, "Userland", SafeProjectSegment(projectName));
+    string file = Path.Combine(root, "Shell.cs");
+    if (!File.Exists(file)) return;
+    string source = File.ReadAllText(file);
+    if (!source.Contains("Coder-owned shell behaviour. Configure runs once", StringComparison.Ordinal)) return;
+    if (!HasUnterminatedCSharpLiteral(source)) return;
+
+    string ns = "Generated.Userland";
+    foreach (string line in source.Split('\n'))
+    {
+        string t = line.Trim();
+        if (t.StartsWith("namespace ", StringComparison.Ordinal) && t.EndsWith(";", StringComparison.Ordinal))
+        { ns = t[10..^1].Trim(); break; }
+    }
+
+    string prompt = "> ";
+    const string promptNeedle = "public const string Prompt = \"";
+    int promptStart = source.IndexOf(promptNeedle, StringComparison.Ordinal);
+    if (promptStart >= 0)
+    {
+        promptStart += promptNeedle.Length;
+        int promptEnd = source.IndexOf("\";", promptStart, StringComparison.Ordinal);
+        if (promptEnd > promptStart) prompt = source[promptStart..promptEnd];
+    }
+
+    string configureBody = "        // Console.Clear();\n        // Console.WriteLine(\"Howdy\");";
+    int configure = source.IndexOf("public static void Configure()", StringComparison.Ordinal);
+    if (configure >= 0)
+    {
+        int open = source.IndexOf('{', configure);
+        int run = source.IndexOf("public static void Run()", configure, StringComparison.Ordinal);
+        if (open >= 0 && (run < 0 || open < run))
+        {
+            int depth = 1, cursor = open + 1;
+            while (cursor < source.Length && depth != 0)
+            {
+                if (source[cursor] == '{') depth++;
+                else if (source[cursor] == '}') depth--;
+                cursor++;
+            }
+            if (depth == 0 && (run < 0 || cursor <= run))
+                configureBody = source[(open + 1)..(cursor - 1)].Trim('\r','\n');
+        }
+    }
+
+    string escapedPrompt = prompt.Replace("\\", "\\\\").Replace("\"", "\\\"");
+    string repaired = $"using System;\nusing Inu.Userland.Runtime;\n\nnamespace {ns};\n\n" +
+        "/// <summary>Coder-owned shell behaviour. Configure runs once for the lifetime of the shell; Run owns the visible command loop.</summary>\n" +
+        "public static class Shell\n{\n" +
+        $"    public const string Prompt = \"{escapedPrompt}\";\n\n" +
+        "    public static void Configure()\n    {\n" + configureBody + "\n    }\n\n" +
+        "    public static void Run()\n    {\n        while (true)\n        {\n" +
+        "            Console.Write(Prompt);\n            String input = Console.ReadLine();\n            if (String.IsNullOrWhiteSpace(input)) continue;\n" +
+        "            Int32 start=0,end=input.Length; while(start<end&&input[start]==' ')start++; while(end>start&&input[end-1]==' ')end--; if(start==end)continue;\n" +
+        "            Int32 split=start;while(split<end&&input[split]!=' ')split++;Int32 argumentStart=split;while(argumentStart<end&&input[argumentStart]==' ')argumentStart++;\n" +
+        "            String command=input.Substring(start,split-start);String arguments=argumentStart<end?input.Substring(argumentStart,end-argumentStart):String.Empty;\n" +
+        "            String[] candidates=FileSystemPaths.BuildCommandsPath(command);Boolean launched=false;\n" +
+        "            for(Int32 index=0;index<candidates.Length;index++)if(Process.TryStart(candidates[index],arguments)){launched=true;break;}\n" +
+        "            if(!launched)Console.WriteLine(\"Command not found.\");\n        }\n    }\n}\n";
+    File.WriteAllText(file, repaired);
+    Console.WriteLine($"[ OK ] Repaired malformed stock generated shell source: {file}");
+}
+
+static bool HasUnterminatedCSharpLiteral(string source)
+{
+    bool inBlockComment=false;
+    foreach (string rawLine in source.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n'))
+    {
+        bool inString=false, inChar=false, escape=false;
+        for (int i=0;i<rawLine.Length;i++)
+        {
+            char c=rawLine[i]; char next=i+1<rawLine.Length?rawLine[i+1]:'\0';
+            if (inBlockComment)
+            {
+                if (c=='*'&&next=='/') { inBlockComment=false; i++; }
+                continue;
+            }
+            if (inString)
+            {
+                if (escape) { escape=false; continue; }
+                if (c=='\\') { escape=true; continue; }
+                if (c=='\"') { inString=false; continue; }
+                continue;
+            }
+            if (inChar)
+            {
+                if (escape) { escape=false; continue; }
+                if (c=='\\') { escape=true; continue; }
+                if (c=='\'') { inChar=false; continue; }
+                continue;
+            }
+            if (c=='/'&&next=='/') break;
+            if (c=='/'&&next=='*') { inBlockComment=true; i++; continue; }
+            if (c=='\"') { inString=true; continue; }
+            if (c=='\'') { inChar=true; continue; }
+        }
+        if (inString||inChar) return true;
+    }
+    return false;
 }
 
 static void MigrateGeneratedCommandSurface(string output, string projectName, string sdkRoot)

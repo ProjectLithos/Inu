@@ -1,26 +1,24 @@
 {
-  "baseVersion": "0.0.117",
-  "version": "0.0.118",
+  "baseVersion": "0.0.118",
+  "version": "0.0.119",
   "changedFiles": [
-    "CHANGED-0.0.118.txt",
-    "Inu/SDK/Assets/System/Help/PWD.MAN",
-    "Inu/SDK/Assets/System/Help/SYSINFO.MAN",
+    "CHANGED-0.0.119.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.ImageBuilder/Program.cs",
+    "Inu/SDK/src/Inu.ProjectCreator/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.0.118.md",
+    "Kath/docs/Release-0.0.119.md",
     "Kath/packages/kath/package.json",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "VERSION"
   ],
-  "summary": "Stage each built ring-3 command together with its exact matching manual and stop copying orphan SDK help files into generated OS images."
+  "summary": "Repair malformed stock generated Shell.cs source during refresh without overwriting custom shell implementations."
 }
