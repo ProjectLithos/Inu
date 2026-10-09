@@ -49,6 +49,10 @@ static int MainEntry(string[] args)
     string ilcIdentity=UserlandStageCache.Fingerprint([Path.GetDirectoryName(Path.GetFullPath(ilc))!],[]);
 
     string shellSource=Path.Combine(coderRoot,"Shell.cs");
+    string commands=Path.Combine(coderRoot,"Commands");
+    int commandCount=Directory.Exists(commands)?Directory.GetFiles(commands,"*.cs",SearchOption.TopDirectoryOnly).Length:0;
+    int executableCount=(File.Exists(shellSource)?1:0)+commandCount;
+    Console.WriteLine($"[INFO] Ring-3 build is compiling {executableCount} userland executable(s) ({(File.Exists(shellSource)?"Shell + ":String.Empty)}{commandCount} command(s)). This is host-side compilation, not guest execution.");
     if(File.Exists(shellSource))
     {
         string shellType=FindTypeWithMethod(shellSource,"Configure")??returnFail($"Could not find Shell.Configure in {shellSource}");
@@ -68,7 +72,6 @@ static int MainEntry(string[] args)
         if(rc!=0)return rc;
     }
 
-    string commands=Path.Combine(coderRoot,"Commands");
     if(Directory.Exists(commands))
     {
         foreach(string source in Directory.GetFiles(commands,"*.cs",SearchOption.TopDirectoryOnly).OrderBy(Path.GetFileName,StringComparer.OrdinalIgnoreCase))

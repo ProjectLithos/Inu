@@ -1,8 +1,8 @@
 {
-  "baseVersion": "0.0.115",
-  "version": "0.0.116",
+  "baseVersion": "0.0.116",
+  "version": "0.0.117",
   "changedFiles": [
-    "CHANGED-0.0.116.txt",
+    "CHANGED-0.0.117.txt",
     "Inu/SDK/Build-Inu.ps1",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
@@ -22,7 +22,7 @@
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.0.116.md",
+    "Kath/docs/Release-0.0.117.md",
     "Kath/packages/kath/package.json",
     "Kath/packages/kath/src/browser/inu-target-manager-widget.tsx",
     "Kath/packages/kath/src/browser/inu-widget.tsx",

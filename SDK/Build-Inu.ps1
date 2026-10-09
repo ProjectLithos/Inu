@@ -151,7 +151,11 @@ function Invoke-InuCapturedStage {
                 throw ("{0} exceeded its hard stage timeout of {1} seconds." -f $Stage, $TimeoutSeconds)
             }
             if ($elapsedSeconds -ge $nextHeartbeatSeconds) {
-                Write-Host ("[INFO] {0} still running ({1}s elapsed)." -f $Stage, $elapsedSeconds)
+                if ($Stage -eq 'Ring-3 userland executables') {
+                    Write-Host ("[INFO] Ring-3 userland compilation is still running ({0}s elapsed); Shell/command executables are being built on the host, not executed in the guest." -f $elapsedSeconds)
+                } else {
+                    Write-Host ("[INFO] {0} still running ({1}s elapsed)." -f $Stage, $elapsedSeconds)
+                }
                 $nextHeartbeatSeconds += $heartbeatIntervalSeconds
             }
         }
