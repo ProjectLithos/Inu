@@ -443,8 +443,9 @@ public static unsafe partial class Kernel
         }
 #endif
 
-        KernelConsole.WriteLine("NOBT:CONF:BASE");
         if (!NativeAotExceptionRuntime.ConfigureImageBase(boot.GetKernelImageBase())) { KernelConsole.WriteLine("NOBT:FAIL:EHBASE"); return false; }
+#if DEBUG || INU_RUNTIME_CONFORMANCE
+        KernelConsole.WriteLine("NOBT:CONF:BASE");
         KernelConsole.WriteLine("NOBT:CONF:RUN");
 
         if (!ManagedRuntimeConformance.Run(out UInt32 runtimePassed, out UInt32 runtimeFailed, out UInt32 abiPassed, out UInt32 abiFailed))
@@ -474,6 +475,9 @@ public static unsafe partial class Kernel
         if (!KernelConsole.WriteLine("")) return false;
         if (abiFailed != 0U && !KernelStructuredLogging.WarningLine("runtime","Kernel.KMain","CoreLib ABI baseline contains known pre-reconciliation divergences; boot continues until the corresponding ABI audit items are implemented.")) return false;
         if (!KernelStructuredLogging.InfoLine("runtime","Kernel.KMain","Inu.Runtime.NativeAot managed phase and in-kernel conformance are online.")) return false;
+#else
+        if (!KernelStructuredLogging.InfoLine("runtime","Kernel.KMain","Inu.Runtime.NativeAot managed phase is online; full conformance is skipped for normal/Release boot.")) return false;
+#endif
 
         if (!Inu.Kernel.Audio.Audio.Initialize()) return false;
         if (!Inu.Kernel.Audio.Audio.Run()) return false;
@@ -526,8 +530,9 @@ public static unsafe partial class Kernel
         }
         KernelConsole.WriteLine("NOBT:GC:ROOTMAP:OK");
 
-        // 0.0.77 mature tracing-GC gate. It runs only after all scheduler CPUs can
-        // participate in the stop-the-world rendezvous and the root map is sealed.
+        // Full mature-GC conformance is validation-only. The root map is still sealed and
+        // checked on every boot; the expensive GC stress/assertion pass is Debug/opt-in.
+#if DEBUG || INU_RUNTIME_CONFORMANCE
         KernelConsole.WriteLine("NOBT:GC:RUN");
         if (!ManagedRuntimeConformance.RunGarbageCollectorChecks(out UInt32 gcPassed, out UInt32 gcFailed))
         {
@@ -545,6 +550,7 @@ public static unsafe partial class Kernel
         if (!KernelConsole.WriteUInt64(gcFailed)) return false;
         if (!KernelConsole.WriteLine("")) return false;
         KernelConsole.WriteLine("NOBT:GC:OK");
+#endif
 
         if (!KernelConsole.Write("Scheduler threads active: ")) return false;
         if (!KernelConsole.WriteUInt64(KernelScheduler.GetActiveThreadCount())) return false;

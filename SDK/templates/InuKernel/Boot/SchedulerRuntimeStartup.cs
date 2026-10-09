@@ -60,8 +60,10 @@ public static unsafe class SchedulerRuntimeStartup
         }
         if (!KernelConsole.WriteLine("NOBT:GC:ROOTMAP:OK")) return false;
 
-        // 0.0.77 mature tracing-GC gate. It runs only after all scheduler CPUs can
-        // participate in the stop-the-world rendezvous and the root map is sealed.
+        // Full mature-GC conformance is validation-only. Root-map sealing above remains
+        // part of every runtime boot, while the expensive stress/assertion pass runs only
+        // for Debug builds or when INU_RUNTIME_CONFORMANCE is explicitly requested.
+#if DEBUG || INU_RUNTIME_CONFORMANCE
         if (!KernelConsole.WriteLine("NOBT:GC:RUN")) return false;
         if (!ManagedRuntimeConformance.RunGarbageCollectorChecks(out UInt32 gcPassed, out UInt32 gcFailed))
         {
@@ -79,6 +81,7 @@ public static unsafe class SchedulerRuntimeStartup
         if (!KernelConsole.WriteUInt64(gcFailed)) return false;
         if (!KernelConsole.WriteLine("")) return false;
         if (!KernelConsole.WriteLine("NOBT:GC:OK")) return false;
+#endif
 
         if (!KernelStructuredLogging.Begin(KernelLogLevel.Info,"boot-detail","BootStartup.Initialize")) return false;
         if (!KernelConsole.Write("Scheduler threads active: ")) return false;

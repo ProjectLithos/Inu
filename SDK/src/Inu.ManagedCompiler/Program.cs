@@ -95,14 +95,21 @@ static int MainEntry(string[] args)
         $"--map:{ilcMap}",
         "--noscan",
         "--root", File.Exists(Path.Combine(managedOutput, "Inu.Runtime.NativeAot.dll")) ? "Inu.Runtime.NativeAot" : assemblyName,
-        "--root", File.Exists(Path.Combine(managedOutput, "Inu.Runtime.Conformance.dll")) ? "Inu.Runtime.Conformance" : assemblyName,
         "--scanreflection",
         "--nopreinitstatics"
     ]);
     if (debugBuild)
     {
+        // Runtime/BCL conformance is validation-only. Debug explicitly roots the
+        // conformance assembly; Release leaves it unrooted so unused validation code
+        // can be removed from the final native image.
+        if (File.Exists(Path.Combine(managedOutput, "Inu.Runtime.Conformance.dll")))
+        {
+            ilcArguments.Add("--root");
+            ilcArguments.Add("Inu.Runtime.Conformance");
+        }
         // Matches NativeAOT's official build integration: -g asks ILC to carry
-        // managed sequence points into C# / NativeAOTodeView debug records.
+        // managed sequence points into C# / NativeAOT CodeView debug records.
         ilcArguments.Add("-g");
     }
 

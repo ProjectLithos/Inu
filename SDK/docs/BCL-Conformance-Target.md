@@ -5,9 +5,9 @@ Inu does not claim support for the whole .NET Base Class Library. The fixed comp
 A BCL item is part of this target only when the same item is exercised in both of these executable gates:
 
 1. **Reference side:** `SDK/tests/Inu.DotNetConformance.Tests`, executed against the normal .NET 10 BCL by `SDK/Run-InuDotNetConformance.bat`.
-2. **Kernel side:** `Inu.Runtime.Conformance.ManagedRuntimeConformance.RunBclCoreV1Checks`, executed inside the booted Inu kernel. A failed item contributes to the hard managed-runtime failure count and rejects boot.
+2. **Kernel side:** `Inu.Runtime.Conformance.ManagedRuntimeConformance.RunBclCoreV1Checks`, executed inside the booted Inu kernel only for Debug/explicit validation runs. A failed item rejects that validation run; normal/Release boot does not execute the conformance suite.
 
-The target is intentionally type-level rather than a claim that every API on a listed type is implemented. The APIs exercised by the paired gates are the supported contract. Extending the target requires extending both gates in the same change.
+The target is intentionally type-level rather than a claim that every API on a listed type is implemented. The APIs exercised by the paired gates are the supported contract. Extending the target requires extending both gates in the same change. The host/reference gate remains available independently of OS boot, while the in-kernel gate is validation code rather than a normal startup prerequisite.
 
 ## Inu.BCL.Core.v1
 
@@ -33,16 +33,31 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 18 | `System.Text.Encoding` | ASCII/UTF-8 factories and byte-count contract |
 | 19 | `System.Text.ASCIIEncoding` | string-to-byte and byte-to-string round-trip |
 | 20 | `System.Text.UTF8Encoding` | multi-byte UTF-8 encode/decode round-trip |
-| 21 | primitive numeric formatting / `System.IFormattable` | signed/unsigned integer decimal formatting and `G`/`D` general decimal contract |
-| 22 | `System.Math` | integer `Abs`, `Min`, `Max`, `Sign`, and `Clamp` |
-| 23 | `System.Convert` | Boolean/integer conversions and primitive string conversion |
-| 24 | `System.IComparable` / `System.IComparable<T>` | boxed and strongly typed integer ordering |
-| 25 | `System.Delegate` / `System.Action` / `System.Func` | managed delegate construction and invocation with and without arguments/results |
-| 26 | `System.Span<T>` / `System.ReadOnlySpan<T>` | array-backed length, indexing, mutation, slicing, read-only view, and `ToArray` |
+| 21 | primitive numeric formatting / `System.IFormattable` | signed/unsigned `G`, precision `D`, hexadecimal `X`, and bounded invariant floating `G` formatting |
+| 22 | `System.Math` | integer/floating `Abs`, `Min`, `Max`, `Sign`, `Clamp`, plus `Floor`, `Ceiling`, `Truncate`, banker's `Round`, and `Sqrt` |
+| 23 | `System.Convert` | Boolean, all integer widths, integer/floating conversions, banker's rounding on floating-to-integer conversion, and primitive invariant string conversion |
+| 24 | `System.IComparable` / `System.IComparable<T>` / `System.IEquatable<T>` | boxed and strongly typed ordering/equality across Boolean, Char, signed/unsigned integer and floating primitive families |
+| 25 | delegate family | managed delegate construction/invocation for `Action`/`Func` through four arguments plus `Predicate<T>`, `Comparison<T>`, and `Converter<TInput,TOutput>` |
+| 26 | `System.Span<T>` / `System.ReadOnlySpan<T>` | null/empty semantics, array windows, indexing, mutation, slicing, fill/clear, overlap-safe copy/try-copy, read-only view, and `ToArray` |
+| 27 | `System.Memory<T>` / `System.ReadOnlyMemory<T>` | storable array-backed windows, slicing, `Span`, empty/null semantics, mutation through `Memory<T>.Span`, and `ToArray` |
+| 28 | `System.Collections.Generic.Comparer<T>` + equality consistency | default generic ordering and equality across multiple primitive families |
+
+## Primitive/runtime foundation status
+
+For Core v1, the primitive/runtime foundation is considered complete when the two executable gates pass all items 21-28. This deliberately means **the named Inu subset**, not every culture-sensitive or reflection-heavy desktop .NET overload. The completed foundation provides:
+
+- deterministic invariant primitive formatting required by kernel/runtime diagnostics;
+- integer and finite floating-point arithmetic/conversion paths used by Inu components;
+- consistent `IComparable<T>`/`IEquatable<T>` and default generic comparer behaviour for the covered primitive families;
+- the common managed delegate families needed by callbacks and generic helpers;
+- temporary byref windows through `Span<T>`/`ReadOnlySpan<T>` and storable array-backed windows through `Memory<T>`/`ReadOnlyMemory<T>`;
+- paired boundary behaviour for empty/null windows, slicing, copy sizing and overlapping span copies.
+
+Culture-aware numeric formatting/parsing, arbitrary custom format strings, decimal arithmetic, SIMD/vector numerics and the full desktop `System.Math` surface are outside `Inu.BCL.Core.v1` unless deliberately added to a later named target.
 
 ## Change rule
 
-The target is fixed by name and count. `ManagedRuntimeConformance.BclTargetName` is `Inu.BCL.Core.v1` and `BclTargetItemCount` is `26`. The reference executable independently carries the same name and count and fails if it does not execute exactly 20 target items.
+The target is fixed by name and count. `ManagedRuntimeConformance.BclTargetName` is `Inu.BCL.Core.v1` and `BclTargetItemCount` is `28`. The reference executable independently carries the same name and count and fails if it does not execute exactly 28 target items.
 
 When adding a new item:
 

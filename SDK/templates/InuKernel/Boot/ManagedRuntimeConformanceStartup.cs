@@ -20,6 +20,11 @@ public static class ManagedRuntimeConformanceStartup
         if (kernelImageBase == 0UL) return false;
         if (_completed) return true;
         _kernelImageBase = kernelImageBase;
+        if (!NativeAotExceptionRuntime.ConfigureImageBase(_kernelImageBase))
+        {
+            KernelConsole.WriteLine("NOBT:FAIL:EHBASE");
+            return false;
+        }
         _prepared = true;
         return true;
     }
@@ -30,13 +35,8 @@ public static class ManagedRuntimeConformanceStartup
         if (!_prepared || _kernelImageBase == 0UL || _running) return false;
         _running = true;
 
+#if DEBUG || INU_RUNTIME_CONFORMANCE
         KernelConsole.WriteLine("NOBT:CONF:BASE");
-        if (!NativeAotExceptionRuntime.ConfigureImageBase(_kernelImageBase))
-        {
-            KernelConsole.WriteLine("NOBT:FAIL:EHBASE");
-            _running = false;
-            return false;
-        }
         KernelConsole.WriteLine("NOBT:CONF:RUN");
 
         if (!ManagedRuntimeConformance.Run(out UInt32 runtimePassed, out UInt32 runtimeFailed, out UInt32 abiPassed, out UInt32 abiFailed))
@@ -70,6 +70,7 @@ public static class ManagedRuntimeConformanceStartup
         if (!KernelConsole.WriteUInt64(abiFailed)) { _running=false; return false; }
         if (!KernelConsole.WriteLine("")) { _running=false; return false; }
 
+#endif
         _completed = true;
         _running = false;
         return true;
