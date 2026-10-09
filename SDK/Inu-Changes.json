@@ -1,10 +1,10 @@
 {
-  "baseVersion": "0.0.102",
-  "version": "0.0.103",
+  "baseVersion": "0.0.103",
+  "version": "0.0.104",
   "changedFiles": [
-    "Inu/SDK/scripts/Build-References.ps1",
-    "Inu/SDK/src/Inu.Boot.Memory/NativeUefiMemoryMapSource.cs",
-    "Inu/SDK/src/Inu.Kernel.Sample/Kernel.cs",
+    "Inu/SDK/templates/InuKernel/Boot/MemoryRuntimeStartup.cs",
+    "Inu/SDK/templates/InuKernel/Boot/GraphicsStartup.cs",
+    "Inu/SDK/templates/InuKernel/Boot/ManagedRuntimeConformanceStartup.cs",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu-Changes.json",
@@ -16,11 +16,11 @@
     "Kath/JSON/package.json",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
-    "Kath/docs/Release-0.0.103.md",
+    "Kath/docs/Release-0.0.104.md",
     "VERSION",
     "Inu/VERSION",
     "Kath/VERSION",
-    "CHANGED-0.0.103.txt"
+    "CHANGED-0.0.104.txt"
   ],
-  "summary": "Restrict central SDK reference compilation to automatic Using libraries and remove stale combined UEFI final-memory-map API usage from Boot.Memory and the kernel sample."
+  "summary": "Refresh existing generated kernels so framebuffer/TrueType startup completes before the managed runtime conformance gate, without rewriting coder-owned Kernel.cs."
 }

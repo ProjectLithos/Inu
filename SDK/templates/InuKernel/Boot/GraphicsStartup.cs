@@ -43,7 +43,10 @@ public static unsafe class GraphicsStartup
             if (!KernelConsole.Write("x")) return false;
             if (!KernelConsole.WriteUInt64(boot.GetFramebufferHeight())) return false;
             if (!KernelConsole.WriteLine(" (UEFI GOP generic framebuffer target).")) return false;
-            // Auto bootstrap is intentionally serial-only until the managed runtime is accepted.
+            // Visible console readiness is a boot prerequisite, not a post-conformance reward.
+            // Existing projects are refreshed to this SDK-owned stage, so the framebuffer/TrueType
+            // console comes online before the managed runtime conformance gate without touching
+            // coder-owned Kernel.cs.
             // Attach GOP to KernelConsole now, before querying the framebuffer byte count or
             // allocating software back buffers. Without this transition FrameByteCount remains 0.
             if (!KernelConsole.TryInitializeFramebuffer(boot))
@@ -91,6 +94,12 @@ public static unsafe class GraphicsStartup
             if (!KernelStructuredLogging.WarningLine("graphics","BootStartup.Initialize","UEFI GOP unavailable; boot continues on serial until a graphics driver publishes a display.")) return false;
         }
 #endif
+        // Run the managed semantic/ABI gate only after graphics had its chance to publish
+        // TTF_READY. This call is idempotent and also serves as the compatibility migration
+        // for kernels generated before 0.0.104 whose coder-owned Kernel.cs calls
+        // MemoryRuntimeStartup followed by GraphicsStartup.
+        if (!ManagedRuntimeConformanceStartup.Initialize()) return false;
+
         if (!KernelHeap.TryAllocate(256UL, 16UL, true, out KernelHeapAllocation heapSample)) return false;
         if (!KernelStructuredLogging.Begin(KernelLogLevel.Info,"boot-detail","BootStartup.Initialize")) return false;
         if (!KernelConsole.Write("Kernel heap sample: ")) return false;

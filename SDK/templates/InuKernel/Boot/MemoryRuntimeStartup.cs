@@ -130,39 +130,12 @@ public static unsafe class MemoryRuntimeStartup
             null,
             0);
         KernelConsole.WriteLine("NOBT:MODULES:OK");
+        if (!ManagedRuntimeConformanceStartup.Prepare(boot.GetKernelImageBase())) return false;
 
-        KernelConsole.WriteLine("NOBT:CONF:BASE");
-        if (!NativeAotExceptionRuntime.ConfigureImageBase(boot.GetKernelImageBase())) { KernelConsole.WriteLine("NOBT:FAIL:EHBASE"); return false; }
-        KernelConsole.WriteLine("NOBT:CONF:RUN");
-
-        if (!ManagedRuntimeConformance.Run(out UInt32 runtimePassed, out UInt32 runtimeFailed, out UInt32 abiPassed, out UInt32 abiFailed))
-        {
-            if (!KernelStructuredLogging.Begin(KernelLogLevel.Critical,"runtime","BootStartup.Initialize")) return false;
-            if (!KernelConsole.Write(".NET conformance passed/failed: ")) return false;
-            if (!KernelConsole.WriteUInt64(runtimePassed)) return false;
-            if (!KernelConsole.Write("/")) return false;
-            if (!KernelConsole.WriteUInt64(runtimeFailed)) return false;
-            if (!KernelConsole.WriteLine("")) return false;
-            if (!KernelStructuredLogging.Begin(KernelLogLevel.Critical,"runtime","BootStartup.Initialize")) return false;
-            if (!KernelConsole.Write(".NET ABI baseline passed/failed: ")) return false;
-            if (!KernelConsole.WriteUInt64(abiPassed)) return false;
-            if (!KernelConsole.Write("/")) return false;
-            if (!KernelConsole.WriteUInt64(abiFailed)) return false;
-            if (!KernelConsole.WriteLine("")) return false;
-            return false;
-        }
-        if (!KernelStructuredLogging.Begin(KernelLogLevel.Info,"runtime","BootStartup.Initialize")) return false;
-        if (!KernelConsole.Write(".NET conformance passed/failed: ")) return false;
-        if (!KernelConsole.WriteUInt64(runtimePassed)) return false;
-        if (!KernelConsole.Write("/")) return false;
-        if (!KernelConsole.WriteUInt64(runtimeFailed)) return false;
-        if (!KernelConsole.WriteLine("")) return false;
-        if (!KernelStructuredLogging.Begin(abiFailed == 0U ? KernelLogLevel.Info : KernelLogLevel.Warning,"runtime","BootStartup.Initialize")) return false;
-        if (!KernelConsole.Write(".NET ABI baseline passed/failed: ")) return false;
-        if (!KernelConsole.WriteUInt64(abiPassed)) return false;
-        if (!KernelConsole.Write("/")) return false;
-        if (!KernelConsole.WriteUInt64(abiFailed)) return false;
-        if (!KernelConsole.WriteLine("")) return false;
+        // Managed semantic/ABI conformance is deliberately deferred until after
+        // GraphicsStartup has brought the visible framebuffer/TrueType console online.
+        // Existing generated kernels call MemoryRuntimeStartup before GraphicsStartup,
+        // so keeping the gate out of this stage upgrades them without rewriting coder-owned Kernel.cs.
 
         return true;
     }

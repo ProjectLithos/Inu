@@ -1,5 +1,5 @@
 {
-  "version": "0.0.103",
+  "version": "0.0.104",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -803,7 +803,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "ff12f54afdd91a83f81f6486204b8966b8f1ccaf36952329a037c20716df1065"
+      "sha256": "be225073d82c8ac6b443a061466cc6643c2cc19c8827d527759e9dd3e2408259"
     },
     {
       "path": "Directory.Build.targets",
@@ -911,7 +911,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "d3c9fd04035ab1274451c70cf668cc96f241970572fcb68dad401a75b73fba64"
+      "sha256": "d1edbc34f45ddd9270f0837c4c534a8ecf0d4fb169414cf5a99d903fd130e0c5"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2963,7 +2963,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "140ee623efcd8c2c7048685b6c82d51e201dcf579ab43e98805806c8dd2cc696"
+      "sha256": "6d096819bad6d0072400f31aef02e95d3c62e6b94e0ae889207a91f2f94a34cb"
     },
     {
       "path": "Inu-Package.bat",
@@ -2999,7 +2999,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "60a45d622089d04e9a82289e90c1b101140e9f42bffa2ea9ae3df457bbdc633c"
+      "sha256": "032d28913993607042836e94765f58e103f7a0f90c90cc57a1f22d3295869fc7"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3511,7 +3511,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "d0abfa6a621ca67078b4f954d954909ef307e0ccb35fde7afd4e5a3eb1d67742"
+      "sha256": "22755f8b5432b6b963287f415baa859cc3044cb5f963944d06c3d0d194ae278d"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5907,7 +5907,7 @@
     },
     {
       "path": "templates/InuKernel/Boot/GraphicsStartup.cs",
-      "sha256": "bdf7425e0ae3fa25eaf1c31c882a3d1e7d2b41271e0cc3d41c0fa5e3c1424c42"
+      "sha256": "951635bb9cdb45808c6326d140e95ff4ff982611ed15e5cc0aecbf7d9ce76845"
     },
     {
       "path": "templates/InuKernel/Boot/KernelPanicTransport.cs",
@@ -5918,8 +5918,12 @@
       "sha256": "132fafce8f05715bf329f1d673e6b214aac7ca8877849c1d91d185eba4651ad1"
     },
     {
+      "path": "templates/InuKernel/Boot/ManagedRuntimeConformanceStartup.cs",
+      "sha256": "a8a5029ab01bdc2742162a79fdf4e6a97fd3fafb17e0c8a57b60370759ea5110"
+    },
+    {
       "path": "templates/InuKernel/Boot/MemoryRuntimeStartup.cs",
-      "sha256": "b408fec22c6a3e8413e101a2d8e28252d28d3610a16017e2a417f71727756c86"
+      "sha256": "f9166357780adc1d1b93102d8902f63ccbc4cb8ac80c3c99ab583137aa28aaf3"
     },
     {
       "path": "templates/InuKernel/Boot/PlatformTablesStartup.cs",
