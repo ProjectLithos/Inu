@@ -16,6 +16,36 @@ public static unsafe class FileSystemPaths
         return value>0L&&value<=0x7FL?(Char)value:'/';
     }
 
+
+    /// <summary><inu.api>Gets the OS root path using the separator selected by the OS author.</inu.api></summary>
+    public static String GetRootPath()=>GetPathSeparator().ToString();
+
+    /// <summary><inu.api>Returns true when a path is absolute according to the active OS path policy.</inu.api></summary>
+    public static Boolean IsAbsolutePath(String path)=>!String.IsNullOrEmpty(path)&&path[0]==GetPathSeparator();
+
+    /// <summary><inu.api>Combines two path parts using only the separator selected by the OS author.</inu.api></summary>
+    public static String Combine(String left,String right)
+    {
+        if(String.IsNullOrEmpty(left))return right??String.Empty;
+        if(String.IsNullOrEmpty(right))return left;
+        Char separator=GetPathSeparator();
+        if(right[0]==separator)return right;
+        Boolean leftHas=left[left.Length-1]==separator;
+        StringBuilder value=new StringBuilder(left.Length+right.Length+(leftHas?0:1));
+        value.Append(left);if(!leftHas)value.Append(separator);value.Append(right);return value.ToString();
+    }
+
+    /// <summary><inu.api>Gets the parent spelling for an external path using the active separator. Root remains root.</inu.api></summary>
+    public static String GetParentPath(String path)
+    {
+        Char separator=GetPathSeparator();
+        if(String.IsNullOrEmpty(path))return separator.ToString();
+        Int32 end=path.Length;while(end>1&&path[end-1]==separator)end--;
+        Int32 index=end-1;while(index>0&&path[index]!=separator)index--;
+        if(index<=0)return separator.ToString();
+        return path.Substring(0,index);
+    }
+
     /// <summary><inu.api>Changes the OS-selected external path separator while preserving the rest of the active path policy.</inu.api></summary>
     public static Boolean SetPathSeparator(Char separator)
     {

@@ -76,3 +76,14 @@ The supplied shell now obtains `FileSystemLogicalPath.Commands` through Get(`fil
 Userland code no longer needs to send `filesystem.*` Get/Set messages directly. `Inu.Userland.Runtime.FileSystemPaths` exposes `GetPathSeparator`, `SetPathSeparator`, `GetCommandsPath`, `GetCommandsPaths`, `SetCommandsPath`, `SetCommandsPaths`, and `BuildCommandsPath`.
 
 Command directories are now an ordered search list rather than one fixed location. `BuildCommandsPath(command)` returns executable candidates for each configured directory in search order, including `.EXE` and extensionless forms. The compatibility default remains `/System/Commands` until OS policy changes it.
+
+## Command and userland separator rule
+
+The active `FileSystemPathPolicy.Separator` is the sole user-facing path separator. Shell command lookup, `dir`, `cd`, `view`, `System.IO.Directory`, and `FileSystemPaths` must query that policy rather than infer or hard-code `/`, `\\`, `:`, or another joiner. Inu may keep an internal canonical path representation inside the VFS/boot-asset bridge, but it is an implementation detail and must be translated at the userland boundary.
+
+
+## 0.0.112 shell working-directory ownership
+
+Commands remain ordinary isolated ring-3 processes. A child process normally owns its own current directory, inherited from its parent at spawn time. Shell-state commands such as `cd` are the exception: they explicitly request that their parent process adopt the validated directory. This keeps `cd` as a discovered command under `/System/Commands` without making it a shell hard-code, while ensuring the directory survives after the short-lived `cd` process exits.
+
+The boot asset catalogue is indexed once at registration time for case-insensitive exact-file lookup. Command launch and `view` therefore do not linearly rescan the complete catalogue for every executable or file. Directory child de-duplication relies on the image builder's globally sorted asset paths and performs one forward comparison instead of rescanning all prior entries.

@@ -69,6 +69,7 @@ public static unsafe class UserlandRuntimeStartup
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessEnvironment,&ProcessEnvironmentGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessCurrentDirectory,&ProcessCurrentDirectoryGet)||
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ProcessCurrentDirectory,&ProcessCurrentDirectorySet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ProcessParentCurrentDirectory,&ProcessParentCurrentDirectorySet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileOpen,&FileOpenGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileRead,&FileReadGet)||
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileWrite,&FileWriteSet)||
@@ -254,11 +255,14 @@ public static unsafe class UserlandRuntimeStartup
 
         if(!TryCreateExecutable(payload,pathLength,KernelProcessOwnership.Foreground,out KernelProcessInfo process))
             return (Int64)KernelSystemCallError.NotFound;
-        if(KernelProcesses.TryGetCurrentProcessId(out UInt64 parentProcessId)&&parentProcessId!=0UL&&
-           !KernelProcessRecordStore.TryCopyCurrentDirectory(parentProcessId,process.Id))
+        if(KernelProcesses.TryGetCurrentProcessId(out UInt64 parentProcessId)&&parentProcessId!=0UL)
         {
-            KernelProcesses.TryTerminate(process.Id,-1L);
-            return (Int64)KernelSystemCallError.Fault;
+            if(!KernelProcessRecordStore.TrySetParentProcessId(process.Id,parentProcessId)||
+               !KernelProcessRecordStore.TryCopyCurrentDirectory(parentProcessId,process.Id))
+            {
+                KernelProcesses.TryTerminate(process.Id,-1L);
+                return (Int64)KernelSystemCallError.Fault;
+            }
         }
 
         fixed(Byte* args=_state.PendingArguments,env=_state.PendingEnvironment)
@@ -372,6 +376,23 @@ public static unsafe class UserlandRuntimeStartup
         }
         else if(!SystemAssetCatalog.DirectoryExistsAscii(resolved,resolvedLength))return (Int64)KernelSystemCallError.NotFound;
         return KernelProcessRecordStore.TrySetCurrentDirectoryAscii(processId,resolved,resolvedLength)?0L:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 ProcessParentCurrentDirectorySet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>PathCapacity)return (Int64)KernelSystemCallError.InvalidArgument;
+        if(!KernelProcesses.TryGetCurrentProcessId(out UInt64 processId)||processId==0UL)return (Int64)KernelSystemCallError.NotPermitted;
+        if(!KernelProcessRecordStore.TryGetParentProcessId(processId,out UInt64 parentProcessId)||parentProcessId==0UL)return (Int64)KernelSystemCallError.NotPermitted;
+        Byte* raw=stackalloc Byte[(Int32)PathCapacity];
+        if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)raw,frame->NativeMessage.DataLength))return (Int64)KernelSystemCallError.Fault;
+        Byte* resolved=stackalloc Byte[(Int32)PathCapacity];
+        if(!TryResolveProcessPath(processId,raw,(UInt32)frame->NativeMessage.DataLength,resolved,PathCapacity,out UInt32 resolvedLength))return (Int64)KernelSystemCallError.InvalidArgument;
+        if(KernelVfs.OpenDirectoryAscii(KernelVfs.DefaultNamespace,resolved,resolvedLength,out KernelDirectoryHandle handle))
+        {
+            if(!KernelVfs.CloseDirectory(handle))return (Int64)KernelSystemCallError.Fault;
+        }
+        else if(!SystemAssetCatalog.DirectoryExistsAscii(resolved,resolvedLength))return (Int64)KernelSystemCallError.NotFound;
+        return KernelProcessRecordStore.TrySetCurrentDirectoryAscii(parentProcessId,resolved,resolvedLength)?0L:(Int64)KernelSystemCallError.Fault;
     }
 
     private static Int64 CopyContextToUser(KernelSystemCallFrame* frame,Boolean arguments)

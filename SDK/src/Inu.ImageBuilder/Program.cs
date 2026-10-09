@@ -172,6 +172,7 @@ static void BuildAssetBundle(string novaRoot, string bundlePath)
         foreach(string file in Directory.GetFiles(fullDir).OrderBy(Path.GetFileName,StringComparer.OrdinalIgnoreCase))
             entries.Add(($"{path}/{Path.GetFileName(file).ToUpperInvariant()}",file,flags));
     }
+    entries.Sort((left,right)=>StringComparer.OrdinalIgnoreCase.Compare(left.Path,right.Path));
     using FileStream stream=new(bundlePath,FileMode.Create,FileAccess.Write,FileShare.None);
     using BinaryWriter writer=new(stream,Encoding.ASCII,leaveOpen:false);
     writer.Write(Encoding.ASCII.GetBytes("NOVASSET"));writer.Write(1U);writer.Write((uint)entries.Count);

@@ -19,7 +19,7 @@ internal static unsafe class KernelProcessRecordStore
 {
     private struct ProcessRecord
     {
-        internal UInt64 Id,Root,Entry,StackBase,StackTop,StackGuardBase,ApplicationIdHash,ApplicationNameHash,ApplicationVersionHash,KillRequested;
+        internal UInt64 Id,ParentId,Root,Entry,StackBase,StackTop,StackGuardBase,ApplicationIdHash,ApplicationNameHash,ApplicationVersionHash,KillRequested;
         internal Int64 ExitCode;
         internal UInt32 State,Format,Ownership,SyscallAbi,TableCount,AllocationCount,CurrentDirectoryLength;
         internal fixed Byte CurrentDirectory[1536];
@@ -65,6 +65,14 @@ internal static unsafe class KernelProcessRecordStore
     internal static Boolean TryGetInfo(UInt64 id,out KernelProcessInfo process)
     {
         process=default;if(!Acquire())return false;if(!TryFind(id,true,out KernelProcessRecordHandle handle)){Release();return false;}ProcessRecord* r=Record(handle);process=Snapshot(r);Release();return true;
+    }
+    internal static Boolean TrySetParentProcessId(UInt64 processId,UInt64 parentProcessId)
+    {
+        if(processId==0UL||!Acquire())return false;if(!TryFind(processId,false,out KernelProcessRecordHandle handle)){Release();return false;}ProcessRecord* r=Record(handle);if(r==null){Release();return false;}r->ParentId=parentProcessId;Release();return true;
+    }
+    internal static Boolean TryGetParentProcessId(UInt64 processId,out UInt64 parentProcessId)
+    {
+        parentProcessId=0UL;if(processId==0UL||!Acquire())return false;if(!TryFind(processId,false,out KernelProcessRecordHandle handle)){Release();return false;}ProcessRecord* r=Record(handle);if(r==null){Release();return false;}parentProcessId=r->ParentId;Release();return parentProcessId!=0UL;
     }
     internal static Boolean TryGetInfo(KernelProcessRecordHandle handle,out KernelProcessInfo process)
     {

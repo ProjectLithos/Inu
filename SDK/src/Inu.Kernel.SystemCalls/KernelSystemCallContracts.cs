@@ -35,6 +35,7 @@ public static class KernelSystemCallMessages
     public const String ProcessArguments = "process.arguments";
     public const String ProcessEnvironment = "process.environment";
     public const String ProcessCurrentDirectory = "process.current-directory";
+    public const String ProcessParentCurrentDirectory = "process.parent-current-directory";
     public const String ProcessControl = "process.control";
     public const String ConsoleOutput = "console.output";
     public const String ConsoleInput = "console.input";

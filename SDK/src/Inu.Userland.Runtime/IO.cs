@@ -208,6 +208,16 @@ public static unsafe class Directory
             throw new DirectoryNotFoundException("The requested working directory could not be selected.");
     }
 
+    /// <summary><inu.api>Requests that the parent process adopt a new working directory. This is intended for shell-state commands such as cd; ordinary applications should use SetCurrentDirectory.</inu.api></summary>
+    public static void SetParentCurrentDirectory(String path)
+    {
+        PathTransport.Validate(path);
+        Byte* ascii = stackalloc Byte[path.Length];
+        PathTransport.CopyAsciiChecked(path, ascii);
+        if (UserlandDirectory.SetParentCurrentDirectoryAscii(ascii, (UInt32)path.Length) < 0L)
+            throw new DirectoryNotFoundException("The requested parent working directory could not be selected.");
+    }
+
     /// <summary><inu.api>Creates a directory when it does not already exist and returns information for that path.</inu.api></summary>
     public static DirectoryInfo CreateDirectory(String path)
     {
@@ -227,12 +237,12 @@ public static unsafe class Directory
     {
         PathTransport.Validate(path);Byte* ascii=stackalloc Byte[path.Length];PathTransport.CopyAsciiChecked(path,ascii);
         Int64 opened=UserlandDirectory.OpenAscii(ascii,(UInt32)path.Length);if(opened<=0L)throw new DirectoryNotFoundException("The requested directory could not be found.");
-        List<String> entries=new List<String>();Byte* name=stackalloc Byte[512];Char separator=FileSystemPaths.GetPathSeparator();
+        List<String> entries=new List<String>();Byte* name=stackalloc Byte[512];
         for(;;)
         {
             Int32 length=UserlandDirectory.ReadAscii((UInt64)opened,name,512U);if(length<0){UserlandDirectory.Close((UInt64)opened);throw new IOException("The directory could not be read.");}if(length==0)break;
             Byte[] bytes=new Byte[length];for(Int32 i=0;i<length;i++)bytes[i]=name[i];String entry=Encoding.ASCII.GetString(bytes);
-            StringBuilder combined=new StringBuilder(path.Length+entry.Length+1);combined.Append(path);if(path[path.Length-1]!=separator)combined.Append(separator);combined.Append(entry);entries.Add(combined.ToString());
+            entries.Add(FileSystemPaths.Combine(path,entry));
         }
         UserlandDirectory.Close((UInt64)opened);return entries.ToArray();
     }

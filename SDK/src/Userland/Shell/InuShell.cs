@@ -56,9 +56,8 @@ public static unsafe class InuShell
 
     private static Byte GetPathSeparator()
     {
-        Byte* current=stackalloc Byte[(Int32)MaximumPathBytes];
-        Int64 length=UserlandSystem.Call(UserlandOperation.Get,"process.current-directory",null,0UL,current,MaximumPathBytes);
-        return length>0L?current[0]:(Byte)0;
+        Int64 value=UserlandSystem.Call(UserlandOperation.Get,"filesystem.path-separator",null,0UL,null,0UL);
+        return value>0L&&value<=0x7FL?(Byte)value:(Byte)0;
     }
 
     private static UInt32 GetCommandsPath(Byte* destination,UInt32 capacity)
