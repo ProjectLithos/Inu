@@ -1,8 +1,8 @@
 {
-  "baseVersion": "0.0.118",
-  "version": "0.0.119",
+  "baseVersion": "0.0.119",
+  "version": "0.0.120",
   "changedFiles": [
-    "CHANGED-0.0.119.txt",
+    "CHANGED-0.0.120.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -15,10 +15,15 @@
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.0.119.md",
+    "Kath/docs/Release-0.0.120.md",
     "Kath/packages/kath/package.json",
+    "Kath/packages/kath/src/browser/inu-contribution.ts",
+    "Kath/packages/kath/src/browser/inu-widget.tsx",
+    "Kath/packages/kath/src/common/inu-protocol.ts",
+    "Kath/packages/kath/src/node/inu-project-generation.ts",
+    "Kath/packages/kath/src/node/inu-project-service.ts",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "VERSION"
   ],
-  "summary": "Repair malformed stock generated Shell.cs source during refresh without overwriting custom shell implementations."
+  "summary": "Refresh Kath/Inu-owned OS dependencies automatically when an OS is opened, add an Inu > Refresh menu action, and repair the stock Shell backslash character literal during refresh."
 }

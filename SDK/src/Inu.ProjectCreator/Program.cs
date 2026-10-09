@@ -353,6 +353,7 @@ static void MigrateGeneratedShellSurface(string output, string projectName)
             if (depth == 0) configureBody = source[(open + 1)..(cursor - 1)].Trim('\r','\n');
         }
     }
+    configureBody = configureBody.Replace("'\\'", "'\\\\'", StringComparison.Ordinal);
     string escapedPrompt = prompt.Replace("\\", "\\\\").Replace("\"", "\\\"");
     string migrated = $"using System;\nusing Inu.Userland.Runtime;\n\nnamespace {ns};\n\n" +
         "/// <summary>Coder-owned shell behaviour. Configure runs once for the lifetime of the shell; Run owns the visible command loop.</summary>\n" +
@@ -418,6 +419,7 @@ static void RepairMalformedGeneratedStockShellSurface(string output, string proj
         }
     }
 
+    configureBody = configureBody.Replace("'\\'", "'\\\\'", StringComparison.Ordinal);
     string escapedPrompt = prompt.Replace("\\", "\\\\").Replace("\"", "\\\"");
     string repaired = $"using System;\nusing Inu.Userland.Runtime;\n\nnamespace {ns};\n\n" +
         "/// <summary>Coder-owned shell behaviour. Configure runs once for the lifetime of the shell; Run owns the visible command loop.</summary>\n" +
