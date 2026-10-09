@@ -1,8 +1,10 @@
 {
-  "baseVersion": "0.0.98",
-  "version": "0.0.99",
+  "baseVersion": "0.0.102",
+  "version": "0.0.103",
   "changedFiles": [
-    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
+    "Inu/SDK/scripts/Build-References.ps1",
+    "Inu/SDK/src/Inu.Boot.Memory/NativeUefiMemoryMapSource.cs",
+    "Inu/SDK/src/Inu.Kernel.Sample/Kernel.cs",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu-Changes.json",
@@ -14,11 +16,11 @@
     "Kath/JSON/package.json",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
-    "Kath/docs/Release-0.0.99.md",
+    "Kath/docs/Release-0.0.103.md",
     "VERSION",
     "Inu/VERSION",
     "Kath/VERSION",
-    "CHANGED-0.0.99.txt"
+    "CHANGED-0.0.103.txt"
   ],
-  "summary": "Fix freestanding Single/Double NaN equality and comparison so CoreLib does not trigger CS1718 under warnings-as-errors, while preserving .NET NaN comparison semantics."
+  "summary": "Restrict central SDK reference compilation to automatic Using libraries and remove stale combined UEFI final-memory-map API usage from Boot.Memory and the kernel sample."
 }

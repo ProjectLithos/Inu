@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="Inu.Configuration.props" Condition="Exists('Inu.Configuration.props')" />
   <Import Project="Inu.Configuration.targets" Condition="Exists('Inu.Configuration.targets')" />
+  <Import Project="Inu.SdkReferences.props" Condition="Exists('Inu.SdkReferences.props')" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net10.0</TargetFramework>

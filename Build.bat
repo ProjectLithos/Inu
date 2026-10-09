@@ -60,6 +60,18 @@ if errorlevel 1 (
     echo [ OK ] Inu private toolchain is installed.
 )
 
+if exist "%ROOT%\SDK\scripts\Build-Usings.ps1" del /q "%ROOT%\SDK\scripts\Build-Usings.ps1" >nul 2>nul
+
+if not exist "%ROOT%\SDK\scripts\Build-References.ps1" (
+    echo [FAIL] SDK central-reference build script is missing.
+    exit /b 1
+)
+powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%ROOT%\SDK\scripts\Build-References.ps1" -SdkRoot "%ROOT%\SDK" -DotNet "%ROOT%\.toolchain\DotNet\dotnet.exe" -Configuration Release
+if errorlevel 1 (
+    echo [FAIL] SDK central-reference compilation failed.
+    exit /b 1
+)
+
 powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "%ROOT%\Bootstrap-Inu.ps1" -Root "%ROOT%" %*
 set "RC=%ERRORLEVEL%"
 if not "%RC%"=="0" (

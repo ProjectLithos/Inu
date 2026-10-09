@@ -1,0 +1,21 @@
+NAME
+    view - Display a text file in the console.
+
+SYNOPSIS
+    view <file>
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Displays a text file. A relative file name is opened from the current working directory.
+    A path may also be supplied directly. Quoted paths are accepted.
+
+EXAMPLES
+    view README.TXT
+    view Docs/NOTES.TXT
+    view "/User/Dave/My Notes.txt"
+
+FILES
+    /System/Commands/VIEW.CMD
+    /INU/HELP/VIEW.MAN

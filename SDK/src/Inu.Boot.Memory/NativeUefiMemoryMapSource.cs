@@ -6,7 +6,7 @@ namespace Inu.Boot.Memory;
 
 /// <summary>Reads the retained native UEFI descriptor buffer exposed by a final boot context.</summary>
 /// <nova.when>Use during identity-mapped early boot, or pass an explicitly mapped virtual address after paging changes.</nova.when>
-/// <nova.depends>IUefiFinalMemoryMap final-map capability and a readable mapping of the retained descriptor buffer</nova.depends>
+/// <nova.depends>IBootMemoryMapBuffer, IUefiMemoryMapKey, IMemoryDescriptorLayout, and a readable mapping of the retained descriptor buffer</nova.depends>
 public sealed unsafe class NativeUefiMemoryMapSource : IMemoryMapSource
 {
     private readonly ulong _mappedAddress;
@@ -44,26 +44,40 @@ public sealed unsafe class NativeUefiMemoryMapSource : IMemoryMapSource
 
     /// <summary>Creates a source while the retained physical buffer remains identity mapped.</summary>
     /// <nova.when>Use before replacing the firmware page tables.</nova.when>
-    /// <nova.depends>IUefiFinalMemoryMap.MemoryMapAddress must be directly readable</nova.depends>
+    /// <nova.depends>IBootMemoryMapBuffer.MemoryMapAddress must be directly readable</nova.depends>
     /// <returns><see langword="true"/> when all final-map metadata is valid.</returns>
-    /// <example><code>bool ready = NativeUefiMemoryMapSource.TryCreate(boot, out NativeUefiMemoryMapSource? source);</code></example>
-    public static bool TryCreate(IUefiFinalMemoryMap boot, out NativeUefiMemoryMapSource? source)
-        => TryCreate(boot, boot.MemoryMapAddress.Value, out source);
+    /// <example><code>bool ready = NativeUefiMemoryMapSource.TryCreate(memoryMap, mapKey, descriptorLayout, out NativeUefiMemoryMapSource? source);</code></example>
+    public static bool TryCreate(
+        IBootMemoryMapBuffer memoryMap,
+        IUefiMemoryMapKey mapKey,
+        IMemoryDescriptorLayout descriptorLayout,
+        out NativeUefiMemoryMapSource? source)
+        => TryCreate(memoryMap, mapKey, descriptorLayout, memoryMap.MemoryMapAddress.Value, out source);
 
     /// <summary>Creates a source using the virtual address at which the retained physical buffer is mapped.</summary>
     /// <nova.when>Use after installing page tables that map the final UEFI buffer at a non-identity address.</nova.when>
     /// <nova.depends>The complete buffer must be readable at mappedAddress</nova.depends>
     /// <returns><see langword="true"/> when all final-map metadata and address arithmetic are valid.</returns>
-    /// <example><code>bool ready = NativeUefiMemoryMapSource.TryCreate(boot, mappedAddress, out NativeUefiMemoryMapSource? source);</code></example>
-    public static bool TryCreate(IUefiFinalMemoryMap boot, ulong mappedAddress, out NativeUefiMemoryMapSource? source)
+    /// <example><code>bool ready = NativeUefiMemoryMapSource.TryCreate(memoryMap, mapKey, descriptorLayout, mappedAddress, out NativeUefiMemoryMapSource? source);</code></example>
+    public static bool TryCreate(
+        IBootMemoryMapBuffer memoryMap,
+        IUefiMemoryMapKey mapKey,
+        IMemoryDescriptorLayout descriptorLayout,
+        ulong mappedAddress,
+        out NativeUefiMemoryMapSource? source)
     {
         source = null;
-        if (mappedAddress == 0 || boot.MemoryMapLength == 0 || boot.MemoryDescriptorSize < 40) return false;
-        if ((boot.MemoryDescriptorSize & 7UL) != 0 || boot.MemoryMapLength % boot.MemoryDescriptorSize != 0) return false;
-        if (mappedAddress > ulong.MaxValue - boot.MemoryMapLength) return false;
-        ulong count = boot.MemoryMapLength / boot.MemoryDescriptorSize;
+        if (mappedAddress == 0 || memoryMap.MemoryMapLength == 0 || descriptorLayout.MemoryDescriptorSize < 40) return false;
+        if ((descriptorLayout.MemoryDescriptorSize & 7UL) != 0 || memoryMap.MemoryMapLength % descriptorLayout.MemoryDescriptorSize != 0) return false;
+        if (mappedAddress > ulong.MaxValue - memoryMap.MemoryMapLength) return false;
+        ulong count = memoryMap.MemoryMapLength / descriptorLayout.MemoryDescriptorSize;
         if (count == 0 || count > int.MaxValue) return false;
-        source = new NativeUefiMemoryMapSource(mappedAddress, (int)count, boot.MemoryMapKey, boot.MemoryDescriptorSize, boot.MemoryDescriptorVersion);
+        source = new NativeUefiMemoryMapSource(
+            mappedAddress,
+            (int)count,
+            mapKey.MemoryMapKey,
+            descriptorLayout.MemoryDescriptorSize,
+            descriptorLayout.MemoryDescriptorVersion);
         return true;
     }
 

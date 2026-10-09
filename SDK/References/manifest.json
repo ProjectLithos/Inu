@@ -1,0 +1,221 @@
+﻿{
+    "configuration":  "Release",
+    "schemaVersion":  2,
+    "assemblies":  [
+                       {
+                           "project":  "Inu.Runtime.UserlandNativeAot",
+                           "assembly":  "Inu.Runtime.UserlandNativeAot",
+                           "file":  "All/Inu.Runtime.UserlandNativeAot.dll",
+                           "autoReference":  true
+                       },
+                       {
+                           "project":  "Inu.Userland.Runtime",
+                           "assembly":  "Inu.Userland.Runtime",
+                           "file":  "All/Inu.Userland.Runtime.dll",
+                           "autoReference":  true
+                       },
+                       {
+                           "project":  "Inu.Userland.RuntimeSupport",
+                           "assembly":  "Inu.Userland.RuntimeSupport",
+                           "file":  "All/Inu.Userland.RuntimeSupport.dll",
+                           "autoReference":  true
+                       },
+                       {
+                           "project":  "Inu.Userland.Shell",
+                           "assembly":  "Inu.Userland.Shell",
+                           "file":  "All/Inu.Userland.Shell.dll",
+                           "autoReference":  true
+                       }
+                   ],
+    "symbols":  [
+                    {
+                        "name":  "Console",
+                        "namespace":  "System",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "FileSystemPaths",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "IOException",
+                        "namespace":  "System.IO",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "FileNotFoundException",
+                        "namespace":  "System.IO",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "DirectoryNotFoundException",
+                        "namespace":  "System.IO",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "File",
+                        "namespace":  "System.IO",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "Directory",
+                        "namespace":  "System.IO",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "DirectoryInfo",
+                        "namespace":  "System.IO",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "Process",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "CommandLine",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "DeviceInfo",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "SystemInformation",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "Timeout",
+                        "namespace":  "System.Threading",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "Thread",
+                        "namespace":  "System.Threading",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "UserlandOperation",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "UserlandError",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "UserlandMessage",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "UserlandSystem",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "Output",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "UserlandConsole",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "UserlandProcess",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "UserlandArguments",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "UserlandFile",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "KernelHeapAllocation",
+                        "namespace":  "Inu.Kernel.Heap",
+                        "project":  "Inu.Userland.RuntimeSupport",
+                        "assembly":  "Inu.Userland.RuntimeSupport",
+                        "file":  "All/Inu.Userland.RuntimeSupport.dll"
+                    },
+                    {
+                        "name":  "KernelHeap",
+                        "namespace":  "Inu.Kernel.Heap",
+                        "project":  "Inu.Userland.RuntimeSupport",
+                        "assembly":  "Inu.Userland.RuntimeSupport",
+                        "file":  "All/Inu.Userland.RuntimeSupport.dll"
+                    },
+                    {
+                        "name":  "X64ArchitectureBoundary",
+                        "namespace":  "Inu.Kernel.Heap",
+                        "project":  "Inu.Userland.RuntimeSupport",
+                        "assembly":  "Inu.Userland.RuntimeSupport",
+                        "file":  "All/Inu.Userland.RuntimeSupport.dll"
+                    },
+                    {
+                        "name":  "InuShell",
+                        "namespace":  "Inu.Userland.Shell",
+                        "project":  "Inu.Userland.Shell",
+                        "assembly":  "Inu.Userland.Shell",
+                        "file":  "All/Inu.Userland.Shell.dll"
+                    }
+                ]
+}

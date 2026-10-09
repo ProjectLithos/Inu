@@ -14,7 +14,7 @@ public static class Kernel
     private const uint ConsoleFontSize = 16U;
 
     [KernelEntry]
-    public static bool KMain(IBootFramebuffer framebufferBoot, IUefiFinalMemoryMap finalMemoryMap)
+    public static bool KMain(IBootFramebuffer framebufferBoot, IBootMemoryMapBuffer memoryMap, IUefiMemoryMapKey memoryMapKey, IMemoryDescriptorLayout descriptorLayout)
     {
         SerialConsole serial = new();
         FramebufferConsole framebuffer = new();
@@ -23,7 +23,7 @@ public static class Kernel
         if (!serial.Initialize()) return false;
         if (!framebuffer.Initialize(framebufferBoot)) return false;
         if (!WriteLine(serial, framebuffer, "Inu KMain started.")) return false;
-        if (!NativeUefiMemoryMapSource.TryCreate(finalMemoryMap, out NativeUefiMemoryMapSource? finalMap)) return false;
+        if (!NativeUefiMemoryMapSource.TryCreate(memoryMap, memoryMapKey, descriptorLayout, out NativeUefiMemoryMapSource? finalMap)) return false;
         if (finalMap is null || finalMap.Count < 1) return false;
         if (!WriteLine(serial, framebuffer, "Final UEFI memory map retained; ExitBootServices succeeded.")) return false;
         if (!WriteLine(serial, framebuffer, "Native UEFI memory-map adapter online.")) return false;
@@ -57,13 +57,14 @@ public static class Kernel
         if (native->FinalMemoryMapFlag != 1 || native->ExitBootServicesStatus != 0) return 0;
 
         BootFramebufferContext framebufferBoot = new(framebuffer);
-        UefiFinalMemoryMapContext finalMemoryMap = new(
+        BootMemoryMapBufferContext memoryMap = new(
             new PhysicalAddress(native->FinalMemoryMapAddress),
-            native->FinalMemoryMapLength,
-            native->FinalMemoryMapKey,
+            native->FinalMemoryMapLength);
+        UefiMemoryMapKeyContext memoryMapKey = new(native->FinalMemoryMapKey);
+        MemoryDescriptorLayoutContext descriptorLayout = new(
             native->FinalMemoryDescriptorSize,
             native->FinalMemoryDescriptorVersion);
-        return KMain(framebufferBoot, finalMemoryMap) ? (byte)1 : (byte)0;
+        return KMain(framebufferBoot, memoryMap, memoryMapKey, descriptorLayout) ? (byte)1 : (byte)0;
     }
 
     private static bool WriteLine(SerialConsole serial, FramebufferConsole framebuffer, ReadOnlySpan<char> text)

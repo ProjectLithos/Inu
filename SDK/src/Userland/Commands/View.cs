@@ -4,15 +4,15 @@ using Inu.Userland.Runtime;
 
 namespace Inu.Userland.Commands;
 
-/// <summary>Compatibility text-file viewer command.</summary>
-public static class Type
+/// <summary>Displays a text file from the process working directory or from an explicit path.</summary>
+public static class View
 {
     public static int Main()
     {
         String path = CommandLine.GetRawArguments();
         if (String.IsNullOrWhiteSpace(path))
         {
-            Console.WriteLine("Usage: type <file>");
+            Console.WriteLine("Usage: view <file>");
             return 1;
         }
 
@@ -26,12 +26,15 @@ public static class Type
 
         try
         {
+            // File.ReadAllText deliberately receives the path exactly as supplied.
+            // Relative names are resolved by the kernel against this process's current
+            // working directory; absolute/explicit paths are resolved by filesystem policy.
             Console.Write(File.ReadAllText(path));
             return 0;
         }
         catch (Exception)
         {
-            Console.WriteLine("Could not read file: " + path);
+            Console.WriteLine("Could not read text file: " + path);
             return 1;
         }
     }

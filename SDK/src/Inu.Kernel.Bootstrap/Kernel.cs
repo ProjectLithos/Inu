@@ -378,41 +378,9 @@ public static unsafe partial class Kernel
             0);
         KernelConsole.WriteLine("NOBT:MODULES:OK");
 
-        KernelConsole.WriteLine("NOBT:CONF:BASE");
-        if (!NativeAotExceptionRuntime.ConfigureImageBase(boot.GetKernelImageBase())) { KernelConsole.WriteLine("NOBT:FAIL:EHBASE"); return false; }
-        KernelConsole.WriteLine("NOBT:CONF:RUN");
-
-        if (!ManagedRuntimeConformance.Run(out UInt32 runtimePassed, out UInt32 runtimeFailed, out UInt32 abiPassed, out UInt32 abiFailed))
-        {
-            if (!KernelConsole.Write(".NET conformance passed/failed: ")) return false;
-            if (!KernelConsole.WriteUInt64(runtimePassed)) return false;
-            if (!KernelConsole.Write("/")) return false;
-            if (!KernelConsole.WriteUInt64(runtimeFailed)) return false;
-            if (!KernelConsole.WriteLine("")) return false;
-            if (!KernelConsole.Write(".NET ABI baseline passed/failed: ")) return false;
-            if (!KernelConsole.WriteUInt64(abiPassed)) return false;
-            if (!KernelConsole.Write("/")) return false;
-            if (!KernelConsole.WriteUInt64(abiFailed)) return false;
-            if (!KernelConsole.WriteLine("")) return false;
-            KernelStructuredLogging.CriticalLine("runtime","Kernel.KMain",runtimeFailed!=0U?"Managed runtime semantic conformance rejected startup.":"System.Object NativeAOT ABI gate rejected startup.");
-            return false;
-        }
-        if (!KernelConsole.Write(".NET conformance passed/failed: ")) return false;
-        if (!KernelConsole.WriteUInt64(runtimePassed)) return false;
-        if (!KernelConsole.Write("/")) return false;
-        if (!KernelConsole.WriteUInt64(runtimeFailed)) return false;
-        if (!KernelConsole.WriteLine("")) return false;
-        if (!KernelConsole.Write(".NET ABI baseline passed/failed: ")) return false;
-        if (!KernelConsole.WriteUInt64(abiPassed)) return false;
-        if (!KernelConsole.Write("/")) return false;
-        if (!KernelConsole.WriteUInt64(abiFailed)) return false;
-        if (!KernelConsole.WriteLine("")) return false;
-        if (abiFailed != 0U && !KernelStructuredLogging.WarningLine("runtime","Kernel.KMain","CoreLib ABI baseline contains known pre-reconciliation divergences; boot continues until the corresponding ABI audit items are implemented.")) return false;
-        if (!KernelStructuredLogging.InfoLine("runtime","Kernel.KMain","Inu.Runtime.NativeAot managed phase and in-kernel conformance are online.")) return false;
-
+        // Visible console readiness is a boot prerequisite, not a post-conformance reward.
+        // Initialize graphics/GOP/TrueType now so every subsequent runtime gate has visible output.
         if (!KernelGraphics.Initialize()) return false;
-        if (!Inu.Kernel.Audio.Audio.Initialize()) return false;
-        if (!Inu.Kernel.Audio.Audio.Run()) return false;
         Boolean firmwareFramebufferAvailable = boot.GetFramebufferAddress() != 0UL && boot.GetFramebufferSize() != 0UL && boot.GetFramebufferWidth() != 0U && boot.GetFramebufferHeight() != 0U;
 #if INU_COMPONENT_GRAPHICS_FIRMWARE_FRAMEBUFFER
         if (firmwareFramebufferAvailable)
@@ -425,8 +393,9 @@ public static unsafe partial class Kernel
             if (!KernelConsole.Write("x")) return false;
             if (!KernelConsole.WriteUInt64(boot.GetFramebufferHeight())) return false;
             if (!KernelConsole.WriteLine(" (UEFI GOP generic framebuffer target).")) return false;
-            // Auto bootstrap is intentionally serial-only until the managed runtime is accepted.
-            // Attach GOP to KernelConsole now, before querying the framebuffer byte count or
+            // Bring the visible framebuffer console online before managed conformance.
+            // Long-running runtime gates must never leave the user with a blank display.
+            // Attach GOP to KernelConsole before querying the framebuffer byte count or
             // allocating software back buffers. Without this transition FrameByteCount remains 0.
             if (!KernelConsole.TryInitializeFramebuffer(framebufferBoot))
             {
@@ -473,6 +442,41 @@ public static unsafe partial class Kernel
             KernelStructuredLogging.WarningLine("graphics","Kernel.KMain","UEFI GOP unavailable; graphics is optional and boot continues on serial.");
         }
 #endif
+
+        KernelConsole.WriteLine("NOBT:CONF:BASE");
+        if (!NativeAotExceptionRuntime.ConfigureImageBase(boot.GetKernelImageBase())) { KernelConsole.WriteLine("NOBT:FAIL:EHBASE"); return false; }
+        KernelConsole.WriteLine("NOBT:CONF:RUN");
+
+        if (!ManagedRuntimeConformance.Run(out UInt32 runtimePassed, out UInt32 runtimeFailed, out UInt32 abiPassed, out UInt32 abiFailed))
+        {
+            if (!KernelConsole.Write(".NET conformance passed/failed: ")) return false;
+            if (!KernelConsole.WriteUInt64(runtimePassed)) return false;
+            if (!KernelConsole.Write("/")) return false;
+            if (!KernelConsole.WriteUInt64(runtimeFailed)) return false;
+            if (!KernelConsole.WriteLine("")) return false;
+            if (!KernelConsole.Write(".NET ABI baseline passed/failed: ")) return false;
+            if (!KernelConsole.WriteUInt64(abiPassed)) return false;
+            if (!KernelConsole.Write("/")) return false;
+            if (!KernelConsole.WriteUInt64(abiFailed)) return false;
+            if (!KernelConsole.WriteLine("")) return false;
+            KernelStructuredLogging.CriticalLine("runtime","Kernel.KMain",runtimeFailed!=0U?"Managed runtime semantic conformance rejected startup.":"System.Object NativeAOT ABI gate rejected startup.");
+            return false;
+        }
+        if (!KernelConsole.Write(".NET conformance passed/failed: ")) return false;
+        if (!KernelConsole.WriteUInt64(runtimePassed)) return false;
+        if (!KernelConsole.Write("/")) return false;
+        if (!KernelConsole.WriteUInt64(runtimeFailed)) return false;
+        if (!KernelConsole.WriteLine("")) return false;
+        if (!KernelConsole.Write(".NET ABI baseline passed/failed: ")) return false;
+        if (!KernelConsole.WriteUInt64(abiPassed)) return false;
+        if (!KernelConsole.Write("/")) return false;
+        if (!KernelConsole.WriteUInt64(abiFailed)) return false;
+        if (!KernelConsole.WriteLine("")) return false;
+        if (abiFailed != 0U && !KernelStructuredLogging.WarningLine("runtime","Kernel.KMain","CoreLib ABI baseline contains known pre-reconciliation divergences; boot continues until the corresponding ABI audit items are implemented.")) return false;
+        if (!KernelStructuredLogging.InfoLine("runtime","Kernel.KMain","Inu.Runtime.NativeAot managed phase and in-kernel conformance are online.")) return false;
+
+        if (!Inu.Kernel.Audio.Audio.Initialize()) return false;
+        if (!Inu.Kernel.Audio.Audio.Run()) return false;
         if (!KernelHeap.TryAllocate(256UL, 16UL, true, out KernelHeapAllocation heapSample)) return false;
         if (!KernelConsole.Write("Kernel heap sample: ")) return false;
         if (!KernelConsole.WriteHex(heapSample.Address)) return false;
