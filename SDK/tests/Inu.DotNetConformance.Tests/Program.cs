@@ -256,15 +256,25 @@ internal static class Program
             && Math.Abs(Math.Sqrt(81.0) - 9.0) < 0.000001;
 
     private static bool TestConvert()
-        => Convert.ToInt32(true) == 1 && Convert.ToInt32(false) == 0
+    {
+        bool intOverflow = false, uintOverflow = false, longOverflow = false, ulongOverflow = false;
+        try { _ = Convert.ToInt32(2147483648.0); } catch (OverflowException) { intOverflow = true; }
+        try { _ = Convert.ToUInt32(-1.0); } catch (OverflowException) { uintOverflow = true; }
+        try { _ = Convert.ToInt64(9223372036854775808.0); } catch (OverflowException) { longOverflow = true; }
+        try { _ = Convert.ToUInt64(-1.0); } catch (OverflowException) { ulongOverflow = true; }
+        return Convert.ToInt32(true) == 1 && Convert.ToInt32(false) == 0
             && Convert.ToByte(255) == 255 && Convert.ToSByte(-12) == -12
             && Convert.ToInt16(-32000) == -32000 && Convert.ToUInt16(65000) == 65000
             && Convert.ToUInt32(123) == 123U && Convert.ToInt64(-123) == -123L
             && Convert.ToUInt64(123) == 123UL && Convert.ToBoolean(1) && !Convert.ToBoolean(0)
             && Convert.ToInt32(2.5) == 2 && Convert.ToInt32(3.5) == 4
+            && Convert.ToInt32(2147483647.0) == 2147483647
+            && Convert.ToUInt32(4294967295.0) == 4294967295U
             && Convert.ToDouble(123) == 123.0 && Convert.ToSingle(12) == 12.0f
             && Convert.ToString(-321) == "-321" && Convert.ToString(12.5) == "12.5"
-            && Convert.ToString(true) == "True";
+            && Convert.ToString(true) == "True"
+            && intOverflow && uintOverflow && longOverflow && ulongOverflow;
+    }
 
     private static bool TestComparables()
     {

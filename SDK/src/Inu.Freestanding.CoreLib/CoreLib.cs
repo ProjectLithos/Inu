@@ -580,6 +580,43 @@ namespace System
             for (Int32 i = 0; i < 24; i++) guess = (guess + value / guess) * 0.5;
             return guess;
         }
+
+        // NativeAOT/RyuJIT imports these exact CoreLib helpers for checked
+        // floating-point-to-integer conversions. Keep the range tests here
+        // and perform only an unchecked in-range cast inside the helper so the
+        // helper cannot recursively require itself during code generation.
+        internal static Int32 ConvertToInt32Checked(Double value)
+        {
+            const Double upper = 2147483648.0;
+            if (!(value > -2147483649.0 && value < upper)) throw new OverflowException();
+            return (Int32)value;
+        }
+
+        internal static UInt32 ConvertToUInt32Checked(Double value)
+        {
+            const Double two31 = 2147483648.0;
+            const Double two32 = 4294967296.0;
+            if (!(value > -1.0 && value < two32)) throw new OverflowException();
+            if (value < two31) return (UInt32)(Int32)value;
+            return ((UInt32)(Int32)(value - two31)) + 0x80000000U;
+        }
+
+        internal static Int64 ConvertToInt64Checked(Double value)
+        {
+            const Double two63 = 9223372036854775808.0;
+            // The next representable Double below -2^63 is -2^63-2048.
+            if (!(value > -9223372036854777856.0 && value < two63)) throw new OverflowException();
+            return (Int64)value;
+        }
+
+        internal static UInt64 ConvertToUInt64Checked(Double value)
+        {
+            const Double two63 = 9223372036854775808.0;
+            const Double two64 = 18446744073709551616.0;
+            if (!(value > -1.0 && value < two64)) throw new OverflowException();
+            if (value < two63) return (UInt64)(Int64)value;
+            return ((UInt64)(Int64)(value - two63)) + 0x8000000000000000UL;
+        }
     }
 
     /// <summary><inu.api/>Invariant primitive conversions for the Core v1 freestanding runtime.</summary>

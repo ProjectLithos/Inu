@@ -68,3 +68,7 @@ When adding a new item:
 - do not advertise the item as supported until both gates pass.
 
 A future incompatible expansion should receive a new target name such as `Inu.BCL.Core.v2` rather than silently changing the meaning of `v1`.
+
+### NativeAOT JIT helper contract
+
+The freestanding `System.Math` surface also supplies the CoreLib helper entry points that RyuJIT/NativeAOT imports for checked floating-point-to-integer conversion (`ConvertToInt32Checked`, `ConvertToUInt32Checked`, `ConvertToInt64Checked`, and `ConvertToUInt64Checked`). These are runtime/compiler ABI helpers rather than public BCL APIs, and their behaviour is covered through the public `System.Convert` conformance cases.

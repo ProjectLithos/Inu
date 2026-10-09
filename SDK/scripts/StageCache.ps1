@@ -23,6 +23,26 @@ function Get-InuStageHash {
             [void]$sha.TransformBlock($bytes, 0, $bytes.Length, $bytes, 0)
         }
         foreach ($file in @(Get-InuStageFiles -Paths $Paths -Outputs:$Outputs | Sort-Object FullName -Unique)) {
+            # Release identity in Directory.Build.props does not change generated
+            # machine code. Normalise only those properties for input fingerprints
+            # so a release-number bump does not rebuild every unchanged host tool,
+            # kernel, or userland project. All other build-policy content remains
+            # part of the cache key. Output hashing always uses the exact bytes.
+            if (-not $Outputs -and $file.Name -eq 'Directory.Build.props') {
+                $text = Get-Content -LiteralPath $file.FullName -Raw
+                foreach ($element in @('Version','AssemblyVersion','FileVersion','PackageVersion')) {
+                    $text = [Text.RegularExpressions.Regex]::Replace(
+                        $text,
+                        ('(<' + $element + '>)[^<]*(</' + $element + '>)'),
+                        '$1<release-version>$2',
+                        [Text.RegularExpressions.RegexOptions]::CultureInvariant)
+                }
+                $content = [Text.Encoding]::UTF8.GetBytes($text)
+                $bytes = [Text.Encoding]::UTF8.GetBytes(($file.FullName + "`0" + $content.Length + "`0"))
+                [void]$sha.TransformBlock($bytes, 0, $bytes.Length, $bytes, 0)
+                [void]$sha.TransformBlock($content, 0, $content.Length, $content, 0)
+                continue
+            }
             $bytes = [Text.Encoding]::UTF8.GetBytes(($file.FullName + "`0" + $file.Length + "`0"))
             [void]$sha.TransformBlock($bytes, 0, $bytes.Length, $bytes, 0)
             $stream = [IO.File]::OpenRead($file.FullName)
