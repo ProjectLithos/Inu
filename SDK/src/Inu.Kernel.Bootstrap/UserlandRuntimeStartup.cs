@@ -26,6 +26,7 @@ public static unsafe class UserlandRuntimeStartup
     private const UInt32 AssetHandleSlots=8U;
     private const UInt64 AssetFileHandleBase=0x70000000UL;
     private const UInt64 AssetDirectoryHandleBase=0x71000000UL;
+    private const UInt64 IndexedDirectoryHandleBase=0x72000000UL;
 
     private unsafe struct RuntimeState
     {
@@ -55,6 +56,9 @@ public static unsafe class UserlandRuntimeStartup
     private static UInt32[] _assetDirectoryLengths=new UInt32[(Int32)AssetHandleSlots];
     private static UInt32[] _assetDirectoryIndices=new UInt32[(Int32)AssetHandleSlots];
     private static Byte[] _assetDirectoryPaths=new Byte[(Int32)(AssetHandleSlots*PathCapacity)];
+    private static UInt32[] _indexedDirectoryLengths=new UInt32[(Int32)AssetHandleSlots];
+    private static UInt32[] _indexedDirectoryCursors=new UInt32[(Int32)AssetHandleSlots];
+    private static Byte[] _indexedDirectoryPaths=new Byte[(Int32)(AssetHandleSlots*PathCapacity)];
 
     public static Boolean Initialize<TBoot>(TBoot boot) where TBoot:ISystemAssetBundleContext
     {
@@ -370,11 +374,14 @@ public static unsafe class UserlandRuntimeStartup
         if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)raw,frame->NativeMessage.DataLength))return (Int64)KernelSystemCallError.Fault;
         Byte* resolved=stackalloc Byte[(Int32)PathCapacity];
         if(!TryResolveProcessPath(processId,raw,(UInt32)frame->NativeMessage.DataLength,resolved,PathCapacity,out UInt32 resolvedLength))return (Int64)KernelSystemCallError.InvalidArgument;
-        if(KernelVfs.OpenDirectoryAscii(KernelVfs.DefaultNamespace,resolved,resolvedLength,out KernelDirectoryHandle handle))
+        if(!KernelPathIndex.IsDirectoryReadyAscii(KernelVfs.DefaultNamespace,resolved,resolvedLength))
         {
-            if(!KernelVfs.CloseDirectory(handle))return (Int64)KernelSystemCallError.Fault;
+            if(KernelVfs.OpenDirectoryAscii(KernelVfs.DefaultNamespace,resolved,resolvedLength,out KernelDirectoryHandle handle))
+            {
+                if(!KernelVfs.CloseDirectory(handle))return (Int64)KernelSystemCallError.Fault;
+            }
+            else if(!SystemAssetCatalog.DirectoryExistsAscii(resolved,resolvedLength))return (Int64)KernelSystemCallError.NotFound;
         }
-        else if(!SystemAssetCatalog.DirectoryExistsAscii(resolved,resolvedLength))return (Int64)KernelSystemCallError.NotFound;
         return KernelProcessRecordStore.TrySetCurrentDirectoryAscii(processId,resolved,resolvedLength)?0L:(Int64)KernelSystemCallError.Fault;
     }
 
@@ -387,11 +394,14 @@ public static unsafe class UserlandRuntimeStartup
         if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)raw,frame->NativeMessage.DataLength))return (Int64)KernelSystemCallError.Fault;
         Byte* resolved=stackalloc Byte[(Int32)PathCapacity];
         if(!TryResolveProcessPath(processId,raw,(UInt32)frame->NativeMessage.DataLength,resolved,PathCapacity,out UInt32 resolvedLength))return (Int64)KernelSystemCallError.InvalidArgument;
-        if(KernelVfs.OpenDirectoryAscii(KernelVfs.DefaultNamespace,resolved,resolvedLength,out KernelDirectoryHandle handle))
+        if(!KernelPathIndex.IsDirectoryReadyAscii(KernelVfs.DefaultNamespace,resolved,resolvedLength))
         {
-            if(!KernelVfs.CloseDirectory(handle))return (Int64)KernelSystemCallError.Fault;
+            if(KernelVfs.OpenDirectoryAscii(KernelVfs.DefaultNamespace,resolved,resolvedLength,out KernelDirectoryHandle handle))
+            {
+                if(!KernelVfs.CloseDirectory(handle))return (Int64)KernelSystemCallError.Fault;
+            }
+            else if(!SystemAssetCatalog.DirectoryExistsAscii(resolved,resolvedLength))return (Int64)KernelSystemCallError.NotFound;
         }
-        else if(!SystemAssetCatalog.DirectoryExistsAscii(resolved,resolvedLength))return (Int64)KernelSystemCallError.NotFound;
         return KernelProcessRecordStore.TrySetCurrentDirectoryAscii(parentProcessId,resolved,resolvedLength)?0L:(Int64)KernelSystemCallError.Fault;
     }
 
@@ -560,6 +570,7 @@ public static unsafe class UserlandRuntimeStartup
         if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
         Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
         if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
+        if(TryOpenIndexedDirectory(path,pathLength,out UInt64 indexedHandle))return (Int64)indexedHandle;
         if(KernelVfs.OpenDirectoryAscii(KernelVfs.DefaultNamespace,path,pathLength,out KernelDirectoryHandle handle))return handle.Value;
         return TryOpenAssetDirectory(path,pathLength,out UInt64 assetHandle)?(Int64)assetHandle:(Int64)KernelSystemCallError.NotFound;
     }
@@ -586,13 +597,24 @@ public static unsafe class UserlandRuntimeStartup
     {
         if(frame==null||frame->NativeMessage.Value0==0UL||frame->NativeMessage.OutputCapacity==0UL)return (Int64)KernelSystemCallError.InvalidArgument;
         UInt64 capacity=frame->NativeMessage.OutputCapacity;if(capacity>512UL)capacity=512UL;
+        if(TryGetIndexedDirectorySlot(frame->NativeMessage.Value0,out UInt32 indexedSlot))
+        {
+            Byte* indexedAscii=stackalloc Byte[(Int32)capacity];UInt32 pathOffset=indexedSlot*PathCapacity;
+            fixed(Byte* paths=_indexedDirectoryPaths)
+            {
+                UInt32 cursor=_indexedDirectoryCursors[(Int32)indexedSlot];
+                if(!KernelPathIndex.TryGetNextDirectoryEntryAscii(KernelVfs.DefaultNamespace,paths+pathOffset,_indexedDirectoryLengths[(Int32)indexedSlot],ref cursor,indexedAscii,(UInt32)capacity,out UInt32 indexedLength,out _)){_indexedDirectoryCursors[(Int32)indexedSlot]=cursor;return 0L;}
+                _indexedDirectoryCursors[(Int32)indexedSlot]=cursor;return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)indexedAscii,indexedLength)?(Int64)indexedLength:(Int64)KernelSystemCallError.Fault;
+            }
+        }
         if(TryGetAssetDirectorySlot(frame->NativeMessage.Value0,out UInt32 assetSlot))
         {
             Byte* assetAscii=stackalloc Byte[(Int32)capacity];UInt32 pathOffset=assetSlot*PathCapacity;
             fixed(Byte* paths=_assetDirectoryPaths)
             {
-                if(!SystemAssetCatalog.TryGetDirectoryEntryAscii(paths+pathOffset,_assetDirectoryLengths[(Int32)assetSlot],_assetDirectoryIndices[(Int32)assetSlot],assetAscii,(UInt32)capacity,out UInt32 assetLength,out _))return 0L;
-                _assetDirectoryIndices[(Int32)assetSlot]++;return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)assetAscii,assetLength)?(Int64)assetLength:(Int64)KernelSystemCallError.Fault;
+                UInt32 cursor=_assetDirectoryIndices[(Int32)assetSlot];
+                if(!SystemAssetCatalog.TryGetNextDirectoryEntryAscii(paths+pathOffset,_assetDirectoryLengths[(Int32)assetSlot],ref cursor,assetAscii,(UInt32)capacity,out UInt32 assetLength,out _)){_assetDirectoryIndices[(Int32)assetSlot]=cursor;return 0L;}
+                _assetDirectoryIndices[(Int32)assetSlot]=cursor;return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)assetAscii,assetLength)?(Int64)assetLength:(Int64)KernelSystemCallError.Fault;
             }
         }
         Char* name=stackalloc Char[(Int32)capacity];
@@ -606,6 +628,7 @@ public static unsafe class UserlandRuntimeStartup
         if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
         UInt64 handle=frame->NativeMessage.Value0;
         if(handle<=2UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        if(TryGetIndexedDirectorySlot(handle,out UInt32 indexedSlot)){_indexedDirectoryLengths[(Int32)indexedSlot]=0U;_indexedDirectoryCursors[(Int32)indexedSlot]=0U;return 0L;}
         if(TryGetAssetDirectorySlot(handle,out UInt32 assetSlot)){_assetDirectoryLengths[(Int32)assetSlot]=0U;_assetDirectoryIndices[(Int32)assetSlot]=0U;return 0L;}
         return KernelVfs.CloseDirectory(new KernelDirectoryHandle((UInt32)handle))?0L:(Int64)KernelSystemCallError.NotFound;
     }
@@ -616,6 +639,13 @@ public static unsafe class UserlandRuntimeStartup
         for(UInt32 i=0U;i<AssetHandleSlots;i++)if(_assetFileAddresses[(Int32)i]==0UL){_assetFileAddresses[(Int32)i]=(UInt64)(nuint)data;_assetFileLengths[(Int32)i]=length;_assetFilePositions[(Int32)i]=0U;handle=AssetFileHandleBase+i;return true;}return false;
     }
     private static Boolean TryGetAssetFileSlot(UInt64 handle,out UInt32 slot){slot=0U;if(handle<AssetFileHandleBase||handle>=AssetFileHandleBase+AssetHandleSlots)return false;slot=(UInt32)(handle-AssetFileHandleBase);return _assetFileAddresses[(Int32)slot]!=0UL;}
+    private static Boolean TryOpenIndexedDirectory(Byte* canonical,UInt32 canonicalLength,out UInt64 handle)
+    {
+        handle=0UL;if(!KernelPathIndex.IsDirectoryReadyAscii(KernelVfs.DefaultNamespace,canonical,canonicalLength))return false;
+        for(UInt32 i=0U;i<AssetHandleSlots;i++)if(_indexedDirectoryLengths[(Int32)i]==0U){UInt32 offset=i*PathCapacity;fixed(Byte* paths=_indexedDirectoryPaths)for(UInt32 j=0U;j<canonicalLength;j++)paths[offset+j]=canonical[j];_indexedDirectoryLengths[(Int32)i]=canonicalLength;_indexedDirectoryCursors[(Int32)i]=0U;handle=IndexedDirectoryHandleBase+i;return true;}return false;
+    }
+    private static Boolean TryGetIndexedDirectorySlot(UInt64 handle,out UInt32 slot){slot=0U;if(handle<IndexedDirectoryHandleBase||handle>=IndexedDirectoryHandleBase+AssetHandleSlots)return false;slot=(UInt32)(handle-IndexedDirectoryHandleBase);return _indexedDirectoryLengths[(Int32)slot]!=0U;}
+
     private static Boolean TryOpenAssetDirectory(Byte* canonical,UInt32 canonicalLength,out UInt64 handle)
     {
         handle=0UL;if(!SystemAssetCatalog.DirectoryExistsAscii(canonical,canonicalLength))return false;

@@ -62,7 +62,7 @@ public static unsafe partial class KernelVfs
            !AllocMounts(options.InitialMounts,out _mountAllocation,out _mounts)||
            !AllocFiles(options.InitialOpenFiles,out _fileAllocation,out _files))return false;
         _mountCapacity=options.InitialMounts;_fileCapacity=options.InitialOpenFiles;
-        _namespaces->Used=1;_namespaceCount=1;_initialized=true;return true;
+        _namespaces->Used=1;_namespaceCount=1;_initialized=true;KernelPathIndex.Initialize();return true;
     }
 
     public static Boolean IsInitialized()=>_initialized;

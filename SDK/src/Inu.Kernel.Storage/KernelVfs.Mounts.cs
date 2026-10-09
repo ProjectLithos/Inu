@@ -16,7 +16,7 @@ public static unsafe partial class KernelVfs
         KernelHeapAllocation pathAllocation=default;if(!AllocateMountPath(path,pathLength,out pathAllocation)){CallUnmount(p,cookie);return false;}
         Int32 slot=FreeMount();if(slot<0){if(!GrowMounts()){KernelHeap.TryRelease(pathAllocation);CallUnmount(p,cookie);return false;}slot=FreeMount();}
         MountRecord* m=_mounts+slot;m->Used=1;m->Namespace=ns.Value;m->Volume=volume.Value;m->Provider=(UInt32)provider+1U;
-        m->PathLength=pathLength;m->MountCookie=cookie;m->PathAllocation=pathAllocation;_mountCount++;handle=new KernelMountHandle((UInt32)slot+1U);return true;
+        m->PathLength=pathLength;m->MountCookie=cookie;m->PathAllocation=pathAllocation;_mountCount++;handle=new KernelMountHandle((UInt32)slot+1U);KernelPathIndex.NotifyMount(ns,path);return true;
     }
 
     public static Boolean Unmount(KernelMountHandle handle)
@@ -24,7 +24,7 @@ public static unsafe partial class KernelVfs
         Int32 i=(Int32)handle.Value-1;if(!_initialized||i<0||(UInt32)i>=_mountCapacity||(_mounts+i)->Used==0)return false;
         for(Int32 f=0;f<(Int32)_fileCapacity;f++)if((_files+f)->Used!=0&&(_files+f)->Mount==handle.Value)return false;
         MountRecord* m=_mounts+i;ProviderRecord* p=_providers+(Int32)m->Provider-1;
-        if(!CallUnmount(p,m->MountCookie))return false;KernelHeapAllocation pathAllocation=m->PathAllocation;Clear((Byte*)m,sizeof(MountRecord));_mountCount--;return KernelHeap.TryRelease(pathAllocation);
+        if(!CallUnmount(p,m->MountCookie))return false;KernelHeapAllocation pathAllocation=m->PathAllocation;UInt32 pathLength=m->PathLength;Byte* ascii=stackalloc Byte[(Int32)pathLength];Char* saved=(Char*)(nuint)pathAllocation.Address;for(UInt32 c=0U;c<pathLength;c++)ascii[c]=(Byte)saved[c];KernelPathIndex.NotifyUnmount(new KernelMountNamespaceHandle(m->Namespace),ascii,pathLength);Clear((Byte*)m,sizeof(MountRecord));_mountCount--;return KernelHeap.TryRelease(pathAllocation);
     }
 
     /// <summary>Returns whether a volume currently has any live mount. Driver teardown uses this to refuse unsafe hot removal.</summary>

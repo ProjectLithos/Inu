@@ -87,3 +87,15 @@ The active `FileSystemPathPolicy.Separator` is the sole user-facing path separat
 Commands remain ordinary isolated ring-3 processes. A child process normally owns its own current directory, inherited from its parent at spawn time. Shell-state commands such as `cd` are the exception: they explicitly request that their parent process adopt the validated directory. This keeps `cd` as a discovered command under `/System/Commands` without making it a shell hard-code, while ensuring the directory survives after the short-lived `cd` process exits.
 
 The boot asset catalogue is indexed once at registration time for case-insensitive exact-file lookup. Command launch and `view` therefore do not linearly rescan the complete catalogue for every executable or file. Directory child de-duplication relies on the image builder's globally sorted asset paths and performs one forward comparison instead of rescanning all prior entries.
+
+
+## Live kernel path index
+
+The filesystem remains authoritative for files, directories, contents, permissions, and persistence. The kernel may maintain a derived path index for fast namespace queries.
+
+- Mounting a filesystem queues its root for asynchronous enumeration by the storage worker; boot is not blocked on a full tree walk.
+- Successfully created files/directories are inserted immediately.
+- Delete, directory removal, rename/move, mount, and unmount update or invalidate the affected indexed paths immediately.
+- `dir`, working-directory validation, command/file resolution, and similar namespace queries may use the index once the relevant directory has completed its background scan.
+- While a directory is not yet indexed, callers fall back to the authoritative VFS provider.
+- The index never makes a read-only filesystem writable and never replaces the filesystem as the source of truth.

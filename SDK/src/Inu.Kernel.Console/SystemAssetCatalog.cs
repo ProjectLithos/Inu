@@ -6,9 +6,12 @@ namespace Inu.Kernel.Console;
 public static unsafe class SystemAssetCatalog
 {
     private const UInt32 AssetHashSlots = 2048U;
+    private const UInt32 AssetEntrySlots = 2048U;
     private struct AssetHashIndex { internal fixed UInt32 Offsets[(Int32)AssetHashSlots]; }
+    private struct AssetEntryIndex { internal fixed UInt32 Offsets[(Int32)AssetEntrySlots]; }
     private static AssetHashIndex _hashIndex;
-    private static Boolean _hashReady;
+    private static AssetEntryIndex _entryIndex;
+    private static Boolean _hashReady,_entryIndexReady;
     private static Byte* _base;
     private static UInt64 _length;
     private static UInt32 _count;
@@ -54,7 +57,16 @@ public static unsafe class SystemAssetCatalog
     /// <summary>Returns one raw loader-catalogue entry by index so command packages can be discovered without a shell-side command table.</summary>
     public static Boolean TryGetAsset(UInt32 index,out Byte* path,out UInt32 pathLength,out Byte* data,out UInt32 dataLength)
     {
-        path=null;pathLength=0U;data=null;dataLength=0U;if(!_available||index>=_count)return false;Byte* cursor=_base+16;UInt64 remaining=_length-16UL;
+        path=null;pathLength=0U;data=null;dataLength=0U;if(!_available||index>=_count)return false;
+        if(_entryIndexReady)
+        {
+            fixed(UInt32* entries=_entryIndex.Offsets)
+            {
+                UInt32 stored=entries[index];if(stored==0U)return false;Byte* cursor=_base+(stored-1U);UInt32 pn=ReadU32(cursor),dn=ReadU32(cursor+4);
+                path=cursor+16;pathLength=pn;data=path+pn;dataLength=dn;return true;
+            }
+        }
+        Byte* cursor=_base+16;UInt64 remaining=_length-16UL;
         for(UInt32 i=0U;i<_count;i++)
         {
             if(remaining<16UL)return false;UInt32 pn=ReadU32(cursor),dn=ReadU32(cursor+4);UInt64 total=16UL+(UInt64)pn+(UInt64)dn;if(total>remaining)return false;
@@ -129,6 +141,48 @@ public static unsafe class SystemAssetCatalog
         return false;
     }
 
+
+    /// <summary>Advances a directory cursor through the sorted boot asset catalogue without rescanning earlier assets.</summary>
+    public static Boolean TryGetNextDirectoryEntryAscii(Byte* canonical,UInt32 canonicalLength,ref UInt32 assetIndex,Byte* name,UInt32 capacity,out UInt32 nameLength,out Boolean directory)
+    {
+        nameLength=0U;directory=false;if(!_available||canonical==null||canonicalLength==0U||canonical[0]!=(Byte)'/'||name==null||capacity<2U)return false;
+        UInt32 prefixLength=canonicalLength==1U?0U:canonicalLength-1U;Byte* prefix=canonical+1;
+        for(UInt32 i=assetIndex;i<_count;i++)
+        {
+            if(!TryGetAsset(i,out Byte* candidate,out UInt32 pn,out _,out _)){assetIndex=_count;return false;}
+            UInt32 start=0U;
+            if(prefixLength!=0U)
+            {
+                if(pn<=prefixLength||!AsciiPrefixEquals(candidate,prefix,prefixLength)||candidate[prefixLength]!=(Byte)'/')continue;
+                start=prefixLength+1U;
+            }
+            if(start>=pn)continue;
+            UInt32 childLength=0U;while(start+childLength<pn&&candidate[start+childLength]!=(Byte)'/')childLength++;if(childLength==0U)continue;
+            if(childLength+1U>capacity){assetIndex=i+1U;return false;}
+            for(UInt32 c=0U;c<childLength;c++)name[c]=candidate[start+c];
+            directory=start+childLength<pn;nameLength=childLength;
+
+            // The image builder globally sorts asset paths. Skip all following assets that
+            // belong to this same direct child so the next call starts at the next child.
+            UInt32 next=i+1U;
+            for(;next<_count;next++)
+            {
+                if(!TryGetAsset(next,out Byte* following,out UInt32 followingLength,out _,out _))break;
+                UInt32 followingStart=0U;
+                if(prefixLength!=0U)
+                {
+                    if(followingLength<=prefixLength||!AsciiPrefixEquals(following,prefix,prefixLength)||following[prefixLength]!=(Byte)'/')break;
+                    followingStart=prefixLength+1U;
+                }
+                if(followingStart>=followingLength)break;
+                UInt32 followingChildLength=0U;while(followingStart+followingChildLength<followingLength&&following[followingStart+followingChildLength]!=(Byte)'/')followingChildLength++;
+                if(followingChildLength!=childLength||!AsciiEquals(following+followingStart,followingChildLength,candidate+start,childLength))break;
+            }
+            assetIndex=next;return true;
+        }
+        assetIndex=_count;return false;
+    }
+
     /// <summary>Gets a text asset by an allocation-free ASCII path.</summary>
     public static Boolean TryGetTextAscii(Byte* path,UInt32 pathLength,out Byte* text,out UInt32 length)=>TryFindAscii(path,pathLength,out text,out length);
 
@@ -141,20 +195,27 @@ public static unsafe class SystemAssetCatalog
 
     private static void BuildHashIndex()
     {
-        _hashReady=false;fixed(UInt32* slots=_hashIndex.Offsets)for(UInt32 i=0U;i<AssetHashSlots;i++)slots[i]=0U;
-        if(!_available||_count==0U||_count*2U>=AssetHashSlots)return;
-        Byte* cursor=_base+16;UInt64 remaining=_length-16UL;
-        fixed(UInt32* slots=_hashIndex.Offsets)
+        _hashReady=false;_entryIndexReady=false;
+        fixed(UInt32* slots=_hashIndex.Offsets)for(UInt32 i=0U;i<AssetHashSlots;i++)slots[i]=0U;
+        fixed(UInt32* entries=_entryIndex.Offsets)for(UInt32 i=0U;i<AssetEntrySlots;i++)entries[i]=0U;
+        if(!_available||_count==0U)return;
+        Byte* cursor=_base+16;UInt64 remaining=_length-16UL;Boolean canHash=_count*2U<AssetHashSlots;Boolean canIndex=_count<=AssetEntrySlots;
+        fixed(UInt32* slots=_hashIndex.Offsets)fixed(UInt32* entries=_entryIndex.Offsets)
         {
             for(UInt32 i=0U;i<_count;i++)
             {
                 if(remaining<16UL)return;UInt32 pn=ReadU32(cursor),dn=ReadU32(cursor+4);UInt64 total=16UL+(UInt64)pn+(UInt64)dn;if(total>remaining)return;
-                UInt32 offset=(UInt32)(cursor-_base);UInt32 slot=HashAscii(cursor+16,pn)&(AssetHashSlots-1U);UInt32 probes=0U;
-                while(slots[slot]!=0U&&probes<AssetHashSlots){slot=(slot+1U)&(AssetHashSlots-1U);probes++;}
-                if(probes>=AssetHashSlots)return;slots[slot]=offset+1U;cursor+=total;remaining-=total;
+                UInt32 offset=(UInt32)(cursor-_base);if(canIndex)entries[i]=offset+1U;
+                if(canHash)
+                {
+                    UInt32 slot=HashAscii(cursor+16,pn)&(AssetHashSlots-1U);UInt32 probes=0U;
+                    while(slots[slot]!=0U&&probes<AssetHashSlots){slot=(slot+1U)&(AssetHashSlots-1U);probes++;}
+                    if(probes>=AssetHashSlots)canHash=false;else slots[slot]=offset+1U;
+                }
+                cursor+=total;remaining-=total;
             }
         }
-        _hashReady=true;
+        _entryIndexReady=canIndex;_hashReady=canHash;
     }
     private static Boolean TryFindHashedAscii(Byte* path,UInt32 pathLength,out Byte* data,out UInt32 dataLength)
     {

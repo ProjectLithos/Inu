@@ -20,11 +20,13 @@
     ],
     "requires": [
       "storage.vfs",
-      "memory.heap"
+      "memory.heap",
+      "storage.partition-discovery"
     ]
   },
   "dependencies": [
-    "Kernel.Storage"
+    "Kernel.Storage",
+    "Kernel.Storage.PartitionDiscovery"
   ],
   "implementations": {
     "CSharp": {

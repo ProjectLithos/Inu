@@ -39,28 +39,28 @@ public static unsafe partial class KernelVfs
     {
         if(!TryNamespace(ns)||!ValidAbsoluteAsciiPath(path,pathLength))return false;Int32 mount=FindMountAscii(ns,path,pathLength);if(mount<0)return false;
         MountRecord* m=_mounts+mount;ProviderRecord* p=_providers+(Int32)m->Provider-1;if(p->CreateFileAscii==0)return false;
-        delegate*<UInt64,Byte*,UInt32,UInt32,Boolean,Boolean> fn=(delegate*<UInt64,Byte*,UInt32,UInt32,Boolean,Boolean>)(void*)p->CreateFileAscii;return fn(m->MountCookie,path,pathLength,m->PathLength,overwrite);
+        delegate*<UInt64,Byte*,UInt32,UInt32,Boolean,Boolean> fn=(delegate*<UInt64,Byte*,UInt32,UInt32,Boolean,Boolean>)(void*)p->CreateFileAscii;Boolean ok=fn(m->MountCookie,path,pathLength,m->PathLength,overwrite);if(ok)KernelPathIndex.NotifyCreated(ns,path,pathLength,KernelFileType.File);return ok;
     }
 
     public static Boolean CreateDirectoryAscii(KernelMountNamespaceHandle ns,Byte* path,UInt32 pathLength)
     {
         if(!TryNamespace(ns)||!ValidAbsoluteAsciiPath(path,pathLength))return false;Int32 mount=FindMountAscii(ns,path,pathLength);if(mount<0)return false;
         MountRecord* m=_mounts+mount;ProviderRecord* p=_providers+(Int32)m->Provider-1;if(p->CreateDirectoryAscii==0)return false;
-        delegate*<UInt64,Byte*,UInt32,UInt32,Boolean> fn=(delegate*<UInt64,Byte*,UInt32,UInt32,Boolean>)(void*)p->CreateDirectoryAscii;return fn(m->MountCookie,path,pathLength,m->PathLength);
+        delegate*<UInt64,Byte*,UInt32,UInt32,Boolean> fn=(delegate*<UInt64,Byte*,UInt32,UInt32,Boolean>)(void*)p->CreateDirectoryAscii;Boolean ok=fn(m->MountCookie,path,pathLength,m->PathLength);if(ok)KernelPathIndex.NotifyCreated(ns,path,pathLength,KernelFileType.Directory);return ok;
     }
 
     public static Boolean DeleteFileAscii(KernelMountNamespaceHandle ns,Byte* path,UInt32 pathLength)
     {
         if(!TryNamespace(ns)||!ValidAbsoluteAsciiPath(path,pathLength))return false;Int32 mount=FindMountAscii(ns,path,pathLength);if(mount<0)return false;
         MountRecord* m=_mounts+mount;ProviderRecord* p=_providers+(Int32)m->Provider-1;if(p->DeleteFileAscii==0)return false;
-        delegate*<UInt64,Byte*,UInt32,UInt32,Boolean> fn=(delegate*<UInt64,Byte*,UInt32,UInt32,Boolean>)(void*)p->DeleteFileAscii;return fn(m->MountCookie,path,pathLength,m->PathLength);
+        delegate*<UInt64,Byte*,UInt32,UInt32,Boolean> fn=(delegate*<UInt64,Byte*,UInt32,UInt32,Boolean>)(void*)p->DeleteFileAscii;Boolean ok=fn(m->MountCookie,path,pathLength,m->PathLength);if(ok)KernelPathIndex.NotifyDeleted(ns,path,pathLength,false);return ok;
     }
 
     public static Boolean RemoveDirectoryAscii(KernelMountNamespaceHandle ns,Byte* path,UInt32 pathLength)
     {
         if(!TryNamespace(ns)||!ValidAbsoluteAsciiPath(path,pathLength))return false;Int32 mount=FindMountAscii(ns,path,pathLength);if(mount<0)return false;
         MountRecord* m=_mounts+mount;ProviderRecord* p=_providers+(Int32)m->Provider-1;if(p->RemoveDirectoryAscii==0)return false;
-        delegate*<UInt64,Byte*,UInt32,UInt32,Boolean> fn=(delegate*<UInt64,Byte*,UInt32,UInt32,Boolean>)(void*)p->RemoveDirectoryAscii;return fn(m->MountCookie,path,pathLength,m->PathLength);
+        delegate*<UInt64,Byte*,UInt32,UInt32,Boolean> fn=(delegate*<UInt64,Byte*,UInt32,UInt32,Boolean>)(void*)p->RemoveDirectoryAscii;Boolean ok=fn(m->MountCookie,path,pathLength,m->PathLength);if(ok)KernelPathIndex.NotifyDeleted(ns,path,pathLength,true);return ok;
     }
 
     public static Boolean RenameAscii(KernelMountNamespaceHandle ns,Byte* source,UInt32 sourceLength,Byte* destination,UInt32 destinationLength)
@@ -69,7 +69,7 @@ public static unsafe partial class KernelVfs
         Int32 sourceMount=FindMountAscii(ns,source,sourceLength),destinationMount=FindMountAscii(ns,destination,destinationLength);if(sourceMount<0||sourceMount!=destinationMount)return false;
         MountRecord* m=_mounts+sourceMount;ProviderRecord* p=_providers+(Int32)m->Provider-1;if(p->RenameAscii==0)return false;
         delegate*<UInt64,Byte*,UInt32,UInt32,Byte*,UInt32,UInt32,Boolean> fn=(delegate*<UInt64,Byte*,UInt32,UInt32,Byte*,UInt32,UInt32,Boolean>)(void*)p->RenameAscii;
-        return fn(m->MountCookie,source,sourceLength,m->PathLength,destination,destinationLength,m->PathLength);
+        Boolean ok=fn(m->MountCookie,source,sourceLength,m->PathLength,destination,destinationLength,m->PathLength);if(ok)KernelPathIndex.NotifyRenamed(ns,source,sourceLength,destination,destinationLength);return ok;
     }
 
     public static Boolean Read(KernelFileHandle handle,Byte* buffer,UInt32 bytesToRead,out UInt32 bytesRead)
