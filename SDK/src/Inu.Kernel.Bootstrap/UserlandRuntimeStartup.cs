@@ -567,17 +567,17 @@ public static unsafe class UserlandRuntimeStartup
         UInt64 capacity=frame->NativeMessage.OutputCapacity;if(capacity>512UL)capacity=512UL;
         if(TryGetAssetDirectorySlot(frame->NativeMessage.Value0,out UInt32 assetSlot))
         {
-            Byte* ascii=stackalloc Byte[(Int32)capacity];UInt32 pathOffset=assetSlot*PathCapacity;
+            Byte* assetAscii=stackalloc Byte[(Int32)capacity];UInt32 pathOffset=assetSlot*PathCapacity;
             fixed(Byte* paths=_assetDirectoryPaths)
             {
-                if(!SystemAssetCatalog.TryGetDirectoryEntryAscii(paths+pathOffset,_assetDirectoryLengths[(Int32)assetSlot],_assetDirectoryIndices[(Int32)assetSlot],ascii,(UInt32)capacity,out UInt32 assetLength,out _))return 0L;
-                _assetDirectoryIndices[(Int32)assetSlot]++;return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)ascii,assetLength)?(Int64)assetLength:(Int64)KernelSystemCallError.Fault;
+                if(!SystemAssetCatalog.TryGetDirectoryEntryAscii(paths+pathOffset,_assetDirectoryLengths[(Int32)assetSlot],_assetDirectoryIndices[(Int32)assetSlot],assetAscii,(UInt32)capacity,out UInt32 assetLength,out _))return 0L;
+                _assetDirectoryIndices[(Int32)assetSlot]++;return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)assetAscii,assetLength)?(Int64)assetLength:(Int64)KernelSystemCallError.Fault;
             }
         }
         Char* name=stackalloc Char[(Int32)capacity];
         if(!KernelVfs.ReadDirectory(new KernelDirectoryHandle((UInt32)frame->NativeMessage.Value0),name,(UInt32)capacity,out UInt32 length,out _,out _,out _))return 0L;
-        Byte* ascii=stackalloc Byte[(Int32)capacity];for(UInt32 i=0U;i<length;i++){Char c=name[i];if(c>0x7F)return (Int64)KernelSystemCallError.Fault;ascii[i]=(Byte)c;}
-        return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)ascii,length)?(Int64)length:(Int64)KernelSystemCallError.Fault;
+        Byte* vfsAscii=stackalloc Byte[(Int32)capacity];for(UInt32 i=0U;i<length;i++){Char c=name[i];if(c>0x7F)return (Int64)KernelSystemCallError.Fault;vfsAscii[i]=(Byte)c;}
+        return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)vfsAscii,length)?(Int64)length:(Int64)KernelSystemCallError.Fault;
     }
 
     private static Int64 DirectoryCloseEvent(KernelSystemCallFrame* frame)

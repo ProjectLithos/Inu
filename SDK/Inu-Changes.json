@@ -1,18 +1,8 @@
 {
-  "baseVersion": "0.0.107",
-  "version": "0.0.108",
+  "baseVersion": "0.0.108",
+  "version": "0.0.109",
   "changedFiles": [
-    "Inu/SDK/Build-Inu.ps1",
-    "Inu/SDK/src/Inu.ManagedCompiler/Program.cs",
-    "Inu/SDK/templates/InuKernel/InuKernel.csproj",
-    "Inu/SDK/templates/InuKernel/Boot/ManagedRuntimeConformanceStartup.cs",
-    "Inu/SDK/templates/InuKernel/Boot/SchedulerRuntimeStartup.cs",
-    "Inu/SDK/src/Inu.Kernel.Bootstrap/Kernel.cs",
-    "Inu/SDK/src/Inu.Kernel.Console/SystemAssetCatalog.cs",
     "Inu/SDK/src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-    "Inu/SDK/src/Inu.Userland.Runtime/IO.cs",
-    "Inu/SDK/docs/BCL-Conformance-Target.md",
-    "Inu/SDK/docs/Managed-Runtime.md",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu-Changes.json",
@@ -24,11 +14,11 @@
     "Kath/JSON/package.json",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
-    "Kath/docs/Release-0.0.108.md",
+    "Kath/docs/Release-0.0.109.md",
     "VERSION",
     "Inu/VERSION",
     "Kath/VERSION",
-    "CHANGED-0.0.108.txt"
+    "CHANGED-0.0.109.txt"
   ],
-  "summary": "Run full in-kernel conformance only after SDK implementation code changes, speed command launch by making boot-asset lookup linear, and make dir/cd/view operate through a read-only preloaded-system-tree fallback when a minimal kernel has no mounted runtime storage device."
+  "summary": "Fix CS0136 in the 0.0.108 directory fallback by using distinct asset and VFS ASCII buffer locals in DirectoryReadGet."
 }
