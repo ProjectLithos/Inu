@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "product": "Inu OS SDK",
-  "version": "0.0.109",
+  "version": "0.0.110",
   "outputDirectory": "docs/site",
   "publicAssemblies": [
     "Inu.Primitives",
