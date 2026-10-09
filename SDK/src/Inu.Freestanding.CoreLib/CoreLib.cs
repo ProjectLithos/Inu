@@ -383,10 +383,11 @@ namespace System
     public struct Single : IComparable, IComparable<Single>, IEquatable<Single>, IFormattable
     {
         private float _value;
-        public Boolean Equals(Single other) => _value == other._value || (_value != _value && other._value != other._value);
+        private static Boolean IsNaN(float value) => !(value < 0.0f || value >= 0.0f);
+        public Boolean Equals(Single other) => _value == other._value || (IsNaN(_value) && IsNaN(other._value));
         public override Boolean Equals(Object obj) => obj is Single && Equals((Single)obj);
         public override Int32 GetHashCode() => _value == 0 ? 0 : (Int32)_value;
-        public Int32 CompareTo(Single other) { if (_value < other._value) return -1; if (_value > other._value) return 1; if (_value == other._value) return 0; return _value != _value ? (other._value != other._value ? 0 : -1) : 1; }
+        public Int32 CompareTo(Single other) { if (_value < other._value) return -1; if (_value > other._value) return 1; if (_value == other._value) return 0; return IsNaN(_value) ? (IsNaN(other._value) ? 0 : -1) : 1; }
         public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Single)) throw new ArgumentException(); return CompareTo((Single)obj); }
         public override String ToString() => NumberFormatting.FormatDouble(_value);
         public String ToString(String format, IFormatProvider formatProvider)
@@ -399,10 +400,11 @@ namespace System
     public struct Double : IComparable, IComparable<Double>, IEquatable<Double>, IFormattable
     {
         private double _value;
-        public Boolean Equals(Double other) => _value == other._value || (_value != _value && other._value != other._value);
+        private static Boolean IsNaN(double value) => !(value < 0.0 || value >= 0.0);
+        public Boolean Equals(Double other) => _value == other._value || (IsNaN(_value) && IsNaN(other._value));
         public override Boolean Equals(Object obj) => obj is Double && Equals((Double)obj);
         public override Int32 GetHashCode() => _value == 0 ? 0 : (Int32)_value;
-        public Int32 CompareTo(Double other) { if (_value < other._value) return -1; if (_value > other._value) return 1; if (_value == other._value) return 0; return _value != _value ? (other._value != other._value ? 0 : -1) : 1; }
+        public Int32 CompareTo(Double other) { if (_value < other._value) return -1; if (_value > other._value) return 1; if (_value == other._value) return 0; return IsNaN(_value) ? (IsNaN(other._value) ? 0 : -1) : 1; }
         public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Double)) throw new ArgumentException(); return CompareTo((Double)obj); }
         public override String ToString() => NumberFormatting.FormatDouble(_value);
         public String ToString(String format, IFormatProvider formatProvider)

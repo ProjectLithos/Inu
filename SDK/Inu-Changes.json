@@ -1,6 +1,6 @@
 {
-  "baseVersion": "0.0.97",
-  "version": "0.0.98",
+  "baseVersion": "0.0.98",
+  "version": "0.0.99",
   "changedFiles": [
     "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
     "Inu/SDK/Inu.SdkManifest.json",
@@ -14,10 +14,11 @@
     "Kath/JSON/package.json",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
+    "Kath/docs/Release-0.0.99.md",
     "VERSION",
     "Inu/VERSION",
     "Kath/VERSION",
-    "CHANGED-0.0.98.txt"
+    "CHANGED-0.0.99.txt"
   ],
-  "summary": "Fix the 0.0.97 primitive/runtime regression by removing the duplicate System.OverflowException declaration while preserving the correct ArithmeticException inheritance required by .NET semantics."
+  "summary": "Fix freestanding Single/Double NaN equality and comparison so CoreLib does not trigger CS1718 under warnings-as-errors, while preserving .NET NaN comparison semantics."
 }
