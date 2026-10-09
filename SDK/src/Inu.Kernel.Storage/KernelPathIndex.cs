@@ -97,9 +97,9 @@ public static unsafe class KernelPathIndex
     internal static Boolean ServiceBackgroundStep()
     {
         if(!_initialized||_queueCount==0U)return false;UInt32 slot=_queue[(Int32)_queueRead];_queueRead=(_queueRead+1U)%MaximumEntries;_queueCount--;
-        if(slot>=MaximumEntries)return false;Entry root=_entries[(Int32)slot];if(root.Used==0U||root.Type!=(Byte)KernelFileType.Directory||root.Path.Address==0UL)return false;root.Queued=0U;_entries[(Int32)slot]=root;
+        if(slot>=MaximumEntries)return false;Entry root=_entries[(Int32)slot];if(root.Used==0U||root.Type!=(Byte)KernelFileType.Directory||root.Path.Address==0UL)return false;root.Queued=0;_entries[(Int32)slot]=root;
         Byte* path=(Byte*)(nuint)root.Path.Address;
-        if(!KernelVfs.OpenDirectoryAscii(new KernelMountNamespaceHandle(root.Namespace),path,root.Length,out KernelDirectoryHandle handle)){root.Scanned=1U;_entries[(Int32)slot]=root;return true;}
+        if(!KernelVfs.OpenDirectoryAscii(new KernelMountNamespaceHandle(root.Namespace),path,root.Length,out KernelDirectoryHandle handle)){root.Scanned=1;_entries[(Int32)slot]=root;return true;}
         Char* childName=stackalloc Char[512];Byte* child=stackalloc Byte[(Int32)MaximumPathBytes];
         while(KernelVfs.ReadDirectory(handle,childName,512U,out UInt32 nameLength,out KernelFileType type,out _,out _))
         {
@@ -108,20 +108,20 @@ public static unsafe class KernelPathIndex
             for(UInt32 c=0U;c<nameLength;c++){Char value=childName[c];if(value>0x7FU){childLength=0U;break;}if(childLength>=MaximumPathBytes){childLength=0U;break;}child[childLength++]=(Byte)value;}if(childLength==0U)continue;
             Int32 childSlot=AddOrUpdate(new KernelMountNamespaceHandle(root.Namespace),child,childLength,type,false);if(childSlot>=0&&type==KernelFileType.Directory)Queue((UInt32)childSlot);
         }
-        KernelVfs.CloseDirectory(handle);root=_entries[(Int32)slot];if(root.Used!=0U){root.Scanned=1U;root.Queued=0U;_entries[(Int32)slot]=root;}if(_queueCount!=0U)KernelScheduler.NotifyRoleWork(KernelCpuRole.Storage);return true;
+        KernelVfs.CloseDirectory(handle);root=_entries[(Int32)slot];if(root.Used!=0U){root.Scanned=1;root.Queued=0;_entries[(Int32)slot]=root;}if(_queueCount!=0U)KernelScheduler.NotifyRoleWork(KernelCpuRole.Storage);return true;
     }
 
     private static Int32 AddOrUpdate(KernelMountNamespaceHandle ns,Byte* path,UInt32 length,KernelFileType type,Boolean scanned)
     {
-        if(!_initialized||ns.Value==0U||path==null||length==0U||length>MaximumPathBytes)return -1;Int32 existing=Find(ns,path,length);if(existing>=0){Entry current=_entries[existing];current.Type=(Byte)type;if(scanned)current.Scanned=1U;_entries[existing]=current;return existing;}
+        if(!_initialized||ns.Value==0U||path==null||length==0U||length>MaximumPathBytes)return -1;Int32 existing=Find(ns,path,length);if(existing>=0){Entry current=_entries[existing];current.Type=(Byte)type;if(scanned)current.Scanned=1;_entries[existing]=current;return existing;}
         Int32 slot=-1;for(Int32 i=0;i<(Int32)MaximumEntries;i++)if(_entries[i].Used==0U){slot=i;break;}if(slot<0)return -1;
         if(!KernelHeap.TryAllocate(length,8UL,false,out KernelHeapAllocation allocation))return -1;Byte* saved=(Byte*)(nuint)allocation.Address;for(UInt32 i=0U;i<length;i++)saved[i]=path[i];
-        _entries[slot]=new Entry{Used=1U,Type=(Byte)type,Scanned=(Byte)(scanned?1:0),Namespace=ns.Value,Length=length,Hash=Hash(path,length),Path=allocation};_count++;return slot;
+        _entries[slot]=new Entry{Used=1,Type=(Byte)type,Scanned=(Byte)(scanned?1:0),Namespace=ns.Value,Length=length,Hash=Hash(path,length),Path=allocation};_count++;return slot;
     }
     private static Int32 Find(KernelMountNamespaceHandle ns,Byte* path,UInt32 length)
     {UInt64 hash=Hash(path,length);for(Int32 i=0;i<(Int32)MaximumEntries;i++){Entry e=_entries[i];if(e.Used==0U||e.Namespace!=ns.Value||e.Length!=length||e.Hash!=hash||e.Path.Address==0UL)continue;if(Equals((Byte*)(nuint)e.Path.Address,path,length))return i;}return -1;}
     private static void Queue(UInt32 slot)
-    {if(slot>=MaximumEntries)return;Entry e=_entries[(Int32)slot];if(e.Used==0U||e.Type!=(Byte)KernelFileType.Directory||e.Scanned!=0U||e.Queued!=0U||_queueCount>=MaximumEntries)return;e.Queued=1U;_entries[(Int32)slot]=e;_queue[(Int32)_queueWrite]=slot;_queueWrite=(_queueWrite+1U)%MaximumEntries;_queueCount++;KernelScheduler.NotifyRoleWork(KernelCpuRole.Storage);}
+    {if(slot>=MaximumEntries)return;Entry e=_entries[(Int32)slot];if(e.Used==0U||e.Type!=(Byte)KernelFileType.Directory||e.Scanned!=0U||e.Queued!=0U||_queueCount>=MaximumEntries)return;e.Queued=1;_entries[(Int32)slot]=e;_queue[(Int32)_queueWrite]=slot;_queueWrite=(_queueWrite+1U)%MaximumEntries;_queueCount++;KernelScheduler.NotifyRoleWork(KernelCpuRole.Storage);}
     private static UInt64 Hash(Byte* value,UInt32 length){UInt64 h=14695981039346656037UL;for(UInt32 i=0U;i<length;i++){Byte b=value[i];if(!FileSystemPathPolicyRuntime.CaseSensitive&&b>='A'&&b<='Z')b=(Byte)(b+32);h^=b;h*=1099511628211UL;}return h;}
     private static Boolean Equals(Byte* a,Byte* b,UInt32 length){for(UInt32 i=0U;i<length;i++){Byte x=a[i],y=b[i];if(!FileSystemPathPolicyRuntime.CaseSensitive){if(x>='A'&&x<='Z')x=(Byte)(x+32);if(y>='A'&&y<='Z')y=(Byte)(y+32);}if(x!=y)return false;}return true;}
     private static Boolean Prefix(Byte* value,UInt32 valueLength,Byte* prefix,UInt32 prefixLength){if(prefixLength>valueLength)return false;return Equals(value,prefix,prefixLength);}

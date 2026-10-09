@@ -74,7 +74,7 @@ public static unsafe partial class KernelProcesses
         if(!InuApplicationLoader.TryResolveNativeImage(packageOrImage,imageLength,out image,out nativeLength,out application,out packaged,out error))return false;
         if(!ProcessExecutableMath.TryInspect(image,nativeLength,out executable)){error=InuApplicationLoadError.MalformedExecutable;return false;}
         UInt32 slot=_executableCacheNext++%ExecutableCacheSlots;
-        _executableCache[(Int32)slot]=new ExecutableCacheEntry{PackageAddress=address,PackageLength=imageLength,NativeAddress=(UInt64)(nuint)image,NativeLength=nativeLength,Application=application,Executable=executable,Used=1U,Packaged=(Byte)(packaged?1:0)};
+        _executableCache[(Int32)slot]=new ExecutableCacheEntry{PackageAddress=address,PackageLength=imageLength,NativeAddress=(UInt64)(nuint)image,NativeLength=nativeLength,Application=application,Executable=executable,Used=1,Packaged=(Byte)(packaged?1:0)};
         return true;
     }
 

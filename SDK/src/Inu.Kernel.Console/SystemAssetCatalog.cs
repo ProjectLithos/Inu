@@ -62,8 +62,8 @@ public static unsafe class SystemAssetCatalog
         {
             fixed(UInt32* entries=_entryIndex.Offsets)
             {
-                UInt32 stored=entries[index];if(stored==0U)return false;Byte* cursor=_base+(stored-1U);UInt32 pn=ReadU32(cursor),dn=ReadU32(cursor+4);
-                path=cursor+16;pathLength=pn;data=path+pn;dataLength=dn;return true;
+                UInt32 stored=entries[index];if(stored==0U)return false;Byte* indexedEntry=_base+(stored-1U);UInt32 pn=ReadU32(indexedEntry),dn=ReadU32(indexedEntry+4);
+                path=indexedEntry+16;pathLength=pn;data=path+pn;dataLength=dn;return true;
             }
         }
         Byte* cursor=_base+16;UInt64 remaining=_length-16UL;
