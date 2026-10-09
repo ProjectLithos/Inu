@@ -1,11 +1,16 @@
 {
-  "baseVersion": "0.0.106",
-  "version": "0.0.107",
+  "baseVersion": "0.0.107",
+  "version": "0.0.108",
   "changedFiles": [
+    "Inu/SDK/Build-Inu.ps1",
+    "Inu/SDK/src/Inu.ManagedCompiler/Program.cs",
+    "Inu/SDK/templates/InuKernel/InuKernel.csproj",
     "Inu/SDK/templates/InuKernel/Boot/ManagedRuntimeConformanceStartup.cs",
     "Inu/SDK/templates/InuKernel/Boot/SchedulerRuntimeStartup.cs",
     "Inu/SDK/src/Inu.Kernel.Bootstrap/Kernel.cs",
-    "Inu/SDK/src/Inu.ManagedCompiler/Program.cs",
+    "Inu/SDK/src/Inu.Kernel.Console/SystemAssetCatalog.cs",
+    "Inu/SDK/src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
+    "Inu/SDK/src/Inu.Userland.Runtime/IO.cs",
     "Inu/SDK/docs/BCL-Conformance-Target.md",
     "Inu/SDK/docs/Managed-Runtime.md",
     "Inu/SDK/Inu.SdkManifest.json",
@@ -19,11 +24,11 @@
     "Kath/JSON/package.json",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
-    "Kath/docs/Release-0.0.107.md",
+    "Kath/docs/Release-0.0.108.md",
     "VERSION",
     "Inu/VERSION",
     "Kath/VERSION",
-    "CHANGED-0.0.107.txt"
+    "CHANGED-0.0.108.txt"
   ],
-  "summary": "Make full in-kernel managed/BCL and mature-GC conformance validation Debug-only so normal/Release boots proceed directly into the selected OS, while preserving required NativeAOT exception/image-base setup and Debug validation coverage."
+  "summary": "Run full in-kernel conformance only after SDK implementation code changes, speed command launch by making boot-asset lookup linear, and make dir/cd/view operate through a read-only preloaded-system-tree fallback when a minimal kernel has no mounted runtime storage device."
 }

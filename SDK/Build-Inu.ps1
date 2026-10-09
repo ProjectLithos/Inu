@@ -17,6 +17,44 @@ if (Test-Path variable:PSCSharpommandUseErrorActionPreference) { $PSCSharpommand
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $releaseVersion = ([IO.File]::ReadAllText((Join-Path (Split-Path -Parent $root) 'VERSION'))).Trim()
 
+function Get-InuSdkCodeFingerprint {
+    param([Parameter(Mandatory = $true)][string]$SdkRoot)
+    $extensions = @('.cs','.csproj','.props','.targets','.asm','.c','.h','.json')
+    $files = @()
+    foreach ($relativeRoot in @('src','native','templates')) {
+        $candidate = Join-Path $SdkRoot $relativeRoot
+        if (Test-Path -LiteralPath $candidate -PathType Container) {
+            $files += @(Get-ChildItem -LiteralPath $candidate -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $extensions -contains $_.Extension.ToLowerInvariant() })
+        }
+    }
+    # Release identity changes on every package and does not change runtime behaviour.
+    $releaseIdentity = [IO.Path]::GetFullPath((Join-Path $SdkRoot 'src\Inu.Core\InuSdkContract.cs'))
+    $records = [System.Collections.Generic.List[string]]::new()
+    foreach ($file in @($files | Sort-Object FullName)) {
+        if ([IO.Path]::GetFullPath($file.FullName) -ieq $releaseIdentity) { continue }
+        $relative = $file.FullName.Substring(([IO.Path]::GetFullPath($SdkRoot).TrimEnd('\').Length + 1)).Replace('\','/')
+        $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+        [void]$records.Add(($relative + '|' + $hash))
+    }
+    $payload = [Text.Encoding]::UTF8.GetBytes(($records -join "`n"))
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try { return ([BitConverter]::ToString($sha.ComputeHash($payload))).Replace('-','').ToLowerInvariant() } finally { $sha.Dispose() }
+}
+
+$runtimeValidationDirectory = Join-Path $root 'Artifacts\Validation'
+$runtimeValidationStamp = Join-Path $runtimeValidationDirectory 'runtime-conformance-source.sha256'
+$currentSdkCodeFingerprint = Get-InuSdkCodeFingerprint -SdkRoot $root
+$lastValidatedSdkCodeFingerprint = if (Test-Path -LiteralPath $runtimeValidationStamp -PathType Leaf) { (Get-Content -LiteralPath $runtimeValidationStamp -TotalCount 1).Trim().ToLowerInvariant() } else { '' }
+$runtimeConformanceRequired = $currentSdkCodeFingerprint -ne $lastValidatedSdkCodeFingerprint
+$runtimeConformanceEnabled = $Run -and -not $NoRun -and $runtimeConformanceRequired
+if ($runtimeConformanceRequired) {
+    Write-Host '[INFO] SDK code changed since the last successful runtime conformance validation.'
+    if ($runtimeConformanceEnabled) { Write-Host '[INFO] This run will execute the one-time managed/BCL/GC conformance gate.' }
+    else { Write-Host '[INFO] Conformance is pending until the next OS run; normal build-only work does not execute it.' }
+} else {
+    Write-Host '[ OK ] SDK code fingerprint already passed runtime conformance; startup validation will be skipped.'
+}
+
 $inuBuildLogRoot = Join-Path $root "Artifacts\BuildLogs"
 if (-not (Test-Path -LiteralPath $inuBuildLogRoot -PathType Container)) {
     New-Item -ItemType Directory -Path $inuBuildLogRoot -Force | Out-Null
@@ -700,6 +738,7 @@ $compileOutputs = @($nativeAotObject,$compileManifestPath,(Join-Path $outputDire
 $linkOutputs = @($kernelBin,$loaderBin,(Join-Path $outputDirectory (([string]$projectData.Name) + '.map')))
 if ($Configuration -eq 'Debug') { $linkOutputs += @((Join-Path $outputDirectory 'Inu.DebugSymbols.json'), (Join-Path $outputDirectory (([string]$projectData.Name) + '.pdb'))) }
     $compileArgs = @($compiler, "compile", $projectManifest, "--dotnet", $dotnet, "--ilc", $ilc, "--configuration", $Configuration, "--sdk-root", $root) + $dry
+    if ($runtimeConformanceEnabled) { $compileArgs += '--runtime-conformance' }
     Invoke-InuBuildStage -Stage "Managed IL + NativeAOT ILC" -FilePath $dotnet -Arguments $compileArgs -Inputs ($kernelInputs + $dotnetStageInputs + $ilcStageInputs + @((Get-InuStageFiles -Paths @((Split-Path -Parent $compiler)) -Outputs).FullName)) -Outputs $compileOutputs -CleanDirectories @((Join-Path $outputDirectory 'ManagedIL'),(Join-Path $outputDirectory 'NativeAot'))
 
     $linkArgs = @($linker, "link", $projectManifest, "--lld-link", $lldLink, "--llvm-nm", $llvmNm, "--nasm", $nasm, "--native-root", $nativeOutput) + $dry
@@ -785,8 +824,12 @@ Write-Host "[ OK ] qemu    : $qemu"
 Write-Host "[ OK ] OVMF code: $ovmfCode"
 Write-Host "[ OK ] OVMF vars: $ovmfVars"
 
-$qemuArgs = @($qemuLauncher, "run", $projectManifest, "--qemu", $qemu, "--image", $imagePath, "--ovmf-code", $ovmfCode, "--ovmf-vars", $ovmfVars, "--timeout-seconds", [string]$BootTimeoutSeconds) + $dry
-$qemuStageHardTimeout = ($BootTimeoutSeconds * 2) + 65
+$effectiveBootTimeoutSeconds = if ($runtimeConformanceEnabled) { [Math]::Max($BootTimeoutSeconds, 90) } else { $BootTimeoutSeconds }
+if ($runtimeConformanceEnabled -and $effectiveBootTimeoutSeconds -ne $BootTimeoutSeconds) {
+    Write-Host ("[INFO] One-time SDK conformance validation uses a {0}s bounded boot window; unchanged SDK runs keep the normal {1}s window." -f $effectiveBootTimeoutSeconds,$BootTimeoutSeconds)
+}
+$qemuArgs = @($qemuLauncher, "run", $projectManifest, "--qemu", $qemu, "--image", $imagePath, "--ovmf-code", $ovmfCode, "--ovmf-vars", $ovmfVars, "--timeout-seconds", [string]$effectiveBootTimeoutSeconds) + $dry
+$qemuStageHardTimeout = ($effectiveBootTimeoutSeconds * 2) + 65
 $null = Invoke-InuCapturedStage -Stage "QEMU runtime acceptance" -FilePath $dotnet -Arguments $qemuArgs -TimeoutSeconds $qemuStageHardTimeout
 
 # Surface the exact accepted run identity to Kath. Successful captured stages normally keep
@@ -812,5 +855,11 @@ Write-Host ("[INFO] Accepted QEMU serial log: {0}" -f [string]$acceptedRun.seria
 Write-Host ("[INFO] Accepted QEMU stop report: {0}" -f [string]$acceptedRun.diagnosticReport)
 Write-Host ("[INFO] Accepted QEMU run directory: {0}" -f [string]$acceptedRun.runDirectory)
 Write-Host ("[INFO] Accepted QEMU UTC: {0}" -f [string]$acceptedRun.acceptedUtc)
+
+if ($runtimeConformanceEnabled) {
+    New-Item -ItemType Directory -Path $runtimeValidationDirectory -Force | Out-Null
+    Set-Content -LiteralPath $runtimeValidationStamp -Encoding ASCII -Value $currentSdkCodeFingerprint
+    Write-Host '[ OK ] Current SDK code fingerprint passed runtime conformance; subsequent unchanged SDK runs will skip it.'
+}
 
 Write-Host "[ OK ] Inu x64 NativeAOT boot-and-run acceptance completed."

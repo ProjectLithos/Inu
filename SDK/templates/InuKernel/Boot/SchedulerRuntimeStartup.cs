@@ -63,7 +63,7 @@ public static unsafe class SchedulerRuntimeStartup
         // Full mature-GC conformance is validation-only. Root-map sealing above remains
         // part of every runtime boot, while the expensive stress/assertion pass runs only
         // for Debug builds or when INU_RUNTIME_CONFORMANCE is explicitly requested.
-#if DEBUG || INU_RUNTIME_CONFORMANCE
+#if INU_RUNTIME_CONFORMANCE
         if (!KernelConsole.WriteLine("NOBT:GC:RUN")) return false;
         if (!ManagedRuntimeConformance.RunGarbageCollectorChecks(out UInt32 gcPassed, out UInt32 gcFailed))
         {

@@ -35,7 +35,7 @@ public static class ManagedRuntimeConformanceStartup
         if (!_prepared || _kernelImageBase == 0UL || _running) return false;
         _running = true;
 
-#if DEBUG || INU_RUNTIME_CONFORMANCE
+#if INU_RUNTIME_CONFORMANCE
         KernelConsole.WriteLine("NOBT:CONF:BASE");
         KernelConsole.WriteLine("NOBT:CONF:RUN");
 

@@ -24,6 +24,8 @@
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
     <InuOsSdkRoot>$(MSBuildThisFileDirectory)Kernel\Provided\SDK</InuOsSdkRoot>
+    <!-- Full managed/BCL conformance is enabled only by Inu's SDK-change validation run. -->
+    <DefineConstants Condition="'$(InuRuntimeConformance)' == 'true'">$(DefineConstants);INU_RUNTIME_CONFORMANCE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <!-- Compile only the active OS-owned source tree. Kernel/Provided/SDK is a

@@ -9,7 +9,7 @@ static int MainEntry(string[] args)
 {
     if (args.Length < 2 || !string.Equals(args[0], "compile", StringComparison.OrdinalIgnoreCase))
     {
-        return Fail("Usage: Inu.ManagedCompiler compile <InuProject.json> [--dotnet <path>] [--ilc <path>] [--configuration Debug|Release] [--sdk-root <path>] [--dry-run]");
+        return Fail("Usage: Inu.ManagedCompiler compile <InuProject.json> [--dotnet <path>] [--ilc <path>] [--configuration Debug|Release] [--sdk-root <path>] [--runtime-conformance] [--dry-run]");
     }
 
     if (!InuProject.TryLoad(args[1], out InuProject? project, out string error) || project is null)
@@ -20,6 +20,7 @@ static int MainEntry(string[] args)
     string dotnet = GetOption(args, "--dotnet") ?? "dotnet";
     string configuration = GetOption(args, "--configuration") ?? "Release";
     bool debugBuild = string.Equals(configuration, "Debug", StringComparison.OrdinalIgnoreCase);
+    bool runtimeConformance = HasOption(args, "--runtime-conformance");
     bool dryRun = HasOption(args, "--dry-run");
     string repositoryRoot = Path.GetFullPath(GetOption(args, "--sdk-root") ?? FindRepositoryRoot(Path.GetDirectoryName(project.ProjectFile)!));
     string ilc = GetOption(args, "--ilc") ?? FindIlc(repositoryRoot);
@@ -39,6 +40,10 @@ static int MainEntry(string[] args)
         "-p:SelfContained=false",
         $"-p:InuSdkRoot={repositoryRoot}"
     ];
+    if (runtimeConformance)
+    {
+        buildArguments.Add("-p:InuRuntimeConformance=true");
+    }
     if (debugBuild)
     {
         buildArguments.Add("-p:DebugSymbols=true");
@@ -98,16 +103,18 @@ static int MainEntry(string[] args)
         "--scanreflection",
         "--nopreinitstatics"
     ]);
-    if (debugBuild)
+    if (runtimeConformance)
     {
-        // Runtime/BCL conformance is validation-only. Debug explicitly roots the
-        // conformance assembly; Release leaves it unrooted so unused validation code
-        // can be removed from the final native image.
+        // Runtime/BCL conformance is SDK-change validation only. It is rooted only when
+        // Build-Inu detects SDK code that has not yet passed the in-kernel validation gate.
         if (File.Exists(Path.Combine(managedOutput, "Inu.Runtime.Conformance.dll")))
         {
             ilcArguments.Add("--root");
             ilcArguments.Add("Inu.Runtime.Conformance");
         }
+    }
+    if (debugBuild)
+    {
         // Matches NativeAOT's official build integration: -g asks ILC to carry
         // managed sequence points into C# / NativeAOT CodeView debug records.
         ilcArguments.Add("-g");

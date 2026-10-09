@@ -444,7 +444,7 @@ public static unsafe partial class Kernel
 #endif
 
         if (!NativeAotExceptionRuntime.ConfigureImageBase(boot.GetKernelImageBase())) { KernelConsole.WriteLine("NOBT:FAIL:EHBASE"); return false; }
-#if DEBUG || INU_RUNTIME_CONFORMANCE
+#if INU_RUNTIME_CONFORMANCE
         KernelConsole.WriteLine("NOBT:CONF:BASE");
         KernelConsole.WriteLine("NOBT:CONF:RUN");
 
@@ -532,7 +532,7 @@ public static unsafe partial class Kernel
 
         // Full mature-GC conformance is validation-only. The root map is still sealed and
         // checked on every boot; the expensive GC stress/assertion pass is Debug/opt-in.
-#if DEBUG || INU_RUNTIME_CONFORMANCE
+#if INU_RUNTIME_CONFORMANCE
         KernelConsole.WriteLine("NOBT:GC:RUN");
         if (!ManagedRuntimeConformance.RunGarbageCollectorChecks(out UInt32 gcPassed, out UInt32 gcFailed))
         {
