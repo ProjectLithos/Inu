@@ -22,25 +22,41 @@ public static unsafe partial class KernelProcesses
         }
         ClearPendingExit(cpu);
         if(!TryClaimForegroundProcess(record)){ReturnRunningProcessToReady(cpu,record);return false;}
+#if DEBUG
         TraceUserProcessStart(record);
+#endif
         if(!KernelSystemCalls.EnsureCurrentProcessorConfigured()){TraceUserRecord("[USR] syscall CPU setup FAILED\r\n");ReturnRunningProcessToReady(cpu,record);return false;}
         UInt64 kernelRoot=KernelVirtualMemory.GetRootPhysicalAddress();
+#if DEBUG
         TraceUserPreflight(record,kernelRoot);
+#endif
         if(!ValidateProcessRootBeforeSwitch(record)){TraceUserRecord("[USR] process CR3 preflight FAILED; refusing transition\r\n");ReturnRunningProcessToReady(cpu,record);return false;}
         UInt64 userRoot=KernelProcessRecordStore.GetRoot(record),entry=KernelProcessRecordStore.GetEntry(record),stackTop=KernelProcessRecordStore.GetStackTop(record);
         if(!Native.WritePageTableRoot(userRoot)){TraceUserRecord("[USR] user CR3 switch FAILED\r\n");ReturnRunningProcessToReady(cpu,record);return false;}
+#if DEBUG
         if(Native.BeginSerialRecord()){TraceUserText("[USR] user CR3 active readback=");TraceUserHex(Native.ReadPageTableRoot());TraceUserText("\r\n");Native.EndSerialRecord();}
+#endif
         if(!KernelSecurity.SetCurrentProcess(processId)){TraceUserRecord("[USR] syscall policy activation FAILED\r\n");Native.WritePageTableRoot(kernelRoot);ClearRunningProcess(cpu);return FinishFaultedProcess(record,-2L,false);}
+#if DEBUG
         if(Native.BeginSerialRecord()){TraceUserText("[USR] syscall policy active pid=");TraceUserHex(processId);TraceUserText("\r\n");Native.EndSerialRecord();}
+#endif
         if(KernelFaultInjection.ShouldCrashUserProcess("process",out UInt64 injectedCrashCode))
         {
             if(Native.BeginSerialRecord()){TraceUserText("[USR] injected controlled process crash code=");TraceUserHex(injectedCrashCode);TraceUserText("\r\n");Native.EndSerialRecord();}
             Boolean injectedRootRestored=Native.WritePageTableRoot(kernelRoot);KernelSecurity.SetCurrentProcess(0UL);ClearRunningProcess(cpu);ClearPendingExit(cpu);ReleaseForegroundProcessClaim(processId);
             Int64 injectedExit=injectedCrashCode==0UL?-1L:unchecked((Int64)injectedCrashCode);return FinishFaultedProcess(record,injectedExit,injectedRootRestored);
         }
+#if DEBUG
         if(Native.BeginSerialRecord()){TraceUserText("[USR] EnterUserMode -> IRETQ entry=");TraceUserHex(entry);TraceUserText(" rsp=");TraceUserHex(stackTop);TraceUserText("\r\n");Native.EndSerialRecord();}
+#endif
         Int32 transition=Native.EnterUserMode(entry,stackTop,argument);
-        if(transition==1)TraceUserRecord("[USR] controlled user exit returned to kernel\r\n");else if(transition==2)TraceUserRecord("[USR] contained CPL3 exception returned to kernel\r\n");else TraceUserRecord("[USR] EnterUserMode failed before controlled return\r\n");
+#if DEBUG
+        if(transition==1)TraceUserRecord("[USR] controlled user exit returned to kernel\r\n");
+        else if(transition==2)TraceUserRecord("[USR] contained CPL3 exception returned to kernel\r\n");
+        else TraceUserRecord("[USR] EnterUserMode failed before controlled return\r\n");
+#else
+        if(transition!=1)TraceUserRecord(transition==2?"[USR] contained CPL3 exception returned to kernel\r\n":"[USR] EnterUserMode failed before controlled return\r\n");
+#endif
         Boolean rootRestored=Native.WritePageTableRoot(kernelRoot);KernelSecurity.SetCurrentProcess(0UL);ClearRunningProcess(cpu);ReleaseForegroundProcessClaim(processId);
         ReadPendingExit(cpu,out UInt64 pendingProcess,out Int64 pendingCode,out UInt64 pendingKill);ClearPendingExit(cpu);
         if(transition==1&&pendingProcess==processId)

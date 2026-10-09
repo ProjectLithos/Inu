@@ -40,11 +40,12 @@ static int MainEntry(string[] args)
     if(rc!=0)return Fail($"NASM failed for UserEntry.asm with exit code {rc}.");
     rc=UserlandStageCache.Run("Userland exception assembly",cacheDirectory,[userExceptionSource,nasm],[userExceptionObject],["-f","win64","-DINU_USERLAND=1"],force,()=>Run(nasm,["-f","win64","-DINU_USERLAND=1",userExceptionSource,"-o",userExceptionObject],sdkRoot));
     if(rc!=0)return Fail($"NASM failed for ring-3 exception helpers with exit code {rc}.");
-    List<string> sharedInputs=[typeof(UserlandStageCache).Assembly.Location,dotnet,Path.Combine(sdkRoot,"Directory.Build.props")];
+    string directoryBuildProps=Path.Combine(sdkRoot,"Directory.Build.props");
+    List<string> sharedInputs=[typeof(UserlandStageCache).Assembly.Location,dotnet];
     foreach(string library in new[]{"Inu.Freestanding.CoreLib","Inu.Userland.RuntimeSupport","Inu.Runtime.UserlandNativeAot","Inu.Userland.Runtime"})sharedInputs.AddRange(UserlandStageCache.ProjectInputs(Path.Combine(sdkRoot,"src",library,library+".csproj")));
     string sdkDirectory=Path.Combine(Path.GetDirectoryName(Path.GetFullPath(dotnet))!,"sdk");
     if(Directory.Exists(sdkDirectory))sharedInputs.Add(sdkDirectory);
-    string sharedIdentity=UserlandStageCache.Fingerprint(sharedInputs,[configuration]);
+    string sharedIdentity=UserlandStageCache.Fingerprint(sharedInputs,[configuration,CompilationRelevantBuildProps(directoryBuildProps)]);
     string ilcIdentity=UserlandStageCache.Fingerprint([Path.GetDirectoryName(Path.GetFullPath(ilc))!],[]);
 
     string shellSource=Path.Combine(coderRoot,"Shell.cs");
@@ -169,6 +170,18 @@ static bool HasStringArrayMain(string file,string type)=>Regex.IsMatch(File.Read
 static bool HasPromptMember(string file)=>Regex.IsMatch(File.ReadAllText(file),@"\b(?:const\s+)?(?:string|String)\s+Prompt\b");
 static string Sanitize(string value)=>Regex.Replace(value,@"[^A-Za-z0-9_.-]","_");
 static string Esc(string value)=>value.Replace("&","&amp;").Replace("\"","&quot;");
+
+static string CompilationRelevantBuildProps(string path)
+{
+    if(!File.Exists(path))return String.Empty;
+    string text=File.ReadAllText(path);
+    // Product/release identity does not alter generated userland IL or native code.
+    // Keep all other Directory.Build.props content in the cache identity so a real
+    // compiler/build-policy change still invalidates every affected application.
+    foreach(string element in new[]{"Version","AssemblyVersion","FileVersion","PackageVersion"})
+        text=Regex.Replace(text,$@"(<{element}>)[^<]*(</{element}>)","$1<release-version>$2",RegexOptions.CultureInvariant);
+    return text;
+}
 static string? GetOption(string[] args,string name){for(int i=0;i+1<args.Length;i++)if(string.Equals(args[i],name,StringComparison.OrdinalIgnoreCase))return args[i+1];return null;}
 static int Run(string file,IEnumerable<string> args,string cwd){ProcessStartInfo psi=new(file){WorkingDirectory=cwd,UseShellExecute=false};foreach(string arg in args)psi.ArgumentList.Add(arg);using Process p=Process.Start(psi)!;p.WaitForExit();return p.ExitCode;}
 static int Fail(string message){Console.Error.WriteLine("[FAIL] "+message);return 1;}

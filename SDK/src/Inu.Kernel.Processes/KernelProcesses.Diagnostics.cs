@@ -22,21 +22,30 @@ public static unsafe partial class KernelProcesses
     {
         UInt64 root=KernelProcessRecordStore.GetRoot(record);
         if(!Native.CapturePanicContext(out UInt64 rip,out UInt64 rsp,out UInt64 rbp,out UInt64 flags,out UInt64 activeRoot)){TraceUserRecord("[USR] capture kernel context FAILED\r\n");return false;}
+#if DEBUG
         if(Native.BeginSerialRecord()){TraceUserText("[USR] kernel context rip=");TraceUserHex(rip);TraceUserText(" rsp=");TraceUserHex(rsp);TraceUserText(" rbp=");TraceUserHex(rbp);TraceUserText(" rflags=");TraceUserHex(flags);TraceUserText(" activeCR3=");TraceUserHex(activeRoot);TraceUserText("\r\n");Native.EndSerialRecord();}
-        Boolean ripMapped=TraceCandidateRootMapping(root,"kernel-rip",rip);
-        Boolean rspMapped=TraceCandidateRootMapping(root,"kernel-rsp",rsp);
+#endif
+        Boolean ripMapped=ValidateCandidateRootMapping(root,"kernel-rip",rip);
+        Boolean rspMapped=ValidateCandidateRootMapping(root,"kernel-rsp",rsp);
         UInt64 syscallState=KernelSystemCalls.GetSyscallStateAddress();UInt64 syscallStack=KernelSystemCalls.GetSyscallStackTop();
-        Boolean stateMapped=syscallState==0UL||TraceCandidateRootMapping(root,"syscall-state",syscallState);
-        Boolean syscallStackMapped=syscallStack==0UL||TraceCandidateRootMapping(root,"syscall-stack",syscallStack-8UL);
+        Boolean stateMapped=syscallState==0UL||ValidateCandidateRootMapping(root,"syscall-state",syscallState);
+        Boolean syscallStackMapped=syscallStack==0UL||ValidateCandidateRootMapping(root,"syscall-stack",syscallStack-8UL);
         return ripMapped&&rspMapped&&stateMapped&&syscallStackMapped;
     }
 
-    private static Boolean TraceCandidateRootMapping(UInt64 root,String label,UInt64 virtualAddress)
+    private static Boolean ValidateCandidateRootMapping(UInt64 root,String label,UInt64 virtualAddress)
     {
-        if(!Native.BeginSerialRecord())return false;
-        TraceUserText("[USR] processCR3 map ");TraceUserText(label);TraceUserText(" va=");TraceUserHex(virtualAddress);
-        if(!ProcessAddressSpace.TryInspectMapping(root,virtualAddress,out UInt64 physical,out UInt64 raw,out UInt64 pageSize)){TraceUserText(" MISSING\r\n");Native.EndSerialRecord();return false;}
-        TraceUserText(" pa=");TraceUserHex(physical);TraceUserText(" flags=");TraceUserHex(raw);TraceUserText(" page=");TraceUserHex(pageSize);TraceUserText("\r\n");return Native.EndSerialRecord();
+        Boolean mapped=ProcessAddressSpace.TryInspectMapping(root,virtualAddress,out UInt64 physical,out UInt64 raw,out UInt64 pageSize);
+#if DEBUG
+        if(Native.BeginSerialRecord())
+        {
+            TraceUserText("[USR] processCR3 map ");TraceUserText(label);TraceUserText(" va=");TraceUserHex(virtualAddress);
+            if(!mapped)TraceUserText(" MISSING");
+            else{TraceUserText(" pa=");TraceUserHex(physical);TraceUserText(" flags=");TraceUserHex(raw);TraceUserText(" page=");TraceUserHex(pageSize);}
+            TraceUserText("\r\n");Native.EndSerialRecord();
+        }
+#endif
+        return mapped;
     }
 
     private static void TraceUserMapping(UInt64 processId,String label,UInt64 virtualAddress)

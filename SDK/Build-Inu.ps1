@@ -841,7 +841,9 @@ $effectiveBootTimeoutSeconds = if ($runtimeConformanceEnabled) { [Math]::Max($Bo
 if ($runtimeConformanceEnabled -and $effectiveBootTimeoutSeconds -ne $BootTimeoutSeconds) {
     Write-Host ("[INFO] Explicit in-kernel runtime conformance uses a {0}s bounded boot window; normal OS runs keep the {1}s window." -f $effectiveBootTimeoutSeconds,$BootTimeoutSeconds)
 }
-$qemuArgs = @($qemuLauncher, "run", $projectManifest, "--qemu", $qemu, "--image", $imagePath, "--ovmf-code", $ovmfCode, "--ovmf-vars", $ovmfVars, "--timeout-seconds", [string]$effectiveBootTimeoutSeconds) + $dry
+$targetAccelerator = if ([string]::IsNullOrWhiteSpace($env:INU_TARGET_ACCELERATOR)) { "auto" } else { $env:INU_TARGET_ACCELERATOR }
+Write-Host ("[INFO] QEMU accelerator policy: {0}" -f $targetAccelerator)
+$qemuArgs = @($qemuLauncher, "run", $projectManifest, "--qemu", $qemu, "--image", $imagePath, "--ovmf-code", $ovmfCode, "--ovmf-vars", $ovmfVars, "--timeout-seconds", [string]$effectiveBootTimeoutSeconds, "--accelerator", $targetAccelerator) + $dry
 $qemuStageHardTimeout = ($effectiveBootTimeoutSeconds * 2) + 65
 $null = Invoke-InuCapturedStage -Stage "QEMU runtime acceptance" -FilePath $dotnet -Arguments $qemuArgs -TimeoutSeconds $qemuStageHardTimeout
 

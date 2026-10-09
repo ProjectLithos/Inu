@@ -17,7 +17,7 @@ static int MainEntry(string[] args)
     }
     if (args.Length < 2 || !string.Equals(args[0], "run", StringComparison.OrdinalIgnoreCase))
     {
-        return Fail("Usage: Inu.QemuLauncher run <InuProject.json> --qemu <path> --image <path> [--ovmf-code <path>] [--ovmf-vars <path>] [--timeout-seconds <value>] [--cpus <n>] [--memory-mib <n>] [--storage virtio-block|ahci|nvme] [--network virtio-net|e1000|none] [--graphics virtio-gpu|gop] [--usb xhci|none] [--run-directory <path>] [--require-marker <text>] [--accept-and-stop] [--dry-run]");
+        return Fail("Usage: Inu.QemuLauncher run <InuProject.json> --qemu <path> --image <path> [--ovmf-code <path>] [--ovmf-vars <path>] [--timeout-seconds <value>] [--accelerator auto|whpx|kvm|hvf|tcg] [--cpus <n>] [--memory-mib <n>] [--storage virtio-block|ahci|nvme] [--network virtio-net|e1000|none] [--graphics virtio-gpu|gop] [--usb xhci|none] [--run-directory <path>] [--require-marker <text>] [--accept-and-stop] [--dry-run]");
     }
 
     if (!InuProject.TryLoad(args[1], out InuProject? project, out string error) || project is null)
@@ -50,6 +50,7 @@ static int MainEntry(string[] args)
 
     int qemuProcessorCount;
     int memoryMiB;
+    string acceleratorTarget;
     string storageTarget;
     string networkTarget;
     string graphicsTarget;
@@ -57,6 +58,7 @@ static int MainEntry(string[] args)
     try
     {
         qemuProcessorCount = ResolveQemuProcessorCount(project, GetOption(args, "--cpus"));
+        acceleratorTarget = ParseChoice(GetOption(args, "--accelerator"), "auto", ["auto", "whpx", "kvm", "hvf", "tcg"], "--accelerator");
         memoryMiB = ParseBoundedInt(GetOption(args, "--memory-mib"), 512, 128, 65536, "--memory-mib");
         storageTarget = ParseChoice(GetOption(args, "--storage"), "virtio-block", ["virtio-block", "ahci", "nvme"], "--storage");
         networkTarget = ParseChoice(GetOption(args, "--network"), "none", ["none", "virtio-net", "e1000"], "--network");
@@ -106,7 +108,7 @@ static int MainEntry(string[] args)
     }
 
     int hostLogicalProcessorCount = Environment.ProcessorCount;
-    string[] qemuArguments = BuildArguments(ovmfCode, variableStore, runImage, serialLog, qemuPidFile, qemuProcessorCount, memoryMiB, storageTarget, networkTarget, graphicsTarget, usbTarget, qemuDebugLog, qemuDebugConLog, qmpPort);
+    string[] qemuArguments = BuildArguments(ovmfCode, variableStore, runImage, serialLog, qemuPidFile, qemuProcessorCount, memoryMiB, acceleratorTarget, storageTarget, networkTarget, graphicsTarget, usbTarget, qemuDebugLog, qemuDebugConLog, qmpPort);
     Console.WriteLine($"[INFO] QEMU executable: {qemu}");
     Console.WriteLine($"[INFO] OVMF code     : {ovmfCode}");
     Console.WriteLine($"[INFO] OVMF variables: {ovmfVars}");
@@ -119,6 +121,7 @@ static int MainEntry(string[] args)
     Console.WriteLine($"[INFO] Host CPUs     : {hostLogicalProcessorCount} logical processor(s)");
     Console.WriteLine($"[INFO] QEMU CPUs     : {qemuProcessorCount} logical processor(s)");
     Console.WriteLine($"[INFO] QEMU RAM      : {memoryMiB} MiB");
+    Console.WriteLine($"[INFO] QEMU accel    : {DescribeAccelerator(acceleratorTarget)}");
     Console.WriteLine($"[INFO] QEMU storage  : {storageTarget}");
     Console.WriteLine($"[INFO] QEMU network  : {networkTarget}");
     Console.WriteLine($"[INFO] QEMU graphics : {graphicsTarget}");
@@ -207,7 +210,7 @@ static int MainEntry(string[] args)
 
         Console.WriteLine($"[ OK ] QEMU started without -S. Process ID: {qemuPid}");
         const int gcStressGraceSeconds = 60;
-        const int managedProgressGraceSeconds = 15;
+        const int managedProgressGraceSeconds = 30;
         const string gcRunMarker = "NOBT:GC:RUN";
         const string gcOkMarker = "NOBT:GC:OK";
         Stopwatch acceptanceClock = Stopwatch.StartNew();
@@ -216,8 +219,27 @@ static int MainEntry(string[] args)
         bool gcStressCompleted = false;
         bool managedProgressGraceActivated = false;
         string serialText = string.Empty;
-        while (acceptanceClock.Elapsed < acceptanceDeadline)
+        while (true)
         {
+            // Always inspect the serial stream once more at the deadline boundary.
+            // QEMU/TCG can publish a progress marker immediately before the host-side
+            // stopwatch crosses the base timeout; the old loop condition exited before
+            // that marker could be observed and therefore discarded the configured grace.
+            if (acceptanceClock.Elapsed >= acceptanceDeadline)
+            {
+                serialText = ReadSharedText(serialLog);
+                bool boundaryManagedProgress = serialText.Contains("EH:1890", StringComparison.Ordinal);
+                if (boundaryManagedProgress && !managedProgressGraceActivated)
+                {
+                    managedProgressGraceActivated = true;
+                    acceptanceDeadline += TimeSpan.FromSeconds(managedProgressGraceSeconds);
+                    Console.WriteLine($"[INFO] Managed conformance progress was observed at the acceptance boundary; extending the current deadline by {managedProgressGraceSeconds} seconds.");
+                }
+                else
+                {
+                    break;
+                }
+            }
             if (!IsProcessAlive(qemuPid))
             {
                 // Preserve the same diagnostic contract as the timeout path: an
@@ -257,21 +279,21 @@ static int MainEntry(string[] args)
             bool managedConformanceProgress =
                 serialText.Contains("EH:1890", StringComparison.Ordinal);
 
-            // 0.0.109: the GVM acceptance probe is intentionally heavily instrumented.
+            // The GVM acceptance probe is intentionally heavily instrumented.
             // Under TCG that serial traffic can consume a material part of the base boot
             // window. Once both class-GVM calls have completed, allow the new interface-GVM
             // and dynamic-dictionary gates to finish before collection conformance. Grant one
             // bounded post-progress window; unlike the mature-GC allowance this is never repeated.
-            if (managedConformanceProgress && !ttfReady && !managedProgressGraceActivated)
+            if (managedConformanceProgress && !managedProgressGraceActivated)
             {
                 managedProgressGraceActivated = true;
-                // 0.0.106: this is an allowance in addition to the existing boot
-                // deadline. 0.0.104/0.0.105 incorrectly used elapsed+grace, which
+                // This is an allowance in addition to the existing boot
+                // deadline. Earlier launchers could lose the allowance at the timeout boundary, which
                 // often equalled the original 20-second deadline when EH:1890 arrived
                 // early. The launcher announced an extension without extending QEMU's
                 // lifetime. Keep this additive and one-shot.
                 acceptanceDeadline += TimeSpan.FromSeconds(managedProgressGraceSeconds);
-                Console.WriteLine($"[INFO] Managed conformance is still advancing through interface-GVM/dynamic-dictionary checks after class-GVM completion; extending the current acceptance deadline by {managedProgressGraceSeconds} seconds before graphics readiness.");
+                Console.WriteLine($"[INFO] Managed conformance is still advancing through interface-GVM/dynamic-dictionary checks after class-GVM completion; extending the current acceptance deadline by {managedProgressGraceSeconds} seconds while managed conformance is still advancing.");
             }
 
             if (gcStressRunning && !gcStressReady && !gcStressGraceActivated)
@@ -821,20 +843,46 @@ static string ReadBinaryTailHex(string path, int maximumBytes)
     }
 }
 
-static string[] BuildArguments(string ovmfCode, string variableStore, string runImage, string serialLog, string qemuPidFile, int qemuProcessorCount, int memoryMiB, string storageTarget, string networkTarget, string graphicsTarget, string usbTarget, string qemuDebugLog, string qemuDebugConLog, int qmpPort)
+static string DescribeAccelerator(string acceleratorTarget)
 {
-    List<string> arguments =
-    [
-        "-machine", "q35",
-        "-accel", "tcg,thread=multi",
-        "-cpu", "max",
+    if(!string.Equals(acceleratorTarget,"auto",StringComparison.OrdinalIgnoreCase))return acceleratorTarget;
+    if(OperatingSystem.IsWindows())return "auto (WHPX -> TCG fallback)";
+    if(OperatingSystem.IsLinux())return "auto (KVM -> TCG fallback)";
+    if(OperatingSystem.IsMacOS())return "auto (HVF -> TCG fallback)";
+    return "auto (TCG)";
+}
+
+static string[] BuildArguments(string ovmfCode, string variableStore, string runImage, string serialLog, string qemuPidFile, int qemuProcessorCount, int memoryMiB, string acceleratorTarget, string storageTarget, string networkTarget, string graphicsTarget, string usbTarget, string qemuDebugLog, string qemuDebugConLog, int qmpPort)
+{
+    List<string> arguments = new();
+    if(string.Equals(acceleratorTarget,"auto",StringComparison.OrdinalIgnoreCase))
+    {
+        // On Windows, prefer WHPX and let QEMU fall back to TCG if the Windows
+        // Hypervisor Platform is unavailable. QEMU's accelerator-list syntax
+        // performs the fallback inside one launch. Other hosts retain TCG here;
+        // platform-specific launchers may select their native accelerator.
+        if(OperatingSystem.IsWindows())arguments.AddRange(["-machine","q35,accel=whpx:tcg"]);
+        else if(OperatingSystem.IsLinux())arguments.AddRange(["-machine","q35,accel=kvm:tcg"]);
+        else if(OperatingSystem.IsMacOS())arguments.AddRange(["-machine","q35,accel=hvf:tcg"]);
+        else arguments.AddRange(["-machine","q35","-accel","tcg,thread=multi"]);
+    }
+    else
+    {
+        arguments.AddRange(["-machine","q35"]);
+        arguments.AddRange(["-accel",string.Equals(acceleratorTarget,"tcg",StringComparison.OrdinalIgnoreCase)?"tcg,thread=multi":acceleratorTarget]);
+    }
+    // The TCG-only "max" CPU model is useful for software emulation but is not
+    // a safe default for WHPX/KVM/HVF. Native accelerators use QEMU's host-safe
+    // default CPU model; explicit TCG retains the broad emulated feature model.
+    if(string.Equals(acceleratorTarget,"tcg",StringComparison.OrdinalIgnoreCase))arguments.AddRange(["-cpu","max"]);
+    arguments.AddRange([
         "-smp", qemuProcessorCount.ToString(CultureInfo.InvariantCulture),
         "-m", memoryMiB.ToString(CultureInfo.InvariantCulture) + "M",
         "-display", "sdl",
         "-drive", $"if=pflash,format=raw,unit=0,readonly=on,file={EscapeDriveValue(ovmfCode)}",
         "-drive", $"if=pflash,format=raw,unit=1,file={EscapeDriveValue(variableStore)}",
         "-drive", $"if=none,format=raw,file={EscapeDriveValue(runImage)},id=boot"
-    ];
+    ]);
 
     switch (storageTarget)
     {

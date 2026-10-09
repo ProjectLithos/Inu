@@ -43,7 +43,19 @@ public static unsafe partial class KernelSystemCalls
     [RuntimeExport("InuManagedSyscallDispatch")]
     private static Int64 NativeDispatch(UInt64 encoded, UInt64 a0, UInt64 a1, UInt64 a2, UInt64 a3, UInt64 a4, UInt64 a5)
     {
-        UInt64 sequence=NextDiagnosticSequence();Boolean trace=sequence<=DiagnosticTraceLimit;if(trace)TraceSyscallEnter(sequence,encoded,a0);Int64 result=Dispatch(encoded,a0,a1,a2,a3,a4,a5);if(trace)TraceSyscallExit(sequence,result);return result;
+#if DEBUG
+        UInt64 sequence=NextDiagnosticSequence();
+        Boolean trace=sequence<=DiagnosticTraceLimit;
+        if(trace)TraceSyscallEnter(sequence,encoded,a0);
+        Int64 result=Dispatch(encoded,a0,a1,a2,a3,a4,a5);
+        if(trace)TraceSyscallExit(sequence,result);
+        return result;
+#else
+        // Per-syscall serial tracing is intentionally absent from normal/Release
+        // kernels. QEMU serial I/O is orders of magnitude slower than the syscall
+        // itself and made ordinary shell input and commands appear unresponsive.
+        return Dispatch(encoded,a0,a1,a2,a3,a4,a5);
+#endif
     }
 
     private static UInt64 NextDiagnosticSequence()

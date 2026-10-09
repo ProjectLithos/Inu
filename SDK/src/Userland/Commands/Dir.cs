@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Inu.Userland.Runtime;
 namespace Inu.Userland.Commands;
 public static class Dir
@@ -21,10 +22,11 @@ public static class Dir
                 else files.Add(GetName(entry));
             }
             Sort(directories);Sort(files);
-            Console.WriteLine("Directory of "+path);
-            Console.WriteLine(String.Empty);
-            for(Int32 i=0;i<directories.Count;i++)Console.WriteLine("<DIR>  "+directories[i]);
-            for(Int32 i=0;i<files.Count;i++)Console.WriteLine("       "+files[i]);
+            StringBuilder output=new StringBuilder();
+            output.Append("Directory of ");output.Append(path);output.Append('\n');output.Append('\n');
+            for(Int32 i=0;i<directories.Count;i++){output.Append("<DIR>  ");output.Append(directories[i]);output.Append('\n');}
+            for(Int32 i=0;i<files.Count;i++){output.Append("       ");output.Append(files[i]);output.Append('\n');}
+            Console.Write(output.ToString());
             return 0;
         }
         catch(Exception)

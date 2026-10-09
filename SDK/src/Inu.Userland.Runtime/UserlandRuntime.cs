@@ -63,7 +63,7 @@ public static class Output
 
 public static unsafe class UserlandConsole
 {
-    public static Boolean Write(String text){if(text==null)return false;Byte* b=stackalloc Byte[256];Int32 offset=0;while(offset<text.Length){UInt32 n=(UInt32)(text.Length-offset);if(n>256U)n=256U;for(UInt32 i=0;i<n;i++){Char c=text[offset+(Int32)i];b[i]=(Byte)(c<=255?c:'?');}Int64 r=UserlandSystem.Call(UserlandOperation.Event,"console.output",b,n,null,0UL);if(r<0L)return false;offset+=(Int32)n;}return true;}
+    public static Boolean Write(String text){if(text==null)return false;const UInt32 ChunkBytes=1024U;Byte* b=stackalloc Byte[(Int32)ChunkBytes];Int32 offset=0;while(offset<text.Length){UInt32 n=(UInt32)(text.Length-offset);if(n>ChunkBytes)n=ChunkBytes;for(UInt32 i=0;i<n;i++){Char c=text[offset+(Int32)i];b[i]=(Byte)(c<=255?c:'?');}Int64 r=UserlandSystem.Call(UserlandOperation.Event,"console.output",b,n,null,0UL);if(r<0L)return false;offset+=(Int32)n;}return true;}
     public static Boolean WriteLine(String text){return Write(text)&&Write("\n");}
     internal static Boolean WriteChar(Char value)
     {

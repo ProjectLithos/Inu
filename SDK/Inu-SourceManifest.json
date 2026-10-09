@@ -1,5 +1,5 @@
 {
-  "version": "0.0.115",
+  "version": "0.0.116",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -379,7 +379,7 @@
     },
     {
       "path": "Build-Inu.ps1",
-      "sha256": "CF474D2D349A6023D336DF6D0E1FCF141EE8C7D07CB588C7A84464DD802C649B"
+      "sha256": "048BB1F8C7AC983E42928F4CD469A4977B2C1C561224D83D69CE200DE24B4FC5"
     },
     {
       "path": "Build-InuDocumentation.bat",
@@ -803,7 +803,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "30ebbe27cf2d563051041ff5d0e670120ff5b08e87ba85d2573473d64adab5bd"
+      "sha256": "3a36d6684a2794c0aba34a18d4261136b7056a478a93199c81206c6671ca7251"
     },
     {
       "path": "Directory.Build.targets",
@@ -911,7 +911,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "b7ca28555c85e709b8e907763ec5582997cc32c32cac14653c5a7d763d9fb818"
+      "sha256": "0825c6edc50e066c2de312d5334909005192063b33842b127511d0618e11e990"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2963,7 +2963,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "4a805dc1a0f7c65f1c14f6bd3b523ed15335197d48fccc8b429fc9708b2e6121"
+      "sha256": "b5883eed25e6463985a43ce25154e14dcb89fa74127b13ddb17a12380b4cce60"
     },
     {
       "path": "Inu-Package.bat",
@@ -2999,7 +2999,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "0ce11442e2006c05ab19bf52d8a43a7fffea43afe1d1a5c3fba812ba53aec643"
+      "sha256": "3ea7b1e842c3e375e4a446f0e1176bb1924d55fd9be4b6c509bef0a5b376ea53"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3511,7 +3511,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "97a0f75f883fe8f037d018c1efe5eaae900522c43b96fd05772a18e1646991e3"
+      "sha256": "204a0d2c3e12d86e26a354c8671cd1998f4c0cd562daebaa4e3162ef63de69d2"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4619,7 +4619,7 @@
     },
     {
       "path": "src/Inu.Kernel.Processes/KernelProcesses.Diagnostics.cs",
-      "sha256": "39DE72CAA24259D7CC91108CDD4234FA0D7AEEC0BE507A5E35CD30601224FD8F"
+      "sha256": "F92A27DD01E24084131AB23794F1C9C7422F15F888C780EA2FBDFD58DD2DF8AB"
     },
     {
       "path": "src/Inu.Kernel.Processes/KernelProcesses.Execution.cs",
@@ -4659,7 +4659,7 @@
     },
     {
       "path": "src/Inu.Kernel.Processes/KernelProcesses.Start.cs",
-      "sha256": "1280F51D00BEF75F03FB31976471E36332B6AF7578A26DC56E4BC5DA11E6DCE4"
+      "sha256": "399339E4E8B7F91424A36ACD603DEF5891FE0D85AA63880E524E1DA45D2C652A"
     },
     {
       "path": "src/Inu.Kernel.Processes/KernelProcesses.Syscalls.cs",
@@ -5159,7 +5159,7 @@
     },
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCalls.Dispatch.cs",
-      "sha256": "6CEB7BBD7530DA20D8B3A74D8E0C42BEC79B3E12A15489C91D65E6D4B5566C63"
+      "sha256": "29322E2DCEFFC33AB63AFD72B4CA017F4A7DE793DE1BD26D925873E0C469F672"
     },
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCalls.NativeMessages.cs",
@@ -5575,7 +5575,7 @@
     },
     {
       "path": "src/Inu.QemuLauncher/Program.cs",
-      "sha256": "4DC13FA7617C4A8234068A853924E746D9BEB2F93BD0B7CA4A7A89ED6EC92144"
+      "sha256": "3EB135FA142044C768DE9D26BF7837D46DF707D3577A99639E010A7A2AF08C6C"
     },
     {
       "path": "src/Inu.Runtime.Conformance/Inu.Runtime.Conformance.csproj",
@@ -5735,7 +5735,7 @@
     },
     {
       "path": "src/Inu.Userland.Runtime/UserlandRuntime.cs",
-      "sha256": "B5265744CE77828065AB1115E209689547137DEE7700643E70325556D7DF455A"
+      "sha256": "F7BEBA77A56173DDDCB00DCC5D39EA74E928660EF5CDD51611806C5BB5E532E9"
     },
     {
       "path": "src/Inu.Userland.RuntimeSupport/Inu.Userland.RuntimeSupport.csproj",
@@ -5751,7 +5751,7 @@
     },
     {
       "path": "src/Inu.UserlandCompiler/Program.cs",
-      "sha256": "4D307E61BD495495D851D40FEAEBFFF246B55905217469DA1A0428672BF099F1"
+      "sha256": "14AA8F3C8AABE8083B0418AF396A87A122C520F80F6860D0AFFB401FBA1873DC"
     },
     {
       "path": "src/Inu.UserlandCompiler/UserlandStageCache.cs",
@@ -5771,7 +5771,7 @@
     },
     {
       "path": "src/Userland/Commands/Dir.cs",
-      "sha256": "4529EE1295B69E7E08B3BF47EA4B0D522BA96672F6EADC9710EEB4B6D415E51B"
+      "sha256": "40CD9855D7B929CF93370558C380FB46F2B69779C1590931657A1CCBDEAC4F91"
     },
     {
       "path": "src/Userland/Commands/Echo.cs",
