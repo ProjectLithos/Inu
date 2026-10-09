@@ -1,29 +1,26 @@
 {
-  "baseVersion": "0.0.119",
-  "version": "0.0.120",
+  "baseVersion": "0.0.120",
+  "version": "0.0.121",
   "changedFiles": [
-    "CHANGED-0.0.120.txt",
+    "TODO.md",
+    "Inu/README.md",
+    "Kath/README.md",
+    "CHANGED-0.0.121.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.ProjectCreator/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
-    "Kath/JSON/package.json",
     "Kath/VERSION",
+    "Kath/JSON/package.json",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.0.120.md",
+    "Kath/docs/Release-0.0.121.md",
     "Kath/packages/kath/package.json",
-    "Kath/packages/kath/src/browser/inu-contribution.ts",
-    "Kath/packages/kath/src/browser/inu-widget.tsx",
-    "Kath/packages/kath/src/common/inu-protocol.ts",
-    "Kath/packages/kath/src/node/inu-project-generation.ts",
-    "Kath/packages/kath/src/node/inu-project-service.ts",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "VERSION"
   ],
-  "summary": "Refresh Kath/Inu-owned OS dependencies automatically when an OS is opened, add an Inu > Refresh menu action, and repair the stock Shell backslash character literal during refresh."
+  "summary": "Add TODO.md as the single authoritative Kath & Inu implementation backlog and make it part of the release workflow."
 }
