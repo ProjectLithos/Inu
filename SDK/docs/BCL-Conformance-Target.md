@@ -5,7 +5,7 @@ Inu does not claim support for the whole .NET Base Class Library. The fixed comp
 A BCL item is part of this target only when the same item is exercised in both of these executable gates:
 
 1. **Reference side:** `SDK/tests/Inu.DotNetConformance.Tests`, executed against the normal .NET 10 BCL by `SDK/Run-InuDotNetConformance.bat`.
-2. **Kernel side:** `Inu.Runtime.Conformance.ManagedRuntimeConformance.RunBclCoreV1Checks`, executed inside the booted Inu kernel only when Inu detects SDK code that has changed since the last successful runtime validation (or when validation is explicitly requested). A failed item rejects that validation run; ordinary Debug and Release OS boots of an unchanged SDK do not execute the conformance suite.
+2. **Kernel side:** `Inu.Runtime.Conformance.ManagedRuntimeConformance.RunBclCoreV1Checks`, available for explicit SDK runtime validation. It is **not** injected into an ordinary generated-OS boot merely because the SDK changed. When Inu implementation code changes, the normal build runs the reference-side suite once for the new SDK fingerprint; the heavier in-kernel gate is opt-in via the SDK runtime-conformance validation path.
 
 The target is intentionally type-level rather than a claim that every API on a listed type is implemented. The APIs exercised by the paired gates are the supported contract. Extending the target requires extending both gates in the same change. The host/reference gate remains available independently of OS boot, while the in-kernel gate is SDK-change validation code rather than a normal or Debug startup prerequisite. Inu records the validated SDK-code fingerprint only after the runtime gate completes successfully.
 

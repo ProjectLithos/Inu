@@ -6,6 +6,7 @@ param(
     [switch]$Run,
     [switch]$NoRun,
     [switch]$ForceRebuild,
+    [switch]$RuntimeConformance,
     [switch]$DryRun
 )
 
@@ -46,13 +47,15 @@ $runtimeValidationStamp = Join-Path $runtimeValidationDirectory 'runtime-conform
 $currentSdkCodeFingerprint = Get-InuSdkCodeFingerprint -SdkRoot $root
 $lastValidatedSdkCodeFingerprint = if (Test-Path -LiteralPath $runtimeValidationStamp -PathType Leaf) { (Get-Content -LiteralPath $runtimeValidationStamp -TotalCount 1).Trim().ToLowerInvariant() } else { '' }
 $runtimeConformanceRequired = $currentSdkCodeFingerprint -ne $lastValidatedSdkCodeFingerprint
-$runtimeConformanceEnabled = $Run -and -not $NoRun -and $runtimeConformanceRequired
+$runtimeConformanceEnabled = $RuntimeConformance -and $Run -and -not $NoRun
 if ($runtimeConformanceRequired) {
-    Write-Host '[INFO] SDK code changed since the last successful runtime conformance validation.'
-    if ($runtimeConformanceEnabled) { Write-Host '[INFO] This run will execute the one-time managed/BCL/GC conformance gate.' }
-    else { Write-Host '[INFO] Conformance is pending until the next OS run; normal build-only work does not execute it.' }
+    Write-Host '[INFO] SDK implementation code changed since the last successful conformance validation.'
+    Write-Host '[INFO] The host-side Inu .NET conformance suite will run once before this build continues.'
+    if ($runtimeConformanceEnabled) { Write-Host '[INFO] Explicit -RuntimeConformance also enables the in-kernel managed/BCL/GC validation gate.' }
+} elseif ($runtimeConformanceEnabled) {
+    Write-Host '[INFO] Explicit -RuntimeConformance requested; the in-kernel managed/BCL/GC validation gate will run.'
 } else {
-    Write-Host '[ OK ] SDK code fingerprint already passed runtime conformance; startup validation will be skipped.'
+    Write-Host '[ OK ] SDK code fingerprint already passed conformance; validation is skipped.'
 }
 
 $inuBuildLogRoot = Join-Path $root "Artifacts\BuildLogs"
@@ -391,6 +394,16 @@ $clang = Join-Path (Split-Path -Parent $lldLink) 'clang.exe'
 if (-not (Test-Path -LiteralPath $clang -PathType Leaf)) { throw "The LLVM clang compiler required for the UEFI loader was not found next to lld-link: $clang" }
 Write-Host "[ OK ] clang   : $clang"
 
+if ($runtimeConformanceRequired -and -not $DryRun) {
+    $referenceConformanceProject = Join-Path $root 'tests\Inu.DotNetConformance.Tests\Inu.DotNetConformance.Tests.csproj'
+    $null = Invoke-InuCapturedStage -Stage 'SDK .NET reference conformance' -FilePath $dotnet -Arguments @('run','--project',$referenceConformanceProject,'-c','Release','--no-launch-profile') -TimeoutSeconds 180
+    New-Item -ItemType Directory -Path $runtimeValidationDirectory -Force | Out-Null
+    Set-Content -LiteralPath $runtimeValidationStamp -Encoding ASCII -Value $currentSdkCodeFingerprint
+    $lastValidatedSdkCodeFingerprint = $currentSdkCodeFingerprint
+    $runtimeConformanceRequired = $false
+    Write-Host '[ OK ] Current SDK code fingerprint passed host-side .NET conformance.'
+}
+
 $projectFontRoot = $null
 if (-not [string]::IsNullOrWhiteSpace($Project)) {
     $fontProjectManifest = if ([IO.Path]::IsPathRooted($Project)) { [IO.Path]::GetFullPath($Project) } else { [IO.Path]::GetFullPath((Join-Path $root $Project)) }
@@ -727,7 +740,7 @@ $kernelProjectFile = if ([IO.Path]::IsPathRooted([string]$projectData.ProjectFil
 $projectMetadata = @($projectManifest) + @(Get-ChildItem -LiteralPath $projectDirectory -File | Where-Object { $_.Extension -in @('.props','.targets','.csproj') -or $_.Name -eq 'Inu.Configuration.json' } | ForEach-Object { $_.FullName })
 $kernelInputs = if (Test-Path -LiteralPath (Join-Path $projectDirectory 'Kernel') -PathType Container) {
     # The copied SDK includes userland libraries that are not kernel compile inputs.
-    @((Get-InuStageFiles -Paths @((Join-Path $projectDirectory 'Boot'),(Join-Path $projectDirectory 'Kernel')) | Where-Object { $_.FullName -notmatch '[\\/]Kernel[\\/]Provided[\\/]SDK[\\/]' }).FullName) + @(Get-InuProjectStageInputs -ProjectFile (Join-Path $projectDirectory 'Kernel\Provided\SDK\src\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj'))
+    @((Get-InuStageFiles -Paths @((Join-Path $projectDirectory 'Boot'),(Join-Path $projectDirectory 'Kernel'))).FullName) + @(Get-InuProjectStageInputs -ProjectFile (Join-Path $root 'src\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj'))
 } else { @(Get-InuProjectStageInputs -ProjectFile $kernelProjectFile) }
 $kernelInputs += $projectMetadata
 $nativeAotObject = Join-Path $outputDirectory ('NativeAot\' + [string]$projectData.Name + '.obj')
@@ -826,7 +839,7 @@ Write-Host "[ OK ] OVMF vars: $ovmfVars"
 
 $effectiveBootTimeoutSeconds = if ($runtimeConformanceEnabled) { [Math]::Max($BootTimeoutSeconds, 90) } else { $BootTimeoutSeconds }
 if ($runtimeConformanceEnabled -and $effectiveBootTimeoutSeconds -ne $BootTimeoutSeconds) {
-    Write-Host ("[INFO] One-time SDK conformance validation uses a {0}s bounded boot window; unchanged SDK runs keep the normal {1}s window." -f $effectiveBootTimeoutSeconds,$BootTimeoutSeconds)
+    Write-Host ("[INFO] Explicit in-kernel runtime conformance uses a {0}s bounded boot window; normal OS runs keep the {1}s window." -f $effectiveBootTimeoutSeconds,$BootTimeoutSeconds)
 }
 $qemuArgs = @($qemuLauncher, "run", $projectManifest, "--qemu", $qemu, "--image", $imagePath, "--ovmf-code", $ovmfCode, "--ovmf-vars", $ovmfVars, "--timeout-seconds", [string]$effectiveBootTimeoutSeconds) + $dry
 $qemuStageHardTimeout = ($effectiveBootTimeoutSeconds * 2) + 65
@@ -859,7 +872,7 @@ Write-Host ("[INFO] Accepted QEMU UTC: {0}" -f [string]$acceptedRun.acceptedUtc)
 if ($runtimeConformanceEnabled) {
     New-Item -ItemType Directory -Path $runtimeValidationDirectory -Force | Out-Null
     Set-Content -LiteralPath $runtimeValidationStamp -Encoding ASCII -Value $currentSdkCodeFingerprint
-    Write-Host '[ OK ] Current SDK code fingerprint passed runtime conformance; subsequent unchanged SDK runs will skip it.'
+    Write-Host '[ OK ] Explicit in-kernel runtime conformance passed for the current SDK fingerprint.'
 }
 
 Write-Host "[ OK ] Inu x64 NativeAOT boot-and-run acceptance completed."

@@ -23,13 +23,11 @@
     <InuProjectType>Kernel</InuProjectType>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
-    <InuOsSdkRoot>$(MSBuildThisFileDirectory)Kernel\Provided\SDK</InuOsSdkRoot>
     <!-- Full managed/BCL conformance is enabled only by Inu's SDK-change validation run. -->
     <DefineConstants Condition="'$(InuRuntimeConformance)' == 'true'">$(DefineConstants);INU_RUNTIME_CONFORMANCE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Compile only the active OS-owned source tree. Kernel/Provided/SDK is a
-         reference/source library, never a wildcard compile root. Userland is ring 3. -->
+    <!-- Compile only the active OS-owned source tree. SDK build-only support is linked from the central Inu SDK; Userland is ring 3. -->
     <Compile Include="Kernel\*\**\*.cs"
              Exclude="Kernel\Provided\**\*.cs" />
     <!-- ProjectCreator places startup scaffolding in these explicit folders.
@@ -44,7 +42,6 @@
 
     <!-- Absolute source-ownership barriers. These remain effective even if an old generated
          project or another SDK target tries to add these trees to Compile. -->
-    <Compile Remove="Kernel\Provided\SDK\**\*.cs" />
     <Compile Remove="Kernel\Kernel.cs" />
     <Compile Remove="Boot\*.cs" />
     <Compile Remove="HAL\**\*.cs" />
@@ -53,7 +50,7 @@
 
     <!-- All planned kernel source shares one compilation and one set of static state.
          Only the freestanding system module remains a separate assembly. -->
-    <ProjectReference Include="$(InuOsSdkRoot)\src\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj" />
+    <ProjectReference Include="$(InuSdkRoot)\src\Inu.Freestanding.CoreLib\Inu.Freestanding.CoreLib.csproj" />
 
     <None Include="InuProject.json" />
     <None Include="Inu.Configuration.json" />

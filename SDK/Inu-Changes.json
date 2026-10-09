@@ -1,10 +1,12 @@
 {
-  "baseVersion": "0.0.109",
-  "version": "0.0.110",
+  "baseVersion": "0.0.110",
+  "version": "0.0.111",
   "changedFiles": [
     "Kath/packages/kath/src/node/inu-project-generation.ts",
-    "Kath/CJS/stage-cache.cjs",
-    "Kath/CJS/test-stage-cache.cjs",
+    "Inu/SDK/templates/InuKernel/InuKernel.csproj",
+    "Inu/SDK/Build-Inu.ps1",
+    "Inu/SDK/docs/BCL-Conformance-Target.md",
+    "Inu/SDK/docs/Managed-Runtime.md",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu-Changes.json",
@@ -16,11 +18,11 @@
     "Kath/JSON/package.json",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
-    "Kath/docs/Release-0.0.110.md",
+    "Kath/docs/Release-0.0.111.md",
     "VERSION",
     "Inu/VERSION",
     "Kath/VERSION",
-    "CHANGED-0.0.110.txt"
+    "CHANGED-0.0.111.txt"
   ],
-  "summary": "Repair existing-project DirectoryReadGet CS0136 migration and prevent Kath npm install from rerunning on version-only package metadata changes."
+  "summary": "Eliminate generated duplicate SDK/support source and move automatic SDK-change conformance to a one-time host-side check; in-kernel conformance is explicit-only."
 }
