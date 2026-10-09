@@ -5,6 +5,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Internal.Metadata.NativeFormat
 {
@@ -439,6 +440,26 @@ namespace Internal.NativeFormat
             if (data > _base + _size) throw new BadImageFormatException();
             return (UInt32)(data - _base);
         }
+
+        // NativeFormat strings are UTF-8 byte sequences prefixed by their encoded byte count.
+        // Keep this decoder local to the freestanding metadata reader so Object.ToString/Type.ToString
+        // can consume NativeAOT's existing EmbeddedMetadata without importing the reflection stack.
+        public UInt32 DecodeString(UInt32 offset, out String value)
+        {
+            UInt32 byteCount;
+            offset = DecodeUnsigned(offset, out byteCount);
+            if (byteCount == 0U)
+            {
+                value = String.Empty;
+                return offset;
+            }
+
+            if (offset > _size || byteCount > _size - offset) throw new BadImageFormatException();
+            Byte[] bytes = new Byte[(Int32)byteCount];
+            for (UInt32 index = 0U; index < byteCount; index++) bytes[(Int32)index] = *(_base + offset + index);
+            value = global::System.Text.Encoding.UTF8.GetString(bytes);
+            return offset + byteCount;
+        }
     }
 
     internal struct NativeParser
@@ -840,6 +861,213 @@ namespace Internal.Runtime.TypeLoader
     internal static unsafe class TypeLoaderEnvironment
     {
         private const Int32 ReadonlyBlobRegionStart = 300;
+        private const UInt32 MetadataHandleOffsetMask = 0x01FFFFFFU;
+        private const UInt32 MetadataHandleTypeShift = 25U;
+        private const UInt32 MetadataHandleTypeNamespaceDefinition = 0x2FU;
+        private const UInt32 MetadataHandleTypeScopeDefinition = 0x38U;
+        private const UInt32 MetadataHandleTypeTypeDefinition = 0x3AU;
+        private const UInt32 MetadataHandleTypeConstantStringValue = 0x1AU;
+
+        /// <summary>
+        /// Returns the normal .NET display name for a runtime type using NativeAOT's own
+        /// TypeMap and EmbeddedMetadata blobs. This intentionally implements only type-name
+        /// lookup; broad managed reflection remains outside Inu .NET Profile 1.
+        /// </summary>
+        internal static String GetRuntimeTypeDisplayName(RuntimeTypeHandle handle)
+        {
+            MethodTable* table = handle.ToMethodTable();
+            if (table == null) return String.Empty;
+
+            if (table->IsArray)
+            {
+                MethodTable* element = table->RelatedParameterType;
+                String elementName = element == null ? "System.Object" : GetRuntimeTypeDisplayName(new RuntimeTypeHandle(element));
+                if (table->IsSzArray) return String.Concat(elementName, "[]");
+                Int32 rank = table->ArrayRank;
+                if (rank <= 1) return String.Concat(elementName, "[*]");
+                StringBuilder suffix = new StringBuilder();
+                suffix.Append('[');
+                for (Int32 index = 1; index < rank; index++) suffix.Append(',');
+                suffix.Append(']');
+                return String.Concat(elementName, suffix.ToString());
+            }
+
+            if (table->IsPointer || table->IsByRef)
+            {
+                MethodTable* element = table->RelatedParameterType;
+                String elementName = element == null ? "System.Object" : GetRuntimeTypeDisplayName(new RuntimeTypeHandle(element));
+                return String.Concat(elementName, table->IsPointer ? "*" : "&");
+            }
+
+            if (table->IsGeneric && table->GenericDefinition != null)
+            {
+                String definitionName;
+                RuntimeTypeHandle definition = new RuntimeTypeHandle(table->GenericDefinition);
+                if (!TryGetNamedTypeDisplayName(definition, out definitionName)) definitionName = "System.Object";
+
+                UInt32 arity = table->GenericArity;
+                StringBuilder builder = new StringBuilder();
+                builder.Append(definitionName);
+                builder.Append('[');
+                for (UInt32 index = 0U; index < arity; index++)
+                {
+                    if (index != 0U) builder.Append(',');
+                    MethodTable* argument = table->GetGenericArgument(index);
+                    builder.Append(argument == null ? "System.Object" : GetRuntimeTypeDisplayName(new RuntimeTypeHandle(argument)));
+                }
+                builder.Append(']');
+                return builder.ToString();
+            }
+
+            String named;
+            return TryGetNamedTypeDisplayName(handle, out named) ? named : "System.Object";
+        }
+
+        private static Boolean TryGetNamedTypeDisplayName(RuntimeTypeHandle handle, out String name)
+        {
+            TypeManagerHandle[] modules = new TypeManagerHandle[global::Internal.Runtime.CompilerHelpers.StartupCodeHelpers.GetLoadedModules(null)];
+            global::Internal.Runtime.CompilerHelpers.StartupCodeHelpers.GetLoadedModules(modules);
+            Int32 hashCode = handle.GetHashCode();
+
+            for (Int32 moduleIndex = 0; moduleIndex < modules.Length; moduleIndex++)
+            {
+                TypeManagerHandle module = modules[moduleIndex];
+                Byte* mapBlob; UInt32 mapSize;
+                if (!TryFindBlob(module, ReflectionMapBlob.TypeMap, out mapBlob, out mapSize) || mapBlob == null || mapSize == 0U) continue;
+
+                ExternalReferencesTable references = default;
+                if (!references.InitializeCommonFixupsTable(module)) continue;
+
+                NativeHashtable table = new NativeHashtable(new NativeParser(new NativeReader(mapBlob, mapSize), 0U));
+                NativeHashtable.Enumerator lookup = table.Lookup(hashCode);
+                NativeParser entry;
+                while (!(entry = lookup.GetNext()).IsNull)
+                {
+                    RuntimeTypeHandle found = references.GetRuntimeTypeHandleFromIndex(entry.GetUnsigned());
+                    UInt32 metadataHandle = entry.GetUnsigned();
+                    if (RuntimeTypeHandle.ToIntPtr(found) != RuntimeTypeHandle.ToIntPtr(handle)) continue;
+                    if (MetadataHandleType(metadataHandle) != MetadataHandleTypeTypeDefinition) continue;
+
+                    Byte* metadataBlob; UInt32 metadataSize;
+                    if (!TryFindBlob(module, ReflectionMapBlob.EmbeddedMetadata, out metadataBlob, out metadataSize) || metadataBlob == null || metadataSize == 0U) continue;
+                    NativeReader metadata = new NativeReader(metadataBlob, metadataSize);
+                    if (TryReadTypeDefinitionDisplayName(metadata, metadataHandle, 0, out name)) return true;
+                }
+            }
+
+            name = null;
+            return false;
+        }
+
+        private static UInt32 MetadataHandleType(UInt32 handle) => handle >> (Int32)MetadataHandleTypeShift;
+        private static UInt32 MetadataHandleOffset(UInt32 handle) => handle & MetadataHandleOffsetMask;
+
+        private static Boolean TryReadTypeDefinitionDisplayName(NativeReader metadata, UInt32 handle, Int32 depth, out String name)
+        {
+            if (depth > 64 || MetadataHandleType(handle) != MetadataHandleTypeTypeDefinition)
+            {
+                name = null;
+                return false;
+            }
+
+            UInt32 offset = MetadataHandleOffset(handle);
+            UInt32 ignored;
+            offset = metadata.DecodeUnsigned(offset, out ignored); // TypeAttributes
+            offset = metadata.DecodeUnsigned(offset, out ignored); // BaseType
+            UInt32 namespaceOrEnclosing;
+            offset = metadata.DecodeUnsigned(offset, out namespaceOrEnclosing);
+            UInt32 nameHandle;
+            metadata.DecodeUnsigned(offset, out nameHandle);
+
+            String simpleName;
+            if (!TryReadMetadataString(metadata, nameHandle, out simpleName))
+            {
+                name = null;
+                return false;
+            }
+
+            UInt32 parentType = MetadataHandleType(namespaceOrEnclosing);
+            if (parentType == MetadataHandleTypeTypeDefinition)
+            {
+                String parent;
+                if (!TryReadTypeDefinitionDisplayName(metadata, namespaceOrEnclosing, depth + 1, out parent))
+                {
+                    name = null;
+                    return false;
+                }
+                name = String.Concat(parent, "+", simpleName);
+                return true;
+            }
+
+            if (parentType == MetadataHandleTypeNamespaceDefinition)
+            {
+                String ns;
+                if (!TryReadNamespaceDisplayName(metadata, namespaceOrEnclosing, depth + 1, out ns))
+                {
+                    name = null;
+                    return false;
+                }
+                name = String.IsNullOrEmpty(ns) ? simpleName : String.Concat(ns, ".", simpleName);
+                return true;
+            }
+
+            name = simpleName;
+            return parentType == 0U || parentType == MetadataHandleTypeScopeDefinition;
+        }
+
+        private static Boolean TryReadNamespaceDisplayName(NativeReader metadata, UInt32 handle, Int32 depth, out String name)
+        {
+            if (depth > 64 || MetadataHandleType(handle) != MetadataHandleTypeNamespaceDefinition)
+            {
+                name = null;
+                return false;
+            }
+
+            UInt32 offset = MetadataHandleOffset(handle);
+            UInt32 parent;
+            offset = metadata.DecodeUnsigned(offset, out parent);
+            UInt32 nameHandle;
+            metadata.DecodeUnsigned(offset, out nameHandle);
+
+            String segment;
+            if (!TryReadMetadataString(metadata, nameHandle, out segment))
+            {
+                name = null;
+                return false;
+            }
+
+            UInt32 parentType = MetadataHandleType(parent);
+            if (parentType == MetadataHandleTypeNamespaceDefinition)
+            {
+                String prefix;
+                if (!TryReadNamespaceDisplayName(metadata, parent, depth + 1, out prefix))
+                {
+                    name = null;
+                    return false;
+                }
+                name = String.IsNullOrEmpty(prefix) ? segment : String.Concat(prefix, ".", segment);
+                return true;
+            }
+
+            name = segment;
+            return parentType == 0U || parentType == MetadataHandleTypeScopeDefinition;
+        }
+
+        private static Boolean TryReadMetadataString(NativeReader metadata, UInt32 handle, out String value)
+        {
+            if (handle == 0U)
+            {
+                value = String.Empty;
+                return true;
+            }
+            if (MetadataHandleType(handle) != MetadataHandleTypeConstantStringValue)
+            {
+                value = null;
+                return false;
+            }
+            metadata.DecodeString(MetadataHandleOffset(handle), out value);
+            return true;
+        }
 
 #pragma warning disable CS0626
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]

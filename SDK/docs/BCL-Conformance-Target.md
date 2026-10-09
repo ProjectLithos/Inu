@@ -13,7 +13,7 @@ The target is intentionally type-level rather than a claim that every API on a l
 
 | # | BCL item | Contract exercised by both gates |
 |---:|---|---|
-| 1 | `System.Object` | construction, identity, `ReferenceEquals`, default `Equals`, default `ToString` |
+| 1 | `System.Object` | construction, identity, `ReferenceEquals`, default `Equals`, stable identity `GetHashCode`, runtime type identity, and default `ToString` for base, derived, array and closed-generic runtime types |
 | 2 | `System.Boolean` | canonical `ToString` values |
 | 3 | `System.Char` | min/max values and supported whitespace classification |
 | 4 | `System.Int32` | value equality, hash code, min/max constants |

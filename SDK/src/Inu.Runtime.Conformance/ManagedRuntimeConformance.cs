@@ -609,14 +609,19 @@ public static unsafe class ManagedRuntimeConformance
 
     private static Int32 _bclDelegateObserved;
     private static void BclCapture(Int32 value) => _bclDelegateObserved = value;
+    private static void BclAddCapture(Int32 left, Int32 right) => _bclDelegateObserved = left + right;
     private static Int32 BclDouble(Int32 value) => value * 2;
+    private static Int32 BclSum(Int32 left, Int32 right) => left + right;
     private static Int32 BclConstant() => 11;
+    private static Boolean BclPositive(Int32 value) => value > 0;
+    private static Int32 BclCompare(Int32 left, Int32 right) => left.CompareTo(right);
+    private static Int64 BclWiden(Int32 value) => value;
 
     /// <summary>Name of the fixed BCL compatibility target enforced by this release.</summary>
     public const String BclTargetName = "Inu.BCL.Core.v1";
 
     /// <summary>Number of type-level BCL items in <see cref="BclTargetName"/>.</summary>
-    public const Int32 BclTargetItemCount = 26;
+    public const Int32 BclTargetItemCount = 28;
 
     /// <summary>
     /// Hard in-kernel gate for the named BCL subset. Keep this list in lock-step with
@@ -632,10 +637,19 @@ public static unsafe class ManagedRuntimeConformance
         Object objectValue = new Object();
         Object objectAlias = objectValue;
         Object objectOther = new Object();
+        Object derivedObject = new Probe(7);
+        Object genericObject = new List<Int32>();
+        Object arrayObject = new Int32[1];
         Record(Object.ReferenceEquals(objectValue, objectAlias)
             && !Object.ReferenceEquals(objectValue, objectOther)
             && objectValue.Equals(objectAlias)
-            && String.Equals(objectValue.ToString(), "System.Object"), ref passed, ref failed);
+            && objectValue.GetHashCode() == objectAlias.GetHashCode()
+            && objectValue.GetType() == typeof(Object)
+            && objectAlias.GetType() == objectValue.GetType()
+            && String.Equals(objectValue.ToString(), "System.Object")
+            && String.Equals(derivedObject.ToString(), "Inu.Runtime.Conformance.ManagedRuntimeConformance+Probe")
+            && String.Equals(genericObject.ToString(), "System.Collections.Generic.List`1[System.Int32]")
+            && String.Equals(arrayObject.ToString(), "System.Int32[]"), ref passed, ref failed);
 
         // 02 System.Boolean
         Record(String.Equals(true.ToString(), "True") && String.Equals(false.ToString(), "False"), ref passed, ref failed);
@@ -754,47 +768,107 @@ public static unsafe class ManagedRuntimeConformance
             && utf8Bytes[2] == 0xE2 && utf8Bytes[3] == 0x82 && utf8Bytes[4] == 0xAC
             && String.Equals(utf8.GetString(utf8Bytes), unicode), ref passed, ref failed);
 
-        // 21 Primitive formatting
+        // 21 Primitive formatting: general/decimal/hex integers plus bounded invariant floating G.
         Record(String.Equals(((Int32)12345).ToString(), "12345")
             && String.Equals(((Int32)(-42)).ToString(), "-42")
-            && String.Equals(((Int32)12345).ToString("G", null), "12345")
-            && String.Equals(((UInt32)99U).ToString(), "99")
-            && String.Equals(((Int64)(-9000000000L)).ToString(), "-9000000000"), ref passed, ref failed);
+            && String.Equals(((Int32)42).ToString("D5", null), "00042")
+            && String.Equals(((Int32)0x2A).ToString("X4", null), "002A")
+            && String.Equals(((Int32)(-1)).ToString("X", null), "FFFFFFFF")
+            && String.Equals(((UInt32)99U).ToString("D4", null), "0099")
+            && String.Equals(((Int64)(-9000000000L)).ToString("D12", null), "-009000000000")
+            && String.Equals(((Double)12.5).ToString("G", null), "12.5")
+            && String.Equals(((Single)(-0.25F)).ToString("G", null), "-0.25"), ref passed, ref failed);
 
-        // 22 System.Math
-        Record(Math.Abs(-17) == 17 && Math.Min(5, 9) == 5 && Math.Max(5, 9) == 9
-            && Math.Sign(-8) == -1 && Math.Sign(0) == 0 && Math.Sign(8) == 1
-            && Math.Clamp(15, 0, 10) == 10 && Math.Clamp(-4, 0, 10) == 0, ref passed, ref failed);
+        // 22 System.Math: integer + floating primitives used by the runtime and graphics layers.
+        Double sqrt81 = Math.Sqrt(81.0);
+        Record(Math.Abs(-17) == 17 && Math.Abs(-17L) == 17L && Math.Abs(-2.5) == 2.5
+            && Math.Min(5, 9) == 5 && Math.Max(5, 9) == 9 && Math.Min(5L, 9L) == 5L
+            && Math.Sign(-8) == -1 && Math.Sign(0L) == 0 && Math.Sign(8.0) == 1
+            && Math.Clamp(15, 0, 10) == 10 && Math.Clamp(-4L, 0L, 10L) == 0L
+            && Math.Floor(2.75) == 2.0 && Math.Ceiling(2.25) == 3.0 && Math.Truncate(-2.75) == -2.0
+            && Math.Round(2.5) == 2.0 && Math.Round(3.5) == 4.0
+            && Math.Abs(sqrt81 - 9.0) < 0.000001, ref passed, ref failed);
 
-        // 23 System.Convert
+        // 23 System.Convert: all primitive integer widths plus floating/integer conversion paths.
         Record(Convert.ToInt32(true) == 1 && Convert.ToInt32(false) == 0
-            && Convert.ToInt64(-123) == -123L && Convert.ToBoolean(1) && !Convert.ToBoolean(0)
-            && String.Equals(Convert.ToString(-321), "-321") && String.Equals(Convert.ToString(true), "True"), ref passed, ref failed);
+            && Convert.ToByte(255) == 255 && Convert.ToSByte(-12) == -12
+            && Convert.ToInt16(-32000) == -32000 && Convert.ToUInt16(65000) == 65000
+            && Convert.ToUInt32(123) == 123U && Convert.ToInt64(-123) == -123L
+            && Convert.ToUInt64(123) == 123UL && Convert.ToBoolean(1) && !Convert.ToBoolean(0)
+            && Convert.ToInt32(2.5) == 2 && Convert.ToInt32(3.5) == 4
+            && Convert.ToDouble(123) == 123.0 && Convert.ToSingle(12) == 12.0F
+            && String.Equals(Convert.ToString(-321), "-321")
+            && String.Equals(Convert.ToString(12.5), "12.5")
+            && String.Equals(Convert.ToString(true), "True"), ref passed, ref failed);
 
-        // 24 System.IComparable / System.IComparable<T>
+        // 24 System.IComparable / IComparable<T> / IEquatable<T> across primitive families.
         IComparable nonGenericComparable = (Int32)7;
         IComparable<Int32> genericComparable = (Int32)7;
+        IComparable<Int64> longComparable = (Int64)9;
+        IEquatable<UInt32> uintEquatable = (UInt32)77U;
         Record(nonGenericComparable.CompareTo((Int32)6) > 0 && nonGenericComparable.CompareTo((Int32)7) == 0
-            && genericComparable.CompareTo(8) < 0 && ((IComparable<Int32>)(Int32)8).CompareTo(7) > 0, ref passed, ref failed);
+            && genericComparable.CompareTo(8) < 0 && ((IComparable<Int32>)(Int32)8).CompareTo(7) > 0
+            && longComparable.CompareTo(10L) < 0 && uintEquatable.Equals(77U)
+            && ((IComparable<Char>)(Char)'b').CompareTo('a') > 0
+            && ((IEquatable<Boolean>)(Boolean)true).Equals(true), ref passed, ref failed);
 
-        // 25 System.Delegate / Action / Func
+        // 25 Delegate family: multiple arities plus Predicate/Comparison/Converter.
         _bclDelegateObserved = 0;
         Action<Int32> bclAction = BclCapture;
+        Action<Int32, Int32> bclAdd = BclAddCapture;
         Func<Int32, Int32> bclTwice = BclDouble;
+        Func<Int32, Int32, Int32> bclSum = BclSum;
         Func<Int32> bclConstant = BclConstant;
+        Predicate<Int32> bclPositive = BclPositive;
+        Comparison<Int32> bclCompare = BclCompare;
+        Converter<Int32, Int64> bclWiden = BclWiden;
         bclAction(9);
-        Record(_bclDelegateObserved == 9 && bclTwice(6) == 12 && bclConstant() == 11, ref passed, ref failed);
+        Boolean firstDelegatePass = _bclDelegateObserved == 9 && bclTwice(6) == 12 && bclConstant() == 11;
+        bclAdd(7, 8);
+        Record(firstDelegatePass && _bclDelegateObserved == 15 && bclSum(4, 5) == 9
+            && bclPositive(1) && !bclPositive(-1) && bclCompare(3, 7) < 0 && bclWiden(44) == 44L, ref passed, ref failed);
 
-        // 26 System.Span<T> / System.ReadOnlySpan<T>
-        Int32[] spanValues = new Int32[] { 1, 2, 3, 4 };
+        // 26 System.Span<T> / ReadOnlySpan<T>: empty/null, fill, slicing and overlap-safe copy.
+        Int32[] spanValues = new Int32[] { 1, 2, 3, 4, 5 };
         Span<Int32> span = spanValues;
         span[1] = 20;
-        Span<Int32> middle = span.Slice(1, 2);
+        Span<Int32> middle = span.Slice(1, 3);
+        middle.Fill(7);
         ReadOnlySpan<Int32> readOnlySpan = span;
-        Int32[] spanCopy = readOnlySpan.Slice(1, 2).ToArray();
-        middle[1] = 30;
-        Record(span.Length == 4 && span[1] == 20 && span[2] == 30
-            && readOnlySpan.Length == 4 && spanCopy.Length == 2 && spanCopy[0] == 20 && spanCopy[1] == 3, ref passed, ref failed);
+        Int32[] spanCopy = readOnlySpan.Slice(1, 3).ToArray();
+        Int32[] overlapping = new Int32[] { 1, 2, 3, 4, 5 };
+        Span<Int32> overlapSource = new Span<Int32>(overlapping, 0, 4);
+        Span<Int32> overlapDestination = new Span<Int32>(overlapping, 1, 4);
+        overlapSource.CopyTo(overlapDestination);
+        Span<Int32> tooSmall = new Span<Int32>(new Int32[2]);
+        Span<Int32> nullSpan = new Span<Int32>((Int32[])null);
+        Record(span.Length == 5 && span[0] == 1 && span[1] == 7 && span[3] == 7
+            && readOnlySpan.Length == 5 && spanCopy.Length == 3 && spanCopy[0] == 7 && spanCopy[2] == 7
+            && overlapping[0] == 1 && overlapping[1] == 1 && overlapping[4] == 4
+            && !span.TryCopyTo(tooSmall) && Span<Int32>.Empty.IsEmpty && ReadOnlySpan<Int32>.Empty.IsEmpty
+            && nullSpan.IsEmpty, ref passed, ref failed);
+
+        // 27 System.Memory<T> / ReadOnlyMemory<T>: storable array-backed windows over Span.
+        Int32[] memoryValues = new Int32[] { 10, 20, 30, 40 };
+        Memory<Int32> memory = memoryValues;
+        Memory<Int32> memoryMiddle = memory.Slice(1, 2);
+        memoryMiddle.Span[0] = 25;
+        ReadOnlyMemory<Int32> readOnlyMemory = memory;
+        Int32[] memoryCopy = readOnlyMemory.Slice(1, 2).ToArray();
+        Memory<Int32> nullMemory = new Memory<Int32>((Int32[])null);
+        Record(memory.Length == 4 && memoryValues[1] == 25 && memoryMiddle.Span[1] == 30
+            && readOnlyMemory.Span[1] == 25 && memoryCopy.Length == 2 && memoryCopy[0] == 25 && memoryCopy[1] == 30
+            && Memory<Int32>.Empty.IsEmpty && ReadOnlyMemory<Int32>.Empty.IsEmpty && nullMemory.IsEmpty, ref passed, ref failed);
+
+        // 28 Generic comparison/equality consistency.
+        Comparer<Int32> intOrdering = Comparer<Int32>.Default;
+        Comparer<Int64> longOrdering = Comparer<Int64>.Default;
+        EqualityComparer<UInt32> uintEquality = EqualityComparer<UInt32>.Default;
+        EqualityComparer<Int64> longEquality = EqualityComparer<Int64>.Default;
+        Record(intOrdering.Compare(2, 7) < 0 && intOrdering.Compare(7, 2) > 0 && intOrdering.Compare(4, 4) == 0
+            && longOrdering.Compare(9L, 10L) < 0
+            && uintEquality.Equals(99U, 99U) && !uintEquality.Equals(99U, 100U)
+            && longEquality.Equals(-5L, -5L) && !longEquality.Equals(-5L, 5L), ref passed, ref failed);
 
         UInt32 exercised = (passed + failed) - before;
         Record(exercised == (UInt32)BclTargetItemCount, ref passed, ref failed);

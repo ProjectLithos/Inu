@@ -7,7 +7,7 @@ namespace Inu.DotNetConformance.Tests;
 internal static class Program
 {
     private const string TargetName = "Inu.BCL.Core.v1";
-    private const int TargetItemCount = 26;
+    private const int TargetItemCount = 28;
     private static int _passed;
     private static int _failed;
 
@@ -43,6 +43,8 @@ internal static class Program
         Check("System.IComparable / IComparable<T>", TestComparables());
         Check("System.Delegate / Action / Func", TestDelegates());
         Check("System.Span<T> / ReadOnlySpan<T>", TestSpan());
+        Check("System.Memory<T> / ReadOnlyMemory<T>", TestMemory());
+        Check("Generic comparison/equality consistency", TestGenericComparisonEquality());
 
         int total = _passed + _failed;
         if (total != TargetItemCount)
@@ -74,8 +76,18 @@ internal static class Program
         object value = new object();
         object alias = value;
         object other = new object();
+        object derived = new Probe();
+        object generic = new List<int>();
+        object array = new int[1];
         return ReferenceEquals(value, alias) && !ReferenceEquals(value, other)
-            && value.Equals(alias) && value.ToString() == "System.Object";
+            && value.Equals(alias)
+            && value.GetHashCode() == alias.GetHashCode()
+            && value.GetType() == typeof(object)
+            && alias.GetType() == value.GetType()
+            && value.ToString() == "System.Object"
+            && derived.ToString() == "Inu.DotNetConformance.Tests.Program+Probe"
+            && generic.ToString() == "System.Collections.Generic.List`1[System.Int32]"
+            && array.ToString() == "System.Int32[]";
     }
 
     private static bool TestBoolean()
@@ -228,48 +240,108 @@ internal static class Program
     }
     private static bool TestPrimitiveFormatting()
         => 12345.ToString() == "12345" && (-42).ToString() == "-42"
-            && 12345.ToString("G", null) == "12345" && ((uint)99).ToString() == "99"
-            && ((long)-9000000000L).ToString() == "-9000000000";
+            && 12345.ToString("G", null) == "12345" && 42.ToString("D5", null) == "00042"
+            && 0x2A.ToString("X4", null) == "002A" && (-1).ToString("X", null) == "FFFFFFFF"
+            && ((uint)99).ToString("D4", null) == "0099"
+            && ((long)-9000000000L).ToString("D12", null) == "-009000000000"
+            && 12.5.ToString("G", null) == "12.5" && (-0.25f).ToString("G", null) == "-0.25";
 
     private static bool TestMath()
-        => Math.Abs(-17) == 17 && Math.Min(5, 9) == 5 && Math.Max(5, 9) == 9
-            && Math.Sign(-8) == -1 && Math.Sign(0) == 0 && Math.Sign(8) == 1
-            && Math.Clamp(15, 0, 10) == 10 && Math.Clamp(-4, 0, 10) == 0;
+        => Math.Abs(-17) == 17 && Math.Abs(-17L) == 17L && Math.Abs(-2.5) == 2.5
+            && Math.Min(5, 9) == 5 && Math.Max(5, 9) == 9 && Math.Min(5L, 9L) == 5L
+            && Math.Sign(-8) == -1 && Math.Sign(0L) == 0 && Math.Sign(8.0) == 1
+            && Math.Clamp(15, 0, 10) == 10 && Math.Clamp(-4L, 0L, 10L) == 0L
+            && Math.Floor(2.75) == 2.0 && Math.Ceiling(2.25) == 3.0 && Math.Truncate(-2.75) == -2.0
+            && Math.Round(2.5) == 2.0 && Math.Round(3.5) == 4.0
+            && Math.Abs(Math.Sqrt(81.0) - 9.0) < 0.000001;
 
     private static bool TestConvert()
         => Convert.ToInt32(true) == 1 && Convert.ToInt32(false) == 0
-            && Convert.ToInt64(-123) == -123L && Convert.ToBoolean(1) && !Convert.ToBoolean(0)
-            && Convert.ToString(-321) == "-321" && Convert.ToString(true) == "True";
+            && Convert.ToByte(255) == 255 && Convert.ToSByte(-12) == -12
+            && Convert.ToInt16(-32000) == -32000 && Convert.ToUInt16(65000) == 65000
+            && Convert.ToUInt32(123) == 123U && Convert.ToInt64(-123) == -123L
+            && Convert.ToUInt64(123) == 123UL && Convert.ToBoolean(1) && !Convert.ToBoolean(0)
+            && Convert.ToInt32(2.5) == 2 && Convert.ToInt32(3.5) == 4
+            && Convert.ToDouble(123) == 123.0 && Convert.ToSingle(12) == 12.0f
+            && Convert.ToString(-321) == "-321" && Convert.ToString(12.5) == "12.5"
+            && Convert.ToString(true) == "True";
 
     private static bool TestComparables()
     {
         IComparable nonGeneric = 7;
         IComparable<int> generic = 7;
+        IComparable<long> longGeneric = 9L;
+        IEquatable<uint> uintEquatable = 77U;
         return nonGeneric.CompareTo(6) > 0 && nonGeneric.CompareTo(7) == 0
-            && generic.CompareTo(8) < 0 && ((IComparable<int>)8).CompareTo(7) > 0;
+            && generic.CompareTo(8) < 0 && ((IComparable<int>)8).CompareTo(7) > 0
+            && longGeneric.CompareTo(10L) < 0 && uintEquatable.Equals(77U)
+            && ((IComparable<char>)'b').CompareTo('a') > 0
+            && ((IEquatable<bool>)true).Equals(true);
     }
 
     private static bool TestDelegates()
     {
         int observed = 0;
         Action<int> action = value => observed = value;
+        Action<int, int> add = (a, b) => observed = a + b;
         Func<int, int> twice = value => value * 2;
+        Func<int, int, int> sum = (a, b) => a + b;
         Func<int> constant = () => 11;
+        Predicate<int> positive = value => value > 0;
+        Comparison<int> compare = (a, b) => a.CompareTo(b);
+        Converter<int, long> widen = value => value;
         action(9);
-        return observed == 9 && twice(6) == 12 && constant() == 11;
+        bool first = observed == 9 && twice(6) == 12 && constant() == 11;
+        add(7, 8);
+        return first && observed == 15 && sum(4, 5) == 9
+            && positive(1) && !positive(-1) && compare(3, 7) < 0 && widen(44) == 44L;
     }
 
     private static bool TestSpan()
     {
-        int[] values = { 1, 2, 3, 4 };
+        int[] values = { 1, 2, 3, 4, 5 };
         Span<int> span = values;
         span[1] = 20;
-        Span<int> middle = span.Slice(1, 2);
+        Span<int> middle = span.Slice(1, 3);
+        middle.Fill(7);
         ReadOnlySpan<int> readOnly = span;
+        int[] copy = readOnly.Slice(1, 3).ToArray();
+
+        int[] overlapping = { 1, 2, 3, 4, 5 };
+        overlapping.AsSpan(0, 4).CopyTo(overlapping.AsSpan(1, 4));
+        Span<int> tooSmall = new int[2];
+        Span<int> nullSpan = (int[])null;
+        return span.Length == 5 && span[0] == 1 && span[1] == 7 && span[3] == 7
+            && readOnly.Length == 5 && copy.Length == 3 && copy[0] == 7 && copy[2] == 7
+            && overlapping[0] == 1 && overlapping[1] == 1 && overlapping[4] == 4
+            && !span.TryCopyTo(tooSmall) && Span<int>.Empty.IsEmpty && ReadOnlySpan<int>.Empty.IsEmpty
+            && nullSpan.IsEmpty;
+    }
+
+    private static bool TestMemory()
+    {
+        int[] values = { 10, 20, 30, 40 };
+        Memory<int> memory = values;
+        Memory<int> middle = memory.Slice(1, 2);
+        middle.Span[0] = 25;
+        ReadOnlyMemory<int> readOnly = memory;
         int[] copy = readOnly.Slice(1, 2).ToArray();
-        middle[1] = 30;
-        return span.Length == 4 && span[1] == 20 && span[2] == 30
-            && readOnly.Length == 4 && copy.Length == 2 && copy[0] == 20 && copy[1] == 3;
+        Memory<int> nullMemory = (int[])null;
+        return memory.Length == 4 && values[1] == 25 && middle.Span[1] == 30
+            && readOnly.Span[1] == 25 && copy.Length == 2 && copy[0] == 25 && copy[1] == 30
+            && Memory<int>.Empty.IsEmpty && ReadOnlyMemory<int>.Empty.IsEmpty && nullMemory.IsEmpty;
+    }
+
+    private static bool TestGenericComparisonEquality()
+    {
+        Comparer<int> ints = Comparer<int>.Default;
+        Comparer<long> longs = Comparer<long>.Default;
+        EqualityComparer<uint> uints = EqualityComparer<uint>.Default;
+        EqualityComparer<long> longEquality = EqualityComparer<long>.Default;
+        return ints.Compare(2, 7) < 0 && ints.Compare(7, 2) > 0 && ints.Compare(4, 4) == 0
+            && longs.Compare(9L, 10L) < 0
+            && uints.Equals(99U, 99U) && !uints.Equals(99U, 100U)
+            && longEquality.Equals(-5L, -5L) && !longEquality.Equals(-5L, 5L);
     }
 
 }

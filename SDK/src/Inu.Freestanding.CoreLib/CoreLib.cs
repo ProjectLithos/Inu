@@ -39,14 +39,14 @@ namespace System
         internal UInt32 GetRawDataSize()
             => m_pEEType->BaseSize - (UInt32)sizeof(ObjHeader) - (UInt32)sizeof(MethodTable*);
 
-        /// <summary>Returns the freestanding type name used when no more specific value formatter is available.</summary>
-        public virtual String ToString() => "System.Object";
+        /// <summary>Returns the runtime type name, matching the normal .NET Object.ToString default.</summary>
+        public virtual String ToString() => GetType().ToString();
 
         /// <summary>Implements the normal Object identity default until a derived type overrides equality.</summary>
         public virtual Boolean Equals(Object obj) => ReferenceEquals(this, obj);
 
-        /// <summary>Provides a legal, allocation-free default hash. Identity hashing is supplied by a later GC/type-system phase.</summary>
-        public virtual Int32 GetHashCode() => 0;
+        /// <summary>Returns the stable identity hash for this managed object.</summary>
+        public virtual Int32 GetHashCode() => Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
 
         /// <summary>Determines whether two object references identify the same managed object.</summary>
         public static Boolean ReferenceEquals(Object first, Object second) => first == second;
@@ -1563,6 +1563,11 @@ namespace System
         public static Boolean operator !=(Type left, Type right) => !(left == right);
 
         public override Boolean Equals(Object value) => value is Type && this == (Type)value;
+
+        /// <summary>Returns the normal .NET display name for this runtime type.</summary>
+        public override String ToString()
+            => global::Internal.Runtime.TypeLoader.TypeLoaderEnvironment.GetRuntimeTypeDisplayName(_typeHandle);
+
         public override Int32 GetHashCode()
         {
             MethodTable* mt = EEType;
@@ -1859,6 +1864,23 @@ namespace System
         public static class RuntimeHelpers
         {
             public static unsafe Int32 OffsetToStringData => sizeof(IntPtr) + sizeof(Int32);
+
+            /// <summary>Returns the allocation-free identity hash used by System.Object.GetHashCode.</summary>
+            public static unsafe Int32 GetHashCode(Object obj)
+            {
+                if (Object.ReferenceEquals(obj, null)) return 0;
+
+                // Inu's current managed heap is non-moving, so the object reference is a
+                // stable identity for the lifetime of the object. Mix both halves so the
+                // naturally aligned low address bits do not dominate the returned hash.
+                // If Inu later gains a moving collector, the collector must preserve this
+                // identity hash in object metadata/side storage before relocating objects.
+                Object reference = obj;
+                UInt64 address = *(UInt64*)Unsafe.AsPointer(ref reference);
+                UInt64 mixed = address ^ (address >> 32);
+                mixed ^= mixed >> 16;
+                return unchecked((Int32)mixed);
+            }
 
             [Intrinsic]
             public static unsafe Boolean IsReferenceOrContainsReferences<T>()

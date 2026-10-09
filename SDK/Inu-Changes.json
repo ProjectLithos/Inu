@@ -1,11 +1,15 @@
 {
-  "baseVersion": "0.0.120",
-  "version": "0.0.121",
+  "baseVersion": "0.0.122",
+  "version": "0.0.123",
   "changedFiles": [
     "TODO.md",
-    "Inu/README.md",
-    "Kath/README.md",
-    "CHANGED-0.0.121.txt",
+    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
+    "Inu/SDK/src/Inu.Freestanding.CoreLib/NativeAotTypeLoader.cs",
+    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
+    "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
+    "Inu/SDK/docs/BCL-Conformance-Target.md",
+    "Kath/docs/Release-0.0.123.md",
+    "CHANGED-0.0.123.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -17,10 +21,9 @@
     "Kath/VERSION",
     "Kath/JSON/package.json",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.0.121.md",
     "Kath/packages/kath/package.json",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "VERSION"
   ],
-  "summary": "Add TODO.md as the single authoritative Kath & Inu implementation backlog and make it part of the release workflow."
+  "summary": "Complete the first Inu .NET Profile 1 TODO block without skipping System.Object.ToString: resolve runtime type display names from NativeAOT TypeMap/EmbeddedMetadata and validate derived, array, nested and closed-generic default ToString behaviour."
 }
