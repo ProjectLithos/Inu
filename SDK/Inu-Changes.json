@@ -1,26 +1,24 @@
 {
-  "baseVersion": "0.0.113",
-  "version": "0.0.114",
+  "baseVersion": "0.0.114",
+  "version": "0.0.115",
   "changedFiles": [
-    "CHANGED-0.0.114.txt",
+    "CHANGED-0.0.115.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Kernel.Console/SystemAssetCatalog.cs",
-    "Inu/SDK/src/Inu.Kernel.Processes/KernelProcesses.Creation.cs",
-    "Inu/SDK/src/Inu.Kernel.Storage/KernelPathIndex.cs",
+    "Inu/SDK/src/Userland/Commands/Dir.cs",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Inu/VERSION",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.0.114.md",
+    "Kath/docs/Release-0.0.115.md",
     "Kath/JSON/package.json",
     "Kath/packages/kath/package.json",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "Kath/VERSION",
     "VERSION"
   ],
-  "summary": "Fix the 0.0.113 namespace-index and executable-cache compile regressions without changing their architecture."
+  "summary": "Present dir output as a conventional directory listing: current directory heading, child directories first, then files, with stable alphabetical grouping."
 }
