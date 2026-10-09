@@ -1,0 +1,15 @@
+NAME
+    sysinfo - Display system, scheduler and detected-device information.
+
+SYNOPSIS
+    sysinfo
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Displays the online processor count, scheduler quantum and devices currently registered by the kernel.
+
+FILES
+    System:Commands:SYSINFO.EXE
+    System:Help:SYSINFO.MAN

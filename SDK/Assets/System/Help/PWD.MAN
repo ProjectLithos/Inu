@@ -1,0 +1,15 @@
+NAME
+    pwd - Display the current working directory.
+
+SYNOPSIS
+    pwd
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    Displays the current working directory using the path syntax selected by the OS.
+
+FILES
+    System:Commands:PWD.EXE
+    System:Help:PWD.MAN

@@ -83,9 +83,7 @@ static int MainEntry(string[] args)
         }
         if (File.Exists(shellSource))
             File.Copy(shellSource, Path.Combine(novaRoot, "SYSTEM", "SHELL", "SHELL.EXE"), true);
-        if (Directory.Exists(commandsSource))
-            CopyDirectoryFiles(commandsSource, Path.Combine(novaRoot, "SYSTEM", "COMMANDS"));
-        CopyDirectoryFiles(helpSource, Path.Combine(novaRoot, "SYSTEM", "HELP"));
+        if (!StageCommandsWithHelp(commandsSource, helpSource, Path.Combine(novaRoot, "SYSTEM", "COMMANDS"), Path.Combine(novaRoot, "SYSTEM", "HELP"), out error)) return Fail(error);
         CopyDirectoryFiles(wallpapersSource, Path.Combine(novaRoot, "SYSTEM", "WALLPAPERS"));
         if (!StageGuiApplication(userlandAppsSource, "INU-DESKTOP.EXE", stagingRoot, desktopVfsPath, out error)) return Fail(error);
         if (!StageGuiApplication(userlandAppsSource, "INU-LOGIN.EXE", stagingRoot, loginVfsPath, out error)) return Fail(error);
@@ -161,6 +159,25 @@ static void CopyDirectoryFiles(string source, string destination)
 {
     foreach (string file in Directory.GetFiles(source).OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase))
         File.Copy(file, Path.Combine(destination, Path.GetFileName(file)), true);
+}
+
+static bool StageCommandsWithHelp(string commandsSource, string helpSource, string commandsDestination, string helpDestination, out string error)
+{
+    error = string.Empty;
+    if (!Directory.Exists(commandsSource)) return true;
+    foreach (string executable in Directory.GetFiles(commandsSource, "*.EXE").OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase))
+    {
+        string commandName = Path.GetFileNameWithoutExtension(executable);
+        string manual = Path.Combine(helpSource, commandName + ".MAN");
+        if (!File.Exists(manual))
+        {
+            error = $"Built command {Path.GetFileName(executable)} has no matching help file {commandName}.MAN.";
+            return false;
+        }
+        File.Copy(executable, Path.Combine(commandsDestination, Path.GetFileName(executable)), true);
+        File.Copy(manual, Path.Combine(helpDestination, Path.GetFileName(manual)), true);
+    }
+    return true;
 }
 
 static void BuildAssetBundle(string novaRoot, string bundlePath)
