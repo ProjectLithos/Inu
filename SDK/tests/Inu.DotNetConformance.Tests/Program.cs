@@ -7,7 +7,7 @@ namespace Inu.DotNetConformance.Tests;
 internal static class Program
 {
     private const string TargetName = "Inu.BCL.Core.v1";
-    private const int TargetItemCount = 28;
+    private const int TargetItemCount = 31;
     private static int _passed;
     private static int _failed;
 
@@ -20,7 +20,10 @@ internal static class Program
         Check("System.Object", TestObject());
         Check("System.Boolean", TestBoolean());
         Check("System.Char", TestChar());
+        Check("System.SByte", TestSByte());
+        Check("System.Int16", TestInt16());
         Check("System.Int32", TestInt32());
+        Check("System.Int64", TestInt64());
         Check("System.IntPtr", TestIntPtr());
         Check("System.UIntPtr", TestUIntPtr());
         Check("System.Array", TestArray());
@@ -264,11 +267,118 @@ internal static class Program
             && sbyteOverflowThrows && nullStringConvertThrows;
     }
 
+    private static bool TestSByte()
+    {
+        sbyte parsed;
+        bool nullThrows = false, formatThrows = false, overflowThrows = false, checkedThrows = false, wrongCompareThrows = false;
+        try { _ = sbyte.Parse((string)null!); } catch (ArgumentNullException) { nullThrows = true; }
+        try { _ = sbyte.Parse("12x"); } catch (FormatException) { formatThrows = true; }
+        try { _ = sbyte.Parse("128"); } catch (OverflowException) { overflowThrows = true; }
+        int tooLarge = 128;
+        try { _ = checked((sbyte)tooLarge); } catch (OverflowException) { checkedThrows = true; }
+        try { _ = ((IComparable)(sbyte)4).CompareTo((short)4); } catch (ArgumentException) { wrongCompareThrows = true; }
+        int wrap = 130;
+        Span<char> destination = stackalloc char[4];
+        bool formatted = ((sbyte)-12).TryFormat(destination, out int written, "D3", null);
+        IConvertible convertible = (sbyte)-12;
+        bool convertOverflow = false;
+        try { _ = Convert.ToSByte(128); } catch (OverflowException) { convertOverflow = true; }
+        return sbyte.MinValue == -128 && sbyte.MaxValue == 127
+            && sbyte.Parse(" -128 ") == sbyte.MinValue && sbyte.Parse("+127") == sbyte.MaxValue
+            && sbyte.TryParse("42", out parsed) && parsed == 42 && !sbyte.TryParse("129", out parsed) && parsed == 0
+            && ParseViaIParsable<sbyte>("7", null) == 7
+            && ParseViaISpanParsable<sbyte>("-8".AsSpan(), null) == -8
+            && ((sbyte)-12).ToString() == "-12" && ((sbyte)12).ToString("D3", null) == "012" && ((sbyte)-1).ToString("X2", null) == "FF"
+            && formatted && written == 4 && destination.SequenceEqual("-012")
+            && ((sbyte)4).CompareTo((sbyte)5) < 0 && ((IComparable)(sbyte)4).CompareTo(null) > 0
+            && ((sbyte)4).Equals((sbyte)4) && !((sbyte)4).Equals((sbyte)5) && !((sbyte)4).Equals((object)(short)4)
+            && convertible.GetTypeCode() == TypeCode.SByte && convertible.ToInt64(null) == -12L && convertible.ToBoolean(null)
+            && convertible.ToDecimal(null) == new decimal(-12) && convertOverflow
+            && checkedThrows && unchecked((sbyte)wrap) == -126
+            && nullThrows && formatThrows && overflowThrows && wrongCompareThrows;
+    }
+
+    private static bool TestInt16()
+    {
+        short parsed;
+        bool overflowThrows = false, checkedThrows = false, wrongCompareThrows = false;
+        try { _ = short.Parse("32768"); } catch (OverflowException) { overflowThrows = true; }
+        int tooLarge = 32768;
+        try { _ = checked((short)tooLarge); } catch (OverflowException) { checkedThrows = true; }
+        try { _ = ((IComparable)(short)4).CompareTo(4); } catch (ArgumentException) { wrongCompareThrows = true; }
+        int wrap = 65535;
+        Span<char> destination = stackalloc char[6];
+        bool formatted = ((short)-123).TryFormat(destination, out int written, "D5", null);
+        IConvertible convertible = (short)-123;
+        bool convertOverflow = false;
+        try { _ = Convert.ToInt16(32768); } catch (OverflowException) { convertOverflow = true; }
+        return short.MinValue == -32768 && short.MaxValue == 32767
+            && short.Parse("-32768") == short.MinValue && short.Parse("32767") == short.MaxValue
+            && short.TryParse("1234", out parsed) && parsed == 1234 && !short.TryParse("32768", out parsed) && parsed == 0
+            && ParseViaIParsable<short>("-45", null) == -45
+            && ParseViaISpanParsable<short>("46".AsSpan(), null) == 46
+            && ((short)-123).ToString() == "-123" && ((short)12).ToString("D4", null) == "0012" && ((short)-1).ToString("X4", null) == "FFFF"
+            && formatted && written == 6 && destination.SequenceEqual("-00123")
+            && ((short)4).CompareTo((short)5) < 0 && ((short)4).Equals((short)4) && !((short)4).Equals((short)5)
+            && convertible.GetTypeCode() == TypeCode.Int16 && convertible.ToInt64(null) == -123L && convertible.ToBoolean(null)
+            && convertible.ToDecimal(null) == new decimal(-123) && convertOverflow
+            && checkedThrows && unchecked((short)wrap) == -1 && overflowThrows && wrongCompareThrows;
+    }
+
     private static bool TestInt32()
     {
+        int parsed;
+        bool overflowThrows = false, checkedThrows = false, wrongCompareThrows = false;
+        try { _ = int.Parse("2147483648"); } catch (OverflowException) { overflowThrows = true; }
+        long tooLarge = 2147483648L;
+        try { _ = checked((int)tooLarge); } catch (OverflowException) { checkedThrows = true; }
+        try { _ = ((IComparable)12345).CompareTo(12345L); } catch (ArgumentException) { wrongCompareThrows = true; }
+        long wrap = 4294967295L;
+        Span<char> destination = stackalloc char[7];
+        bool formatted = (-123).TryFormat(destination, out int written, "D6", null);
+        IConvertible convertible = -123;
+        bool convertOverflow = false;
+        try { _ = Convert.ToInt32(2147483648L); } catch (OverflowException) { convertOverflow = true; }
         int value = 12345;
-        return value.Equals(12345) && !value.Equals(12346)
-            && value.GetHashCode() == 12345 && int.MinValue < 0 && int.MaxValue > 0;
+        return int.MinValue == -2147483648 && int.MaxValue == 2147483647
+            && int.Parse(" -2147483648 ") == int.MinValue && int.Parse("+2147483647") == int.MaxValue
+            && int.TryParse("12345", out parsed) && parsed == 12345 && !int.TryParse("2147483648", out parsed) && parsed == 0
+            && ParseViaIParsable<int>("-77", null) == -77
+            && ParseViaISpanParsable<int>("78".AsSpan(), null) == 78
+            && (-123).ToString() == "-123" && 12.ToString("D4", null) == "0012" && (-1).ToString("X8", null) == "FFFFFFFF"
+            && formatted && written == 7 && destination.SequenceEqual("-000123")
+            && value.Equals(12345) && !value.Equals(12346) && value.GetHashCode() == 12345
+            && value.CompareTo(12346) < 0 && ((IComparable)value).CompareTo(null) > 0
+            && convertible.GetTypeCode() == TypeCode.Int32 && convertible.ToInt64(null) == -123L && convertible.ToBoolean(null)
+            && convertible.ToDecimal(null) == new decimal(-123) && convertOverflow
+            && checkedThrows && unchecked((int)wrap) == -1 && overflowThrows && wrongCompareThrows;
+    }
+
+    private static bool TestInt64()
+    {
+        long parsed;
+        bool overflowThrows = false, checkedThrows = false, wrongCompareThrows = false;
+        try { _ = long.Parse("9223372036854775808"); } catch (OverflowException) { overflowThrows = true; }
+        ulong tooLarge = 9223372036854775808UL;
+        try { _ = checked((long)tooLarge); } catch (OverflowException) { checkedThrows = true; }
+        try { _ = ((IComparable)4L).CompareTo(4); } catch (ArgumentException) { wrongCompareThrows = true; }
+        ulong wrap = ulong.MaxValue;
+        Span<char> destination = stackalloc char[8];
+        bool formatted = (-123L).TryFormat(destination, out int written, "D7", null);
+        IConvertible convertible = -123L;
+        bool convertOverflow = false;
+        try { _ = Convert.ToInt64(9223372036854775808UL); } catch (OverflowException) { convertOverflow = true; }
+        return long.MinValue == -9223372036854775808L && long.MaxValue == 9223372036854775807L
+            && long.Parse("-9223372036854775808") == long.MinValue && long.Parse("9223372036854775807") == long.MaxValue
+            && long.TryParse("123456789", out parsed) && parsed == 123456789L && !long.TryParse("9223372036854775808", out parsed) && parsed == 0L
+            && ParseViaIParsable<long>("-79", null) == -79L
+            && ParseViaISpanParsable<long>("80".AsSpan(), null) == 80L
+            && (-123L).ToString() == "-123" && 12L.ToString("D4", null) == "0012" && (-1L).ToString("X16", null) == "FFFFFFFFFFFFFFFF"
+            && formatted && written == 8 && destination.SequenceEqual("-0000123")
+            && 4L.CompareTo(5L) < 0 && 4L.Equals(4L) && !4L.Equals(5L)
+            && convertible.GetTypeCode() == TypeCode.Int64 && convertible.ToInt64(null) == -123L && convertible.ToBoolean(null)
+            && convertible.ToDecimal(null) == new decimal(-123L) && convertOverflow
+            && checkedThrows && unchecked((long)wrap) == -1L && overflowThrows && wrongCompareThrows;
     }
 
     private static bool TestIntPtr()

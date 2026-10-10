@@ -1,5 +1,5 @@
 {
-  "version": "0.0.144",
+  "version": "0.1.0",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -815,7 +815,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "282b0ce9fba575e039f8b540d03714800de14d637a23d2887403d18b1227f1ee"
+      "sha256": "c864539820003a1d5a43103891a0b0aa1a1318649ef67d595d37c7939f2060e4"
     },
     {
       "path": "Directory.Build.targets",
@@ -923,7 +923,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "e8f09d1f24156c0a4dc52b237fdf92c831cfc19d7ee4a658438be5b9cde833f6"
+      "sha256": "cb1bbbe09dbb735fa442d8b80b7ea7f8249031870fb82febd67af4745eb2701c"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2979,7 +2979,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "b7c81328b434aadcc5d15646a486297003bd495844c85e011c72952061827049"
+      "sha256": "e2680b65fe0cc927f1139a0658ea1fbcf5175f88b4f83b07681d266befd575c5"
     },
     {
       "path": "Inu-Package.bat",
@@ -3015,7 +3015,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "263160c69ee8309137da2d78c07b73d8a437a74c7bbcd04e56c0336981e6ff63"
+      "sha256": "7bdd4a048f8613663f26f6265e8c58e21e959397f88b3de2eaba9656da994124"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3527,7 +3527,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "e43db4030d30682bff34d6ed9a7df48f9e99b7f53ca9f2dc62a694a4525dd293"
+      "sha256": "bd6294857b4235f4c52ca3d3559c9dcd3e16d25fb2a180d772ba2066a6b51076"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3607,7 +3607,7 @@
     },
     {
       "path": "src/Inu.Freestanding.CoreLib/CoreLib.cs",
-      "sha256": "045E994CC2C70BD28C9337E7D5F615D5550D2D02E2DF49804A4E8EBBCE821FC8"
+      "sha256": "F530FE487495FBAD363C82A574D3C27FDD709E6F18B627E73948EC18C644F7A8"
     },
     {
       "path": "src/Inu.Freestanding.CoreLib/Inu.Freestanding.CoreLib.csproj",
@@ -5599,7 +5599,7 @@
     },
     {
       "path": "src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-      "sha256": "746DAB02A8EA13D8AB617243E4948B0C16B2D6F05B805164EC253153B82EDCF0"
+      "sha256": "EAAEEF12C8ACF81E94669F034810BA697B0F549C71E77DC5AFABCAF261C77BE0"
     },
     {
       "path": "src/Inu.Runtime.Contracts/Inu.Runtime.Contracts.csproj",
@@ -6079,7 +6079,7 @@
     },
     {
       "path": "tests/Inu.DotNetConformance.Tests/Program.cs",
-      "sha256": "565602A7436B669A6418414AF1E100421B775CBDAF676F62C35D7A0A6CD1073A"
+      "sha256": "7894BB2174C94DA1C71D2F033CF00DE3CC7414B51FA3EDE9841BF406F6A003E7"
     },
     {
       "path": "THIRD-PARTY-NOTICES.md",
