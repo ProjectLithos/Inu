@@ -499,16 +499,69 @@ internal static class Program
     {
         IntPtr value = new IntPtr(100);
         IntPtr advanced = IntPtr.Add(value, 23);
-        return (IntPtr.Size == 4 || IntPtr.Size == 8) && advanced.ToInt64() == 123
-            && IntPtr.Subtract(advanced, 23) == value;
+        IntPtr arithmetic = (new IntPtr(6) * new IntPtr(7)) + new IntPtr(2);
+        IntPtr divided = arithmetic / new IntPtr(4);
+        IntPtr remainder = arithmetic % new IntPtr(5);
+        long converted = (long)new IntPtr(-55);
+        bool wrongCompareThrows = false;
+        try { _ = ((IComparable)value).CompareTo(100L); } catch (ArgumentException) { wrongCompareThrows = true; }
+        bool narrowOverflow = false;
+        if (IntPtr.Size == 8)
+        {
+            try { _ = IntPtr.MaxValue.ToInt32(); } catch (OverflowException) { narrowOverflow = true; }
+        }
+        else
+        {
+            narrowOverflow = true;
+        }
+        Span<char> destination = stackalloc char[5];
+        bool formatted = new IntPtr(123).TryFormat(destination, out int written, "D5", null);
+        long expectedMax = IntPtr.Size == 8 ? long.MaxValue : int.MaxValue;
+        long expectedMin = IntPtr.Size == 8 ? long.MinValue : int.MinValue;
+        return (IntPtr.Size == 4 || IntPtr.Size == 8)
+            && IntPtr.Zero.ToInt64() == 0 && IntPtr.MaxValue.ToInt64() == expectedMax && IntPtr.MinValue.ToInt64() == expectedMin
+            && advanced.ToInt64() == 123 && IntPtr.Subtract(advanced, 23) == value
+            && (value + 23).ToInt64() == 123 && ((value + 23) - 23) == value
+            && arithmetic.ToInt64() == 44 && divided.ToInt64() == 11 && remainder.ToInt64() == 4
+            && value.CompareTo(advanced) < 0 && advanced.CompareTo(value) > 0 && value.CompareTo(value) == 0
+            && value.Equals(new IntPtr(100)) && !value.Equals(advanced) && wrongCompareThrows
+            && converted == -55 && narrowOverflow
+            && new IntPtr(-123).ToString() == "-123" && new IntPtr(12).ToString("D4", null) == "0012"
+            && formatted && written == 5 && destination.SequenceEqual("00123");
     }
 
     private static bool TestUIntPtr()
     {
         UIntPtr value = new UIntPtr(200UL);
         UIntPtr advanced = UIntPtr.Add(value, 17);
-        return (UIntPtr.Size == 4 || UIntPtr.Size == 8) && advanced.ToUInt64() == 217UL
-            && UIntPtr.Subtract(advanced, 17) == value;
+        UIntPtr arithmetic = (new UIntPtr(6UL) * new UIntPtr(7UL)) + new UIntPtr(2UL);
+        UIntPtr divided = arithmetic / new UIntPtr(4UL);
+        UIntPtr remainder = arithmetic % new UIntPtr(5UL);
+        ulong converted = (ulong)new UIntPtr(55UL);
+        bool wrongCompareThrows = false;
+        try { _ = ((IComparable)value).CompareTo(200UL); } catch (ArgumentException) { wrongCompareThrows = true; }
+        bool narrowOverflow = false;
+        if (UIntPtr.Size == 8)
+        {
+            try { _ = UIntPtr.MaxValue.ToUInt32(); } catch (OverflowException) { narrowOverflow = true; }
+        }
+        else
+        {
+            narrowOverflow = true;
+        }
+        Span<char> destination = stackalloc char[5];
+        bool formatted = new UIntPtr(123UL).TryFormat(destination, out int written, "D5", null);
+        ulong expectedMax = UIntPtr.Size == 8 ? ulong.MaxValue : uint.MaxValue;
+        return (UIntPtr.Size == 4 || UIntPtr.Size == 8)
+            && UIntPtr.Zero.ToUInt64() == 0UL && UIntPtr.MinValue.ToUInt64() == 0UL && UIntPtr.MaxValue.ToUInt64() == expectedMax
+            && advanced.ToUInt64() == 217UL && UIntPtr.Subtract(advanced, 17) == value
+            && (value + 17).ToUInt64() == 217UL && ((value + 17) - 17) == value
+            && arithmetic.ToUInt64() == 44UL && divided.ToUInt64() == 11UL && remainder.ToUInt64() == 4UL
+            && value.CompareTo(advanced) < 0 && advanced.CompareTo(value) > 0 && value.CompareTo(value) == 0
+            && value.Equals(new UIntPtr(200UL)) && !value.Equals(advanced) && wrongCompareThrows
+            && converted == 55UL && narrowOverflow
+            && new UIntPtr(123UL).ToString() == "123" && new UIntPtr(12UL).ToString("D4", null) == "0012"
+            && formatted && written == 5 && destination.SequenceEqual("00123");
     }
 
     private static bool TestArray()

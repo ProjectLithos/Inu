@@ -1887,7 +1887,7 @@ namespace System
     // pointer-sized field and provide the conversion/operator surface Roslyn binds for
     // nint/nuint constants, casts, pointer arithmetic and interop lowering.
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct IntPtr
+    public readonly unsafe struct IntPtr : IComparable, IComparable<IntPtr>, IEquatable<IntPtr>, ISpanFormattable
     {
         private readonly void* _value;
 
@@ -1899,12 +1899,33 @@ namespace System
         public static readonly IntPtr Zero;
 
         public static Int32 Size => sizeof(void*);
-        public static IntPtr MaxValue => new IntPtr(Int64.MaxValue);
-        public static IntPtr MinValue => new IntPtr(Int64.MinValue);
+        public static IntPtr MaxValue => Size == 8 ? new IntPtr(Int64.MaxValue) : new IntPtr(Int32.MaxValue);
+        public static IntPtr MinValue => Size == 8 ? new IntPtr(Int64.MinValue) : new IntPtr(Int32.MinValue);
 
         public Int32 ToInt32() => checked((Int32)(Int64)_value);
         public Int64 ToInt64() => (Int64)_value;
         public void* ToPointer() => _value;
+
+        public Boolean Equals(IntPtr other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is IntPtr && Equals((IntPtr)obj);
+        public Int32 CompareTo(IntPtr other)
+        {
+            Int64 left = ToInt64();
+            Int64 right = other.ToInt64();
+            return left < right ? -1 : (left > right ? 1 : 0);
+        }
+        public Int32 CompareTo(Object obj)
+        {
+            if (obj == null) return 1;
+            if (!(obj is IntPtr)) throw new ArgumentException();
+            return CompareTo((IntPtr)obj);
+        }
+
+        public override String ToString() => NumberFormatting.FormatInt64(ToInt64());
+        public String ToString(String format) => NumberFormatting.FormatSigned(ToInt64(), Size * 8, format);
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatSigned(ToInt64(), Size * 8, format);
+        public Boolean TryFormat(Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, IFormatProvider provider)
+            => NumberFormatting.TryFormatSigned(ToInt64(), Size * 8, destination, out charsWritten, format);
 
         public static explicit operator IntPtr(Int32 value) => new IntPtr(value);
         public static explicit operator IntPtr(Int64 value) => new IntPtr(value);
@@ -1919,16 +1940,28 @@ namespace System
             => new IntPtr((Byte*)pointer._value - offset);
         public static IntPtr operator +(IntPtr pointer, Int32 offset) => Add(pointer, offset);
         public static IntPtr operator -(IntPtr pointer, Int32 offset) => Subtract(pointer, offset);
+        public static IntPtr operator +(IntPtr left, IntPtr right) => new IntPtr(unchecked(left.ToInt64() + right.ToInt64()));
+        public static IntPtr operator -(IntPtr left, IntPtr right) => new IntPtr(unchecked(left.ToInt64() - right.ToInt64()));
+        public static IntPtr operator *(IntPtr left, IntPtr right) => new IntPtr(unchecked(left.ToInt64() * right.ToInt64()));
+        public static IntPtr operator /(IntPtr left, IntPtr right) => new IntPtr(left.ToInt64() / right.ToInt64());
+        public static IntPtr operator %(IntPtr left, IntPtr right) => new IntPtr(left.ToInt64() % right.ToInt64());
+        public static IntPtr operator -(IntPtr value) => new IntPtr(unchecked(-value.ToInt64()));
+        public static IntPtr operator +(IntPtr value) => value;
+        public static IntPtr operator ++(IntPtr value) => new IntPtr(unchecked(value.ToInt64() + 1L));
+        public static IntPtr operator --(IntPtr value) => new IntPtr(unchecked(value.ToInt64() - 1L));
 
-        public static Boolean operator ==(IntPtr left, IntPtr right) => left._value == right._value;
-        public static Boolean operator !=(IntPtr left, IntPtr right) => left._value != right._value;
-        public override Boolean Equals(Object obj) => obj is IntPtr && this == (IntPtr)obj;
+        public static Boolean operator ==(IntPtr left, IntPtr right) => left.Equals(right);
+        public static Boolean operator !=(IntPtr left, IntPtr right) => !left.Equals(right);
+        public static Boolean operator <(IntPtr left, IntPtr right) => left.CompareTo(right) < 0;
+        public static Boolean operator <=(IntPtr left, IntPtr right) => left.CompareTo(right) <= 0;
+        public static Boolean operator >(IntPtr left, IntPtr right) => left.CompareTo(right) > 0;
+        public static Boolean operator >=(IntPtr left, IntPtr right) => left.CompareTo(right) >= 0;
         public override Int32 GetHashCode()
             => unchecked((Int32)(UInt64)_value) ^ unchecked((Int32)((UInt64)_value >> 32));
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public readonly unsafe struct UIntPtr
+    public readonly unsafe struct UIntPtr : IComparable, IComparable<UIntPtr>, IEquatable<UIntPtr>, ISpanFormattable
     {
         private readonly void* _value;
 
@@ -1940,12 +1973,33 @@ namespace System
         public static readonly UIntPtr Zero;
 
         public static Int32 Size => sizeof(void*);
-        public static UIntPtr MaxValue => new UIntPtr(UInt64.MaxValue);
-        public static UIntPtr MinValue => new UIntPtr(UInt64.MinValue);
+        public static UIntPtr MaxValue => Size == 8 ? new UIntPtr(UInt64.MaxValue) : new UIntPtr(UInt32.MaxValue);
+        public static UIntPtr MinValue => Zero;
 
         public UInt32 ToUInt32() => checked((UInt32)(UInt64)_value);
         public UInt64 ToUInt64() => (UInt64)_value;
         public void* ToPointer() => _value;
+
+        public Boolean Equals(UIntPtr other) => _value == other._value;
+        public override Boolean Equals(Object obj) => obj is UIntPtr && Equals((UIntPtr)obj);
+        public Int32 CompareTo(UIntPtr other)
+        {
+            UInt64 left = ToUInt64();
+            UInt64 right = other.ToUInt64();
+            return left < right ? -1 : (left > right ? 1 : 0);
+        }
+        public Int32 CompareTo(Object obj)
+        {
+            if (obj == null) return 1;
+            if (!(obj is UIntPtr)) throw new ArgumentException();
+            return CompareTo((UIntPtr)obj);
+        }
+
+        public override String ToString() => NumberFormatting.FormatUInt64(ToUInt64());
+        public String ToString(String format) => NumberFormatting.FormatUnsigned(ToUInt64(), Size * 8, format);
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatUnsigned(ToUInt64(), Size * 8, format);
+        public Boolean TryFormat(Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, IFormatProvider provider)
+            => NumberFormatting.TryFormatUnsigned(ToUInt64(), Size * 8, destination, out charsWritten, format);
 
         // These op_Explicit members are compiler-required for nuint/UIntPtr casts.
         public static explicit operator UIntPtr(UInt32 value) => new UIntPtr(value);
@@ -1961,10 +2015,20 @@ namespace System
             => new UIntPtr((Byte*)pointer._value - offset);
         public static UIntPtr operator +(UIntPtr pointer, Int32 offset) => Add(pointer, offset);
         public static UIntPtr operator -(UIntPtr pointer, Int32 offset) => Subtract(pointer, offset);
+        public static UIntPtr operator +(UIntPtr left, UIntPtr right) => new UIntPtr(unchecked(left.ToUInt64() + right.ToUInt64()));
+        public static UIntPtr operator -(UIntPtr left, UIntPtr right) => new UIntPtr(unchecked(left.ToUInt64() - right.ToUInt64()));
+        public static UIntPtr operator *(UIntPtr left, UIntPtr right) => new UIntPtr(unchecked(left.ToUInt64() * right.ToUInt64()));
+        public static UIntPtr operator /(UIntPtr left, UIntPtr right) => new UIntPtr(left.ToUInt64() / right.ToUInt64());
+        public static UIntPtr operator %(UIntPtr left, UIntPtr right) => new UIntPtr(left.ToUInt64() % right.ToUInt64());
+        public static UIntPtr operator ++(UIntPtr value) => new UIntPtr(unchecked(value.ToUInt64() + 1UL));
+        public static UIntPtr operator --(UIntPtr value) => new UIntPtr(unchecked(value.ToUInt64() - 1UL));
 
-        public static Boolean operator ==(UIntPtr left, UIntPtr right) => left._value == right._value;
-        public static Boolean operator !=(UIntPtr left, UIntPtr right) => left._value != right._value;
-        public override Boolean Equals(Object obj) => obj is UIntPtr && this == (UIntPtr)obj;
+        public static Boolean operator ==(UIntPtr left, UIntPtr right) => left.Equals(right);
+        public static Boolean operator !=(UIntPtr left, UIntPtr right) => !left.Equals(right);
+        public static Boolean operator <(UIntPtr left, UIntPtr right) => left.CompareTo(right) < 0;
+        public static Boolean operator <=(UIntPtr left, UIntPtr right) => left.CompareTo(right) <= 0;
+        public static Boolean operator >(UIntPtr left, UIntPtr right) => left.CompareTo(right) > 0;
+        public static Boolean operator >=(UIntPtr left, UIntPtr right) => left.CompareTo(right) >= 0;
         public override Int32 GetHashCode()
             => unchecked((Int32)(UInt64)_value) ^ unchecked((Int32)((UInt64)_value >> 32));
     }

@@ -1044,14 +1044,67 @@ public static unsafe class ManagedRuntimeConformance
         // 08 System.IntPtr
         IntPtr signedPointer = new IntPtr(100);
         IntPtr signedAdvanced = IntPtr.Add(signedPointer, 23);
-        Record((IntPtr.Size == 4 || IntPtr.Size == 8) && signedAdvanced.ToInt64() == 123
-            && IntPtr.Subtract(signedAdvanced, 23) == signedPointer, ref passed, ref failed);
+        IntPtr signedArithmetic = (new IntPtr(6) * new IntPtr(7)) + new IntPtr(2);
+        IntPtr signedDivided = signedArithmetic / new IntPtr(4);
+        IntPtr signedRemainder = signedArithmetic % new IntPtr(5);
+        Boolean signedWrongCompare = false;
+        try { ((IComparable)signedPointer).CompareTo((Int64)100L); } catch (ArgumentException) { signedWrongCompare = true; }
+        Boolean signedNarrowOverflow = false;
+        if (IntPtr.Size == 8)
+        {
+            try { IntPtr.MaxValue.ToInt32(); } catch (OverflowException) { signedNarrowOverflow = true; }
+        }
+        else
+        {
+            signedNarrowOverflow = true;
+        }
+        Char[] signedFormatChars = new Char[5];
+        Boolean signedFormatted = new IntPtr(123).TryFormat(new Span<Char>(signedFormatChars), out Int32 signedWritten, new ReadOnlySpan<Char>(new Char[] { 'D', '5' }), null);
+        Int64 signedExpectedMax = IntPtr.Size == 8 ? Int64.MaxValue : Int32.MaxValue;
+        Int64 signedExpectedMin = IntPtr.Size == 8 ? Int64.MinValue : Int32.MinValue;
+        Record((IntPtr.Size == 4 || IntPtr.Size == 8)
+            && IntPtr.Zero.ToInt64() == 0L && IntPtr.MaxValue.ToInt64() == signedExpectedMax && IntPtr.MinValue.ToInt64() == signedExpectedMin
+            && signedAdvanced.ToInt64() == 123L && IntPtr.Subtract(signedAdvanced, 23) == signedPointer
+            && (signedPointer + 23).ToInt64() == 123L && ((signedPointer + 23) - 23) == signedPointer
+            && signedArithmetic.ToInt64() == 44L && signedDivided.ToInt64() == 11L && signedRemainder.ToInt64() == 4L
+            && signedPointer.CompareTo(signedAdvanced) < 0 && signedAdvanced.CompareTo(signedPointer) > 0 && signedPointer.CompareTo(signedPointer) == 0
+            && signedPointer.Equals(new IntPtr(100)) && !signedPointer.Equals(signedAdvanced) && signedWrongCompare
+            && (Int64)new IntPtr(-55) == -55L && signedNarrowOverflow
+            && String.Equals(new IntPtr(-123).ToString(), "-123") && String.Equals(new IntPtr(12).ToString("D4", null), "0012")
+            && signedFormatted && signedWritten == 5 && signedFormatChars[0] == '0' && signedFormatChars[1] == '0'
+            && signedFormatChars[2] == '1' && signedFormatChars[3] == '2' && signedFormatChars[4] == '3', ref passed, ref failed);
 
         // 06 System.UIntPtr
         UIntPtr unsignedPointer = new UIntPtr((UInt64)200UL);
         UIntPtr unsignedAdvanced = UIntPtr.Add(unsignedPointer, 17);
-        Record((UIntPtr.Size == 4 || UIntPtr.Size == 8) && unsignedAdvanced.ToUInt64() == 217UL
-            && UIntPtr.Subtract(unsignedAdvanced, 17) == unsignedPointer, ref passed, ref failed);
+        UIntPtr unsignedArithmetic = (new UIntPtr((UInt64)6UL) * new UIntPtr((UInt64)7UL)) + new UIntPtr((UInt64)2UL);
+        UIntPtr unsignedDivided = unsignedArithmetic / new UIntPtr((UInt64)4UL);
+        UIntPtr unsignedRemainder = unsignedArithmetic % new UIntPtr((UInt64)5UL);
+        Boolean unsignedWrongCompare = false;
+        try { ((IComparable)unsignedPointer).CompareTo((UInt64)200UL); } catch (ArgumentException) { unsignedWrongCompare = true; }
+        Boolean unsignedNarrowOverflow = false;
+        if (UIntPtr.Size == 8)
+        {
+            try { UIntPtr.MaxValue.ToUInt32(); } catch (OverflowException) { unsignedNarrowOverflow = true; }
+        }
+        else
+        {
+            unsignedNarrowOverflow = true;
+        }
+        Char[] unsignedFormatChars = new Char[5];
+        Boolean unsignedFormatted = new UIntPtr((UInt64)123UL).TryFormat(new Span<Char>(unsignedFormatChars), out Int32 unsignedWritten, new ReadOnlySpan<Char>(new Char[] { 'D', '5' }), null);
+        UInt64 unsignedExpectedMax = UIntPtr.Size == 8 ? UInt64.MaxValue : UInt32.MaxValue;
+        Record((UIntPtr.Size == 4 || UIntPtr.Size == 8)
+            && UIntPtr.Zero.ToUInt64() == 0UL && UIntPtr.MinValue.ToUInt64() == 0UL && UIntPtr.MaxValue.ToUInt64() == unsignedExpectedMax
+            && unsignedAdvanced.ToUInt64() == 217UL && UIntPtr.Subtract(unsignedAdvanced, 17) == unsignedPointer
+            && (unsignedPointer + 17).ToUInt64() == 217UL && ((unsignedPointer + 17) - 17) == unsignedPointer
+            && unsignedArithmetic.ToUInt64() == 44UL && unsignedDivided.ToUInt64() == 11UL && unsignedRemainder.ToUInt64() == 4UL
+            && unsignedPointer.CompareTo(unsignedAdvanced) < 0 && unsignedAdvanced.CompareTo(unsignedPointer) > 0 && unsignedPointer.CompareTo(unsignedPointer) == 0
+            && unsignedPointer.Equals(new UIntPtr((UInt64)200UL)) && !unsignedPointer.Equals(unsignedAdvanced) && unsignedWrongCompare
+            && (UInt64)new UIntPtr((UInt64)55UL) == 55UL && unsignedNarrowOverflow
+            && String.Equals(new UIntPtr((UInt64)123UL).ToString(), "123") && String.Equals(new UIntPtr((UInt64)12UL).ToString("D4", null), "0012")
+            && unsignedFormatted && unsignedWritten == 5 && unsignedFormatChars[0] == '0' && unsignedFormatChars[1] == '0'
+            && unsignedFormatChars[2] == '1' && unsignedFormatChars[3] == '2' && unsignedFormatChars[4] == '3', ref passed, ref failed);
 
         // 07 System.Array
         Int32[] array = new Int32[3];
