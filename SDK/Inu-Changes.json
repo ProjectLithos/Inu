@@ -1,26 +1,28 @@
 {
-  "baseVersion": "0.1.0",
-  "version": "0.1.1",
+  "baseVersion": "0.1.1",
+  "version": "0.1.2",
   "changedFiles": [
-    "CHANGED-0.1.1.txt",
+    "CHANGED-0.1.2.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/docs/Inu.Documentation.json",
-    "Inu/SDK/docs/Release-0.1.1.md",
+    "Inu/SDK/docs/Release-0.1.2.md",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
+    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
     "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
+    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.1.1.md",
+    "Kath/docs/Release-0.1.2.md",
     "Kath/packages/kath/package.json",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Correct the signed-integer in-kernel conformance source so negative primitive casts compile cleanly."
+  "summary": "Complete byte, ushort, uint, and ulong across parsing, formatting, conversion, comparison, equality, and min/max conformance."
 }

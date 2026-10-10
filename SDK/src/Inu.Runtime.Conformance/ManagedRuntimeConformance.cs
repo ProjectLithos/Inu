@@ -932,6 +932,115 @@ public static unsafe class ManagedRuntimeConformance
             && i64Convertible.ToDecimal(null).Equals(new Decimal((Int64)(-123))) && i64ConvertOverflow
             && i64CheckedOverflow && unchecked((Int64)UInt64.MaxValue) == -1L && i64Overflow && i64WrongCompare, ref passed, ref failed);
 
+
+        // 08 System.Byte
+        Boolean byteOverflow = false;
+        Boolean byteCheckedOverflow = false;
+        Boolean byteWrongCompare = false;
+        try { Byte.Parse("256"); } catch (OverflowException) { byteOverflow = true; }
+        Int32 byteNegative = -1;
+        try { _ = checked((Byte)byteNegative); } catch (OverflowException) { byteCheckedOverflow = true; }
+        try { ((IComparable)(Byte)4).CompareTo((UInt16)4); } catch (ArgumentException) { byteWrongCompare = true; }
+        Char[] byteFormatChars = new Char[3];
+        Boolean byteFormatted = ((Byte)12).TryFormat(new Span<Char>(byteFormatChars), out Int32 byteWritten, new ReadOnlySpan<Char>(new Char[] { 'D', '3' }), null);
+        IConvertible byteConvertible = (Byte)200;
+        Boolean byteConvertOverflow = false;
+        try { Convert.ToByte((Int32)256); } catch (OverflowException) { byteConvertOverflow = true; }
+        Record(Byte.MinValue == (Byte)0 && Byte.MaxValue == (Byte)255
+            && Byte.Parse(" 0 ") == Byte.MinValue && Byte.Parse("+255") == Byte.MaxValue
+            && Byte.TryParse("42", out Byte byteValue) && byteValue == (Byte)42 && !Byte.TryParse("256", out byteValue) && byteValue == 0
+            && ParseViaIParsable<Byte>("7", null) == (Byte)7
+            && ParseViaISpanParsable<Byte>(new ReadOnlySpan<Char>(new Char[] { '8' }), null) == (Byte)8
+            && String.Equals(((Byte)12).ToString(), "12") && String.Equals(((Byte)12).ToString("D3", null), "012")
+            && String.Equals(((Byte)255).ToString("X2", null), "FF")
+            && byteFormatted && byteWritten == 3 && byteFormatChars[0] == '0' && byteFormatChars[1] == '1' && byteFormatChars[2] == '2'
+            && ((Byte)4).CompareTo((Byte)5) < 0 && ((Byte)4).Equals((Byte)4) && !((Byte)4).Equals((Byte)5)
+            && byteConvertible.GetTypeCode() == TypeCode.Byte && byteConvertible.ToUInt64(null) == 200UL && byteConvertible.ToBoolean(null)
+            && byteConvertible.ToDecimal(null).Equals(new Decimal((UInt64)200)) && byteConvertOverflow
+            && byteCheckedOverflow && unchecked((Byte)(-1)) == Byte.MaxValue && byteOverflow && byteWrongCompare, ref passed, ref failed);
+
+        // 09 System.UInt16
+        Boolean u16Overflow = false;
+        Boolean u16CheckedOverflow = false;
+        Boolean u16WrongCompare = false;
+        try { UInt16.Parse("65536"); } catch (OverflowException) { u16Overflow = true; }
+        Int32 u16Negative = -1;
+        try { _ = checked((UInt16)u16Negative); } catch (OverflowException) { u16CheckedOverflow = true; }
+        try { ((IComparable)(UInt16)4).CompareTo((UInt32)4); } catch (ArgumentException) { u16WrongCompare = true; }
+        Char[] u16FormatChars = new Char[5];
+        Boolean u16Formatted = ((UInt16)123).TryFormat(new Span<Char>(u16FormatChars), out Int32 u16Written, new ReadOnlySpan<Char>(new Char[] { 'D', '5' }), null);
+        IConvertible u16Convertible = (UInt16)60000;
+        Boolean u16ConvertOverflow = false;
+        try { Convert.ToUInt16((Int32)65536); } catch (OverflowException) { u16ConvertOverflow = true; }
+        Record(UInt16.MinValue == (UInt16)0 && UInt16.MaxValue == (UInt16)65535
+            && UInt16.Parse("0") == UInt16.MinValue && UInt16.Parse("65535") == UInt16.MaxValue
+            && UInt16.TryParse("1234", out UInt16 u16Value) && u16Value == (UInt16)1234 && !UInt16.TryParse("65536", out u16Value) && u16Value == 0
+            && ParseViaIParsable<UInt16>("45", null) == (UInt16)45
+            && ParseViaISpanParsable<UInt16>(new ReadOnlySpan<Char>(new Char[] { '4', '6' }), null) == (UInt16)46
+            && String.Equals(((UInt16)123).ToString(), "123") && String.Equals(((UInt16)12).ToString("D4", null), "0012")
+            && String.Equals(UInt16.MaxValue.ToString("X4", null), "FFFF")
+            && u16Formatted && u16Written == 5 && u16FormatChars[0] == '0' && u16FormatChars[1] == '0' && u16FormatChars[2] == '1' && u16FormatChars[3] == '2' && u16FormatChars[4] == '3'
+            && ((UInt16)4).CompareTo((UInt16)5) < 0 && ((UInt16)4).Equals((UInt16)4) && !((UInt16)4).Equals((UInt16)5)
+            && u16Convertible.GetTypeCode() == TypeCode.UInt16 && u16Convertible.ToUInt64(null) == 60000UL && u16Convertible.ToBoolean(null)
+            && u16Convertible.ToDecimal(null).Equals(new Decimal((UInt64)60000)) && u16ConvertOverflow
+            && u16CheckedOverflow && unchecked((UInt16)(-1)) == UInt16.MaxValue && u16Overflow && u16WrongCompare, ref passed, ref failed);
+
+        // 10 System.UInt32
+        Boolean u32Overflow = false;
+        Boolean u32CheckedOverflow = false;
+        Boolean u32WrongCompare = false;
+        try { UInt32.Parse("4294967296"); } catch (OverflowException) { u32Overflow = true; }
+        Int64 u32Negative = -1L;
+        try { _ = checked((UInt32)u32Negative); } catch (OverflowException) { u32CheckedOverflow = true; }
+        try { ((IComparable)(UInt32)12345U).CompareTo((UInt64)12345UL); } catch (ArgumentException) { u32WrongCompare = true; }
+        Char[] u32FormatChars = new Char[6];
+        Boolean u32Formatted = ((UInt32)123U).TryFormat(new Span<Char>(u32FormatChars), out Int32 u32Written, new ReadOnlySpan<Char>(new Char[] { 'D', '6' }), null);
+        IConvertible u32Convertible = (UInt32)4000000000U;
+        Boolean u32ConvertOverflow = false;
+        try { Convert.ToUInt32((Int64)4294967296L); } catch (OverflowException) { u32ConvertOverflow = true; }
+        UInt32 unsignedInteger = 12345U;
+        Record(UInt32.MinValue == 0U && UInt32.MaxValue == 4294967295U
+            && UInt32.Parse(" 0 ") == UInt32.MinValue && UInt32.Parse("+4294967295") == UInt32.MaxValue
+            && UInt32.TryParse("12345", out UInt32 u32Value) && u32Value == 12345U && !UInt32.TryParse("4294967296", out u32Value) && u32Value == 0U
+            && ParseViaIParsable<UInt32>("77", null) == 77U
+            && ParseViaISpanParsable<UInt32>(new ReadOnlySpan<Char>(new Char[] { '7', '8' }), null) == 78U
+            && String.Equals(((UInt32)123U).ToString(), "123") && String.Equals(((UInt32)12U).ToString("D4", null), "0012")
+            && String.Equals(UInt32.MaxValue.ToString("X8", null), "FFFFFFFF")
+            && u32Formatted && u32Written == 6 && u32FormatChars[0] == '0' && u32FormatChars[1] == '0' && u32FormatChars[2] == '0'
+            && u32FormatChars[3] == '1' && u32FormatChars[4] == '2' && u32FormatChars[5] == '3'
+            && unsignedInteger.Equals((UInt32)12345U) && !unsignedInteger.Equals((UInt32)12346U) && unsignedInteger.CompareTo(12346U) < 0
+            && u32Convertible.GetTypeCode() == TypeCode.UInt32 && u32Convertible.ToUInt64(null) == 4000000000UL && u32Convertible.ToBoolean(null)
+            && u32Convertible.ToDecimal(null).Equals(new Decimal((UInt64)4000000000UL)) && u32ConvertOverflow
+            && u32CheckedOverflow && unchecked((UInt32)(-1L)) == UInt32.MaxValue && u32Overflow && u32WrongCompare, ref passed, ref failed);
+
+        // 11 System.UInt64
+        Boolean u64Overflow = false;
+        Boolean u64CheckedOverflow = false;
+        Boolean u64WrongCompare = false;
+        try { UInt64.Parse("18446744073709551616"); } catch (OverflowException) { u64Overflow = true; }
+        Int64 u64Negative = -1L;
+        try { _ = checked((UInt64)u64Negative); } catch (OverflowException) { u64CheckedOverflow = true; }
+        try { ((IComparable)(UInt64)4UL).CompareTo((UInt32)4U); } catch (ArgumentException) { u64WrongCompare = true; }
+        Char[] u64FormatChars = new Char[7];
+        Boolean u64Formatted = ((UInt64)123UL).TryFormat(new Span<Char>(u64FormatChars), out Int32 u64Written, new ReadOnlySpan<Char>(new Char[] { 'D', '7' }), null);
+        IConvertible u64Convertible = UInt64.MaxValue;
+        Boolean u64ConvertOverflow = false;
+        try { Convert.ToUInt64((Int64)(-1L)); } catch (OverflowException) { u64ConvertOverflow = true; }
+        Record(UInt64.MinValue == 0UL && UInt64.MaxValue == 18446744073709551615UL
+            && UInt64.Parse("0") == UInt64.MinValue && UInt64.Parse("18446744073709551615") == UInt64.MaxValue
+            && UInt64.TryParse("123456789", out UInt64 u64Value) && u64Value == 123456789UL && !UInt64.TryParse("18446744073709551616", out u64Value) && u64Value == 0UL
+            && ParseViaIParsable<UInt64>("79", null) == 79UL
+            && ParseViaISpanParsable<UInt64>(new ReadOnlySpan<Char>(new Char[] { '8', '0' }), null) == 80UL
+            && String.Equals(((UInt64)123UL).ToString(), "123") && String.Equals(((UInt64)12UL).ToString("D4", null), "0012")
+            && String.Equals(UInt64.MaxValue.ToString("X16", null), "FFFFFFFFFFFFFFFF")
+            && u64Formatted && u64Written == 7 && u64FormatChars[0] == '0' && u64FormatChars[1] == '0' && u64FormatChars[2] == '0'
+            && u64FormatChars[3] == '0' && u64FormatChars[4] == '1' && u64FormatChars[5] == '2' && u64FormatChars[6] == '3'
+            && ((UInt64)4UL).CompareTo((UInt64)5UL) < 0 && ((UInt64)4UL).Equals((UInt64)4UL) && !((UInt64)4UL).Equals((UInt64)5UL)
+            && u64Convertible.GetTypeCode() == TypeCode.UInt64 && u64Convertible.ToUInt64(null) == UInt64.MaxValue && u64Convertible.ToBoolean(null)
+            && u64Convertible.ToDecimal(null).Equals(new Decimal(UInt64.MaxValue)) && u64ConvertOverflow
+            && u64CheckedOverflow && unchecked((UInt64)(-1L)) == UInt64.MaxValue && u64Overflow && u64WrongCompare, ref passed, ref failed);
+
+
         // 08 System.IntPtr
         IntPtr signedPointer = new IntPtr(100);
         IntPtr signedAdvanced = IntPtr.Add(signedPointer, 23);

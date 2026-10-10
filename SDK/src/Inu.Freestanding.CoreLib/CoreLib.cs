@@ -315,6 +315,13 @@ namespace System
             _lo64 = value < 0 ? unchecked(0UL - (UInt64)value) : (UInt64)value;
         }
 
+        public Decimal(UInt64 value)
+        {
+            _flags = 0;
+            _hi32 = 0;
+            _lo64 = value;
+        }
+
         public static readonly Decimal Zero = new Decimal(0);
         public static readonly Decimal One = new Decimal(1);
         public Boolean Equals(Decimal other) => _flags == other._flags && _hi32 == other._hi32 && _lo64 == other._lo64;
@@ -658,16 +665,87 @@ namespace System
         Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
     [StructLayout(LayoutKind.Sequential)]
-    public struct Byte : IComparable, IComparable<Byte>, IEquatable<Byte>, IFormattable
+    public struct Byte : IComparable, IConvertible, IComparable<Byte>, IEquatable<Byte>, ISpanParsable<Byte>, ISpanFormattable
     {
-        private byte _value; public const Byte MinValue = 0; public const Byte MaxValue = 255;
+        private byte _value;
+
+        public const Byte MinValue = 0;
+        public const Byte MaxValue = 255;
+
         public Boolean Equals(Byte other) => _value == other._value;
         public override Boolean Equals(Object obj) => obj is Byte && Equals((Byte)obj);
         public override Int32 GetHashCode() => _value;
         public Int32 CompareTo(Byte other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
         public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Byte)) throw new ArgumentException(); return CompareTo((Byte)obj); }
+
         public override String ToString() => NumberFormatting.FormatUInt64(_value);
+        public String ToString(IFormatProvider provider) => ToString();
         public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatUnsigned(_value, 8, format);
+        public Boolean TryFormat(Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, IFormatProvider provider)
+            => NumberFormatting.TryFormatUnsigned(_value, 8, destination, out charsWritten, format);
+
+        public static Byte Parse(String value)
+        {
+            if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException();
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow))
+            {
+                if (overflow) throw new OverflowException();
+                throw new FormatException();
+            }
+            return (Byte)parsed;
+        }
+
+        public static Byte Parse(ReadOnlySpan<Char> value)
+        {
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow))
+            {
+                if (overflow) throw new OverflowException();
+                throw new FormatException();
+            }
+            return (Byte)parsed;
+        }
+
+        public static Boolean TryParse(String value, out Byte result)
+        {
+            if (Object.ReferenceEquals(value, null)) { result = 0; return false; }
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow)) { result = 0; return false; }
+            result = (Byte)parsed;
+            return true;
+        }
+
+        public static Boolean TryParse(ReadOnlySpan<Char> value, out Byte result)
+        {
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow)) { result = 0; return false; }
+            result = (Byte)parsed;
+            return true;
+        }
+
+        static Byte IParsable<Byte>.Parse(String value, IFormatProvider provider) => Parse(value);
+        static Boolean IParsable<Byte>.TryParse(String value, IFormatProvider provider, out Byte result) => TryParse(value, out result);
+        static Byte ISpanParsable<Byte>.Parse(ReadOnlySpan<Char> value, IFormatProvider provider) => Parse(value);
+        static Boolean ISpanParsable<Byte>.TryParse(ReadOnlySpan<Char> value, IFormatProvider provider, out Byte result) => TryParse(value, out result);
+
+        public TypeCode GetTypeCode() => TypeCode.Byte;
+        Boolean IConvertible.ToBoolean(IFormatProvider provider) => Convert.ToBoolean(this);
+        Char IConvertible.ToChar(IFormatProvider provider) => Convert.ToChar(this);
+        SByte IConvertible.ToSByte(IFormatProvider provider) => Convert.ToSByte(this);
+        Byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(this);
+        Int16 IConvertible.ToInt16(IFormatProvider provider) => Convert.ToInt16(this);
+        UInt16 IConvertible.ToUInt16(IFormatProvider provider) => Convert.ToUInt16(this);
+        Int32 IConvertible.ToInt32(IFormatProvider provider) => Convert.ToInt32(this);
+        UInt32 IConvertible.ToUInt32(IFormatProvider provider) => Convert.ToUInt32(this);
+        Int64 IConvertible.ToInt64(IFormatProvider provider) => Convert.ToInt64(this);
+        UInt64 IConvertible.ToUInt64(IFormatProvider provider) => Convert.ToUInt64(this);
+        Single IConvertible.ToSingle(IFormatProvider provider) => Convert.ToSingle(this);
+        Double IConvertible.ToDouble(IFormatProvider provider) => Convert.ToDouble(this);
+        Decimal IConvertible.ToDecimal(IFormatProvider provider) => Convert.ToDecimal(this);
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException();
+        String IConvertible.ToString(IFormatProvider provider) => ToString();
+        Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
     [StructLayout(LayoutKind.Sequential)]
     public struct Int16 : IComparable, IConvertible, IComparable<Int16>, IEquatable<Int16>, ISpanParsable<Int16>, ISpanFormattable
@@ -753,16 +831,87 @@ namespace System
         Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
     [StructLayout(LayoutKind.Sequential)]
-    public struct UInt16 : IComparable, IComparable<UInt16>, IEquatable<UInt16>, IFormattable
+    public struct UInt16 : IComparable, IConvertible, IComparable<UInt16>, IEquatable<UInt16>, ISpanParsable<UInt16>, ISpanFormattable
     {
-        private ushort _value; public const UInt16 MinValue = 0; public const UInt16 MaxValue = 65535;
+        private ushort _value;
+
+        public const UInt16 MinValue = 0;
+        public const UInt16 MaxValue = 65535;
+
         public Boolean Equals(UInt16 other) => _value == other._value;
         public override Boolean Equals(Object obj) => obj is UInt16 && Equals((UInt16)obj);
         public override Int32 GetHashCode() => _value;
         public Int32 CompareTo(UInt16 other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
         public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is UInt16)) throw new ArgumentException(); return CompareTo((UInt16)obj); }
+
         public override String ToString() => NumberFormatting.FormatUInt64(_value);
+        public String ToString(IFormatProvider provider) => ToString();
         public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatUnsigned(_value, 16, format);
+        public Boolean TryFormat(Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, IFormatProvider provider)
+            => NumberFormatting.TryFormatUnsigned(_value, 16, destination, out charsWritten, format);
+
+        public static UInt16 Parse(String value)
+        {
+            if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException();
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow))
+            {
+                if (overflow) throw new OverflowException();
+                throw new FormatException();
+            }
+            return (UInt16)parsed;
+        }
+
+        public static UInt16 Parse(ReadOnlySpan<Char> value)
+        {
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow))
+            {
+                if (overflow) throw new OverflowException();
+                throw new FormatException();
+            }
+            return (UInt16)parsed;
+        }
+
+        public static Boolean TryParse(String value, out UInt16 result)
+        {
+            if (Object.ReferenceEquals(value, null)) { result = 0; return false; }
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow)) { result = 0; return false; }
+            result = (UInt16)parsed;
+            return true;
+        }
+
+        public static Boolean TryParse(ReadOnlySpan<Char> value, out UInt16 result)
+        {
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow)) { result = 0; return false; }
+            result = (UInt16)parsed;
+            return true;
+        }
+
+        static UInt16 IParsable<UInt16>.Parse(String value, IFormatProvider provider) => Parse(value);
+        static Boolean IParsable<UInt16>.TryParse(String value, IFormatProvider provider, out UInt16 result) => TryParse(value, out result);
+        static UInt16 ISpanParsable<UInt16>.Parse(ReadOnlySpan<Char> value, IFormatProvider provider) => Parse(value);
+        static Boolean ISpanParsable<UInt16>.TryParse(ReadOnlySpan<Char> value, IFormatProvider provider, out UInt16 result) => TryParse(value, out result);
+
+        public TypeCode GetTypeCode() => TypeCode.UInt16;
+        Boolean IConvertible.ToBoolean(IFormatProvider provider) => Convert.ToBoolean(this);
+        Char IConvertible.ToChar(IFormatProvider provider) => Convert.ToChar(this);
+        SByte IConvertible.ToSByte(IFormatProvider provider) => Convert.ToSByte(this);
+        Byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(this);
+        Int16 IConvertible.ToInt16(IFormatProvider provider) => Convert.ToInt16(this);
+        UInt16 IConvertible.ToUInt16(IFormatProvider provider) => Convert.ToUInt16(this);
+        Int32 IConvertible.ToInt32(IFormatProvider provider) => Convert.ToInt32(this);
+        UInt32 IConvertible.ToUInt32(IFormatProvider provider) => Convert.ToUInt32(this);
+        Int64 IConvertible.ToInt64(IFormatProvider provider) => Convert.ToInt64(this);
+        UInt64 IConvertible.ToUInt64(IFormatProvider provider) => Convert.ToUInt64(this);
+        Single IConvertible.ToSingle(IFormatProvider provider) => Convert.ToSingle(this);
+        Double IConvertible.ToDouble(IFormatProvider provider) => Convert.ToDouble(this);
+        Decimal IConvertible.ToDecimal(IFormatProvider provider) => Convert.ToDecimal(this);
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException();
+        String IConvertible.ToString(IFormatProvider provider) => ToString();
+        Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
     [StructLayout(LayoutKind.Sequential)]
     public struct Int32 : IComparable, IConvertible, IComparable<Int32>, IEquatable<Int32>, ISpanParsable<Int32>, ISpanFormattable
@@ -848,16 +997,87 @@ namespace System
         Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
     [StructLayout(LayoutKind.Sequential)]
-    public struct UInt32 : IComparable, IComparable<UInt32>, IEquatable<UInt32>, IFormattable
+    public struct UInt32 : IComparable, IConvertible, IComparable<UInt32>, IEquatable<UInt32>, ISpanParsable<UInt32>, ISpanFormattable
     {
-        private uint _value; public const UInt32 MinValue = 0U; public const UInt32 MaxValue = 0xFFFFFFFFU;
+        private uint _value;
+
+        public const UInt32 MinValue = 0U;
+        public const UInt32 MaxValue = 0xFFFFFFFFU;
+
         public Boolean Equals(UInt32 other) => _value == other._value;
         public override Boolean Equals(Object obj) => obj is UInt32 && Equals((UInt32)obj);
         public override Int32 GetHashCode() => unchecked((Int32)_value);
         public Int32 CompareTo(UInt32 other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
         public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is UInt32)) throw new ArgumentException(); return CompareTo((UInt32)obj); }
+
         public override String ToString() => NumberFormatting.FormatUInt64(_value);
+        public String ToString(IFormatProvider provider) => ToString();
         public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatUnsigned(_value, 32, format);
+        public Boolean TryFormat(Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, IFormatProvider provider)
+            => NumberFormatting.TryFormatUnsigned(_value, 32, destination, out charsWritten, format);
+
+        public static UInt32 Parse(String value)
+        {
+            if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException();
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow))
+            {
+                if (overflow) throw new OverflowException();
+                throw new FormatException();
+            }
+            return (UInt32)parsed;
+        }
+
+        public static UInt32 Parse(ReadOnlySpan<Char> value)
+        {
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow))
+            {
+                if (overflow) throw new OverflowException();
+                throw new FormatException();
+            }
+            return (UInt32)parsed;
+        }
+
+        public static Boolean TryParse(String value, out UInt32 result)
+        {
+            if (Object.ReferenceEquals(value, null)) { result = 0; return false; }
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow)) { result = 0; return false; }
+            result = (UInt32)parsed;
+            return true;
+        }
+
+        public static Boolean TryParse(ReadOnlySpan<Char> value, out UInt32 result)
+        {
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow)) { result = 0; return false; }
+            result = (UInt32)parsed;
+            return true;
+        }
+
+        static UInt32 IParsable<UInt32>.Parse(String value, IFormatProvider provider) => Parse(value);
+        static Boolean IParsable<UInt32>.TryParse(String value, IFormatProvider provider, out UInt32 result) => TryParse(value, out result);
+        static UInt32 ISpanParsable<UInt32>.Parse(ReadOnlySpan<Char> value, IFormatProvider provider) => Parse(value);
+        static Boolean ISpanParsable<UInt32>.TryParse(ReadOnlySpan<Char> value, IFormatProvider provider, out UInt32 result) => TryParse(value, out result);
+
+        public TypeCode GetTypeCode() => TypeCode.UInt32;
+        Boolean IConvertible.ToBoolean(IFormatProvider provider) => Convert.ToBoolean(this);
+        Char IConvertible.ToChar(IFormatProvider provider) => Convert.ToChar(this);
+        SByte IConvertible.ToSByte(IFormatProvider provider) => Convert.ToSByte(this);
+        Byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(this);
+        Int16 IConvertible.ToInt16(IFormatProvider provider) => Convert.ToInt16(this);
+        UInt16 IConvertible.ToUInt16(IFormatProvider provider) => Convert.ToUInt16(this);
+        Int32 IConvertible.ToInt32(IFormatProvider provider) => Convert.ToInt32(this);
+        UInt32 IConvertible.ToUInt32(IFormatProvider provider) => Convert.ToUInt32(this);
+        Int64 IConvertible.ToInt64(IFormatProvider provider) => Convert.ToInt64(this);
+        UInt64 IConvertible.ToUInt64(IFormatProvider provider) => Convert.ToUInt64(this);
+        Single IConvertible.ToSingle(IFormatProvider provider) => Convert.ToSingle(this);
+        Double IConvertible.ToDouble(IFormatProvider provider) => Convert.ToDouble(this);
+        Decimal IConvertible.ToDecimal(IFormatProvider provider) => Convert.ToDecimal(this);
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException();
+        String IConvertible.ToString(IFormatProvider provider) => ToString();
+        Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
     [StructLayout(LayoutKind.Sequential)]
     public struct Int64 : IComparable, IConvertible, IComparable<Int64>, IEquatable<Int64>, ISpanParsable<Int64>, ISpanFormattable
@@ -943,16 +1163,87 @@ namespace System
         Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
     [StructLayout(LayoutKind.Sequential)]
-    public struct UInt64 : IComparable, IComparable<UInt64>, IEquatable<UInt64>, IFormattable
+    public struct UInt64 : IComparable, IConvertible, IComparable<UInt64>, IEquatable<UInt64>, ISpanParsable<UInt64>, ISpanFormattable
     {
-        private ulong _value; public const UInt64 MinValue = 0UL; public const UInt64 MaxValue = 0xFFFFFFFFFFFFFFFFUL;
+        private ulong _value;
+
+        public const UInt64 MinValue = 0UL;
+        public const UInt64 MaxValue = 0xFFFFFFFFFFFFFFFFUL;
+
         public Boolean Equals(UInt64 other) => _value == other._value;
         public override Boolean Equals(Object obj) => obj is UInt64 && Equals((UInt64)obj);
         public override Int32 GetHashCode() => unchecked((Int32)_value ^ (Int32)(_value >> 32));
         public Int32 CompareTo(UInt64 other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
         public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is UInt64)) throw new ArgumentException(); return CompareTo((UInt64)obj); }
+
         public override String ToString() => NumberFormatting.FormatUInt64(_value);
+        public String ToString(IFormatProvider provider) => ToString();
         public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatUnsigned(_value, 64, format);
+        public Boolean TryFormat(Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, IFormatProvider provider)
+            => NumberFormatting.TryFormatUnsigned(_value, 64, destination, out charsWritten, format);
+
+        public static UInt64 Parse(String value)
+        {
+            if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException();
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow))
+            {
+                if (overflow) throw new OverflowException();
+                throw new FormatException();
+            }
+            return (UInt64)parsed;
+        }
+
+        public static UInt64 Parse(ReadOnlySpan<Char> value)
+        {
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow))
+            {
+                if (overflow) throw new OverflowException();
+                throw new FormatException();
+            }
+            return (UInt64)parsed;
+        }
+
+        public static Boolean TryParse(String value, out UInt64 result)
+        {
+            if (Object.ReferenceEquals(value, null)) { result = 0; return false; }
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow)) { result = 0; return false; }
+            result = (UInt64)parsed;
+            return true;
+        }
+
+        public static Boolean TryParse(ReadOnlySpan<Char> value, out UInt64 result)
+        {
+            UInt64 parsed; Boolean overflow;
+            if (!NumberParsing.TryParseUnsigned(value, MaxValue, out parsed, out overflow)) { result = 0; return false; }
+            result = (UInt64)parsed;
+            return true;
+        }
+
+        static UInt64 IParsable<UInt64>.Parse(String value, IFormatProvider provider) => Parse(value);
+        static Boolean IParsable<UInt64>.TryParse(String value, IFormatProvider provider, out UInt64 result) => TryParse(value, out result);
+        static UInt64 ISpanParsable<UInt64>.Parse(ReadOnlySpan<Char> value, IFormatProvider provider) => Parse(value);
+        static Boolean ISpanParsable<UInt64>.TryParse(ReadOnlySpan<Char> value, IFormatProvider provider, out UInt64 result) => TryParse(value, out result);
+
+        public TypeCode GetTypeCode() => TypeCode.UInt64;
+        Boolean IConvertible.ToBoolean(IFormatProvider provider) => Convert.ToBoolean(this);
+        Char IConvertible.ToChar(IFormatProvider provider) => Convert.ToChar(this);
+        SByte IConvertible.ToSByte(IFormatProvider provider) => Convert.ToSByte(this);
+        Byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(this);
+        Int16 IConvertible.ToInt16(IFormatProvider provider) => Convert.ToInt16(this);
+        UInt16 IConvertible.ToUInt16(IFormatProvider provider) => Convert.ToUInt16(this);
+        Int32 IConvertible.ToInt32(IFormatProvider provider) => Convert.ToInt32(this);
+        UInt32 IConvertible.ToUInt32(IFormatProvider provider) => Convert.ToUInt32(this);
+        Int64 IConvertible.ToInt64(IFormatProvider provider) => Convert.ToInt64(this);
+        UInt64 IConvertible.ToUInt64(IFormatProvider provider) => Convert.ToUInt64(this);
+        Single IConvertible.ToSingle(IFormatProvider provider) => Convert.ToSingle(this);
+        Double IConvertible.ToDouble(IFormatProvider provider) => Convert.ToDouble(this);
+        Decimal IConvertible.ToDecimal(IFormatProvider provider) => Convert.ToDecimal(this);
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException();
+        String IConvertible.ToString(IFormatProvider provider) => ToString();
+        Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
     [StructLayout(LayoutKind.Sequential)]
     public struct Single : IComparable, IComparable<Single>, IEquatable<Single>, IFormattable
@@ -1129,6 +1420,23 @@ namespace System
             charsWritten = text.Length;
             return true;
         }
+
+        internal static Boolean TryFormatUnsigned(UInt64 value, Int32 bitWidth, Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format)
+        {
+            String formatString = null;
+            if (format.Length != 0)
+            {
+                Char[] formatChars = new Char[format.Length];
+                for (Int32 index = 0; index < format.Length; index++) formatChars[index] = format[index];
+                formatString = String.CreateFromChars(formatChars, formatChars.Length);
+            }
+
+            String text = FormatUnsigned(value, bitWidth, formatString);
+            if (destination.Length < text.Length) { charsWritten = 0; return false; }
+            for (Int32 index = 0; index < text.Length; index++) destination[index] = text[index];
+            charsWritten = text.Length;
+            return true;
+        }
     }
 
     internal static class NumberParsing
@@ -1215,6 +1523,72 @@ namespace System
             }
             return true;
         }
+        internal static Boolean TryParseUnsigned(String text, UInt64 maxValue, out UInt64 result, out Boolean overflow)
+        {
+            result = 0UL;
+            overflow = false;
+            Int32 start = 0;
+            Int32 end = text.Length;
+            while (start < end && Char.IsWhiteSpace(text[start])) start++;
+            while (end > start && Char.IsWhiteSpace(text[end - 1])) end--;
+            if (start == end) return false;
+
+            Boolean negative = false;
+            if (text[start] == '+' || text[start] == '-')
+            {
+                negative = text[start] == '-';
+                start++;
+                if (start == end) return false;
+            }
+
+            UInt64 value = 0UL;
+            for (Int32 index = start; index < end; index++)
+            {
+                Char c = text[index];
+                if (c < '0' || c > '9') return false;
+                UInt64 digit = (UInt64)(c - '0');
+                if (value > (maxValue - digit) / 10UL) { overflow = true; return false; }
+                value = value * 10UL + digit;
+            }
+
+            if (negative && value != 0UL) { overflow = true; return false; }
+            result = value;
+            return true;
+        }
+
+        internal static Boolean TryParseUnsigned(ReadOnlySpan<Char> text, UInt64 maxValue, out UInt64 result, out Boolean overflow)
+        {
+            result = 0UL;
+            overflow = false;
+            Int32 start = 0;
+            Int32 end = text.Length;
+            while (start < end && Char.IsWhiteSpace(text[start])) start++;
+            while (end > start && Char.IsWhiteSpace(text[end - 1])) end--;
+            if (start == end) return false;
+
+            Boolean negative = false;
+            if (text[start] == '+' || text[start] == '-')
+            {
+                negative = text[start] == '-';
+                start++;
+                if (start == end) return false;
+            }
+
+            UInt64 value = 0UL;
+            for (Int32 index = start; index < end; index++)
+            {
+                Char c = text[index];
+                if (c < '0' || c > '9') return false;
+                UInt64 digit = (UInt64)(c - '0');
+                if (value > (maxValue - digit) / 10UL) { overflow = true; return false; }
+                value = value * 10UL + digit;
+            }
+
+            if (negative && value != 0UL) { overflow = true; return false; }
+            result = value;
+            return true;
+        }
+
     }
 
     /// <summary><inu.api/>Primitive mathematical operations used by the Core v1 freestanding runtime.</summary>
@@ -1463,9 +1837,13 @@ namespace System
         public static Decimal ToDecimal(Boolean value) => value ? Decimal.One : Decimal.Zero;
         public static Decimal ToDecimal(Char value) => throw new InvalidCastException();
         public static Decimal ToDecimal(SByte value) => new Decimal((Int64)value);
+        public static Decimal ToDecimal(Byte value) => new Decimal((UInt64)value);
         public static Decimal ToDecimal(Int16 value) => new Decimal((Int64)value);
+        public static Decimal ToDecimal(UInt16 value) => new Decimal((UInt64)value);
         public static Decimal ToDecimal(Int32 value) => new Decimal((Int64)value);
+        public static Decimal ToDecimal(UInt32 value) => new Decimal((UInt64)value);
         public static Decimal ToDecimal(Int64 value) => new Decimal(value);
+        public static Decimal ToDecimal(UInt64 value) => new Decimal(value);
 
         internal static Object DefaultToType(IConvertible value, Type targetType, IFormatProvider provider)
         {
