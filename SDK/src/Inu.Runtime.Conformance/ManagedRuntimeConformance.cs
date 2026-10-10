@@ -614,6 +614,18 @@ public static unsafe class ManagedRuntimeConformance
     private static Int32 BclSum(Int32 left, Int32 right) => left + right;
     private static Int32 BclConstant() => 11;
     private static Boolean BclPositive(Int32 value) => value > 0;
+
+    private static T ParseViaIParsable<T>(String text, IFormatProvider provider) where T : IParsable<T>
+        => T.Parse(text, provider);
+
+    private static Boolean TryParseViaIParsable<T>(String text, IFormatProvider provider, out T result) where T : IParsable<T>
+        => T.TryParse(text, provider, out result);
+
+    private static T ParseViaISpanParsable<T>(ReadOnlySpan<Char> text, IFormatProvider provider) where T : ISpanParsable<T>
+        => T.Parse(text, provider);
+
+    private static Boolean TryParseViaISpanParsable<T>(ReadOnlySpan<Char> text, IFormatProvider provider, out T result) where T : ISpanParsable<T>
+        => T.TryParse(text, provider, out result);
     private static Int32 BclCompare(Int32 left, Int32 right) => left.CompareTo(right);
     private static Int64 BclWiden(Int32 value) => value;
 
@@ -651,8 +663,80 @@ public static unsafe class ManagedRuntimeConformance
             && String.Equals(genericObject.ToString(), "System.Collections.Generic.List`1[System.Int32]")
             && String.Equals(arrayObject.ToString(), "System.Int32[]"), ref passed, ref failed);
 
-        // 02 System.Boolean
-        Record(String.Equals(true.ToString(), "True") && String.Equals(false.ToString(), "False"), ref passed, ref failed);
+        // 02 System.Boolean — complete .NET 10 Boolean contract
+        Boolean parsedBoolean;
+        Boolean invalidBoolean;
+        Boolean nullBooleanParseThrows = false;
+        Boolean formatBooleanThrows = false;
+        Boolean wrongBooleanCompareThrows = false;
+        Boolean charBooleanConvertThrows = false;
+        Boolean dateBooleanConvertThrows = false;
+        Boolean badTypeBooleanConvertThrows = false;
+        Boolean nullTypeBooleanConvertThrows = false;
+        try { Boolean.Parse((String)null); } catch (ArgumentNullException) { nullBooleanParseThrows = true; }
+        try { Boolean.Parse("not-a-boolean"); } catch (FormatException) { formatBooleanThrows = true; }
+        try { ((IComparable)(Boolean)true).CompareTo((Int32)1); } catch (ArgumentException) { wrongBooleanCompareThrows = true; }
+
+        IConvertible booleanTrueConvertible = (Boolean)true;
+        IConvertible booleanFalseConvertible = (Boolean)false;
+        try { booleanTrueConvertible.ToChar(null); } catch (InvalidCastException) { charBooleanConvertThrows = true; }
+        try { booleanTrueConvertible.ToDateTime(null); } catch (InvalidCastException) { dateBooleanConvertThrows = true; }
+        try { booleanTrueConvertible.ToType(typeof(Probe), null); } catch (InvalidCastException) { badTypeBooleanConvertThrows = true; }
+        try { booleanTrueConvertible.ToType(null, null); } catch (ArgumentNullException) { nullTypeBooleanConvertThrows = true; }
+
+        Char[] booleanDestinationArray = new Char[5];
+        Span<Char> booleanDestination = booleanDestinationArray;
+        Boolean booleanFormatted = ((Boolean)false).TryFormat(booleanDestination, out Int32 booleanCharsWritten);
+        Span<Char> booleanTooSmall = new Char[4];
+        Boolean booleanSmallFormat = ((Boolean)false).TryFormat(booleanTooSmall, out Int32 booleanSmallCharsWritten);
+        Char[] booleanSpanTrue = new Char[] { ' ', 'T', 'R', 'U', 'E', '\0' };
+        Char[] booleanSpanFalseArray = new Char[] { ' ', 'F', 'A', 'L', 'S', 'E', ' ' };
+        ReadOnlySpan<Char> booleanSpanFalse = new ReadOnlySpan<Char>(booleanSpanFalseArray);
+        Boolean staticBooleanParsed = ParseViaIParsable<Boolean>(" true ", null);
+        Boolean staticBooleanTryParsed = TryParseViaIParsable<Boolean>("FALSE", null, out Boolean staticBooleanTryValue);
+        Boolean staticSpanBooleanParsed = ParseViaISpanParsable<Boolean>(new ReadOnlySpan<Char>(booleanSpanTrue), null);
+        Boolean staticSpanBooleanTryParsed = TryParseViaISpanParsable<Boolean>(booleanSpanFalse, null, out Boolean staticSpanBooleanTryValue);
+
+        Record(String.Equals(System.Runtime.CompilerServices.RuntimeFeature.VirtualStaticsInInterfaces, "VirtualStaticsInInterfaces")
+            && String.Equals(Boolean.TrueString, "True") && String.Equals(Boolean.FalseString, "False")
+            && String.Equals(true.ToString(), "True") && String.Equals(false.ToString(), "False")
+            && String.Equals(((Boolean)true).ToString(null), "True") && String.Equals(((Boolean)false).ToString(null), "False")
+            && ((Boolean)true).GetHashCode() == 1 && ((Boolean)false).GetHashCode() == 0
+            && booleanFormatted && booleanCharsWritten == 5
+            && booleanDestinationArray[0] == 'F' && booleanDestinationArray[4] == 'e'
+            && !booleanSmallFormat && booleanSmallCharsWritten == 0
+            && Boolean.Parse("true") && !Boolean.Parse(" FALSE ")
+            && Boolean.Parse(new ReadOnlySpan<Char>(booleanSpanTrue))
+            && Boolean.TryParse("TrUe", out parsedBoolean) && parsedBoolean
+            && Boolean.TryParse("\u3000false\u3000", out parsedBoolean) && !parsedBoolean
+            && !Boolean.TryParse("yes", out invalidBoolean) && !invalidBoolean
+            && !Boolean.TryParse((String)null, out invalidBoolean) && !invalidBoolean
+            && nullBooleanParseThrows && formatBooleanThrows
+            && ((Boolean)false).CompareTo(true) < 0 && ((Boolean)true).CompareTo(false) > 0 && ((Boolean)true).CompareTo(true) == 0
+            && ((IComparable)(Boolean)true).CompareTo(null) > 0 && wrongBooleanCompareThrows
+            && ((Boolean)true).Equals(true) && !((Boolean)true).Equals(false)
+            && ((Object)(Boolean)true).Equals((Boolean)true) && !((Object)(Boolean)true).Equals((Boolean)false)
+            && booleanTrueConvertible.GetTypeCode() == TypeCode.Boolean
+            && booleanTrueConvertible.ToBoolean(null) && !booleanFalseConvertible.ToBoolean(null)
+            && booleanTrueConvertible.ToSByte(null) == (SByte)1 && booleanFalseConvertible.ToSByte(null) == (SByte)0
+            && booleanTrueConvertible.ToByte(null) == (Byte)1 && booleanFalseConvertible.ToByte(null) == (Byte)0
+            && booleanTrueConvertible.ToInt16(null) == (Int16)1 && booleanFalseConvertible.ToInt16(null) == (Int16)0
+            && booleanTrueConvertible.ToUInt16(null) == (UInt16)1 && booleanFalseConvertible.ToUInt16(null) == (UInt16)0
+            && booleanTrueConvertible.ToInt32(null) == 1 && booleanFalseConvertible.ToInt32(null) == 0
+            && booleanTrueConvertible.ToUInt32(null) == 1U && booleanFalseConvertible.ToUInt32(null) == 0U
+            && booleanTrueConvertible.ToInt64(null) == 1L && booleanFalseConvertible.ToInt64(null) == 0L
+            && booleanTrueConvertible.ToUInt64(null) == 1UL && booleanFalseConvertible.ToUInt64(null) == 0UL
+            && booleanTrueConvertible.ToSingle(null) == 1F && booleanFalseConvertible.ToSingle(null) == 0F
+            && booleanTrueConvertible.ToDouble(null) == 1D && booleanFalseConvertible.ToDouble(null) == 0D
+            && booleanTrueConvertible.ToDecimal(null) == Decimal.One && booleanFalseConvertible.ToDecimal(null) == Decimal.Zero
+            && String.Equals(booleanTrueConvertible.ToString(null), "True") && String.Equals(booleanFalseConvertible.ToString(null), "False")
+            && (Boolean)booleanTrueConvertible.ToType(typeof(Boolean), null)
+            && (Int32)booleanTrueConvertible.ToType(typeof(Int32), null) == 1
+            && String.Equals((String)booleanTrueConvertible.ToType(typeof(String), null), "True")
+            && (Boolean)booleanTrueConvertible.ToType(typeof(Object), null)
+            && charBooleanConvertThrows && dateBooleanConvertThrows && badTypeBooleanConvertThrows && nullTypeBooleanConvertThrows
+            && staticBooleanParsed && staticBooleanTryParsed && !staticBooleanTryValue
+            && staticSpanBooleanParsed && staticSpanBooleanTryParsed && !staticSpanBooleanTryValue, ref passed, ref failed);
 
         // 03 System.Char
         Record(Char.IsWhiteSpace(' ') && Char.IsWhiteSpace('\n') && !Char.IsWhiteSpace('X')

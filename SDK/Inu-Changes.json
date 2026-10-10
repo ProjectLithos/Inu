@@ -1,15 +1,12 @@
 {
-  "baseVersion": "0.0.123",
-  "version": "0.0.124",
+  "baseVersion": "0.0.125",
+  "version": "0.0.126",
   "changedFiles": [
     "TODO.md",
     "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
-    "Inu/SDK/scripts/StageCache.ps1",
-    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-    "Inu/SDK/docs/BCL-Conformance-Target.md",
-    "Kath/docs/Release-0.0.124.md",
-    "CHANGED-0.0.124.txt",
+    "Kath/docs/Release-0.0.126.md",
+    "CHANGED-0.0.126.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -25,5 +22,5 @@
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "VERSION"
   ],
-  "summary": "Fix the NativeAOT/RyuJIT checked floating-point conversion helper contract used by System.Convert, expand conversion conformance coverage, and stop release-version-only changes from rebuilding unchanged cached host/kernel/userland stages."
+  "summary": "Fix the full .NET 10 Boolean static-interface build contract by advertising RuntimeFeature.VirtualStaticsInInterfaces, retaining IParsable/ISpanParsable, and guarding the contract in the in-kernel conformance gate."
 }

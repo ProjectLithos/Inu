@@ -90,8 +90,92 @@ internal static class Program
             && array.ToString() == "System.Int32[]";
     }
 
+    private static T ParseViaIParsable<T>(string text, IFormatProvider? provider) where T : IParsable<T>
+        => T.Parse(text, provider);
+
+    private static bool TryParseViaIParsable<T>(string? text, IFormatProvider? provider, out T result) where T : IParsable<T>
+        => T.TryParse(text, provider, out result);
+
+    private static T ParseViaISpanParsable<T>(ReadOnlySpan<char> text, IFormatProvider? provider) where T : ISpanParsable<T>
+        => T.Parse(text, provider);
+
+    private static bool TryParseViaISpanParsable<T>(ReadOnlySpan<char> text, IFormatProvider? provider, out T result) where T : ISpanParsable<T>
+        => T.TryParse(text, provider, out result);
+
     private static bool TestBoolean()
-        => true.ToString() == "True" && false.ToString() == "False";
+    {
+        bool parsed;
+        bool invalid;
+        bool nullParseThrows = false;
+        bool formatThrows = false;
+        bool wrongCompareThrows = false;
+        bool charConvertThrows = false;
+        bool dateConvertThrows = false;
+        bool badTypeConvertThrows = false;
+        bool nullTypeConvertThrows = false;
+        try { _ = bool.Parse((string)null!); } catch (ArgumentNullException) { nullParseThrows = true; }
+        try { _ = bool.Parse("not-a-boolean"); } catch (FormatException) { formatThrows = true; }
+        try { _ = ((IComparable)true).CompareTo(1); } catch (ArgumentException) { wrongCompareThrows = true; }
+
+        IConvertible convertibleTrue = true;
+        IConvertible convertibleFalse = false;
+        try { _ = convertibleTrue.ToChar(null); } catch (InvalidCastException) { charConvertThrows = true; }
+        try { _ = convertibleTrue.ToDateTime(null); } catch (InvalidCastException) { dateConvertThrows = true; }
+        try { _ = convertibleTrue.ToType(typeof(Program), null); } catch (InvalidCastException) { badTypeConvertThrows = true; }
+        try { _ = convertibleTrue.ToType(null!, null); } catch (ArgumentNullException) { nullTypeConvertThrows = true; }
+
+        char[] destinationArray = new char[5];
+        Span<char> destination = destinationArray;
+        bool formatted = false.TryFormat(destination, out int charsWritten);
+        Span<char> tooSmall = new char[4];
+        bool smallFormat = false.TryFormat(tooSmall, out int smallCharsWritten);
+        char[] spanTrue = new[] { ' ', 'T', 'R', 'U', 'E', '\0' };
+        ReadOnlySpan<char> spanFalse = " FALSE ".AsSpan();
+
+        bool staticParsed = ParseViaIParsable<bool>(" true ", null);
+        bool staticTryParsed = TryParseViaIParsable<bool>("FALSE", null, out bool staticTryValue);
+        bool spanStaticParsed = ParseViaISpanParsable<bool>(new ReadOnlySpan<char>(spanTrue), null);
+        bool spanStaticTryParsed = TryParseViaISpanParsable<bool>(spanFalse, null, out bool spanStaticTryValue);
+
+        return bool.TrueString == "True" && bool.FalseString == "False"
+            && true.ToString() == "True" && false.ToString() == "False"
+            && true.ToString(null) == "True" && false.ToString(null) == "False"
+            && formatted && charsWritten == 5 && new string(destinationArray) == "False"
+            && !smallFormat && smallCharsWritten == 0
+            && bool.Parse("true") && !bool.Parse(" FALSE ")
+            && bool.Parse(new ReadOnlySpan<char>(spanTrue))
+            && bool.TryParse("TrUe", out parsed) && parsed
+            && bool.TryParse("\u3000false\u3000", out parsed) && !parsed
+            && !bool.TryParse("yes", out invalid) && !invalid
+            && !bool.TryParse((string?)null, out invalid) && !invalid
+            && nullParseThrows && formatThrows
+            && false.CompareTo(true) < 0 && true.CompareTo(false) > 0 && true.CompareTo(true) == 0
+            && ((IComparable)true).CompareTo(null) > 0 && wrongCompareThrows
+            && true.Equals(true) && !true.Equals(false)
+            && ((object)true).Equals(true) && !((object)true).Equals(false)
+            && true.GetHashCode() == 1 && false.GetHashCode() == 0
+            && convertibleTrue.GetTypeCode() == TypeCode.Boolean
+            && convertibleTrue.ToBoolean(null) && !convertibleFalse.ToBoolean(null)
+            && convertibleTrue.ToSByte(null) == 1 && convertibleFalse.ToSByte(null) == 0
+            && convertibleTrue.ToByte(null) == 1 && convertibleFalse.ToByte(null) == 0
+            && convertibleTrue.ToInt16(null) == 1 && convertibleFalse.ToInt16(null) == 0
+            && convertibleTrue.ToUInt16(null) == 1 && convertibleFalse.ToUInt16(null) == 0
+            && convertibleTrue.ToInt32(null) == 1 && convertibleFalse.ToInt32(null) == 0
+            && convertibleTrue.ToUInt32(null) == 1U && convertibleFalse.ToUInt32(null) == 0U
+            && convertibleTrue.ToInt64(null) == 1L && convertibleFalse.ToInt64(null) == 0L
+            && convertibleTrue.ToUInt64(null) == 1UL && convertibleFalse.ToUInt64(null) == 0UL
+            && convertibleTrue.ToSingle(null) == 1F && convertibleFalse.ToSingle(null) == 0F
+            && convertibleTrue.ToDouble(null) == 1D && convertibleFalse.ToDouble(null) == 0D
+            && convertibleTrue.ToDecimal(null) == 1M && convertibleFalse.ToDecimal(null) == 0M
+            && convertibleTrue.ToString(null) == "True" && convertibleFalse.ToString(null) == "False"
+            && (bool)convertibleTrue.ToType(typeof(bool), null)
+            && (int)convertibleTrue.ToType(typeof(int), null) == 1
+            && (string)convertibleTrue.ToType(typeof(string), null) == "True"
+            && (bool)convertibleTrue.ToType(typeof(object), null)
+            && charConvertThrows && dateConvertThrows && badTypeConvertThrows && nullTypeConvertThrows
+            && staticParsed && staticTryParsed && !staticTryValue
+            && spanStaticParsed && spanStaticTryParsed && !spanStaticTryValue;
+    }
 
     private static bool TestChar()
         => char.IsWhiteSpace(' ') && char.IsWhiteSpace('\n') && !char.IsWhiteSpace('X')

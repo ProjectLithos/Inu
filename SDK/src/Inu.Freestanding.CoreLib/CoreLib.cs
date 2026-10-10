@@ -247,21 +247,204 @@ namespace System
     public interface IFormattable { String ToString(String format, IFormatProvider formatProvider); }
     public interface IFormatProvider { Object GetFormat(Type formatType); }
 
+    /// <summary>Full .NET value-conversion contract used by Boolean and later primitive completion work.</summary>
+    public interface IConvertible
+    {
+        TypeCode GetTypeCode();
+        Boolean ToBoolean(IFormatProvider provider);
+        Char ToChar(IFormatProvider provider);
+        SByte ToSByte(IFormatProvider provider);
+        Byte ToByte(IFormatProvider provider);
+        Int16 ToInt16(IFormatProvider provider);
+        UInt16 ToUInt16(IFormatProvider provider);
+        Int32 ToInt32(IFormatProvider provider);
+        UInt32 ToUInt32(IFormatProvider provider);
+        Int64 ToInt64(IFormatProvider provider);
+        UInt64 ToUInt64(IFormatProvider provider);
+        Single ToSingle(IFormatProvider provider);
+        Double ToDouble(IFormatProvider provider);
+        Decimal ToDecimal(IFormatProvider provider);
+        DateTime ToDateTime(IFormatProvider provider);
+        String ToString(IFormatProvider provider);
+        Object ToType(Type conversionType, IFormatProvider provider);
+    }
+
+    /// <summary>.NET 10 static parsing contract.</summary>
+    public interface IParsable<TSelf> where TSelf : IParsable<TSelf>
+    {
+        static abstract TSelf Parse(String s, IFormatProvider provider);
+        static abstract Boolean TryParse(String s, IFormatProvider provider, out TSelf result);
+    }
+
+    /// <summary>.NET 10 span parsing contract.</summary>
+    public interface ISpanParsable<TSelf> : IParsable<TSelf> where TSelf : ISpanParsable<TSelf>
+    {
+        static abstract TSelf Parse(ReadOnlySpan<Char> s, IFormatProvider provider);
+        static abstract Boolean TryParse(ReadOnlySpan<Char> s, IFormatProvider provider, out TSelf result);
+    }
+
+    /// <summary>Canonical .NET TypeCode values.</summary>
+    public enum TypeCode
+    {
+        Empty = 0, Object = 1, DBNull = 2, Boolean = 3, Char = 4, SByte = 5, Byte = 6,
+        Int16 = 7, UInt16 = 8, Int32 = 9, UInt32 = 10, Int64 = 11, UInt64 = 12,
+        Single = 13, Double = 14, Decimal = 15, DateTime = 16, String = 18
+    }
+
+    // Boolean's IConvertible contract requires Decimal and DateTime type identities.
+    // Their complete public surfaces remain separate later TODO work; these canonical
+    // layouts provide only the ABI/value support needed to complete Boolean now.
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly struct Decimal : IEquatable<Decimal>
+    {
+        private readonly Int32 _flags;
+        private readonly UInt32 _hi32;
+        private readonly UInt64 _lo64;
+
+        public Decimal(Int32 value)
+        {
+            _flags = value < 0 ? unchecked((Int32)0x80000000) : 0;
+            _hi32 = 0;
+            _lo64 = value < 0 ? (UInt64)(-(Int64)value) : (UInt64)value;
+        }
+
+        public static readonly Decimal Zero = new Decimal(0);
+        public static readonly Decimal One = new Decimal(1);
+        public Boolean Equals(Decimal other) => _flags == other._flags && _hi32 == other._hi32 && _lo64 == other._lo64;
+        public override Boolean Equals(Object obj) => obj is Decimal && Equals((Decimal)obj);
+        public override Int32 GetHashCode() => unchecked(_flags ^ (Int32)_hi32 ^ (Int32)_lo64 ^ (Int32)(_lo64 >> 32));
+        public static Boolean operator ==(Decimal left, Decimal right) => left.Equals(right);
+        public static Boolean operator !=(Decimal left, Decimal right) => !left.Equals(right);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly struct DateTime
+    {
+        internal readonly UInt64 _dateData;
+    }
+
     // CONTRACT with .NET 10 NativeAOT Runtime.Base Primitives.cs. These are not
     // decorative fields: ILC/runtime layout, boxing and generic value-type layout
     // are permitted to rely on each primitive's canonical one-field data contract.
 #pragma warning disable CS0169, CS0649 // Primitive backing fields are consumed by compiler/runtime ABI.
-    public struct Boolean : IComparable, IComparable<Boolean>, IEquatable<Boolean>
+    public struct Boolean : IComparable, IConvertible, IComparable<Boolean>, IEquatable<Boolean>, ISpanParsable<Boolean>
     {
         private bool _value;
 
-        /// <summary>Returns the normal .NET Boolean text without allocating a new string.</summary>
-        public override String ToString() => this ? "True" : "False";
+        private const String TrueLiteral = "True";
+        private const String FalseLiteral = "False";
+
+        public static readonly String TrueString = TrueLiteral;
+        public static readonly String FalseString = FalseLiteral;
+
+        public override String ToString() => this ? TrueLiteral : FalseLiteral;
+        public String ToString(IFormatProvider provider) => ToString();
+
+        public Boolean TryFormat(Span<Char> destination, out Int32 charsWritten)
+        {
+            String text = this ? TrueLiteral : FalseLiteral;
+            if (destination.Length < text.Length) { charsWritten = 0; return false; }
+            for (Int32 index = 0; index < text.Length; index++) destination[index] = text[index];
+            charsWritten = text.Length;
+            return true;
+        }
+
         public Boolean Equals(Boolean other) => _value == other._value;
         public override Boolean Equals(Object obj) => obj is Boolean && Equals((Boolean)obj);
         public override Int32 GetHashCode() => this ? 1 : 0;
         public Int32 CompareTo(Boolean other) => this == other ? 0 : (this ? 1 : -1);
         public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Boolean)) throw new ArgumentException(); return CompareTo((Boolean)obj); }
+
+        public TypeCode GetTypeCode() => TypeCode.Boolean;
+
+        Boolean IConvertible.ToBoolean(IFormatProvider provider) => this;
+        Char IConvertible.ToChar(IFormatProvider provider) => throw new InvalidCastException();
+        SByte IConvertible.ToSByte(IFormatProvider provider) => Convert.ToSByte(this);
+        Byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(this);
+        Int16 IConvertible.ToInt16(IFormatProvider provider) => Convert.ToInt16(this);
+        UInt16 IConvertible.ToUInt16(IFormatProvider provider) => Convert.ToUInt16(this);
+        Int32 IConvertible.ToInt32(IFormatProvider provider) => Convert.ToInt32(this);
+        UInt32 IConvertible.ToUInt32(IFormatProvider provider) => Convert.ToUInt32(this);
+        Int64 IConvertible.ToInt64(IFormatProvider provider) => Convert.ToInt64(this);
+        UInt64 IConvertible.ToUInt64(IFormatProvider provider) => Convert.ToUInt64(this);
+        Single IConvertible.ToSingle(IFormatProvider provider) => Convert.ToSingle(this);
+        Double IConvertible.ToDouble(IFormatProvider provider) => Convert.ToDouble(this);
+        Decimal IConvertible.ToDecimal(IFormatProvider provider) => Convert.ToDecimal(this);
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException();
+        Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
+
+        public static Boolean Parse(String value)
+        {
+            if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException();
+            Boolean result;
+            if (!TryParse(value, out result)) throw new FormatException();
+            return result;
+        }
+
+        public static Boolean Parse(ReadOnlySpan<Char> value)
+        {
+            Boolean result;
+            if (!TryParse(value, out result)) throw new FormatException();
+            return result;
+        }
+
+        public static Boolean TryParse(String value, out Boolean result)
+        {
+            if (Object.ReferenceEquals(value, null)) { result = false; return false; }
+            Int32 start = 0;
+            Int32 end = value.Length - 1;
+            while (start <= end && IsParsePadding(value[start])) start++;
+            while (end >= start && IsParsePadding(value[end])) end--;
+            Int32 length = end - start + 1;
+            if (MatchesIgnoreCase(value, start, length, TrueLiteral)) { result = true; return true; }
+            if (MatchesIgnoreCase(value, start, length, FalseLiteral)) { result = false; return true; }
+            result = false;
+            return false;
+        }
+
+        public static Boolean TryParse(ReadOnlySpan<Char> value, out Boolean result)
+        {
+            Int32 start = 0;
+            Int32 end = value.Length - 1;
+            while (start <= end && IsParsePadding(value[start])) start++;
+            while (end >= start && IsParsePadding(value[end])) end--;
+            Int32 length = end - start + 1;
+            if (MatchesIgnoreCase(value, start, length, TrueLiteral)) { result = true; return true; }
+            if (MatchesIgnoreCase(value, start, length, FalseLiteral)) { result = false; return true; }
+            result = false;
+            return false;
+        }
+
+        static Boolean IParsable<Boolean>.Parse(String s, IFormatProvider provider) => Parse(s);
+        static Boolean IParsable<Boolean>.TryParse(String s, IFormatProvider provider, out Boolean result) => TryParse(s, out result);
+        static Boolean ISpanParsable<Boolean>.Parse(ReadOnlySpan<Char> s, IFormatProvider provider) => Parse(s);
+        static Boolean ISpanParsable<Boolean>.TryParse(ReadOnlySpan<Char> s, IFormatProvider provider, out Boolean result) => TryParse(s, out result);
+
+        private static Boolean MatchesIgnoreCase(String value, Int32 start, Int32 length, String expected)
+        {
+            if (length != expected.Length) return false;
+            for (Int32 index = 0; index < length; index++)
+                if (FoldAscii(value[start + index]) != FoldAscii(expected[index])) return false;
+            return true;
+        }
+
+        private static Boolean MatchesIgnoreCase(ReadOnlySpan<Char> value, Int32 start, Int32 length, String expected)
+        {
+            if (length != expected.Length) return false;
+            for (Int32 index = 0; index < length; index++)
+                if (FoldAscii(value[start + index]) != FoldAscii(expected[index])) return false;
+            return true;
+        }
+
+        private static Char FoldAscii(Char value)
+            => value >= 'A' && value <= 'Z' ? (Char)(value + ('a' - 'A')) : value;
+
+        private static Boolean IsParsePadding(Char value)
+            => value == '\0' || (value >= '\t' && value <= '\r') || value == ' '
+                || value == (Char)0x0085 || value == (Char)0x00A0 || value == (Char)0x1680
+                || (value >= (Char)0x2000 && value <= (Char)0x200A)
+                || value == (Char)0x2028 || value == (Char)0x2029 || value == (Char)0x202F
+                || value == (Char)0x205F || value == (Char)0x3000;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -753,6 +936,31 @@ namespace System
         public static Double ToDouble(UInt64 value) => (Double)value;
         public static Double ToDouble(Single value) => (Double)value;
         public static Double ToDouble(Double value) => value;
+
+        public static Decimal ToDecimal(Boolean value) => value ? Decimal.One : Decimal.Zero;
+
+        internal static Object DefaultToType(IConvertible value, Type targetType, IFormatProvider provider)
+        {
+            if (Object.ReferenceEquals(targetType, null)) throw new ArgumentNullException();
+            if (Object.ReferenceEquals(value.GetType(), targetType)) return value;
+            if (targetType == typeof(Boolean)) return value.ToBoolean(provider);
+            if (targetType == typeof(Char)) return value.ToChar(provider);
+            if (targetType == typeof(SByte)) return value.ToSByte(provider);
+            if (targetType == typeof(Byte)) return value.ToByte(provider);
+            if (targetType == typeof(Int16)) return value.ToInt16(provider);
+            if (targetType == typeof(UInt16)) return value.ToUInt16(provider);
+            if (targetType == typeof(Int32)) return value.ToInt32(provider);
+            if (targetType == typeof(UInt32)) return value.ToUInt32(provider);
+            if (targetType == typeof(Int64)) return value.ToInt64(provider);
+            if (targetType == typeof(UInt64)) return value.ToUInt64(provider);
+            if (targetType == typeof(Single)) return value.ToSingle(provider);
+            if (targetType == typeof(Double)) return value.ToDouble(provider);
+            if (targetType == typeof(Decimal)) return value.ToDecimal(provider);
+            if (targetType == typeof(DateTime)) return value.ToDateTime(provider);
+            if (targetType == typeof(String)) return value.ToString(provider);
+            if (targetType == typeof(Object)) return value;
+            throw new InvalidCastException();
+        }
 
         public static String ToString(SByte value) => value.ToString();
         public static String ToString(Byte value) => value.ToString();
@@ -1896,6 +2104,11 @@ namespace System
             // exact member before it will emit the managed-byref field used by
             // System.ByReference / NativeAOT DynamicInvokeMethodThunk.
             public const String ByRefFields = nameof(ByRefFields);
+            // CONTRACT with Roslyn/.NET 10 static abstract/virtual interface lowering.
+            // The compiler probes this exact member before it permits declarations such as
+            // IParsable<TSelf> and ISpanParsable<TSelf>. Inu already implements the NativeAOT
+            // static-interface dispatch-map ABI; this marker advertises that capability.
+            public const String VirtualStaticsInInterfaces = nameof(VirtualStaticsInInterfaces);
             public const String UnmanagedSignatureCallingConvention = nameof(UnmanagedSignatureCallingConvention);
         }
         public static class RuntimeHelpers

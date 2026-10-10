@@ -14,7 +14,7 @@ The target is intentionally type-level rather than a claim that every API on a l
 | # | BCL item | Contract exercised by both gates |
 |---:|---|---|
 | 1 | `System.Object` | construction, identity, `ReferenceEquals`, default `Equals`, stable identity `GetHashCode`, runtime type identity, and default `ToString` for base, derived, array and closed-generic runtime types |
-| 2 | `System.Boolean` | canonical `ToString` values |
+| 2 | `System.Boolean` | full .NET 10 Boolean contract: constants, hashing/text, formatting, parsing, typed/boxed comparison/equality, `IConvertible`, `IParsable<bool>`, `ISpanParsable<bool>`, conversion/exception semantics and static-interface dispatch |
 | 3 | `System.Char` | min/max values and supported whitespace classification |
 | 4 | `System.Int32` | value equality, hash code, min/max constants |
 | 5 | `System.IntPtr` | pointer-size contract, construction, add/subtract, integer round-trip |
@@ -44,7 +44,7 @@ The target is intentionally type-level rather than a claim that every API on a l
 
 ## Primitive/runtime foundation status
 
-For Core v1, the primitive/runtime foundation is considered complete when the two executable gates pass all items 21-28. This deliberately means **the named Inu subset**, not every culture-sensitive or reflection-heavy desktop .NET overload. The completed foundation provides:
+For TODO-listed compatibility targets, completion means the **full applicable .NET 10 contract for that listed item**, not a reduced Inu subset. The summary rows in this document are progress groupings only; they do not narrow the completion definition in `TODO.md`. A listed target remains incomplete while any applicable .NET 10 public member, explicit interface member, runtime/compiler-required member, documented behaviour, exception rule or boundary case is missing. The foundation work provides:
 
 - deterministic invariant primitive formatting required by kernel/runtime diagnostics;
 - integer and finite floating-point arithmetic/conversion paths used by Inu components;
@@ -53,7 +53,7 @@ For Core v1, the primitive/runtime foundation is considered complete when the tw
 - temporary byref windows through `Span<T>`/`ReadOnlySpan<T>` and storable array-backed windows through `Memory<T>`/`ReadOnlyMemory<T>`;
 - paired boundary behaviour for empty/null windows, slicing, copy sizing and overlapping span copies.
 
-Culture-aware numeric formatting/parsing, arbitrary custom format strings, decimal arithmetic, SIMD/vector numerics and the full desktop `System.Math` surface are outside `Inu.BCL.Core.v1` unless deliberately added to a later named target.
+Where one of these areas is explicitly listed in `TODO.md` (for example `System.Math`, primitive formatting/parsing, or `System.Convert`), the full applicable .NET 10 surface for that listed target is required before its checkbox may be completed. Areas not listed remain outside Profile 1 until they are deliberately added.
 
 ## Change rule
 
