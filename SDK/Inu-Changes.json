@@ -1,11 +1,11 @@
 {
-  "baseVersion": "0.0.126",
-  "version": "0.0.127",
+  "baseVersion": "0.0.127",
+  "version": "0.0.128",
   "changedFiles": [
     "TODO.md",
-    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Inu.DotNetConformance.Tests.csproj",
-    "Kath/docs/Release-0.0.127.md",
-    "CHANGED-0.0.127.txt",
+    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
+    "Kath/docs/Release-0.0.128.md",
+    "CHANGED-0.0.128.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -21,5 +21,5 @@
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "VERSION"
   ],
-  "summary": "Fix host-side .NET reference conformance by enabling nullable annotations so full .NET 10 Boolean nullable signatures compile without weakening the contract."
+  "summary": "Fix nullable flow analysis in the host .NET reference conformance tests while preserving the full .NET 10 Boolean contracts."
 }

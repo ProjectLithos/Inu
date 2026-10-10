@@ -93,13 +93,13 @@ internal static class Program
     private static T ParseViaIParsable<T>(string text, IFormatProvider? provider) where T : IParsable<T>
         => T.Parse(text, provider);
 
-    private static bool TryParseViaIParsable<T>(string? text, IFormatProvider? provider, out T result) where T : IParsable<T>
+    private static bool TryParseViaIParsable<T>(string? text, IFormatProvider? provider, out T? result) where T : IParsable<T>
         => T.TryParse(text, provider, out result);
 
     private static T ParseViaISpanParsable<T>(ReadOnlySpan<char> text, IFormatProvider? provider) where T : ISpanParsable<T>
         => T.Parse(text, provider);
 
-    private static bool TryParseViaISpanParsable<T>(ReadOnlySpan<char> text, IFormatProvider? provider, out T result) where T : ISpanParsable<T>
+    private static bool TryParseViaISpanParsable<T>(ReadOnlySpan<char> text, IFormatProvider? provider, out T? result) where T : ISpanParsable<T>
         => T.TryParse(text, provider, out result);
 
     private static bool TestBoolean()
@@ -404,7 +404,8 @@ internal static class Program
         int[] overlapping = { 1, 2, 3, 4, 5 };
         overlapping.AsSpan(0, 4).CopyTo(overlapping.AsSpan(1, 4));
         Span<int> tooSmall = new int[2];
-        Span<int> nullSpan = (int[])null;
+        int[]? nullArrayForSpan = null;
+        Span<int> nullSpan = nullArrayForSpan;
         return span.Length == 5 && span[0] == 1 && span[1] == 7 && span[3] == 7
             && readOnly.Length == 5 && copy.Length == 3 && copy[0] == 7 && copy[2] == 7
             && overlapping[0] == 1 && overlapping[1] == 1 && overlapping[4] == 4
@@ -420,7 +421,8 @@ internal static class Program
         middle.Span[0] = 25;
         ReadOnlyMemory<int> readOnly = memory;
         int[] copy = readOnly.Slice(1, 2).ToArray();
-        Memory<int> nullMemory = (int[])null;
+        int[]? nullArrayForMemory = null;
+        Memory<int> nullMemory = nullArrayForMemory;
         return memory.Length == 4 && values[1] == 25 && middle.Span[1] == 30
             && readOnly.Span[1] == 25 && copy.Length == 2 && copy[0] == 25 && copy[1] == 30
             && Memory<int>.Empty.IsEmpty && ReadOnlyMemory<int>.Empty.IsEmpty && nullMemory.IsEmpty;
