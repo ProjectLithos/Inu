@@ -1,14 +1,15 @@
 {
-  "baseVersion": "0.1.2",
-  "version": "0.1.3",
+  "baseVersion": "0.1.3",
+  "version": "0.1.4",
   "changedFiles": [
-    "CHANGED-0.1.3.txt",
+    "CHANGED-0.1.4.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
+    "Inu/SDK/docs/BCL-Conformance-Target.md",
     "Inu/SDK/docs/Inu.Documentation.json",
-    "Inu/SDK/docs/Release-0.1.3.md",
+    "Inu/SDK/docs/Release-0.1.4.md",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
     "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
     "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
@@ -18,11 +19,11 @@
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.1.3.md",
+    "Kath/docs/Release-0.1.4.md",
     "Kath/packages/kath/package.json",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Complete IntPtr and UIntPtr across native-sized arithmetic, comparison, conversion, formatting, and conformance."
+  "summary": "Complete Single/Double floating-point support across IEEE special values, parsing, formatting, conversions, comparison/equality, and paired conformance."
 }

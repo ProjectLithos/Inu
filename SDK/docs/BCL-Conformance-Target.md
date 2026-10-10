@@ -15,32 +15,41 @@ The target is intentionally type-level rather than a claim that every API on a l
 |---:|---|---|
 | 1 | `System.Object` | construction, identity, `ReferenceEquals`, default `Equals`, stable identity `GetHashCode`, runtime type identity, and default `ToString` for base, derived, array and closed-generic runtime types |
 | 2 | `System.Boolean` | full .NET 10 Boolean contract: constants, hashing/text, formatting, parsing, typed/boxed comparison/equality, `IConvertible`, `IParsable<bool>`, `ISpanParsable<bool>`, conversion/exception semantics and static-interface dispatch |
-| 3 | `System.Char` | comparison/equality/hash semantics; ASCII classification (`IsAscii`, letter/digit/hex variants, `IsBetween`), control and Unicode-whitespace classification; `Parse`/`TryParse` + `IParsable<char>`/`ISpanParsable<char>`; `IConvertible`/`Convert` character conversions and exception semantics; `ToString`/`IFormattable`/`ISpanFormattable` formatting |
-| 4 | `System.Int32` | value equality, hash code, min/max constants |
-| 5 | `System.IntPtr` | pointer-size contract, construction, add/subtract, integer round-trip |
-| 6 | `System.UIntPtr` | pointer-size contract, construction, add/subtract, integer round-trip |
-| 7 | `System.Array` | SZ-array length/long length, element access, `Array.Empty<T>` |
-| 8 | `System.String` | empty, length/indexing, equality, ordinal comparison, search, prefix/suffix, substring, concat, null/whitespace helpers |
-| 9 | `System.Nullable<T>` | present/empty state, `Value`, `GetValueOrDefault` |
-| 10 | `System.Type` | value/primitive/array identity, element/base type, assignability and subclass checks |
-| 11 | `System.Collections.Generic.KeyValuePair<TKey,TValue>` | construction and key/value access |
-| 12 | `System.Collections.Generic.EqualityComparer<T>` | default integer/string equality and stable equal-value hashing |
-| 13 | `System.Collections.Generic.List<T>` | add/insert/index/search/copy/remove/count |
-| 14 | `System.Collections.Generic.Dictionary<TKey,TValue>` | add/indexer/count/lookup/`TryAdd`/remove |
-| 15 | `System.Collections.Generic.Queue<T>` | enqueue/peek/dequeue/count and FIFO ordering |
-| 16 | `System.Collections.Generic.Stack<T>` | push/peek/pop/count and LIFO ordering |
-| 17 | `System.Text.StringBuilder` | append, line append, index/length, clear, capacity, materialisation |
-| 18 | `System.Text.Encoding` | ASCII/UTF-8 factories and byte-count contract |
-| 19 | `System.Text.ASCIIEncoding` | string-to-byte and byte-to-string round-trip |
-| 20 | `System.Text.UTF8Encoding` | multi-byte UTF-8 encode/decode round-trip |
-| 21 | primitive numeric formatting / `System.IFormattable` | signed/unsigned `G`, precision `D`, hexadecimal `X`, and bounded invariant floating `G` formatting |
-| 22 | `System.Math` | integer/floating `Abs`, `Min`, `Max`, `Sign`, `Clamp`, plus `Floor`, `Ceiling`, `Truncate`, banker's `Round`, and `Sqrt` |
-| 23 | `System.Convert` | Boolean, all integer widths, integer/floating conversions, banker's rounding on floating-to-integer conversion, and primitive invariant string conversion |
-| 24 | `System.IComparable` / `System.IComparable<T>` / `System.IEquatable<T>` | boxed and strongly typed ordering/equality across Boolean, Char, signed/unsigned integer and floating primitive families |
-| 25 | delegate family | managed delegate construction/invocation for `Action`/`Func` through four arguments plus `Predicate<T>`, `Comparison<T>`, and `Converter<TInput,TOutput>` |
-| 26 | `System.Span<T>` / `System.ReadOnlySpan<T>` | null/empty semantics, array windows, indexing, mutation, slicing, fill/clear, overlap-safe copy/try-copy, read-only view, and `ToArray` |
-| 27 | `System.Memory<T>` / `System.ReadOnlyMemory<T>` | storable array-backed windows, slicing, `Span`, empty/null semantics, mutation through `Memory<T>.Span`, and `ToArray` |
-| 28 | `System.Collections.Generic.Comparer<T>` + equality consistency | default generic ordering and equality across multiple primitive families |
+| 3 | `System.Char` | comparison/equality/hash semantics; selected classification; parsing; conversion; and span/provider formatting |
+| 4 | `System.SByte` | min/max constants, string/span parsing, formatting, checked/unchecked conversion, comparison/equality and `IConvertible` |
+| 5 | `System.Int16` | min/max constants, string/span parsing, formatting, checked/unchecked conversion, comparison/equality and `IConvertible` |
+| 6 | `System.Int32` | min/max constants, string/span parsing, formatting, checked/unchecked conversion, comparison/equality and `IConvertible` |
+| 7 | `System.Int64` | min/max constants, string/span parsing, formatting, checked/unchecked conversion, comparison/equality and `IConvertible` |
+| 8 | `System.Byte` | min/max constants, string/span parsing, formatting, checked/unchecked conversion, comparison/equality and `IConvertible` |
+| 9 | `System.UInt16` | min/max constants, string/span parsing, formatting, checked/unchecked conversion, comparison/equality and `IConvertible` |
+| 10 | `System.UInt32` | min/max constants, string/span parsing, formatting, checked/unchecked conversion, comparison/equality and `IConvertible` |
+| 11 | `System.UInt64` | min/max constants, string/span parsing, formatting, checked/unchecked conversion, comparison/equality and `IConvertible` |
+| 12 | `System.Single` | IEEE special values, signed zero detection, comparison/equality, string/span parsing, `G`/`F`/`E` formatting, span formatting and primitive conversions |
+| 13 | `System.Double` | IEEE special values, signed zero detection, comparison/equality, string/span parsing, `G`/`F`/`E` formatting, span formatting and primitive conversions |
+| 14 | `System.IntPtr` | pointer-size contract, min/max/zero, arithmetic, comparison/equality, conversion and invariant formatting |
+| 15 | `System.UIntPtr` | pointer-size contract, min/max/zero, arithmetic, comparison/equality, conversion and invariant formatting |
+| 16 | `System.Array` | SZ-array length/long length, element access, `Array.Empty<T>` |
+| 17 | `System.String` | empty, length/indexing, equality, ordinal comparison, search, prefix/suffix, substring, concat, null/whitespace helpers |
+| 18 | `System.Nullable<T>` | present/empty state, `Value`, `GetValueOrDefault` |
+| 19 | `System.Type` | value/primitive/array identity, element/base type, assignability and subclass checks |
+| 20 | `System.Collections.Generic.KeyValuePair<TKey,TValue>` | construction and key/value access |
+| 21 | `System.Collections.Generic.EqualityComparer<T>` | default integer/string equality and stable equal-value hashing |
+| 22 | `System.Collections.Generic.List<T>` | add/insert/index/search/copy/remove/count |
+| 23 | `System.Collections.Generic.Dictionary<TKey,TValue>` | add/indexer/count/lookup/`TryAdd`/remove |
+| 24 | `System.Collections.Generic.Queue<T>` | enqueue/peek/dequeue/count and FIFO ordering |
+| 25 | `System.Collections.Generic.Stack<T>` | push/peek/pop/count and LIFO ordering |
+| 26 | `System.Text.StringBuilder` | append, line append, index/length, clear, capacity, materialisation |
+| 27 | `System.Text.Encoding` | ASCII/UTF-8 factories and byte-count contract |
+| 28 | `System.Text.ASCIIEncoding` | string-to-byte and byte-to-string round-trip |
+| 29 | `System.Text.UTF8Encoding` | multi-byte UTF-8 encode/decode round-trip |
+| 30 | `primitive numeric formatting / System.IFormattable` | signed/unsigned `G`/`D`/`X` plus invariant floating `G`/`F`/`E` formatting |
+| 31 | `System.Math` | integer/floating `Abs`, `Min`, `Max`, `Sign`, `Clamp`, plus `Floor`, `Ceiling`, `Truncate`, banker's `Round`, and `Sqrt` |
+| 32 | `System.Convert` | Boolean, integer and floating primitive conversions, rounding on floating-to-integer conversion, and primitive invariant string conversion |
+| 33 | `System.IComparable / IComparable<T> / IEquatable<T>` | boxed and strongly typed ordering/equality across covered primitive families |
+| 34 | `delegate family` | managed delegate construction/invocation for `Action`/`Func` through four arguments plus `Predicate<T>`, `Comparison<T>`, and `Converter<TInput,TOutput>` |
+| 35 | `System.Span<T> / System.ReadOnlySpan<T>` | null/empty semantics, array windows, indexing, mutation, slicing, fill/clear, overlap-safe copy/try-copy, read-only view, and `ToArray` |
+| 36 | `System.Memory<T> / System.ReadOnlyMemory<T>` | storable array-backed windows, slicing, `Span`, empty/null semantics, mutation through `Memory<T>.Span`, and `ToArray` |
+| 37 | `System.Collections.Generic.Comparer<T> + equality consistency` | default generic ordering and equality across multiple primitive families |
 
 ## Primitive/runtime foundation status
 
@@ -57,7 +66,7 @@ Where one of these areas is explicitly listed in `TODO.md` (for example `System.
 
 ## Change rule
 
-The target is fixed by name and count. `ManagedRuntimeConformance.BclTargetName` is `Inu.BCL.Core.v1` and `BclTargetItemCount` is `28`. The reference executable independently carries the same name and count and fails if it does not execute exactly 28 target items.
+The target is fixed by name and count. `ManagedRuntimeConformance.BclTargetName` is `Inu.BCL.Core.v1` and `BclTargetItemCount` is `37`. The reference executable independently carries the same name and count and fails if it does not execute exactly 37 target items.
 
 When adding a new item:
 

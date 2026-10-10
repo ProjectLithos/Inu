@@ -1246,38 +1246,183 @@ namespace System
         Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
     [StructLayout(LayoutKind.Sequential)]
-    public struct Single : IComparable, IComparable<Single>, IEquatable<Single>, IFormattable
+    public struct Single : IComparable, IConvertible, IComparable<Single>, IEquatable<Single>, ISpanFormattable, ISpanParsable<Single>
     {
         private float _value;
-        private static Boolean IsNaN(float value) => !(value < 0.0f || value >= 0.0f);
-        public Boolean Equals(Single other) => _value == other._value || (IsNaN(_value) && IsNaN(other._value));
+
+        public const Single MinValue = -3.40282346638528859E+38F;
+        public const Single MaxValue = 3.40282346638528859E+38F;
+        public const Single Epsilon = 1.40129846432481707E-45F;
+        public const Single PositiveInfinity = 1.0F / 0.0F;
+        public const Single NegativeInfinity = -1.0F / 0.0F;
+        public const Single NaN = 0.0F / 0.0F;
+        public const Single NegativeZero = -0.0F;
+
+        public static Boolean IsNaN(Single value) => !(value < 0.0F || value >= 0.0F);
+        public static Boolean IsInfinity(Single value) => value == PositiveInfinity || value == NegativeInfinity;
+        public static Boolean IsPositiveInfinity(Single value) => value == PositiveInfinity;
+        public static Boolean IsNegativeInfinity(Single value) => value == NegativeInfinity;
+        public static Boolean IsFinite(Single value) => !IsNaN(value) && !IsInfinity(value);
+        public static Boolean IsNegative(Single value) => value < 0.0F || (value == 0.0F && (1.0F / value) < 0.0F);
+
+        public Boolean Equals(Single other) => _value == other._value || (IsNaN(this) && IsNaN(other));
         public override Boolean Equals(Object obj) => obj is Single && Equals((Single)obj);
-        public override Int32 GetHashCode() => _value == 0 ? 0 : (Int32)_value;
-        public Int32 CompareTo(Single other) { if (_value < other._value) return -1; if (_value > other._value) return 1; if (_value == other._value) return 0; return IsNaN(_value) ? (IsNaN(other._value) ? 0 : -1) : 1; }
-        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Single)) throw new ArgumentException(); return CompareTo((Single)obj); }
-        public override String ToString() => NumberFormatting.FormatDouble(_value);
-        public String ToString(String format, IFormatProvider formatProvider)
+        public override Int32 GetHashCode()
         {
-            if (String.IsNullOrEmpty(format) || String.Equals(format, "G")) return ToString();
-            throw new FormatException();
+            if (_value == 0.0F) return 0;
+            if (IsNaN(this)) return unchecked((Int32)0x7FC00000);
+            return (Int32)_value;
         }
+        public Int32 CompareTo(Single other)
+        {
+            if (_value < other._value) return -1;
+            if (_value > other._value) return 1;
+            if (_value == other._value) return 0;
+            return IsNaN(this) ? (IsNaN(other) ? 0 : -1) : 1;
+        }
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Single)) throw new ArgumentException(); return CompareTo((Single)obj); }
+
+        public override String ToString() => NumberFormatting.FormatFloating(_value, null, 7);
+        public String ToString(String format) => NumberFormatting.FormatFloating(_value, format, 7);
+        public String ToString(IFormatProvider provider) => ToString();
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatFloating(_value, format, 7);
+        public Boolean TryFormat(Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, IFormatProvider provider)
+            => NumberFormatting.TryFormatFloating(_value, destination, out charsWritten, format, 7);
+
+        public static Single Parse(String value)
+        {
+            if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException();
+            Single result; Boolean overflow;
+            if (!NumberParsing.TryParseFloating(value, out result, out overflow)) { if (overflow) throw new OverflowException(); throw new FormatException(); }
+            return result;
+        }
+        public static Single Parse(ReadOnlySpan<Char> value)
+        {
+            Single result; Boolean overflow;
+            if (!NumberParsing.TryParseFloating(value, out result, out overflow)) { if (overflow) throw new OverflowException(); throw new FormatException(); }
+            return result;
+        }
+        public static Boolean TryParse(String value, out Single result)
+        {
+            if (Object.ReferenceEquals(value, null)) { result = 0.0F; return false; }
+            Boolean overflow; return NumberParsing.TryParseFloating(value, out result, out overflow);
+        }
+        public static Boolean TryParse(ReadOnlySpan<Char> value, out Single result)
+        {
+            Boolean overflow; return NumberParsing.TryParseFloating(value, out result, out overflow);
+        }
+        static Single IParsable<Single>.Parse(String value, IFormatProvider provider) => Parse(value);
+        static Boolean IParsable<Single>.TryParse(String value, IFormatProvider provider, out Single result) => TryParse(value, out result);
+        static Single ISpanParsable<Single>.Parse(ReadOnlySpan<Char> value, IFormatProvider provider) => Parse(value);
+        static Boolean ISpanParsable<Single>.TryParse(ReadOnlySpan<Char> value, IFormatProvider provider, out Single result) => TryParse(value, out result);
+
+        public TypeCode GetTypeCode() => TypeCode.Single;
+        Boolean IConvertible.ToBoolean(IFormatProvider provider) => Convert.ToBoolean(this);
+        Char IConvertible.ToChar(IFormatProvider provider) => Convert.ToChar(this);
+        SByte IConvertible.ToSByte(IFormatProvider provider) => Convert.ToSByte(this);
+        Byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(this);
+        Int16 IConvertible.ToInt16(IFormatProvider provider) => Convert.ToInt16(this);
+        UInt16 IConvertible.ToUInt16(IFormatProvider provider) => Convert.ToUInt16(this);
+        Int32 IConvertible.ToInt32(IFormatProvider provider) => Convert.ToInt32(this);
+        UInt32 IConvertible.ToUInt32(IFormatProvider provider) => Convert.ToUInt32(this);
+        Int64 IConvertible.ToInt64(IFormatProvider provider) => Convert.ToInt64(this);
+        UInt64 IConvertible.ToUInt64(IFormatProvider provider) => Convert.ToUInt64(this);
+        Single IConvertible.ToSingle(IFormatProvider provider) => this;
+        Double IConvertible.ToDouble(IFormatProvider provider) => (Double)this;
+        Decimal IConvertible.ToDecimal(IFormatProvider provider) => Convert.ToDecimal(this);
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException();
+        String IConvertible.ToString(IFormatProvider provider) => ToString();
+        Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
+
     [StructLayout(LayoutKind.Sequential)]
-    public struct Double : IComparable, IComparable<Double>, IEquatable<Double>, IFormattable
+    public struct Double : IComparable, IConvertible, IComparable<Double>, IEquatable<Double>, ISpanFormattable, ISpanParsable<Double>
     {
         private double _value;
-        private static Boolean IsNaN(double value) => !(value < 0.0 || value >= 0.0);
-        public Boolean Equals(Double other) => _value == other._value || (IsNaN(_value) && IsNaN(other._value));
+
+        public const Double MinValue = -1.7976931348623157E+308;
+        public const Double MaxValue = 1.7976931348623157E+308;
+        public const Double Epsilon = 4.9406564584124654E-324;
+        public const Double PositiveInfinity = 1.0 / 0.0;
+        public const Double NegativeInfinity = -1.0 / 0.0;
+        public const Double NaN = 0.0 / 0.0;
+        public const Double NegativeZero = -0.0;
+
+        public static Boolean IsNaN(Double value) => !(value < 0.0 || value >= 0.0);
+        public static Boolean IsInfinity(Double value) => value == PositiveInfinity || value == NegativeInfinity;
+        public static Boolean IsPositiveInfinity(Double value) => value == PositiveInfinity;
+        public static Boolean IsNegativeInfinity(Double value) => value == NegativeInfinity;
+        public static Boolean IsFinite(Double value) => !IsNaN(value) && !IsInfinity(value);
+        public static Boolean IsNegative(Double value) => value < 0.0 || (value == 0.0 && (1.0 / value) < 0.0);
+
+        public Boolean Equals(Double other) => _value == other._value || (IsNaN(this) && IsNaN(other));
         public override Boolean Equals(Object obj) => obj is Double && Equals((Double)obj);
-        public override Int32 GetHashCode() => _value == 0 ? 0 : (Int32)_value;
-        public Int32 CompareTo(Double other) { if (_value < other._value) return -1; if (_value > other._value) return 1; if (_value == other._value) return 0; return IsNaN(_value) ? (IsNaN(other._value) ? 0 : -1) : 1; }
-        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Double)) throw new ArgumentException(); return CompareTo((Double)obj); }
-        public override String ToString() => NumberFormatting.FormatDouble(_value);
-        public String ToString(String format, IFormatProvider formatProvider)
+        public override Int32 GetHashCode()
         {
-            if (String.IsNullOrEmpty(format) || String.Equals(format, "G")) return ToString();
-            throw new FormatException();
+            if (_value == 0.0) return 0;
+            if (IsNaN(this)) return unchecked((Int32)0x7FF80000);
+            return (Int32)_value;
         }
+        public Int32 CompareTo(Double other)
+        {
+            if (_value < other._value) return -1;
+            if (_value > other._value) return 1;
+            if (_value == other._value) return 0;
+            return IsNaN(this) ? (IsNaN(other) ? 0 : -1) : 1;
+        }
+        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Double)) throw new ArgumentException(); return CompareTo((Double)obj); }
+
+        public override String ToString() => NumberFormatting.FormatFloating(_value, null, 15);
+        public String ToString(String format) => NumberFormatting.FormatFloating(_value, format, 15);
+        public String ToString(IFormatProvider provider) => ToString();
+        public String ToString(String format, IFormatProvider formatProvider) => NumberFormatting.FormatFloating(_value, format, 15);
+        public Boolean TryFormat(Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, IFormatProvider provider)
+            => NumberFormatting.TryFormatFloating(_value, destination, out charsWritten, format, 15);
+
+        public static Double Parse(String value)
+        {
+            if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException();
+            Double result; Boolean overflow;
+            if (!NumberParsing.TryParseFloating(value, out result, out overflow)) { if (overflow) throw new OverflowException(); throw new FormatException(); }
+            return result;
+        }
+        public static Double Parse(ReadOnlySpan<Char> value)
+        {
+            Double result; Boolean overflow;
+            if (!NumberParsing.TryParseFloating(value, out result, out overflow)) { if (overflow) throw new OverflowException(); throw new FormatException(); }
+            return result;
+        }
+        public static Boolean TryParse(String value, out Double result)
+        {
+            if (Object.ReferenceEquals(value, null)) { result = 0.0; return false; }
+            Boolean overflow; return NumberParsing.TryParseFloating(value, out result, out overflow);
+        }
+        public static Boolean TryParse(ReadOnlySpan<Char> value, out Double result)
+        {
+            Boolean overflow; return NumberParsing.TryParseFloating(value, out result, out overflow);
+        }
+        static Double IParsable<Double>.Parse(String value, IFormatProvider provider) => Parse(value);
+        static Boolean IParsable<Double>.TryParse(String value, IFormatProvider provider, out Double result) => TryParse(value, out result);
+        static Double ISpanParsable<Double>.Parse(ReadOnlySpan<Char> value, IFormatProvider provider) => Parse(value);
+        static Boolean ISpanParsable<Double>.TryParse(ReadOnlySpan<Char> value, IFormatProvider provider, out Double result) => TryParse(value, out result);
+
+        public TypeCode GetTypeCode() => TypeCode.Double;
+        Boolean IConvertible.ToBoolean(IFormatProvider provider) => Convert.ToBoolean(this);
+        Char IConvertible.ToChar(IFormatProvider provider) => Convert.ToChar(this);
+        SByte IConvertible.ToSByte(IFormatProvider provider) => Convert.ToSByte(this);
+        Byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(this);
+        Int16 IConvertible.ToInt16(IFormatProvider provider) => Convert.ToInt16(this);
+        UInt16 IConvertible.ToUInt16(IFormatProvider provider) => Convert.ToUInt16(this);
+        Int32 IConvertible.ToInt32(IFormatProvider provider) => Convert.ToInt32(this);
+        UInt32 IConvertible.ToUInt32(IFormatProvider provider) => Convert.ToUInt32(this);
+        Int64 IConvertible.ToInt64(IFormatProvider provider) => Convert.ToInt64(this);
+        UInt64 IConvertible.ToUInt64(IFormatProvider provider) => Convert.ToUInt64(this);
+        Single IConvertible.ToSingle(IFormatProvider provider) => (Single)this;
+        Double IConvertible.ToDouble(IFormatProvider provider) => this;
+        Decimal IConvertible.ToDecimal(IFormatProvider provider) => Convert.ToDecimal(this);
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException();
+        String IConvertible.ToString(IFormatProvider provider) => ToString();
+        Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
 
     internal static class NumberFormatting
@@ -1331,36 +1476,154 @@ namespace System
             throw new FormatException();
         }
 
-        // Deliberately invariant and allocation-small. Core v1 promises a bounded general
-        // floating format, not culture-aware/custom numeric formatting. Six fractional
-        // places are enough for the bootstrap/runtime diagnostics this surface targets.
-        internal static String FormatDouble(Double value)
-        {
-            if (value == 0.0) return "0";
-            Boolean negative = value < 0.0;
-            if (negative) value = -value;
-            UInt64 whole = (UInt64)value;
-            Double fraction = value - (Double)whole;
-            Char[] wholeChars = FormatUInt64Chars(whole, negative, 0);
-            if (fraction == 0.0) return String.CreateFromChars(wholeChars, wholeChars.Length);
+        internal static String FormatDouble(Double value) => FormatFloating(value, null, 15);
 
-            Char[] result = new Char[wholeChars.Length + 1 + 6];
-            Int32 pos = 0;
-            for (Int32 i = 0; i < wholeChars.Length; i++) result[pos++] = wholeChars[i];
-            result[pos++] = '.';
-            Int32 fractionalStart = pos;
-            for (Int32 i = 0; i < 6; i++)
+        internal static String FormatFloating(Double value, String format, Int32 defaultPrecision)
+        {
+            if (Double.IsNaN(value)) return "NaN";
+            if (Double.IsPositiveInfinity(value)) return "Infinity";
+            if (Double.IsNegativeInfinity(value)) return "-Infinity";
+
+            Char specifier; Int32 precision;
+            ParseFormat(format, out specifier, out precision);
+            Boolean hasPrecision = !String.IsNullOrEmpty(format) && format.Length > 1;
+            if (specifier == 'G' || specifier == 'g')
             {
-                fraction *= 10.0;
-                Int32 digit = (Int32)fraction;
-                if (digit < 0) digit = 0; else if (digit > 9) digit = 9;
-                result[pos++] = (Char)('0' + digit);
-                fraction -= digit;
+                Int32 significantDigits = hasPrecision ? precision : defaultPrecision;
+                if (significantDigits <= 0) significantDigits = defaultPrecision;
+                return FormatGeneral(value, significantDigits, specifier == 'g');
             }
-            while (pos > fractionalStart + 1 && result[pos - 1] == '0') pos--;
-            Char[] trimmed = new Char[pos];
-            for (Int32 i = 0; i < pos; i++) trimmed[i] = result[i];
-            return String.CreateFromChars(trimmed, trimmed.Length);
+            if (specifier == 'F' || specifier == 'f')
+            {
+                Int32 fractionalDigits = hasPrecision ? precision : 2;
+                return FormatFixed(value, fractionalDigits);
+            }
+            if (specifier == 'E' || specifier == 'e')
+            {
+                Int32 fractionalDigits = hasPrecision ? precision : 6;
+                return FormatScientific(value, fractionalDigits, specifier == 'e');
+            }
+            throw new FormatException();
+        }
+
+        private static String FormatGeneral(Double value, Int32 significantDigits, Boolean lowerExponent)
+        {
+            Boolean negative = value < 0.0 || Double.IsNegative(value);
+            Double magnitude = negative ? -value : value;
+            if (magnitude == 0.0) return negative ? "-0" : "0";
+
+            Int32 exponent = DecimalExponent(magnitude);
+            if (exponent < -4 || exponent >= significantDigits)
+                return FormatScientific(value, significantDigits - 1, lowerExponent);
+
+            Int32 fractionalDigits = significantDigits - exponent - 1;
+            if (fractionalDigits < 0) fractionalDigits = 0;
+            String fixedText = FormatFixed(value, fractionalDigits);
+            return TrimFractionZeros(fixedText);
+        }
+
+        private static String FormatFixed(Double value, Int32 fractionalDigits)
+        {
+            if (fractionalDigits < 0 || fractionalDigits > 99) throw new FormatException();
+            Boolean negative = value < 0.0 || Double.IsNegative(value);
+            Double magnitude = negative ? -value : value;
+            if (magnitude > 18446744073709551615.0) return FormatScientific(value, fractionalDigits, false);
+
+            Double scale = 1.0;
+            for (Int32 i = 0; i < fractionalDigits; i++) scale *= 10.0;
+            Double rounded = magnitude * scale;
+            if (rounded < 18446744073709551615.0) rounded += 0.5;
+            UInt64 scaled = (UInt64)rounded;
+            UInt64 whole = fractionalDigits == 0 ? scaled : scaled / (UInt64)scale;
+            UInt64 fraction = fractionalDigits == 0 ? 0UL : scaled % (UInt64)scale;
+
+            Char[] wholeChars = FormatUInt64Chars(whole, negative, 0);
+            if (fractionalDigits == 0) return String.CreateFromChars(wholeChars, wholeChars.Length);
+
+            Char[] result = new Char[wholeChars.Length + 1 + fractionalDigits];
+            Int32 position = 0;
+            for (Int32 i = 0; i < wholeChars.Length; i++) result[position++] = wholeChars[i];
+            result[position++] = '.';
+            UInt64 divisor = (UInt64)scale / 10UL;
+            for (Int32 i = 0; i < fractionalDigits; i++)
+            {
+                UInt64 digit = divisor == 0 ? 0UL : fraction / divisor;
+                result[position++] = (Char)('0' + (Char)digit);
+                if (divisor != 0)
+                {
+                    fraction %= divisor;
+                    divisor /= 10UL;
+                }
+            }
+            return String.CreateFromChars(result, result.Length);
+        }
+
+        private static String FormatScientific(Double value, Int32 fractionalDigits, Boolean lowerExponent)
+        {
+            if (fractionalDigits < 0 || fractionalDigits > 99) throw new FormatException();
+            Boolean negative = value < 0.0 || Double.IsNegative(value);
+            Double magnitude = negative ? -value : value;
+            if (magnitude == 0.0)
+            {
+                String zero = FormatFixed(value, fractionalDigits);
+                return zero + (lowerExponent ? "e+000" : "E+000");
+            }
+
+            Int32 exponent = DecimalExponent(magnitude);
+            Double normalized = magnitude;
+            if (exponent > 0) for (Int32 i = 0; i < exponent; i++) normalized /= 10.0;
+            else if (exponent < 0) for (Int32 i = 0; i < -exponent; i++) normalized *= 10.0;
+            if (normalized >= 10.0) { normalized /= 10.0; exponent++; }
+            else if (normalized < 1.0) { normalized *= 10.0; exponent--; }
+            if (negative) normalized = -normalized;
+
+            String mantissa = FormatFixed(normalized, fractionalDigits);
+            String expDigits = FormatUnsigned((UInt64)(exponent < 0 ? -exponent : exponent), 32, "D3");
+            return mantissa + (lowerExponent ? "e" : "E") + (exponent < 0 ? "-" : "+") + expDigits;
+        }
+
+        private static Int32 DecimalExponent(Double magnitude)
+        {
+            Int32 exponent = 0;
+            if (magnitude >= 10.0)
+            {
+                while (magnitude >= 10.0 && exponent < 308) { magnitude /= 10.0; exponent++; }
+            }
+            else if (magnitude < 1.0)
+            {
+                while (magnitude < 1.0 && magnitude != 0.0 && exponent > -324) { magnitude *= 10.0; exponent--; }
+            }
+            return exponent;
+        }
+
+        private static String TrimFractionZeros(String text)
+        {
+            Int32 decimalIndex = -1;
+            for (Int32 i = 0; i < text.Length; i++) if (text[i] == '.') { decimalIndex = i; break; }
+            if (decimalIndex < 0) return text;
+            Int32 end = text.Length;
+            while (end > decimalIndex + 1 && text[end - 1] == '0') end--;
+            if (end == decimalIndex + 1) end = decimalIndex;
+            if (end == text.Length) return text;
+            Char[] chars = new Char[end];
+            for (Int32 i = 0; i < end; i++) chars[i] = text[i];
+            return String.CreateFromChars(chars, chars.Length);
+        }
+
+        internal static Boolean TryFormatFloating(Double value, Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, Int32 defaultPrecision)
+        {
+            String formatString = null;
+            if (format.Length != 0)
+            {
+                Char[] chars = new Char[format.Length];
+                for (Int32 i = 0; i < format.Length; i++) chars[i] = format[i];
+                formatString = String.CreateFromChars(chars, chars.Length);
+            }
+            String text = FormatFloating(value, formatString, defaultPrecision);
+            if (destination.Length < text.Length) { charsWritten = 0; return false; }
+            for (Int32 i = 0; i < text.Length; i++) destination[i] = text[i];
+            charsWritten = text.Length;
+            return true;
         }
 
         private static void ParseFormat(String format, out Char specifier, out Int32 precision)
@@ -1586,6 +1849,110 @@ namespace System
 
             if (negative && value != 0UL) { overflow = true; return false; }
             result = value;
+            return true;
+        }
+
+        internal static Boolean TryParseFloating(String text, out Double result, out Boolean overflow)
+        {
+            result = 0.0;
+            overflow = false;
+            Int32 start = 0;
+            Int32 end = text.Length;
+            while (start < end && Char.IsWhiteSpace(text[start])) start++;
+            while (end > start && Char.IsWhiteSpace(text[end - 1])) end--;
+            if (start == end) return false;
+
+            Boolean negative = false;
+            if (text[start] == '+' || text[start] == '-')
+            {
+                negative = text[start] == '-';
+                start++;
+                if (start == end) return false;
+            }
+
+            if (Matches(text, start, end, "NaN")) { result = Double.NaN; return true; }
+            if (Matches(text, start, end, "Infinity")) { result = negative ? Double.NegativeInfinity : Double.PositiveInfinity; return true; }
+
+            Double value = 0.0;
+            Boolean sawDigit = false;
+            while (start < end && text[start] >= '0' && text[start] <= '9')
+            {
+                sawDigit = true;
+                value = value * 10.0 + (text[start] - '0');
+                start++;
+            }
+
+            if (start < end && text[start] == '.')
+            {
+                start++;
+                Double scale = 0.1;
+                while (start < end && text[start] >= '0' && text[start] <= '9')
+                {
+                    sawDigit = true;
+                    value += (text[start] - '0') * scale;
+                    scale *= 0.1;
+                    start++;
+                }
+            }
+            if (!sawDigit) return false;
+
+            Int32 exponent = 0;
+            Boolean exponentNegative = false;
+            if (start < end && (text[start] == 'e' || text[start] == 'E'))
+            {
+                start++;
+                if (start < end && (text[start] == '+' || text[start] == '-'))
+                {
+                    exponentNegative = text[start] == '-';
+                    start++;
+                }
+                if (start == end || text[start] < '0' || text[start] > '9') return false;
+                while (start < end && text[start] >= '0' && text[start] <= '9')
+                {
+                    if (exponent < 10000) exponent = exponent * 10 + (text[start] - '0');
+                    start++;
+                }
+            }
+            if (start != end) return false;
+
+            if (exponent > 4000) exponent = 4000;
+            if (exponent != 0)
+            {
+                Double factor = 1.0;
+                for (Int32 i = 0; i < exponent; i++) factor *= 10.0;
+                value = exponentNegative ? value / factor : value * factor;
+            }
+            result = negative ? -value : value;
+            return true;
+        }
+
+        internal static Boolean TryParseFloating(ReadOnlySpan<Char> text, out Double result, out Boolean overflow)
+        {
+            Char[] chars = new Char[text.Length];
+            for (Int32 i = 0; i < text.Length; i++) chars[i] = text[i];
+            return TryParseFloating(String.CreateFromChars(chars, chars.Length), out result, out overflow);
+        }
+
+        internal static Boolean TryParseFloating(String text, out Single result, out Boolean overflow)
+        {
+            Double parsed;
+            if (!TryParseFloating(text, out parsed, out overflow)) { result = 0.0F; return false; }
+            result = (Single)parsed;
+            return true;
+        }
+
+        internal static Boolean TryParseFloating(ReadOnlySpan<Char> text, out Single result, out Boolean overflow)
+        {
+            Double parsed;
+            if (!TryParseFloating(text, out parsed, out overflow)) { result = 0.0F; return false; }
+            result = (Single)parsed;
+            return true;
+        }
+
+        private static Boolean Matches(String text, Int32 start, Int32 end, String expected)
+        {
+            if (end - start != expected.Length) return false;
+            for (Int32 i = 0; i < expected.Length; i++) if (text[start + i] != expected[i]) return false;
             return true;
         }
 
@@ -1844,6 +2211,8 @@ namespace System
         public static Decimal ToDecimal(UInt32 value) => new Decimal((UInt64)value);
         public static Decimal ToDecimal(Int64 value) => new Decimal(value);
         public static Decimal ToDecimal(UInt64 value) => new Decimal(value);
+        public static Decimal ToDecimal(Single value) => new Decimal(checked((Int64)Math.Round(value)));
+        public static Decimal ToDecimal(Double value) => new Decimal(checked((Int64)Math.Round(value)));
 
         internal static Object DefaultToType(IConvertible value, Type targetType, IFormatProvider provider)
         {

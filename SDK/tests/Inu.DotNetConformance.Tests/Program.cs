@@ -7,7 +7,7 @@ namespace Inu.DotNetConformance.Tests;
 internal static class Program
 {
     private const string TargetName = "Inu.BCL.Core.v1";
-    private const int TargetItemCount = 35;
+    private const int TargetItemCount = 37;
     private static int _passed;
     private static int _failed;
 
@@ -28,6 +28,8 @@ internal static class Program
         Check("System.UInt16", TestUInt16());
         Check("System.UInt32", TestUInt32());
         Check("System.UInt64", TestUInt64());
+        Check("System.Single", TestSingle());
+        Check("System.Double", TestDouble());
         Check("System.IntPtr", TestIntPtr());
         Check("System.UIntPtr", TestUIntPtr());
         Check("System.Array", TestArray());
@@ -493,6 +495,52 @@ internal static class Program
             && convertible.GetTypeCode() == TypeCode.UInt64 && convertible.ToUInt64(null) == ulong.MaxValue && convertible.ToBoolean(null)
             && convertible.ToDecimal(null) == new decimal(ulong.MaxValue) && convertOverflow
             && checkedThrows && unchecked((ulong)negative) == ulong.MaxValue && overflowThrows && wrongCompareThrows;
+    }
+
+    private static bool TestSingle()
+    {
+        float parsed;
+        float spanParsed;
+        bool invalid = float.TryParse("not-a-number", out _);
+        Span<char> destination = stackalloc char[32];
+        bool formatted = 12.5f.TryFormat(destination, out int written, "F2", null);
+        IComparable<float> comparable = 2.5f;
+        IEquatable<float> equatableNaN = float.NaN;
+        return float.MinValue < 0.0f && float.MaxValue > 0.0f && float.Epsilon > 0.0f
+            && float.IsNaN(float.NaN) && float.IsPositiveInfinity(float.PositiveInfinity)
+            && float.IsNegativeInfinity(float.NegativeInfinity) && float.IsInfinity(float.PositiveInfinity)
+            && float.IsFinite(12.5f) && !float.IsFinite(float.NaN) && float.IsNegative(-0.0f)
+            && equatableNaN.Equals(float.NaN) && comparable.CompareTo(3.0f) < 0 && float.NaN.CompareTo(0.0f) < 0
+            && float.TryParse(" -12.5 ", out parsed) && parsed == -12.5f
+            && float.TryParse("1.25e2".AsSpan(), out spanParsed) && spanParsed == 125.0f
+            && ParseViaIParsable<float>("2.5", null) == 2.5f
+            && ParseViaISpanParsable<float>("3.5".AsSpan(), null) == 3.5f
+            && !invalid && formatted && new string(destination[..written]) == "12.50"
+            && 12.5f.ToString("G", null) == "12.5" && 12.5f.ToString("E2", null) == "1.25E+001"
+            && Convert.ToInt32(2.5f) == 2 && Convert.ToDouble(12.5f) == 12.5;
+    }
+
+    private static bool TestDouble()
+    {
+        double parsed;
+        double spanParsed;
+        bool invalid = double.TryParse("not-a-number", out _);
+        Span<char> destination = stackalloc char[32];
+        bool formatted = 12.5.TryFormat(destination, out int written, "F3", null);
+        IComparable<double> comparable = 2.5;
+        IEquatable<double> equatableNaN = double.NaN;
+        return double.MinValue < 0.0 && double.MaxValue > 0.0 && double.Epsilon > 0.0
+            && double.IsNaN(double.NaN) && double.IsPositiveInfinity(double.PositiveInfinity)
+            && double.IsNegativeInfinity(double.NegativeInfinity) && double.IsInfinity(double.PositiveInfinity)
+            && double.IsFinite(12.5) && !double.IsFinite(double.NaN) && double.IsNegative(-0.0)
+            && equatableNaN.Equals(double.NaN) && comparable.CompareTo(3.0) < 0 && double.NaN.CompareTo(0.0) < 0
+            && double.TryParse(" -12.5 ", out parsed) && parsed == -12.5
+            && double.TryParse("1.25e2".AsSpan(), out spanParsed) && spanParsed == 125.0
+            && ParseViaIParsable<double>("2.5", null) == 2.5
+            && ParseViaISpanParsable<double>("3.5".AsSpan(), null) == 3.5
+            && !invalid && formatted && new string(destination[..written]) == "12.500"
+            && 12.5.ToString("G", null) == "12.5" && 12.5.ToString("E2", null) == "1.25E+001"
+            && Convert.ToInt32(3.5) == 4 && Convert.ToSingle(12.5) == 12.5f;
     }
 
     private static bool TestIntPtr()

@@ -633,7 +633,7 @@ public static unsafe class ManagedRuntimeConformance
     public const String BclTargetName = "Inu.BCL.Core.v1";
 
     /// <summary>Number of type-level BCL items in <see cref="BclTargetName"/>.</summary>
-    public const Int32 BclTargetItemCount = 31;
+    public const Int32 BclTargetItemCount = 37;
 
     /// <summary>
     /// Hard in-kernel gate for the named BCL subset. Keep this list in lock-step with
@@ -1041,7 +1041,46 @@ public static unsafe class ManagedRuntimeConformance
             && u64CheckedOverflow && unchecked((UInt64)(-1L)) == UInt64.MaxValue && u64Overflow && u64WrongCompare, ref passed, ref failed);
 
 
-        // 08 System.IntPtr
+        // 12 System.Single
+        Char[] singleFormatChars = new Char[16];
+        Boolean singleFormatted = ((Single)12.5F).TryFormat(new Span<Char>(singleFormatChars), out Int32 singleWritten, new ReadOnlySpan<Char>(new Char[] { 'F', '2' }), null);
+        IConvertible singleConvertible = (Single)2.5F;
+        Record(Single.MinValue < 0.0F && Single.MaxValue > 0.0F && Single.Epsilon > 0.0F
+            && Single.IsNaN(Single.NaN) && Single.IsPositiveInfinity(Single.PositiveInfinity)
+            && Single.IsNegativeInfinity(Single.NegativeInfinity) && Single.IsInfinity(Single.PositiveInfinity)
+            && Single.IsFinite((Single)12.5F) && !Single.IsFinite(Single.NaN) && Single.IsNegative(Single.NegativeZero)
+            && Single.NaN.Equals(Single.NaN) && Single.NaN.CompareTo((Single)0.0F) < 0
+            && Single.TryParse(" -12.5 ", out Single singleParsed) && singleParsed == (Single)(-12.5F)
+            && Single.TryParse(new ReadOnlySpan<Char>(new Char[] { '1', '.', '2', '5', 'e', '2' }), out Single singleSpanParsed) && singleSpanParsed == (Single)125.0F
+            && ParseViaIParsable<Single>("2.5", null) == (Single)2.5F
+            && ParseViaISpanParsable<Single>(new ReadOnlySpan<Char>(new Char[] { '3', '.', '5' }), null) == (Single)3.5F
+            && String.Equals(((Single)12.5F).ToString("G", null), "12.5")
+            && String.Equals(((Single)12.5F).ToString("E2", null), "1.25E+001")
+            && singleFormatted && singleWritten == 5 && singleFormatChars[0] == '1' && singleFormatChars[1] == '2'
+            && singleFormatChars[2] == '.' && singleFormatChars[3] == '5' && singleFormatChars[4] == '0'
+            && singleConvertible.GetTypeCode() == TypeCode.Single && singleConvertible.ToInt32(null) == 2 && singleConvertible.ToDouble(null) == 2.5, ref passed, ref failed);
+
+        // 13 System.Double
+        Char[] doubleFormatChars = new Char[16];
+        Boolean doubleFormatted = ((Double)12.5).TryFormat(new Span<Char>(doubleFormatChars), out Int32 doubleWritten, new ReadOnlySpan<Char>(new Char[] { 'F', '3' }), null);
+        IConvertible doubleConvertible = (Double)3.5;
+        Record(Double.MinValue < 0.0 && Double.MaxValue > 0.0 && Double.Epsilon > 0.0
+            && Double.IsNaN(Double.NaN) && Double.IsPositiveInfinity(Double.PositiveInfinity)
+            && Double.IsNegativeInfinity(Double.NegativeInfinity) && Double.IsInfinity(Double.PositiveInfinity)
+            && Double.IsFinite((Double)12.5) && !Double.IsFinite(Double.NaN) && Double.IsNegative(Double.NegativeZero)
+            && Double.NaN.Equals(Double.NaN) && Double.NaN.CompareTo((Double)0.0) < 0
+            && Double.TryParse(" -12.5 ", out Double doubleParsed) && doubleParsed == (Double)(-12.5)
+            && Double.TryParse(new ReadOnlySpan<Char>(new Char[] { '1', '.', '2', '5', 'e', '2' }), out Double doubleSpanParsed) && doubleSpanParsed == (Double)125.0
+            && ParseViaIParsable<Double>("2.5", null) == (Double)2.5
+            && ParseViaISpanParsable<Double>(new ReadOnlySpan<Char>(new Char[] { '3', '.', '5' }), null) == (Double)3.5
+            && String.Equals(((Double)12.5).ToString("G", null), "12.5")
+            && String.Equals(((Double)12.5).ToString("E2", null), "1.25E+001")
+            && doubleFormatted && doubleWritten == 6 && doubleFormatChars[0] == '1' && doubleFormatChars[1] == '2'
+            && doubleFormatChars[2] == '.' && doubleFormatChars[3] == '5' && doubleFormatChars[4] == '0' && doubleFormatChars[5] == '0'
+            && doubleConvertible.GetTypeCode() == TypeCode.Double && doubleConvertible.ToInt32(null) == 4 && doubleConvertible.ToSingle(null) == (Single)3.5F, ref passed, ref failed);
+
+
+        // 14 System.IntPtr
         IntPtr signedPointer = new IntPtr(100);
         IntPtr signedAdvanced = IntPtr.Add(signedPointer, 23);
         IntPtr signedArithmetic = (new IntPtr(6) * new IntPtr(7)) + new IntPtr(2);
@@ -1074,7 +1113,7 @@ public static unsafe class ManagedRuntimeConformance
             && signedFormatted && signedWritten == 5 && signedFormatChars[0] == '0' && signedFormatChars[1] == '0'
             && signedFormatChars[2] == '1' && signedFormatChars[3] == '2' && signedFormatChars[4] == '3', ref passed, ref failed);
 
-        // 06 System.UIntPtr
+        // 15 System.UIntPtr
         UIntPtr unsignedPointer = new UIntPtr((UInt64)200UL);
         UIntPtr unsignedAdvanced = UIntPtr.Add(unsignedPointer, 17);
         UIntPtr unsignedArithmetic = (new UIntPtr((UInt64)6UL) * new UIntPtr((UInt64)7UL)) + new UIntPtr((UInt64)2UL);
@@ -1106,14 +1145,14 @@ public static unsafe class ManagedRuntimeConformance
             && unsignedFormatted && unsignedWritten == 5 && unsignedFormatChars[0] == '0' && unsignedFormatChars[1] == '0'
             && unsignedFormatChars[2] == '1' && unsignedFormatChars[3] == '2' && unsignedFormatChars[4] == '3', ref passed, ref failed);
 
-        // 07 System.Array
+        // 16 System.Array
         Int32[] array = new Int32[3];
         array[1] = 9;
         Int32[] emptyArray = Array.Empty<Int32>();
         Record(array.Length == 3 && array.LongLength == 3L && array[1] == 9
             && emptyArray != null && emptyArray.Length == 0, ref passed, ref failed);
 
-        // 08 System.String
+        // 17 System.String
         String text = "Inu kernel";
         String concatenated = String.Concat("Inu", " ", "kernel");
         Record(String.Empty.Length == 0 && text.Length == 10 && text[0] == 'I'
@@ -1122,13 +1161,13 @@ public static unsafe class ManagedRuntimeConformance
             && String.Equals(text.Substring(4, 6), "kernel")
             && String.IsNullOrEmpty("") && String.IsNullOrWhiteSpace(" \t\r\n"), ref passed, ref failed);
 
-        // 09 System.Nullable<T>
+        // 18 System.Nullable<T>
         Nullable<Int32> present = new Nullable<Int32>(55);
         Nullable<Int32> absent = default;
         Record(present.HasValue && present.Value == 55 && present.GetValueOrDefault() == 55
             && !absent.HasValue && absent.GetValueOrDefault() == 0 && absent.GetValueOrDefault(7) == 7, ref passed, ref failed);
 
-        // 10 System.Type
+        // 19 System.Type
         Type intType = typeof(Int32);
         Type arrayType = typeof(Int32[]);
         Record(intType.IsValueType && intType.IsPrimitive && !intType.IsArray
@@ -1136,25 +1175,25 @@ public static unsafe class ManagedRuntimeConformance
             && arrayType.BaseType == typeof(Array)
             && typeof(Object).IsAssignableFrom(typeof(Probe)) && typeof(Probe).IsSubclassOf(typeof(Object)), ref passed, ref failed);
 
-        // 11 System.Collections.Generic.KeyValuePair<TKey,TValue>
+        // 20 System.Collections.Generic.KeyValuePair<TKey,TValue>
         KeyValuePair<String, Int32> pair = new KeyValuePair<String, Int32>("answer", 42);
         Record(String.Equals(pair.Key, "answer") && pair.Value == 42, ref passed, ref failed);
 
-        // 12 System.Collections.Generic.EqualityComparer<T>
+        // 21 System.Collections.Generic.EqualityComparer<T>
         EqualityComparer<Int32> intComparer = EqualityComparer<Int32>.Default;
         EqualityComparer<String> stringComparer = EqualityComparer<String>.Default;
         Record(intComparer.Equals(7, 7) && !intComparer.Equals(7, 8)
             && stringComparer.Equals("same", "same") && !stringComparer.Equals("same", "other")
             && stringComparer.GetHashCode("same") == stringComparer.GetHashCode("same"), ref passed, ref failed);
 
-        // 13 System.Collections.Generic.List<T>
+        // 22 System.Collections.Generic.List<T>
         List<Int32> list = new List<Int32>();
         list.Add(1); list.Add(3); list.Insert(1, 2);
         Int32[] listCopy = list.ToArray();
         Record(list.Count == 3 && list[1] == 2 && list.Contains(3) && list.IndexOf(2) == 1
             && listCopy.Length == 3 && listCopy[2] == 3 && list.Remove(2) && list.Count == 2, ref passed, ref failed);
 
-        // 14 System.Collections.Generic.Dictionary<TKey,TValue>
+        // 23 System.Collections.Generic.Dictionary<TKey,TValue>
         Dictionary<String, Int32> dictionary = new Dictionary<String, Int32>();
         dictionary.Add("one", 1);
         dictionary["two"] = 2;
@@ -1163,35 +1202,35 @@ public static unsafe class ManagedRuntimeConformance
             && dictionary.TryGetValue("two", out dictionaryValue) && dictionaryValue == 2
             && !dictionary.TryAdd("one", 11) && dictionary.Remove("one") && !dictionary.ContainsKey("one"), ref passed, ref failed);
 
-        // 15 System.Collections.Generic.Queue<T>
+        // 24 System.Collections.Generic.Queue<T>
         Queue<Int32> queue = new Queue<Int32>();
         queue.Enqueue(4); queue.Enqueue(5); queue.Enqueue(6);
         Record(queue.Count == 3 && queue.Peek() == 4 && queue.Dequeue() == 4 && queue.Peek() == 5 && queue.Count == 2, ref passed, ref failed);
 
-        // 16 System.Collections.Generic.Stack<T>
+        // 25 System.Collections.Generic.Stack<T>
         Stack<Int32> stack = new Stack<Int32>();
         stack.Push(4); stack.Push(5); stack.Push(6);
         Record(stack.Count == 3 && stack.Peek() == 6 && stack.Pop() == 6 && stack.Peek() == 5 && stack.Count == 2, ref passed, ref failed);
 
-        // 17 System.Text.StringBuilder
+        // 26 System.Text.StringBuilder
         StringBuilder builder = new StringBuilder();
         builder.Append("Inu").Append(' ').Append(95).AppendLine();
         Record(builder.Length == 8 && builder[0] == 'I' && String.Equals(builder.ToString(), "Inu 95\r\n")
             && builder.Clear().Append(true).EnsureCapacity(32) >= 32 && String.Equals(builder.ToString(), "True"), ref passed, ref failed);
 
-        // 18 System.Text.Encoding (factory contract)
+        // 27 System.Text.Encoding (factory contract)
         Encoding asciiFactory = Encoding.ASCII;
         Encoding utf8Factory = Encoding.UTF8;
         Record(asciiFactory != null && utf8Factory != null
             && asciiFactory.GetByteCount("Inu") == 3 && utf8Factory.GetByteCount("Inu") == 3, ref passed, ref failed);
 
-        // 19 System.Text.ASCIIEncoding
+        // 28 System.Text.ASCIIEncoding
         ASCIIEncoding ascii = new ASCIIEncoding();
         Byte[] asciiBytes = ascii.GetBytes("Inu");
         Record(asciiBytes.Length == 3 && asciiBytes[0] == (Byte)'I' && asciiBytes[2] == (Byte)'u'
             && String.Equals(ascii.GetString(asciiBytes), "Inu"), ref passed, ref failed);
 
-        // 20 System.Text.UTF8Encoding
+        // 29 System.Text.UTF8Encoding
         UTF8Encoding utf8 = new UTF8Encoding();
         String unicode = "\u00A3\u20AC";
         Byte[] utf8Bytes = utf8.GetBytes(unicode);
@@ -1199,7 +1238,7 @@ public static unsafe class ManagedRuntimeConformance
             && utf8Bytes[2] == 0xE2 && utf8Bytes[3] == 0x82 && utf8Bytes[4] == 0xAC
             && String.Equals(utf8.GetString(utf8Bytes), unicode), ref passed, ref failed);
 
-        // 21 Primitive formatting: general/decimal/hex integers plus bounded invariant floating G.
+        // 30 Primitive formatting: integer G/D/X plus invariant floating G/F/E.
         Record(String.Equals(((Int32)12345).ToString(), "12345")
             && String.Equals(((Int32)(-42)).ToString(), "-42")
             && String.Equals(((Int32)42).ToString("D5", null), "00042")
@@ -1210,7 +1249,7 @@ public static unsafe class ManagedRuntimeConformance
             && String.Equals(((Double)12.5).ToString("G", null), "12.5")
             && String.Equals(((Single)(-0.25F)).ToString("G", null), "-0.25"), ref passed, ref failed);
 
-        // 22 System.Math: integer + floating primitives used by the runtime and graphics layers.
+        // 31 System.Math: integer + floating primitives used by the runtime and graphics layers.
         Double sqrt81 = Math.Sqrt(81.0);
         Record(Math.Abs(-17) == 17 && Math.Abs(-17L) == 17L && Math.Abs(-2.5) == 2.5
             && Math.Min(5, 9) == 5 && Math.Max(5, 9) == 9 && Math.Min(5L, 9L) == 5L
@@ -1220,7 +1259,7 @@ public static unsafe class ManagedRuntimeConformance
             && Math.Round(2.5) == 2.0 && Math.Round(3.5) == 4.0
             && Math.Abs(sqrt81 - 9.0) < 0.000001, ref passed, ref failed);
 
-        // 23 System.Convert: all primitive integer widths plus NativeAOT checked floating/integer helper paths.
+        // 32 System.Convert: all primitive integer widths plus NativeAOT checked floating/integer helper paths.
         Boolean intOverflow = false, uintOverflow = false, longOverflow = false, ulongOverflow = false;
         try { Convert.ToInt32(2147483648.0); } catch (OverflowException) { intOverflow = true; }
         try { Convert.ToUInt32(-1.0); } catch (OverflowException) { uintOverflow = true; }
@@ -1240,7 +1279,7 @@ public static unsafe class ManagedRuntimeConformance
             && String.Equals(Convert.ToString(true), "True")
             && intOverflow && uintOverflow && longOverflow && ulongOverflow, ref passed, ref failed);
 
-        // 24 System.IComparable / IComparable<T> / IEquatable<T> across primitive families.
+        // 33 System.IComparable / IComparable<T> / IEquatable<T> across primitive families.
         IComparable nonGenericComparable = (Int32)7;
         IComparable<Int32> genericComparable = (Int32)7;
         IComparable<Int64> longComparable = (Int64)9;
@@ -1251,7 +1290,7 @@ public static unsafe class ManagedRuntimeConformance
             && ((IComparable<Char>)(Char)'b').CompareTo('a') > 0
             && ((IEquatable<Boolean>)(Boolean)true).Equals(true), ref passed, ref failed);
 
-        // 25 Delegate family: multiple arities plus Predicate/Comparison/Converter.
+        // 34 Delegate family: multiple arities plus Predicate/Comparison/Converter.
         _bclDelegateObserved = 0;
         Action<Int32> bclAction = BclCapture;
         Action<Int32, Int32> bclAdd = BclAddCapture;
@@ -1267,7 +1306,7 @@ public static unsafe class ManagedRuntimeConformance
         Record(firstDelegatePass && _bclDelegateObserved == 15 && bclSum(4, 5) == 9
             && bclPositive(1) && !bclPositive(-1) && bclCompare(3, 7) < 0 && bclWiden(44) == 44L, ref passed, ref failed);
 
-        // 26 System.Span<T> / ReadOnlySpan<T>: empty/null, fill, slicing and overlap-safe copy.
+        // 35 System.Span<T> / ReadOnlySpan<T>: empty/null, fill, slicing and overlap-safe copy.
         Int32[] spanValues = new Int32[] { 1, 2, 3, 4, 5 };
         Span<Int32> span = spanValues;
         span[1] = 20;
@@ -1287,7 +1326,7 @@ public static unsafe class ManagedRuntimeConformance
             && !span.TryCopyTo(tooSmall) && Span<Int32>.Empty.IsEmpty && ReadOnlySpan<Int32>.Empty.IsEmpty
             && nullSpan.IsEmpty, ref passed, ref failed);
 
-        // 27 System.Memory<T> / ReadOnlyMemory<T>: storable array-backed windows over Span.
+        // 36 System.Memory<T> / ReadOnlyMemory<T>: storable array-backed windows over Span.
         Int32[] memoryValues = new Int32[] { 10, 20, 30, 40 };
         Memory<Int32> memory = memoryValues;
         Memory<Int32> memoryMiddle = memory.Slice(1, 2);
@@ -1299,7 +1338,7 @@ public static unsafe class ManagedRuntimeConformance
             && readOnlyMemory.Span[1] == 25 && memoryCopy.Length == 2 && memoryCopy[0] == 25 && memoryCopy[1] == 30
             && Memory<Int32>.Empty.IsEmpty && ReadOnlyMemory<Int32>.Empty.IsEmpty && nullMemory.IsEmpty, ref passed, ref failed);
 
-        // 28 Generic comparison/equality consistency.
+        // 37 Generic comparison/equality consistency.
         Comparer<Int32> intOrdering = Comparer<Int32>.Default;
         Comparer<Int64> longOrdering = Comparer<Int64>.Default;
         EqualityComparer<UInt32> uintEquality = EqualityComparer<UInt32>.Default;
