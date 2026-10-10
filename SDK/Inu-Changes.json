@@ -1,12 +1,11 @@
 {
-  "baseVersion": "0.0.125",
-  "version": "0.0.126",
+  "baseVersion": "0.0.126",
+  "version": "0.0.127",
   "changedFiles": [
     "TODO.md",
-    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
-    "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-    "Kath/docs/Release-0.0.126.md",
-    "CHANGED-0.0.126.txt",
+    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Inu.DotNetConformance.Tests.csproj",
+    "Kath/docs/Release-0.0.127.md",
+    "CHANGED-0.0.127.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -22,5 +21,5 @@
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "VERSION"
   ],
-  "summary": "Fix the full .NET 10 Boolean static-interface build contract by advertising RuntimeFeature.VirtualStaticsInInterfaces, retaining IParsable/ISpanParsable, and guarding the contract in the in-kernel conformance gate."
+  "summary": "Fix host-side .NET reference conformance by enabling nullable annotations so full .NET 10 Boolean nullable signatures compile without weakening the contract."
 }

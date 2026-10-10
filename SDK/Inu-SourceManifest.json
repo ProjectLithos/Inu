@@ -1,5 +1,5 @@
 {
-  "version": "0.0.126",
+  "version": "0.0.127",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -811,7 +811,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "489abd65730f906f012c3c1e0e6b0d41f30598bbfe32b600dfab9811763f723b"
+      "sha256": "856e6028e8e033f9d4148ce31b2eac0bdd8a427c186e21ff90ace24a4643894b"
     },
     {
       "path": "Directory.Build.targets",
@@ -919,7 +919,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "f93b0b201364056da49be1ea23a1b871c32cdeac874595d792889a0da5d17142"
+      "sha256": "66930df19cbd98cf4eaa0c7d9a0c27e678b00b8a6f46f7c04d9000deb5087203"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2971,7 +2971,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "eaff74ba2996ac797db64c29f174bd18c2b27a7cbf171fb23d1344c89412ab0b"
+      "sha256": "daad0a12d5aeee3925b90db9431227541a39c292ffaab23f9fe368f217043ac6"
     },
     {
       "path": "Inu-Package.bat",
@@ -3007,7 +3007,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "79a65677a19f4a1cc40644ed18ef8efc891e72b66ea953d086286eb6800372dc"
+      "sha256": "82087e86de8294b9c4222fdda8042d6bd3e287b12751131d6eed09dd865b59d0"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3519,7 +3519,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "5224c6cea39e64233a87e513933ef53ea34b2738de2fcba217469e9c37145698"
+      "sha256": "bc5c8f68d068af9e3cdb5fe3719832c0651bd2db4e9fcf56f9dc86f72335cf01"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -6063,7 +6063,7 @@
     },
     {
       "path": "tests/Inu.DotNetConformance.Tests/Inu.DotNetConformance.Tests.csproj",
-      "sha256": "B5A9B5CF4C9F7533ACBC432678191E61DBC29B25977FC1E847E340C1C2841E80"
+      "sha256": "0859765E4D413B69A95EEB1B0781FF23EB4058BFD4F9176EF64B539DF3F38275"
     },
     {
       "path": "tests/Inu.DotNetConformance.Tests/Program.cs",
