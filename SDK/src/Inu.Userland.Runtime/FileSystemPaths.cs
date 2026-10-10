@@ -92,7 +92,7 @@ public static unsafe class FileSystemPaths
             for(Int32 j=0;j<path.Length;j++)
             {
                 Char c=path[j];
-                if((c=='/'||c=='\\'||c==':')&&c!=separator)return false;
+                if(IsSeparatorLike(c)&&c!=separator)return false;
             }
             bytes+=(UInt32)path.Length;if(i+1<paths.Length)bytes++;
         }
@@ -104,6 +104,14 @@ public static unsafe class FileSystemPaths
             if(i+1<paths.Length)payload[offset++]=(Byte)0;
         }
         return UserlandSystem.Call(UserlandOperation.Set,"filesystem.commands-path",payload,bytes,null,0UL)>=0L;
+    }
+
+
+    private static Boolean IsSeparatorLike(Char value)
+    {
+        if(value==0||value>0x7F)return false;
+        if((value>='A'&&value<='Z')||(value>='a'&&value<='z')||(value>='0'&&value<='9'))return false;
+        return value!='.'&&value!='_'&&value!='-'&&value!=' ';
     }
 
     /// <summary><inu.api>Builds every executable candidate for a command using the configured command search directories. Each directory contributes an .EXE candidate followed by the extensionless candidate.</inu.api></summary>

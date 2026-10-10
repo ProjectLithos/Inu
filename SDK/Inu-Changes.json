@@ -1,8 +1,9 @@
 {
-  "baseVersion": "0.0.138",
-  "version": "0.0.139",
+  "baseVersion": "0.0.139",
+  "version": "0.0.140",
   "changedFiles": [
-    "CHANGED-0.0.139.txt",
+    "Build.ps1",
+    "CHANGED-0.0.140.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -14,16 +15,15 @@
     "Inu/SDK/src/Inu.UserlandCompiler/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
+    "Inu/tools/Install-Source.ps1",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
     "Kath/packages/kath/src/browser/inu-editor-environment.ts",
-    "Kath/packages/kath/src/browser/inu-problems-widget.tsx",
-    "Kath/packages/kath/src/browser/style/inu.css",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Add INU1007 live/build/runtime path-separator validation and visually distinguish source-navigable Kath Problems entries from non-clickable build summaries."
+  "summary": "Make path-separator diagnostics follow the coder-selected separator generically and preserve the authoritative root TODO.md through clean builds."
 }

@@ -112,7 +112,7 @@ static bool ValidateLiteralPathPolicy(string sourcePath)
     {
         string token=match.Groups[1].Value;
         char value=token==@"\\"?'\\':token==@"\'"?'\'':token.Length==1?token[0]:'\0';
-        if(value is ':' or '/' or '\\')separators.Add((match.Index,value));
+        if(value!='\0')separators.Add((match.Index,value));
     }
 
     bool valid=true;
@@ -147,17 +147,25 @@ static bool ValidateLiteralPathPolicy(string sourcePath)
                 {
                     if(text[i+1]=='\\')
                     {
-                        if(separator!='\\')ReportInvalidSeparator(sourcePath,text,i,separator,'\\',ref valid);
+                        if(IsSeparatorLike('\\')&&separator!='\\')ReportInvalidSeparator(sourcePath,text,i,separator,'\\',ref valid);
                         i++;continue;
                     }
                     i++;continue;
                 }
                 if(c=='\"'){inString=false;continue;}
             }
-            if((c is ':' or '/' or '\\')&&c!=separator)ReportInvalidSeparator(sourcePath,text,i,separator,c,ref valid);
+            if(IsSeparatorLike(c)&&c!=separator)ReportInvalidSeparator(sourcePath,text,i,separator,c,ref valid);
         }
     }
     return valid;
+}
+
+
+static bool IsSeparatorLike(char value)
+{
+    if(value==0||value>0x7F)return false;
+    if((value>='A'&&value<='Z')||(value>='a'&&value<='z')||(value>='0'&&value<='9'))return false;
+    return value!='.'&&value!='_'&&value!='-'&&value!=' ';
 }
 
 static void ReportInvalidSeparator(string sourcePath,string text,int index,char separator,char invalid,ref bool valid)

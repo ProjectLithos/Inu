@@ -90,7 +90,7 @@ function Remove-KnownObsolete([string]$root) {
 
     # This is the dedicated Kath&Inu product root. Keep only the supported
     # root contract. Hidden Git metadata is preserved when present.
-    $keepRoot = @('Build.bat','Build.ps1','Run-Kath.bat','Version.bat','Version.ps1','VERSION','Inu','Kath','.git')
+    $keepRoot = @('Build.bat','Build.ps1','Run-Kath.bat','Version.bat','Version.ps1','VERSION','TODO.md','Inu','Kath','.git')
     Get-ChildItem -LiteralPath $root -Force -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -notin $keepRoot } |
         ForEach-Object {
@@ -188,7 +188,7 @@ if ($SourceRoot -ine $DestinationRoot) {
     Info "Mirroring Kath $release into $destKath"
     Invoke-Mirror $sourceKath $destKath @('.git','.toolchain','node_modules','Bin','Artifacts','.browser_modules',(Join-Path $destKath 'packages\kath\lib'),(Join-Path $destKath 'applications\electron\lib'),(Join-Path $destKath 'applications\electron\src-gen'),(Join-Path $sourceKath 'packages\kath\lib'),(Join-Path $sourceKath 'applications\electron\lib'),(Join-Path $sourceKath 'applications\electron\src-gen'))
     Copy-Item -LiteralPath (Join-Path $SourceRoot 'VERSION') -Destination (Join-Path $DestinationRoot 'VERSION') -Force
-    foreach ($rootFile in @('Build.bat','Build.ps1','Run-Kath.bat','Version.bat','Version.ps1')) {
+    foreach ($rootFile in @('Build.bat','Build.ps1','Run-Kath.bat','Version.bat','Version.ps1','TODO.md')) {
         $sourceRootFile = Join-Path $SourceRoot $rootFile
         if (Test-Path -LiteralPath $sourceRootFile -PathType Leaf) {
             Copy-Item -LiteralPath $sourceRootFile -Destination (Join-Path $DestinationRoot $rootFile) -Force

@@ -113,7 +113,7 @@ public static unsafe partial class FileSystemPathPolicyRuntime
                 if(componentLength==0U||i+1==input.Length)return false;
                 componentLength=0U;value.Append('/');continue;
             }
-            if((c=='/'||c=='\\'||c==':')&&c!=separator)return false;
+            if(IsSeparatorLike(c)&&c!=separator)return false;
             if(!ValidComponentChar(c)||++componentLength>_maximumComponentLength)return false;
             value.Append(c);
         }
@@ -155,9 +155,9 @@ public static unsafe partial class FileSystemPathPolicyRuntime
                 output[i]=(Byte)'/';
                 continue;
             }
-            // The selected separator is the only external joiner. Other common path joiners
-            // are rejected rather than being accepted as ordinary component characters.
-            if((b==(Byte)'/'||b==(Byte)'\\'||b==(Byte)':')&&b!=separator)return false;
+            // The selected separator is the only external joiner. Separator-like punctuation
+            // that differs from the selected separator is rejected rather than treated as a component character.
+            if(IsSeparatorLike((Char)b)&&b!=separator)return false;
             if(!ValidComponentChar((Char)b)||++componentLength>_maximumComponentLength)return false;
             output[i]=b;
         }
@@ -172,6 +172,14 @@ public static unsafe partial class FileSystemPathPolicyRuntime
         Byte separator=(Byte)_separator;
         for(UInt32 i=0U;i<canonicalLength;i++)output[i]=canonical[i]==(Byte)'/'?separator:canonical[i];
         outputLength=canonicalLength;return true;
+    }
+
+
+    private static Boolean IsSeparatorLike(Char value)
+    {
+        if(value==0||value>0x7F)return false;
+        if((value>='A'&&value<='Z')||(value>='a'&&value<='z')||(value>='0'&&value<='9'))return false;
+        return value!='.'&&value!='_'&&value!='-'&&value!=' ';
     }
 
     private static Boolean ValidComponentChar(Char c)
