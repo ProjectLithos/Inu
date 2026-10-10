@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -815,7 +815,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "c864539820003a1d5a43103891a0b0aa1a1318649ef67d595d37c7939f2060e4"
+      "sha256": "c43bcf86c9fcbffe725c35e8210f54984f3a998608054aaf44c9749d23be9b16"
     },
     {
       "path": "Directory.Build.targets",
@@ -923,7 +923,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "cb1bbbe09dbb735fa442d8b80b7ea7f8249031870fb82febd67af4745eb2701c"
+      "sha256": "212877ab031588402f388408e6a62d6fc6c8655126a7f6edd3566ae89c71990f"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1075,7 +1075,7 @@
     },
     {
       "path": "docs/Release-0.1.1.md",
-      "sha256": "D14412977F61409508288D38E93B3ACDEBE5585B00870403AA4F6136D9D4E2D1"
+      "sha256": "1BD0FF3447F1D4A74BF4F7EA542B0CB6C36C3A6D4810CE8FC078BA85F1EDA2E8"
     },
     {
       "path": "docs/Release-0.1.2.md",
@@ -2979,7 +2979,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "e2680b65fe0cc927f1139a0658ea1fbcf5175f88b4f83b07681d266befd575c5"
+      "sha256": "fe920d66487b03425ec253e2dd21066e37b21044c711170784fc41b40d1ed63e"
     },
     {
       "path": "Inu-Package.bat",
@@ -3015,7 +3015,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "7bdd4a048f8613663f26f6265e8c58e21e959397f88b3de2eaba9656da994124"
+      "sha256": "4c0f4ca8315a7909faefce1fcd068ec0608759c5d632dfbecb31e1c8dab1c8f3"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3527,7 +3527,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "bd6294857b4235f4c52ca3d3559c9dcd3e16d25fb2a180d772ba2066a6b51076"
+      "sha256": "d48d857c0e2ea04ada375bab78beb7fecead3f9feb144e6413fe709416885178"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5599,7 +5599,7 @@
     },
     {
       "path": "src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-      "sha256": "EAAEEF12C8ACF81E94669F034810BA697B0F549C71E77DC5AFABCAF261C77BE0"
+      "sha256": "31999AB64E695F9785AE590B84ACFE134376111F4A49172A9BB7FBA85914F67E"
     },
     {
       "path": "src/Inu.Runtime.Contracts/Inu.Runtime.Contracts.csproj",
