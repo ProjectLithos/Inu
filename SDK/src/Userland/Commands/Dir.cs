@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Inu.Userland.Runtime;
 namespace Inu.Userland.Commands;
 public static class Dir
 {
-    public static int Main()
+    public static int Main(string[] args)
     {
-        String path=CommandLine.GetRawArguments();
-        if(String.IsNullOrWhiteSpace(path))path=Directory.GetCurrentDirectory();
+        if(args.Length>1){Console.WriteLine("Usage: dir [path]");return 1;}
+        String path=args.Length==0?Directory.GetCurrentDirectory():args[0];
         try
         {
             String[] entries=Directory.GetFileSystemEntries(path);

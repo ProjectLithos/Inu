@@ -77,7 +77,9 @@ static int MainEntry(string[] args)
         foreach(string source in Directory.GetFiles(commands,"*.cs",SearchOption.TopDirectoryOnly).OrderBy(Path.GetFileName,StringComparer.OrdinalIgnoreCase))
         {
             string? type=FindTypeWithMethod(source,"Main");if(type is null)return Fail($"Command source has no public static Main: {source}");
-            string body=HasStringArrayMain(source,type)?$"return global::{type}.Main(global::System.Array.Empty<string>());":$"return global::{type}.Main();"; // Raw argv/environment remain available through Inu.Userland.Runtime.UserlandArguments.
+            Boolean withArguments=HasStringArrayMain(source,type),returnsVoid=MainReturnsVoid(source);
+            string invocation=withArguments?$"global::{type}.Main(global::Inu.Userland.Runtime.CommandLine.GetArguments())":$"global::{type}.Main()";
+            string body=returnsVoid?$"{invocation}; return 0;":$"return {invocation};";
             List<string> sources=[source];
             // The generated GUI command is a normal executable and may include the coder GUI entry source.
             if(string.Equals(Path.GetFileNameWithoutExtension(source),"Gui",StringComparison.OrdinalIgnoreCase))
@@ -103,35 +105,29 @@ static int CompileApp(string name,IReadOnlyList<string> sources,string callBody,
 {
     string work=Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(output)!)!,"Build",Sanitize(name));
     Directory.CreateDirectory(work);Directory.CreateDirectory(Path.GetDirectoryName(output)!);
-    string entry=Path.Combine(work,"AppEntry.cs");
-    File.WriteAllText(entry,$$"""
+    string entry=Path.Combine(sdkRoot,"templates","Userland","UserApplicationEntry.cs");
+    if(!File.Exists(entry))return Fail($"Shared userland entry wrapper is missing: {entry}");
+    string binding=Path.Combine(work,"ApplicationEntryBinding.cs");
+    File.WriteAllText(binding,$$"""
 using System;
-using System.Runtime;
-using Inu.Runtime.NativeAot;
 using Inu.Userland.Runtime;
 
-internal static unsafe class InuUserApplicationEntry
+internal static class InuUserApplicationBinding
 {
-{{(shellLifecycle ? "    private static Boolean _configured;\n" : String.Empty)}}    [RuntimeExport("InuUserManagedEntry")]
-    private static Int32 Entry(UInt64 imageBase, UInt64 readyToRunHeader)
+{{(shellLifecycle ? "    private static Boolean _configured;\n" : String.Empty)}}    internal static Int32 Invoke()
     {
-        if(!NativeAotRuntime.Initialize()||imageBase==0UL||readyToRunHeader==0UL)return -100;
-        IntPtr* modules=stackalloc IntPtr[1];modules[0]=(IntPtr)(void*)(nuint)readyToRunHeader;
-        global::Internal.Runtime.CompilerHelpers.StartupCodeHelpers.InitializeModules((IntPtr)(void*)(nuint)imageBase,modules,1,null,0);
-        if(!NativeAotExceptionRuntime.ConfigureImageBase(imageBase))return -101;
-        Int32 code=Run();UserlandProcess.Exit(code);return code;
+        {{callBody}}
     }
-    private static Int32 Run(){ {{callBody}} }
 }
 """);
     string project=Path.Combine(work,"App.csproj");
     StringBuilder xml=new();xml.AppendLine("<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><OutputType>Library</OutputType><TargetFramework>net10.0</TargetFramework><AllowUnsafeBlocks>true</AllowUnsafeBlocks><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable><DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences><NoStdLib>true</NoStdLib><NoConfig>true</NoConfig><RuntimeMetadataVersion>v4.0.30319</RuntimeMetadataVersion><GenerateAssemblyInfo>false</GenerateAssemblyInfo><GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute><DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences><EnableDefaultItems>false</EnableDefaultItems><AssemblyName>Inu.UserApp."+Sanitize(name)+"</AssemblyName></PropertyGroup><ItemGroup>");
-    xml.AppendLine($"<Compile Include=\"{Esc(entry)}\" Link=\"AppEntry.cs\" />");int index=0;foreach(string source in sources)xml.AppendLine($"<Compile Include=\"{Esc(Path.GetFullPath(source))}\" Link=\"Source{index++}.cs\" />");
+    xml.AppendLine($"<Compile Include=\"{Esc(entry)}\" Link=\"Runtime/UserApplicationEntry.cs\" />");xml.AppendLine($"<Compile Include=\"{Esc(binding)}\" Link=\"Generated/ApplicationEntryBinding.cs\" />");int index=0;foreach(string source in sources)xml.AppendLine($"<Compile Include=\"{Esc(Path.GetFullPath(source))}\" Link=\"Source{index++}.cs\" />");
     foreach(string reference in new[]{"Inu.Freestanding.CoreLib","Inu.Userland.RuntimeSupport","Inu.Runtime.UserlandNativeAot","Inu.Userland.Runtime"})xml.AppendLine($"<ProjectReference Include=\"{Esc(Path.Combine(sdkRoot,"src",reference,reference+".csproj"))}\" />");
     xml.AppendLine("</ItemGroup></Project>");File.WriteAllText(project,xml.ToString());
     string managed=Path.Combine(work,"Managed");Directory.CreateDirectory(managed);
     string[] buildArgs=["build",project,"--configuration",configuration,"--output",managed,"--nologo","-p:PublishAot=false","-p:SelfContained=false"];
-    int rc=UserlandStageCache.Run(name+" managed IL",cacheDirectory,sources.Concat([entry,project]),[managed],buildArgs.Concat([sharedIdentity]),force,()=>{if(Directory.Exists(managed))Directory.Delete(managed,true);Directory.CreateDirectory(managed);return Run(dotnet,buildArgs,work);});if(rc!=0)return Fail($"Managed userland build failed for {name} with exit code {rc}.");
+    int rc=UserlandStageCache.Run(name+" managed IL",cacheDirectory,sources.Concat([entry,binding,project]),[managed],buildArgs.Concat([sharedIdentity]),force,()=>{if(Directory.Exists(managed))Directory.Delete(managed,true);Directory.CreateDirectory(managed);return Run(dotnet,buildArgs,work);});if(rc!=0)return Fail($"Managed userland build failed for {name} with exit code {rc}.");
     string[] dlls=Directory.GetFiles(managed,"*.dll").OrderBy(x=>x,StringComparer.OrdinalIgnoreCase).ToArray();if(dlls.Length==0)return Fail($"Managed userland build produced no assemblies for {name}.");
     string native=Path.Combine(work,name+".obj");List<string> ilcArgs=[..dlls,$"-o:{native}","--systemmodule","System.Private.CoreLib","--targetos:win","--targetarch:x64","--nativelib","--directpinvoke:*","--noscan","--root","Inu.Runtime.UserlandNativeAot","--root","Inu.Userland.Runtime","--scanreflection","--nopreinitstatics"];
     rc=UserlandStageCache.Run(name+" NativeAOT",cacheDirectory,dlls,[native],ilcArgs.Concat([ilcIdentity]),force,()=>Run(ilc,ilcArgs,sdkRoot));if(rc!=0)return Fail($"NativeAOT userland compilation failed for {name} with exit code {rc}.");
@@ -170,6 +166,7 @@ static string? FindTypeWithMethod(string file,string method)
     string s=File.ReadAllText(file);Match ns=Regex.Match(s,@"\bnamespace\s+([A-Za-z_][A-Za-z0-9_.]*)\s*[;{]");MatchCollection types=Regex.Matches(s,@"\b(?:public\s+)?static\s+(?:(?:unsafe|partial)\s+)*class\s+([A-Za-z_][A-Za-z0-9_]*)");foreach(Match type in types){int pos=type.Index+type.Length;if(Regex.IsMatch(s[pos..],$@"\b{Regex.Escape(method)}\s*\("))return (ns.Success?ns.Groups[1].Value+".":"")+type.Groups[1].Value;}return null;
 }
 static bool HasStringArrayMain(string file,string type)=>Regex.IsMatch(File.ReadAllText(file),@"\bMain\s*\(\s*(?:string|String)\s*\[\s*\]\s+[A-Za-z_]");
+static bool MainReturnsVoid(string file)=>Regex.IsMatch(File.ReadAllText(file),@"\b(?:public\s+)?static\s+(?:void|Void)\s+Main\s*\(");
 static bool HasPromptMember(string file)=>Regex.IsMatch(File.ReadAllText(file),@"\b(?:const\s+)?(?:string|String)\s+Prompt\b");
 static string Sanitize(string value)=>Regex.Replace(value,@"[^A-Za-z0-9_.-]","_");
 static string Esc(string value)=>value.Replace("&","&amp;").Replace("\"","&quot;");

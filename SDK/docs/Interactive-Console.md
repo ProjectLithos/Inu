@@ -38,3 +38,7 @@ The optional stock `console` command gives the same controls to the end user:
 RGB components are decimal values from 0 to 255.
 
 Ctrl+1/2/3 still force framebuffer buffering modes, and Alt+1/2/3 select font-size presets.
+
+## Generated HAL routing
+
+The generated `InputHardwareStartup` must not consume navigation keys. PS/2 and USB HID Page Up/Page Down are routed to retained framebuffer scrollback, while Up/Down/Left/Right/Home/End/Delete are encoded as terminal-editing input and delivered to the foreground shell process. This keeps generated OSes on the same input contract as Inu's central bootstrap path.

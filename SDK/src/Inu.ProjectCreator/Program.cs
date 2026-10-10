@@ -580,17 +580,19 @@ static void MigrateGeneratedCommandSurface(string output, string projectName, st
 {
     string root = Path.Combine(output, "Userland", SafeProjectSegment(projectName), "Commands");
     if (!Directory.Exists(root)) return;
-    foreach (string name in new[] { "Echo.cs", "SysInfo.cs" })
+
+    foreach (string destination in Directory.EnumerateFiles(root, "*.cs", SearchOption.TopDirectoryOnly))
     {
-        string destination = Path.Combine(root, name); string canonical = Path.Combine(sdkRoot, "src", "Userland", "Commands", name);
-        if (!File.Exists(destination) || !File.Exists(canonical)) continue;
         string current = File.ReadAllText(destination);
-        if (!current.Contains("UserlandSystem.Call", StringComparison.Ordinal) && !current.Contains("UserlandArguments.ReadRaw", StringComparison.Ordinal)) continue;
-        string ns = "Inu.Userland.Commands";
-        foreach (string line in current.Split('\n')) { string t=line.Trim(); if(t.StartsWith("namespace ",StringComparison.Ordinal)&&t.EndsWith(";",StringComparison.Ordinal)){ns=t[10..^1].Trim();break;} }
-        string replacement = File.ReadAllText(canonical).Replace("namespace Inu.Userland.Commands;", $"namespace {ns};", StringComparison.Ordinal);
-        File.WriteAllText(destination, replacement);
-        Console.WriteLine($"[ OK ] Migrated stock command source to high-level SDK APIs: {destination}");
+        Match currentNamespace = Regex.Match(current, @"\bnamespace\s+(KathInu\.[A-Za-z_][A-Za-z0-9_]*\.Userland\.Commands)\s*;");
+        if (!currentNamespace.Success) continue;
+
+        // Kath generated this OS-name namespace for stock commands in older projects.
+        // Only the namespace declaration changes; the coder-owned command body is preserved byte-for-byte otherwise.
+        string migrated = current.Remove(currentNamespace.Groups[1].Index, currentNamespace.Groups[1].Length)
+                                 .Insert(currentNamespace.Groups[1].Index, "Inu.Userland.Commands");
+        File.WriteAllText(destination, migrated);
+        Console.WriteLine($"[ OK ] Migrated command namespace to reusable Inu.Userland.Commands: {destination}");
     }
 }
 

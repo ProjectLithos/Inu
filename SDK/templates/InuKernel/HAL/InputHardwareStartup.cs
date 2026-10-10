@@ -143,7 +143,9 @@ public static unsafe class InputHardwareStartup
 #endif
         if (!input.Pressed) return true;
         if (input.Control && input.Key == Ps2Key.C) return UserlandRuntimeStartup.HandleControlC();
-        if (IsPs2NavigationKey(input.Key)) return true;
+        if (input.Key == Ps2Key.PageUp) return KernelConsole.ScrollPageUp();
+        if (input.Key == Ps2Key.PageDown) return KernelConsole.ScrollPageDown();
+        if (TryMapPs2Navigation(input.Key, out Byte navigationCode)) return UserlandRuntimeStartup.QueueInputCode(navigationCode);
         if (input.Control && input.Key == Ps2Key.D1) return KernelConsole.SetFramebufferBufferCount(1U);
         if (input.Control && input.Key == Ps2Key.D2) return KernelConsole.SetFramebufferBufferCount(2U);
         if (input.Control && input.Key == Ps2Key.D3) return KernelConsole.SetFramebufferBufferCount(3U);
@@ -153,9 +155,13 @@ public static unsafe class InputHardwareStartup
         return UserlandRuntimeStartup.QueueCharacter(input.Character);
     }
 
-    private static Boolean IsPs2NavigationKey(Ps2Key key) =>
-        key == Ps2Key.PageUp || key == Ps2Key.PageDown || key == Ps2Key.Up || key == Ps2Key.Down ||
-        key == Ps2Key.Left || key == Ps2Key.Right || key == Ps2Key.Home || key == Ps2Key.End || key == Ps2Key.Delete;
+    private static Boolean TryMapPs2Navigation(Ps2Key key, out Byte code)
+    {
+        code=0U;
+        if(key==Ps2Key.Up)code=0x80U;else if(key==Ps2Key.Down)code=0x81U;else if(key==Ps2Key.Left)code=0x82U;else if(key==Ps2Key.Right)code=0x83U;
+        else if(key==Ps2Key.Home)code=0x84U;else if(key==Ps2Key.End)code=0x85U;else if(key==Ps2Key.Delete)code=0x86U;
+        return code!=0U;
+    }
 
 #if INU_KERNELAREA_USB
     private static Boolean HandleUsbKeyboardEvent(UsbHidKeyboardEvent input)
@@ -165,7 +171,9 @@ public static unsafe class InputHardwareStartup
         if (KernelGui.IsInitialized() && KernelGui.HandleKeyboard(input.Usage,input.Character,input.Pressed,guiModifiers)) return true;
 #endif
         if (!input.Pressed) return true;
-        if (IsUsbNavigationKey(input.Usage)) return true;
+        if (input.Usage == 75U) return KernelConsole.ScrollPageUp();
+        if (input.Usage == 78U) return KernelConsole.ScrollPageDown();
+        if (TryMapUsbNavigation(input.Usage, out Byte navigationCode)) return UserlandRuntimeStartup.QueueInputCode(navigationCode);
         Boolean control = (input.Modifiers & 0x11U) != 0U;
         Boolean alt = (input.Modifiers & 0x44U) != 0U;
         if (control && input.Usage == 6U) return UserlandRuntimeStartup.HandleControlC();
@@ -178,7 +186,13 @@ public static unsafe class InputHardwareStartup
         return UserlandRuntimeStartup.QueueCharacter(input.Character);
     }
 
-    private static Boolean IsUsbNavigationKey(Byte usage) => usage >= 74U && usage <= 82U;
+    private static Boolean TryMapUsbNavigation(Byte usage, out Byte code)
+    {
+        code=0U;
+        if(usage==82U)code=0x80U;else if(usage==81U)code=0x81U;else if(usage==80U)code=0x82U;else if(usage==79U)code=0x83U;
+        else if(usage==74U)code=0x84U;else if(usage==77U)code=0x85U;else if(usage==76U)code=0x86U;
+        return code!=0U;
+    }
 
 #endif
 #endif

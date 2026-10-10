@@ -1,38 +1,12 @@
 using System;
 using System.IO;
-using Inu.Userland.Runtime;
-
 namespace Inu.Userland.Commands;
-
-/// <summary>Compatibility text-file viewer command.</summary>
 public static class Type
 {
-    public static int Main()
+    public static int Main(string[] args)
     {
-        String path = CommandLine.GetRawArguments();
-        if (String.IsNullOrWhiteSpace(path))
-        {
-            Console.WriteLine("Usage: type <file>");
-            return 1;
-        }
-
-        Int32 start = 0;
-        Int32 end = path.Length;
-        while (start < end && path[start] == ' ') start++;
-        while (end > start && path[end - 1] == ' ') end--;
-        path = path.Substring(start, end - start);
-        if (path.Length >= 2 && path[0] == '"' && path[path.Length - 1] == '"')
-            path = path.Substring(1, path.Length - 2);
-
-        try
-        {
-            Console.Write(File.ReadAllText(path));
-            return 0;
-        }
-        catch (Exception)
-        {
-            Console.WriteLine("Could not read file: " + path);
-            return 1;
-        }
+        if(args.Length!=1){Console.WriteLine("Usage: type <file>");return 1;}
+        try{Console.Write(File.ReadAllText(args[0]));return 0;}
+        catch(Exception){Console.WriteLine("Could not read file: "+args[0]);return 1;}
     }
 }

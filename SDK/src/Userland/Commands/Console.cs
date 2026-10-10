@@ -6,11 +6,8 @@ namespace Inu.Userland.Commands;
 /// <summary>Lets the end user inspect and change text-console colours and caret presentation.</summary>
 public static class ConsoleSettings
 {
-    public static int Main()
+    public static int Main(string[] args)
     {
-        String raw=CommandLine.GetRawArguments();
-        if(String.IsNullOrWhiteSpace(raw)){Show();return 0;}
-        String[] args=Tokenize(raw);
         if(args.Length==0){Show();return 0;}
 
         Byte a,b,c,d,e,f;
@@ -57,10 +54,5 @@ public static class ConsoleSettings
     private static Boolean AsciiLowerEquals(String a,String b){if(a==null||b==null||a.Length!=b.Length)return false;for(Int32 i=0;i<a.Length;i++){Char x=a[i],y=b[i];if(x>='A'&&x<='Z')x=(Char)(x+32);if(y>='A'&&y<='Z')y=(Char)(y+32);if(x!=y)return false;}return true;}
     private static Boolean TryByte(String text,out Byte value){value=0;UInt32 parsed;if(!TryUInt(text,out parsed)||parsed>255U)return false;value=(Byte)parsed;return true;}
     private static Boolean TryUInt(String text,out UInt32 value){value=0U;if(String.IsNullOrEmpty(text))return false;for(Int32 i=0;i<text.Length;i++){Char c=text[i];if(c<'0'||c>'9')return false;UInt32 digit=(UInt32)(c-'0');if(value>(UInt32.MaxValue-digit)/10U)return false;value=value*10U+digit;}return true;}
-    private static String[] Tokenize(String text)
-    {
-        String[] temp=new String[8];Int32 count=0,index=0;
-        while(index<text.Length&&count<temp.Length){while(index<text.Length&&text[index]==' ')index++;if(index>=text.Length)break;Int32 start=index;while(index<text.Length&&text[index]!=' ')index++;temp[count++]=text.Substring(start,index-start);}
-        String[] result=new String[count];for(Int32 i=0;i<count;i++)result[i]=temp[i];return result;
-    }
+
 }
