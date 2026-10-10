@@ -42,6 +42,8 @@ internal Boolean Initialize<TBoot>(TBoot boot, UInt32 fontSize) where TBoot : IB
         _redMask = redMask;
         _greenMask = greenMask;
         _blueMask = blueMask;
+        _foregroundRgb = 0xE8F0F8U;
+        _backgroundRgb = 0x091018U;
         _foreground = PackColor(232, 240, 248);
         _background = PackColor(9, 16, 24);
         _historyStart = 0U;
@@ -59,8 +61,11 @@ internal Boolean Initialize<TBoot>(TBoot boot, UInt32 fontSize) where TBoot : IB
         _liveView = false;
         _liveFrameBatch = false;
         ResetLiveDirty();
-        _caretEnabled = false;
+        _caretEnabled = true;
         _caretVisible = false;
+        _caretActive = false;
+        _caretMode = 1U;
+        _caretHeightPercent = 8U;
         _caretTicks = 0U;
         ResetDirty();
         return ConfigureFont(fontSize);
@@ -76,7 +81,7 @@ internal Boolean ReconfigureFramebuffer(UInt64 address,UInt64 size,UInt32 width,
         if(!HideCaret())return false;
         UInt32 oldRequested=_automaticBuffering?0U:_bufferCount;UInt64 required=bytesPerScanLine*(UInt64)height;
         _address=address;_presenter=presenter;_size=size;_width=width;_height=height;_pitch=pitch;_pixelFormat=pixelFormat;_redMask=0U;_greenMask=0U;_blueMask=0U;
-        _foreground=PackColor(232,240,248);_background=PackColor(9,16,24);
+        _foreground=PackColor((Byte)(_foregroundRgb>>16),(Byte)(_foregroundRgb>>8),(Byte)_foregroundRgb);_background=PackColor((Byte)(_backgroundRgb>>16),(Byte)(_backgroundRgb>>8),(Byte)_backgroundRgb);
         _frameByteCount=required;_drawBuffer=_address;_availableBufferCount=1U;_bufferCount=1U;_automaticBuffering=oldRequested==0U;_batchUpdate=false;ResetDirty();ResetLiveDirty();
         if(!ConfigureFont(_fontSize))return false;
         if(_backBufferA!=0UL&&_backBufferB!=0UL&&_bufferStorageBytes>=required)
@@ -89,8 +94,31 @@ internal Boolean ReconfigureFramebuffer(UInt64 address,UInt64 size,UInt32 width,
 internal Boolean SetReadOnlyShade(Boolean enabled)
     {
         if(_caretVisible&&!HideCaret())return false;
-        _foreground=enabled?PackColor(138,151,164):PackColor(232,240,248);
+        _foreground=enabled?PackColor(138,151,164):PackColor((Byte)(_foregroundRgb>>16),(Byte)(_foregroundRgb>>8),(Byte)_foregroundRgb);
         return true;
+    }
+
+internal UInt32 GetForegroundRgb() => _foregroundRgb;
+internal UInt32 GetBackgroundRgb() => _backgroundRgb;
+
+internal Boolean SetForegroundRgb(UInt32 rgb)
+    {
+        if(rgb>0xFFFFFFU)return false;
+        if(!HideCaret())return false;
+        _foregroundRgb=rgb;
+        _foreground=PackColor((Byte)(rgb>>16),(Byte)(rgb>>8),(Byte)rgb);
+        if(!RedrawHistory())return false;
+        return Flush();
+    }
+
+internal Boolean SetBackgroundRgb(UInt32 rgb)
+    {
+        if(rgb>0xFFFFFFU)return false;
+        if(!HideCaret())return false;
+        _backgroundRgb=rgb;
+        _background=PackColor((Byte)(rgb>>16),(Byte)(rgb>>8),(Byte)rgb);
+        if(!RedrawHistory())return false;
+        return Flush();
     }
 
 internal Boolean Clear()

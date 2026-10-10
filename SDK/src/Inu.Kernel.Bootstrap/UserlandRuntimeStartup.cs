@@ -67,6 +67,17 @@ public static unsafe class UserlandRuntimeStartup
         if(!KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ConsoleInput,&ConsoleInputGet)||
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ConsoleOutput,&ConsoleOutputEvent)||
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ConsoleClear,&ConsoleClearEvent)||
+           !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ConsoleEditableInput,&ConsoleEditableInputEvent)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleEditableCursor,&ConsoleEditableCursorSet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ConsoleCaretMode,&ConsoleCaretModeGet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleCaretMode,&ConsoleCaretModeSet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ConsoleCaretHeight,&ConsoleCaretHeightGet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleCaretHeight,&ConsoleCaretHeightSet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleCaretActive,&ConsoleCaretActiveSet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ConsoleForegroundColor,&ConsoleForegroundColorGet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleForegroundColor,&ConsoleForegroundColorSet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ConsoleBackgroundColor,&ConsoleBackgroundColorGet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleBackgroundColor,&ConsoleBackgroundColorSet)||
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ProcessSpawn,&ProcessSpawnEvent)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessWait,&ProcessWaitGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessArguments,&ProcessArgumentsGet)||
@@ -104,6 +115,12 @@ public static unsafe class UserlandRuntimeStartup
         if(next==_inputRead)return false;
         fixed(Byte* input=_state.Input)input[_inputWrite]=value;
         _inputWrite=next;return true;
+    }
+
+    /// <summary>Queues one non-text console editing/navigation code (0x80-0xFF) for the foreground terminal process.</summary>
+    public static Boolean QueueInputCode(Byte value)
+    {
+        if(!_initialized||value<0x80U)return false;UInt32 next=(_inputWrite+1U)%InputCapacity;if(next==_inputRead)return false;fixed(Byte* input=_state.Input)input[_inputWrite]=value;_inputWrite=next;return true;
     }
 
     /// <summary>Cancels the current foreground ring-3 program. The shell is relaunched by the supervisor.</summary>
@@ -238,6 +255,26 @@ public static unsafe class UserlandRuntimeStartup
     }
 
     private static Int64 ConsoleClearEvent(KernelSystemCallFrame* frame)=>KernelConsole.ClearScreen()?0L:(Int64)KernelSystemCallError.Fault;
+
+    private static Int64 ConsoleEditableInputEvent(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.DataLength>1023UL||frame->NativeMessage.Value0>1023UL||frame->NativeMessage.Value1>frame->NativeMessage.DataLength)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt32 length=(UInt32)frame->NativeMessage.DataLength;Byte* buffer=stackalloc Byte[1024];
+        if(length!=0U&&!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)buffer,length))return (Int64)KernelSystemCallError.Fault;
+        return KernelConsole.ReplaceEditableInput(buffer,(UInt32)frame->NativeMessage.Value0,length,(UInt32)frame->NativeMessage.Value1)?0L:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 ConsoleEditableCursorSet(KernelSystemCallFrame* frame)
+        => frame!=null&&frame->NativeMessage.Value0<=1023UL&&frame->NativeMessage.Value1<=frame->NativeMessage.Value0&&KernelConsole.SetEditableInputCursor((UInt32)frame->NativeMessage.Value0,(UInt32)frame->NativeMessage.Value1)?0L:(Int64)KernelSystemCallError.InvalidArgument;
+    private static Int64 ConsoleCaretModeGet(KernelSystemCallFrame* frame)=>(Int64)KernelConsole.GetCaretMode();
+    private static Int64 ConsoleCaretModeSet(KernelSystemCallFrame* frame)=>frame!=null&&KernelConsole.SetCaretMode((UInt32)frame->NativeMessage.Value0)?0L:(Int64)KernelSystemCallError.InvalidArgument;
+    private static Int64 ConsoleCaretHeightGet(KernelSystemCallFrame* frame)=>(Int64)KernelConsole.GetCaretHeightPercent();
+    private static Int64 ConsoleCaretHeightSet(KernelSystemCallFrame* frame)=>frame!=null&&KernelConsole.SetCaretHeightPercent((UInt32)frame->NativeMessage.Value0)?0L:(Int64)KernelSystemCallError.InvalidArgument;
+    private static Int64 ConsoleCaretActiveSet(KernelSystemCallFrame* frame)=>frame!=null&&KernelConsole.SetCaretActive(frame->NativeMessage.Value0!=0UL)?0L:(Int64)KernelSystemCallError.Fault;
+    private static Int64 ConsoleForegroundColorGet(KernelSystemCallFrame* frame)=>(Int64)KernelConsole.GetForegroundRgb();
+    private static Int64 ConsoleForegroundColorSet(KernelSystemCallFrame* frame)=>frame!=null&&KernelConsole.SetForegroundRgb((UInt32)frame->NativeMessage.Value0)?0L:(Int64)KernelSystemCallError.InvalidArgument;
+    private static Int64 ConsoleBackgroundColorGet(KernelSystemCallFrame* frame)=>(Int64)KernelConsole.GetBackgroundRgb();
+    private static Int64 ConsoleBackgroundColorSet(KernelSystemCallFrame* frame)=>frame!=null&&KernelConsole.SetBackgroundRgb((UInt32)frame->NativeMessage.Value0)?0L:(Int64)KernelSystemCallError.InvalidArgument;
 
     private static Int64 ProcessSpawnEvent(KernelSystemCallFrame* frame)
     {

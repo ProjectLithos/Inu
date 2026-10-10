@@ -95,7 +95,7 @@ internal Boolean Backspace()
             if(_cursorX>=right)return true;
             if(eraseWidth>right-_cursorX)eraseWidth=right-_cursorX;
             if(!FillRectangle(_cursorX,_cursorY,eraseWidth,_lineHeight,_background))return false;
-            if(_caretEnabled)
+            if(_caretEnabled&&_caretActive&&_caretMode!=0U)
             {
                 if(!DrawCaret(_foreground))return false;
                 _caretVisible=true;_caretTicks=0U;
@@ -121,7 +121,7 @@ internal Boolean Flush()
         // single authoritative present.
         if (_batchUpdate) return true;
         if (!DrawScrollbar()) return false;
-        if (_caretEnabled && _scrollLinesFromBottom == 0U && !_caretVisible)
+        if (_caretEnabled && _caretActive && _caretMode != 0U && _scrollLinesFromBottom == 0U && !_caretVisible)
         {
             if (!DrawCaret(_foreground)) return false;
             _caretVisible = true;
@@ -133,13 +133,32 @@ internal Boolean SetCaretEnabled(Boolean enabled)
     {
         if (!HideCaret()) return false;
         _caretEnabled = enabled;
+        _caretActive = enabled && _caretActive;
         _caretTicks = 0U;
         return Flush();
     }
 
+internal UInt32 GetCaretMode()=>_caretMode;
+internal UInt32 GetCaretHeightPercent()=>_caretHeightPercent;
+
+internal Boolean SetCaretMode(UInt32 mode)
+    {
+        if(mode>2U)return false;if(!HideCaret())return false;_caretMode=mode;_caretEnabled=mode!=0U;_caretTicks=0U;return Flush();
+    }
+
+internal Boolean SetCaretHeightPercent(UInt32 percent)
+    {
+        if(percent<1U||percent>100U)return false;if(!HideCaret())return false;_caretHeightPercent=percent;_caretTicks=0U;return Flush();
+    }
+
+internal Boolean SetCaretActive(Boolean active)
+    {
+        if(!HideCaret())return false;_caretActive=active;_caretTicks=0U;return Flush();
+    }
+
 internal Boolean TickCaret()
     {
-        if (!_caretEnabled || _scrollLinesFromBottom != 0U) return true;
+        if (!_caretEnabled || !_caretActive || _caretMode != 1U || _scrollLinesFromBottom != 0U) return true;
         _caretTicks++;
         if (_caretTicks < CaretBlinkTicks) return true;
         _caretTicks = 0U;

@@ -90,10 +90,15 @@ private Boolean HideCaret()
 private Boolean DrawCaret(UInt32 color)
     {
         if (_cursorX >= GetTextRight() || _cursorY >= _height) return true;
-        UInt32 caretWidth = _glyphWidth >= 12U ? 2U : 1U;
-        UInt32 caretHeight = _fontSize;
-        if (_cursorX + caretWidth > GetTextRight()) caretWidth = 1U;
-        return FillRectangle(_cursorX, _cursorY, caretWidth, caretHeight, color);
+        UInt32 percent=_caretHeightPercent<1U?1U:(_caretHeightPercent>100U?100U:_caretHeightPercent);
+        UInt32 caretHeight=(UInt32)(((UInt64)_fontSize*percent+99UL)/100UL);
+        if(caretHeight<1U)caretHeight=1U;if(caretHeight>_fontSize)caretHeight=_fontSize;
+        UInt32 caretWidth=_characterAdvance==0U?_glyphWidth:_characterAdvance;
+        UInt32 right=GetTextRight();if(caretWidth>right-_cursorX)caretWidth=right-_cursorX;if(caretWidth==0U)return true;
+        UInt32 top=_cursorY+(_fontSize-caretHeight);UInt32 bottom=top+caretHeight;if(bottom>_height)bottom=_height;
+        UInt32 mask=_pixelFormat==2U?(_redMask|_greenMask|_blueMask):0x00FFFFFFU;if(mask==0U)mask=0x00FFFFFFU;
+        UInt32* pixels=(UInt32*)GetRenderAddress();for(UInt32 y=top;y<bottom;y++){UInt64 row=(UInt64)y*_pitch;for(UInt32 x=_cursorX;x<_cursorX+caretWidth;x++){UInt64 index=row+x;if(index>=_size/4UL)return false;pixels[index]^=mask;}}
+        MarkDirtyRectangle(_cursorX,top,caretWidth,bottom-top);return true;
     }
 
 private Boolean DrawScrollbar()

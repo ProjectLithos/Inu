@@ -1,5 +1,5 @@
 {
-  "version": "0.0.128",
+  "version": "0.0.133",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -208,6 +208,10 @@
     {
       "path": "Assets/System/Help/CMDS.MAN",
       "sha256": "6A3D2FD038DDF303CB25D4E5AA92684AFB021B332F88E4BAD2E652DD355C44F6"
+    },
+    {
+      "path": "Assets/System/Help/CONSOLE.MAN",
+      "sha256": "B8A79ACDEBAE57A51322789313121B1ABBB6C5760CE0565D06BDD2B2772FA18A"
     },
     {
       "path": "Assets/System/Help/COPY.MAN",
@@ -811,7 +815,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "5addec0241fc2c307745828133bd7b78f8197531a579a4a30a8b1d17dd5c97c5"
+      "sha256": "f76bf97d44c6bd9b28847cc644c73b44a7748add54015b2d108d12b954818bf2"
     },
     {
       "path": "Directory.Build.targets",
@@ -863,7 +867,7 @@
     },
     {
       "path": "docs/Console-Interaction.md",
-      "sha256": "9AEEB31B7DF0594BF128F5B81B97B4D84DC5EBC7BA0DA7B9C5260BF554301CBA"
+      "sha256": "AC7A8E809FA6E05DAD85DF4D2CD37DC994BDAE391E77042BE9D223179D87EDED"
     },
     {
       "path": "docs/Console-Subsystem-Run-API.md",
@@ -915,11 +919,11 @@
     },
     {
       "path": "docs/Interactive-Console.md",
-      "sha256": "364B5B43F2A640A1DCF6DAD9B11A7E2FAA5B5A11918246A4E7FD446688D7E5A9"
+      "sha256": "0CED5881A172F9BF0643901EE316444CBEA920F33EE357B1C118517BF976E1A4"
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "48b1a6d35149cd70529374924c83f4bacee83b95bd72509fb3af7330c8a423e0"
+      "sha256": "b5dd4a1cbeba6f677708bcd5a357e42cf927142a845c1774c3bef01a4a51352d"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2971,7 +2975,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "d6c100ffd54d53256e0b668e5b9d611c4702ce89a9234b82dd6a1639ab7d4b32"
+      "sha256": "a6b10871d021319e434cfbb2ed6e82563d1b23570d0b9fc73762a17b482ca034"
     },
     {
       "path": "Inu-Package.bat",
@@ -3007,7 +3011,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "725c795508d931d10c9347c72a67a4966ba4fbe2992d1357b24ac991baf6ebbc"
+      "sha256": "e837b3a36374805d180e4115d6c899ac995831d52aa111e753f991cd42c05c22"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3519,7 +3523,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "0eb434e6a7ec2837f56c7c2ca6fa8ebbfe9013fdf8814e3f0db8178e03a05c5e"
+      "sha256": "b33c98f9cad043b5b769ed3a7843039d7d15c296013a235c46f212d06b1ac992"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3843,7 +3847,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/Kernel.ConsoleInput.cs",
-      "sha256": "1123C792A3BE33299C18560337DA0F58040071A4061BA7F3AA1088FE0D6C4F4B"
+      "sha256": "F1F929145A9B771949B1E0485E8FBE13BC64E71AE45463166813DAF2D5031559"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/Kernel.cs",
@@ -3875,7 +3879,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-      "sha256": "E4582452015312DEED6C5C78D1AD9DA4BB1E276B3BF203A10BC53E803FAE8CDD"
+      "sha256": "009140EBCDEF55BB51F4FA5E475B4D37ADABF575C7FBF70849C6990365155D84"
     },
     {
       "path": "src/Inu.Kernel.Console/BitmapFont.cs",
@@ -3939,7 +3943,7 @@
     },
     {
       "path": "src/Inu.Kernel.Console/FramebufferConsole.cs",
-      "sha256": "72584D538F95DC8C78E89EE7782EACF8A386B7FE99E0448C4B3256EFDF3449FC"
+      "sha256": "02090753B4AC26BFF9EE96610277A11CFA521F7C4184C4225EE4E2B92B5267C1"
     },
     {
       "path": "src/Inu.Kernel.Console/FramebufferConsole.History.cs",
@@ -3947,7 +3951,7 @@
     },
     {
       "path": "src/Inu.Kernel.Console/FramebufferConsole.Lifecycle.cs",
-      "sha256": "C685D27063DFE029302FE017947BA7771591C875B8B2A9E3E5401230D16057C3"
+      "sha256": "1D0D2AB1F0A1676DF549B974CF25375621F4BAE3FC082E260713FD3581BA3993"
     },
     {
       "path": "src/Inu.Kernel.Console/FramebufferConsole.LiveView.cs",
@@ -3959,11 +3963,11 @@
     },
     {
       "path": "src/Inu.Kernel.Console/FramebufferConsole.Rendering.cs",
-      "sha256": "6C660564F2007C595DDBE16066A6493E78E4C289260A80A70247B050F7224A58"
+      "sha256": "8B60AAB3E8E311B96933D4CB1D1EC071004AAA031AD7802390A1414DF8CD2D07"
     },
     {
       "path": "src/Inu.Kernel.Console/FramebufferConsole.TextEditing.cs",
-      "sha256": "44B6FF9B8EE284294EFD7A999C1352718CDF721FB438FAE610D9E95D1FCADF4F"
+      "sha256": "95F1B83144BDCE02A03934CA1FF526C6F57F6E1C8E506C483588A8DF18791FD0"
     },
     {
       "path": "src/Inu.Kernel.Console/IAcpiRootPointerContext.cs",
@@ -4027,7 +4031,7 @@
     },
     {
       "path": "src/Inu.Kernel.Console/KernelConsole.Input.cs",
-      "sha256": "DA3D087DD648448B07C99F1214C8CDEAE726EBBD7D19DD378B0C7A515EC20604"
+      "sha256": "053471B5C0B8449B33022F00CA4B2902EC20609B1CE1C8A84BE0A809802B3678"
     },
     {
       "path": "src/Inu.Kernel.Console/KernelConsole.LiveView.cs",
@@ -5155,7 +5159,7 @@
     },
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
-      "sha256": "3480589E3EF63E917B3DE34AC7FA74659559B33FE3E1FFDA3BEB8BC5608C495D"
+      "sha256": "DEBF58B9F306C0CBF6F2F170A4F19D4AC51F232BEC24C77B318F8759EF4689AC"
     },
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCallMath.cs",
@@ -5567,7 +5571,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "C61BB395CD99302B56621AA98D31B3FA51DD00BD5991C034D4EC0B034282EFC3"
+      "sha256": "17DA419CE5A356DF0458C8FA2942EFBF536E481E1789E3BB699510B23CF59016"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",
@@ -5743,7 +5747,7 @@
     },
     {
       "path": "src/Inu.Userland.Runtime/UserlandRuntime.cs",
-      "sha256": "F7BEBA77A56173DDDCB00DCC5D39EA74E928660EF5CDD51611806C5BB5E532E9"
+      "sha256": "9EBDDFB1F64A5A6854DA3E13794EE9E78BBEA7303D2610852575708CA404BE43"
     },
     {
       "path": "src/Inu.Userland.RuntimeSupport/Inu.Userland.RuntimeSupport.csproj",
@@ -5772,6 +5776,10 @@
     {
       "path": "src/Userland/Commands/Clear.cs",
       "sha256": "15FCB1D9569B4A33ED217C48EEF661359E8FA7917EC9568D60B78D993568656B"
+    },
+    {
+      "path": "src/Userland/Commands/Console.cs",
+      "sha256": "CC6592F57B443C19E2126640EB53AAAAACACA902DE2D39153B621E34E403CA85"
     },
     {
       "path": "src/Userland/Commands/Del.cs",

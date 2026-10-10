@@ -1,11 +1,9 @@
 {
-  "baseVersion": "0.0.127",
-  "version": "0.0.128",
+  "baseVersion": "0.0.132",
+  "version": "0.0.133",
   "changedFiles": [
-    "TODO.md",
-    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
-    "Kath/docs/Release-0.0.128.md",
-    "CHANGED-0.0.128.txt",
+    "Build.ps1",
+    "CHANGED-0.0.133.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -14,12 +12,15 @@
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
-    "Kath/VERSION",
+    "Kath/Build-Kath.ps1",
     "Kath/JSON/package.json",
+    "Kath/VERSION",
     "Kath/applications/electron/package.json",
+    "Kath/docs/Release-0.0.133.md",
     "Kath/packages/kath/package.json",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
+    "TODO.md",
     "VERSION"
   ],
-  "summary": "Fix nullable flow analysis in the host .NET reference conformance tests while preserving the full .NET 10 Boolean contracts."
+  "summary": "Reject mixed ChangedFiles overlays before version propagation and bind the Kath launcher cache/publish stamp to the authoritative release version."
 }

@@ -34,6 +34,8 @@ internal unsafe partial struct FramebufferConsole
     private UInt32 _margin;
     private UInt32 _foreground;
     private UInt32 _background;
+    private UInt32 _foregroundRgb;
+    private UInt32 _backgroundRgb;
     private UInt32 _historyStart;
     private UInt32 _historyLength;
     private UInt32 _scrollLinesFromBottom;
@@ -56,6 +58,9 @@ internal unsafe partial struct FramebufferConsole
     private Boolean _dirty;
     private Boolean _caretEnabled;
     private Boolean _caretVisible;
+    private Boolean _caretActive;
+    private UInt32 _caretMode;
+    private UInt32 _caretHeightPercent;
     private UInt32 _caretTicks;
     private UInt32 _dirtyLeft;
     private UInt32 _dirtyTop;

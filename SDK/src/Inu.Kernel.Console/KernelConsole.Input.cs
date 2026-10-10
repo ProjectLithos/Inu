@@ -76,6 +76,26 @@ public static partial class KernelConsole
         if (!_initialized) return false;if(!BeginAtomicPresentation())return false;Boolean ok=_framebuffer.SetCaretEnabled(enabled);return EndAtomicPresentation()&&ok;
     }
 
+    public static UInt32 GetCaretMode()=>_framebuffer.GetCaretMode();
+    public static UInt32 GetCaretHeightPercent()=>_framebuffer.GetCaretHeightPercent();
+    public static UInt32 GetForegroundRgb()=>_framebuffer.GetForegroundRgb();
+    public static UInt32 GetBackgroundRgb()=>_framebuffer.GetBackgroundRgb();
+
+    public static Boolean SetCaretMode(UInt32 mode)
+    { if(!_initialized)return false;if(!BeginAtomicPresentation())return false;Boolean ok=_framebuffer.SetCaretMode(mode);return EndAtomicPresentation()&&ok; }
+
+    public static Boolean SetCaretHeightPercent(UInt32 percent)
+    { if(!_initialized)return false;if(!BeginAtomicPresentation())return false;Boolean ok=_framebuffer.SetCaretHeightPercent(percent);return EndAtomicPresentation()&&ok; }
+
+    public static Boolean SetCaretActive(Boolean active)
+    { if(!_initialized)return false;if(!BeginAtomicPresentation())return false;Boolean ok=_framebuffer.SetCaretActive(active);return EndAtomicPresentation()&&ok; }
+
+    public static Boolean SetForegroundRgb(UInt32 rgb)
+    { if(!_initialized)return false;if(!BeginAtomicPresentation())return false;Boolean ok=_framebuffer.SetForegroundRgb(rgb);return EndAtomicPresentation()&&ok; }
+
+    public static Boolean SetBackgroundRgb(UInt32 rgb)
+    { if(!_initialized)return false;if(!BeginAtomicPresentation())return false;Boolean ok=_framebuffer.SetBackgroundRgb(rgb);return EndAtomicPresentation()&&ok; }
+
     /// <summary>Advances the visual caret blink timer; intended for the timer-dispatch service.</summary>
     public static Boolean TickCaret()
     {

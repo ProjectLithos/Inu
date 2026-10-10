@@ -342,7 +342,7 @@ static void MigrateGeneratedShellSurface(string output, string projectName)
         promptStart += promptNeedle.Length; int promptEnd = source.IndexOf("\";", promptStart, StringComparison.Ordinal);
         if (promptEnd > promptStart) prompt = source[promptStart..promptEnd];
     }
-    string configureBody = "        // Console.Clear();\n        // Console.WriteLine(\"Howdy\");";
+    string configureBody = "        // Console.Clear();\n        // Console.WriteLine(\"Howdy\");\n        // ConsolePresentation.SetForegroundRgb(232,240,248);\n        // ConsolePresentation.SetBackgroundRgb(9,16,24);\n        // ConsolePresentation.SetCaretMode(ConsoleCaretMode.Blinking);\n        // ConsolePresentation.SetCaretHeightPercent(8);";
     int configure = source.IndexOf("public static void Configure()", StringComparison.Ordinal);
     if (configure >= 0)
     {
@@ -399,7 +399,7 @@ static void RepairMalformedGeneratedStockShellSurface(string output, string proj
         if (promptEnd > promptStart) prompt = source[promptStart..promptEnd];
     }
 
-    string configureBody = "        // Console.Clear();\n        // Console.WriteLine(\"Howdy\");";
+    string configureBody = "        // Console.Clear();\n        // Console.WriteLine(\"Howdy\");\n        // ConsolePresentation.SetForegroundRgb(232,240,248);\n        // ConsolePresentation.SetBackgroundRgb(9,16,24);\n        // ConsolePresentation.SetCaretMode(ConsoleCaretMode.Blinking);\n        // ConsolePresentation.SetCaretHeightPercent(8);";
     int configure = source.IndexOf("public static void Configure()", StringComparison.Ordinal);
     if (configure >= 0)
     {

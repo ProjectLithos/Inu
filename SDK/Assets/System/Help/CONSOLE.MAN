@@ -1,0 +1,27 @@
+NAME
+    console - Inspect or change text-console colours and caret presentation.
+
+SYNOPSIS
+    console
+    console fg <red> <green> <blue>
+    console bg <red> <green> <blue>
+    console colors <fr> <fg> <fb> <br> <bg> <bb>
+    console caret <blink|visible|off>
+    console caret size <1-100>
+
+DOMAIN
+    userland
+
+DESCRIPTION
+    With no arguments, shows the current text-console foreground/background RGB values,
+    caret visibility mode and caret height. RGB components are decimal values from 0 to 255.
+
+    caret size is a percentage of the character body: 1 is a thin underline and 100 is a
+    full-cell block. caret blink makes it blink, visible keeps it continuously visible while
+    the shell is accepting input, and off disables it.
+
+    SDK authors can set the same policy from C# through Inu.Userland.Runtime.ConsolePresentation.
+
+FILES
+    /System/Commands/CONSOLE.EXE
+    /System/Help/CONSOLE.MAN

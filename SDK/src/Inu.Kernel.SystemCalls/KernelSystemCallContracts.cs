@@ -40,6 +40,13 @@ public static class KernelSystemCallMessages
     public const String ConsoleOutput = "console.output";
     public const String ConsoleInput = "console.input";
     public const String ConsoleClear = "console.clear";
+    public const String ConsoleEditableInput = "console.editable.input";
+    public const String ConsoleEditableCursor = "console.editable.cursor";
+    public const String ConsoleCaretMode = "console.caret.mode";
+    public const String ConsoleCaretHeight = "console.caret.height";
+    public const String ConsoleCaretActive = "console.caret.active";
+    public const String ConsoleForegroundColor = "console.foreground.rgb";
+    public const String ConsoleBackgroundColor = "console.background.rgb";
     public const String StressControl = "runtime.stress.control";
     public const String StressStatus = "runtime.stress.status";
     public const String KeyboardLayout = "input.keyboard.layout";

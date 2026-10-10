@@ -61,8 +61,33 @@ public static class Output
     public static Boolean Clear()=>UserlandConsole.Clear();
 }
 
+public enum ConsoleCaretMode : Byte
+{
+    Off = 0,
+    Blinking = 1,
+    Visible = 2
+}
+
+/// <summary><inu.api>Runtime text-console presentation settings available to SDK authors and ordinary userland tools.</inu.api></summary>
+public static unsafe class ConsolePresentation
+{
+    public static UInt32 GetForegroundRgb(){Int64 v=UserlandSystem.Call(UserlandOperation.Get,"console.foreground.rgb",null,0UL,null,0UL);return v<0L?0U:(UInt32)v;}
+    public static UInt32 GetBackgroundRgb(){Int64 v=UserlandSystem.Call(UserlandOperation.Get,"console.background.rgb",null,0UL,null,0UL);return v<0L?0U:(UInt32)v;}
+    public static Boolean SetForegroundRgb(Byte red,Byte green,Byte blue)=>UserlandSystem.Call(UserlandOperation.Set,"console.foreground.rgb",null,0UL,null,0UL,((UInt64)red<<16)|((UInt64)green<<8)|blue)>=0L;
+    public static Boolean SetBackgroundRgb(Byte red,Byte green,Byte blue)=>UserlandSystem.Call(UserlandOperation.Set,"console.background.rgb",null,0UL,null,0UL,((UInt64)red<<16)|((UInt64)green<<8)|blue)>=0L;
+    public static ConsoleCaretMode GetCaretMode(){Int64 v=UserlandSystem.Call(UserlandOperation.Get,"console.caret.mode",null,0UL,null,0UL);return v<0L?ConsoleCaretMode.Off:(ConsoleCaretMode)(Byte)v;}
+    public static Boolean SetCaretMode(ConsoleCaretMode mode)=>UserlandSystem.Call(UserlandOperation.Set,"console.caret.mode",null,0UL,null,0UL,(UInt64)(Byte)mode)>=0L;
+    public static UInt32 GetCaretHeightPercent(){Int64 v=UserlandSystem.Call(UserlandOperation.Get,"console.caret.height",null,0UL,null,0UL);return v<0L?0U:(UInt32)v;}
+    public static Boolean SetCaretHeightPercent(UInt32 percent)=>UserlandSystem.Call(UserlandOperation.Set,"console.caret.height",null,0UL,null,0UL,percent)>=0L;
+}
+
 public static unsafe class UserlandConsole
 {
+    private const Int32 NavigationUp=0x80,NavigationDown=0x81,NavigationLeft=0x82,NavigationRight=0x83,NavigationHome=0x84,NavigationEnd=0x85,NavigationDelete=0x86;
+    private const Int32 HistoryCapacity=64;
+    private static String[] _history=new String[HistoryCapacity];
+    private static Int32 _historyStart,_historyCount;
+
     public static Boolean Write(String text){if(text==null)return false;const UInt32 ChunkBytes=1024U;Byte* b=stackalloc Byte[(Int32)ChunkBytes];Int32 offset=0;while(offset<text.Length){UInt32 n=(UInt32)(text.Length-offset);if(n>ChunkBytes)n=ChunkBytes;for(UInt32 i=0;i<n;i++){Char c=text[offset+(Int32)i];b[i]=(Byte)(c<=255?c:'?');}Int64 r=UserlandSystem.Call(UserlandOperation.Event,"console.output",b,n,null,0UL);if(r<0L)return false;offset+=(Int32)n;}return true;}
     public static Boolean WriteLine(String text){return Write(text)&&Write("\n");}
     internal static Boolean WriteChar(Char value)
@@ -84,47 +109,80 @@ public static unsafe class UserlandConsole
         UInt64 magnitude=(UInt64)(-(value+1L))+1UL;
         return WriteUnsigned(magnitude);
     }
-    /// <summary>Waits for one decoded character through the kernel's interrupt-driven input service.</summary>
+    /// <summary>Waits for one decoded character or non-text console editing key through the kernel's interrupt-driven input service.</summary>
     internal static Int32 ReadChar(){Int64 value=UserlandSystem.Call(UserlandOperation.Get,"console.input",null,0UL,null,0UL);return value>=0L?(Int32)value:-1;}
 
-    internal static String ReadLine()
+    private static Boolean SetCaretActive(Boolean active)=>UserlandSystem.Call(UserlandOperation.Set,"console.caret.active",null,0UL,null,0UL,active?1UL:0UL)>=0L;
+
+    private static Boolean SyncEditable(StringBuilder line,UInt32 oldLength,UInt32 cursor)
     {
-        StringBuilder line=new StringBuilder();
+        UInt32 length=(UInt32)line.Length;if(length>1023U)return false;Byte* bytes=stackalloc Byte[1024];for(UInt32 i=0U;i<length;i++){Char c=line[(Int32)i];bytes[i]=(Byte)(c<=255?c:'?');}
+        return UserlandSystem.Call(UserlandOperation.Event,"console.editable.input",bytes,length,null,0UL,oldLength,cursor)>=0L;
+    }
+
+    private static Boolean SyncCursor(UInt32 length,UInt32 cursor)=>UserlandSystem.Call(UserlandOperation.Set,"console.editable.cursor",null,0UL,null,0UL,length,cursor)>=0L;
+
+    private static void ReplaceBuilder(StringBuilder line,String value)
+    {
+        line.Clear();if(value!=null)line.Append(value);
+    }
+
+    private static String GetHistoryNewest(Int32 offset)
+    {
+        if(offset<0||offset>=_historyCount)return String.Empty;Int32 index=(_historyStart+_historyCount-1-offset)%HistoryCapacity;return _history[index]??String.Empty;
+    }
+
+    private static void RememberHistory(String value)
+    {
+        if(String.IsNullOrWhiteSpace(value))return;
+        if(_historyCount>0&&String.Equals(GetHistoryNewest(0),value))return;
+        if(_historyCount<HistoryCapacity){_history[(_historyStart+_historyCount)%HistoryCapacity]=value;_historyCount++;return;}
+        _history[_historyStart]=value;_historyStart=(_historyStart+1)%HistoryCapacity;
+    }
+
+    private static String ReadEditedLine()
+    {
+        StringBuilder line=new StringBuilder();UInt32 cursor=0U,renderedLength=0U;Int32 historyOffset=-1;String draft=String.Empty;
+        SetCaretActive(true);
         for(;;)
         {
-            Int32 value=ReadChar();
-            if(value<0)throw new InvalidOperationException();
-            Char c=(Char)value;
-            if(c=='\r'||c=='\n'){Write("\n");return line.ToString();}
-            if(c=='\b')
+            Int32 value=ReadChar();if(value<0){SetCaretActive(false);throw new InvalidOperationException();}
+            if(value=='\r'||value=='\n')
             {
-                if(line.Length!=0){line.Length=line.Length-1;Write("\b \b");}
-                continue;
+                SetCaretActive(false);Write("\n");String result=line.ToString();RememberHistory(result);return result;
             }
-            if(c<32||c==127)continue;
-            line.Append(c);
-            WriteChar(c);
+            if(value==NavigationUp)
+            {
+                if(_historyCount==0)continue;if(historyOffset<0){draft=line.ToString();historyOffset=0;}else if(historyOffset<_historyCount-1)historyOffset++;
+                UInt32 old=renderedLength;ReplaceBuilder(line,GetHistoryNewest(historyOffset));cursor=(UInt32)line.Length;renderedLength=(UInt32)line.Length;SyncEditable(line,old,cursor);continue;
+            }
+            if(value==NavigationDown)
+            {
+                if(historyOffset<0)continue;UInt32 old=renderedLength;if(historyOffset>0){historyOffset--;ReplaceBuilder(line,GetHistoryNewest(historyOffset));}else{historyOffset=-1;ReplaceBuilder(line,draft);}cursor=(UInt32)line.Length;renderedLength=(UInt32)line.Length;SyncEditable(line,old,cursor);continue;
+            }
+            if(value==NavigationLeft){if(cursor>0U)cursor--;SyncCursor((UInt32)line.Length,cursor);continue;}
+            if(value==NavigationRight){if(cursor<(UInt32)line.Length)cursor++;SyncCursor((UInt32)line.Length,cursor);continue;}
+            if(value==NavigationHome){cursor=0U;SyncCursor((UInt32)line.Length,cursor);continue;}
+            if(value==NavigationEnd){cursor=(UInt32)line.Length;SyncCursor((UInt32)line.Length,cursor);continue;}
+            if(value==NavigationDelete)
+            {
+                if(cursor>=(UInt32)line.Length)continue;UInt32 old=(UInt32)line.Length;for(Int32 i=(Int32)cursor;i<line.Length-1;i++)line[i]=line[i+1];line.Length=line.Length-1;historyOffset=-1;renderedLength=(UInt32)line.Length;SyncEditable(line,old,cursor);continue;
+            }
+            if(value=='\b')
+            {
+                if(cursor==0U)continue;UInt32 old=(UInt32)line.Length;UInt32 remove=cursor-1U;for(Int32 i=(Int32)remove;i<line.Length-1;i++)line[i]=line[i+1];line.Length=line.Length-1;cursor--;historyOffset=-1;renderedLength=(UInt32)line.Length;SyncEditable(line,old,cursor);continue;
+            }
+            if(value<32||value>126)continue;
+            if(line.Length>=1023)continue;
+            UInt32 oldLength=(UInt32)line.Length;line.Append('\0');for(Int32 i=line.Length-1;i>(Int32)cursor;i--)line[i]=line[i-1];line[(Int32)cursor]=(Char)value;cursor++;historyOffset=-1;renderedLength=(UInt32)line.Length;SyncEditable(line,oldLength,cursor);
         }
     }
 
+    internal static String ReadLine()=>ReadEditedLine();
+
     public static Int32 ReadLineAscii(Byte* buffer,UInt32 capacity)
     {
-        if(buffer==null||capacity<2U)return -1;
-        UInt32 length=0U;
-        Byte* one=stackalloc Byte[1];
-        for(;;)
-        {
-            Int32 value=ReadChar();
-            if(value<0)return -1;
-            Byte c=(Byte)value;
-            if(c=='\r'||c=='\n'){Write("\n");return (Int32)length;}
-            if(c=='\b'){if(length!=0U){length--;Write("\b \b");}continue;}
-            if(c<32U||c>126U)continue;
-            if(length+1U>=capacity)continue;
-            buffer[length++]=c;
-            one[0]=c;
-            UserlandSystem.Call(UserlandOperation.Event,"console.output",one,1UL,null,0UL);
-        }
+        if(buffer==null||capacity<2U)return -1;String line=ReadEditedLine();UInt32 length=(UInt32)line.Length;if(length+1U>capacity)length=capacity-1U;for(UInt32 i=0U;i<length;i++){Char c=line[(Int32)i];buffer[i]=(Byte)(c<=255?c:'?');}return (Int32)length;
     }
     public static Boolean Clear()=>UserlandSystem.Call(UserlandOperation.Event,"console.clear",null,0UL,null,0UL)>=0L;
 }

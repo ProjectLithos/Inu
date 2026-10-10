@@ -162,6 +162,20 @@
                         "file":  "All/Inu.Userland.Runtime.dll"
                     },
                     {
+                        "name":  "ConsoleCaretMode",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
+                        "name":  "ConsolePresentation",
+                        "namespace":  "Inu.Userland.Runtime",
+                        "project":  "Inu.Userland.Runtime",
+                        "assembly":  "Inu.Userland.Runtime",
+                        "file":  "All/Inu.Userland.Runtime.dll"
+                    },
+                    {
                         "name":  "UserlandConsole",
                         "namespace":  "Inu.Userland.Runtime",
                         "project":  "Inu.Userland.Runtime",
