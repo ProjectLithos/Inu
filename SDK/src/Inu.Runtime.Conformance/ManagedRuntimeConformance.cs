@@ -1249,15 +1249,36 @@ public static unsafe class ManagedRuntimeConformance
             && String.Equals(((Double)12.5).ToString("G", null), "12.5")
             && String.Equals(((Single)(-0.25F)).ToString("G", null), "-0.25"), ref passed, ref failed);
 
-        // 31 System.Math: integer + floating primitives used by the runtime and graphics layers.
+        // 31 System.Math: completed Profile 1 primitive/transcendental surface.
+        Boolean mathAbsOverflow = false, mathSignNaNThrows = false, mathClampThrows = false;
+        try { _ = Math.Abs(Int32.MinValue); } catch (OverflowException) { mathAbsOverflow = true; }
+        try { _ = Math.Sign(Double.NaN); } catch (ArithmeticException) { mathSignNaNThrows = true; }
+        try { _ = Math.Clamp(1, 5, 4); } catch (ArgumentException) { mathClampThrows = true; }
         Double sqrt81 = Math.Sqrt(81.0);
-        Record(Math.Abs(-17) == 17 && Math.Abs(-17L) == 17L && Math.Abs(-2.5) == 2.5
-            && Math.Min(5, 9) == 5 && Math.Max(5, 9) == 9 && Math.Min(5L, 9L) == 5L
-            && Math.Sign(-8) == -1 && Math.Sign(0L) == 0 && Math.Sign(8.0) == 1
-            && Math.Clamp(15, 0, 10) == 10 && Math.Clamp(-4L, 0L, 10L) == 0L
+        Record(Math.Abs((SByte)(-17)) == 17 && Math.Abs((Int16)(-1234)) == 1234
+            && Math.Abs(-17) == 17 && Math.Abs(-17L) == 17L && Math.Abs(-2.5) == 2.5
+            && Math.Min((Byte)5, (Byte)9) == 5 && Math.Max((UInt16)5, (UInt16)9) == 9
+            && Math.Min(5, 9) == 5 && Math.Max(5U, 9U) == 9U && Math.Min(5L, 9L) == 5L
+            && Double.IsNaN(Math.Min(Double.NaN, 1.0)) && Double.IsNaN(Math.Max(1.0, Double.NaN))
+            && Math.Sign((SByte)(-8)) == -1 && Math.Sign((Int16)0) == 0 && Math.Sign(8.0) == 1
+            && Math.Clamp((Byte)15, (Byte)0, (Byte)10) == 10 && Math.Clamp(-4L, 0L, 10L) == 0L
             && Math.Floor(2.75) == 2.0 && Math.Ceiling(2.25) == 3.0 && Math.Truncate(-2.75) == -2.0
             && Math.Round(2.5) == 2.0 && Math.Round(3.5) == 4.0
-            && Math.Abs(sqrt81 - 9.0) < 0.000001, ref passed, ref failed);
+            && Math.Abs(sqrt81 - 9.0) < 0.000001
+            && Math.Abs(Math.Pow(2.0, 10.0) - 1024.0) < 0.000001
+            && Math.Abs(Math.Exp(1.0) - Math.E) < 0.000001
+            && Math.Abs(Math.Log(Math.E) - 1.0) < 0.000001
+            && Math.Abs(Math.Log10(1000.0) - 3.0) < 0.000001
+            && Math.Abs(Math.Log(8.0, 2.0) - 3.0) < 0.000001
+            && Math.Abs(Math.Sin(Math.PI / 6.0) - 0.5) < 0.000001
+            && Math.Abs(Math.Cos(Math.PI / 3.0) - 0.5) < 0.000001
+            && Math.Abs(Math.Tan(Math.PI / 4.0) - 1.0) < 0.000001
+            && Math.Abs(Math.Atan(1.0) - Math.PI / 4.0) < 0.000001
+            && Math.Abs(Math.Atan2(1.0, -1.0) - (3.0 * Math.PI / 4.0)) < 0.000001
+            && Double.IsNaN(Math.Sqrt(-1.0)) && Double.IsNaN(Math.Pow(-2.0, 0.5))
+            && Math.Pow(-2.0, 3.0) == -8.0 && Math.Exp(Double.NegativeInfinity) == 0.0
+            && Math.Log(0.0) == Double.NegativeInfinity
+            && mathAbsOverflow && mathSignNaNThrows && mathClampThrows, ref passed, ref failed);
 
         // 32 System.Convert: all primitive integer widths plus NativeAOT checked floating/integer helper paths.
         Boolean intOverflow = false, uintOverflow = false, longOverflow = false, ulongOverflow = false;

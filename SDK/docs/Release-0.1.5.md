@@ -1,9 +1,14 @@
-# Inu/Kath 0.1.5
+# Kath & Inu 0.1.5
 
-GUI framebuffer presentation ownership fix.
+This release completes the next unchecked primitive/runtime TODO block: `System.Math`.
 
-- The graphical session takes exclusive ownership of physical framebuffer presentation at the normal user-session boundary.
-- The text console stops presenting to the framebuffer before Desktop/Login start, preventing stale console buffers, caret ticks, or later text writes from overwriting compositor frames.
-- CLI fallback restores console framebuffer presentation before the text session starts.
-- The selected framebuffer buffering policy is preserved. Single, double, triple, and automatic modes are not hard-coded by GUI takeover.
-- Serial diagnostics remain active while the GUI owns the display.
+## Included
+
+- Primitive-width `Abs`, `Min`, `Max`, `Clamp`, and `Sign` coverage used by Profile 1.
+- NaN propagation, signed-zero handling, overflow/argument exception paths, and banker's rounding.
+- `Floor`, `Ceiling`, `Round`, `Truncate`, and `Sqrt`.
+- `Pow`, `Exp`, `Log`, and `Log10`, including special-value handling.
+- `Sin`, `Cos`, `Tan`, `Atan`, and `Atan2`.
+- Matching reference-side and in-kernel/runtime conformance coverage in the existing `System.Math` target.
+
+`TODO.md` at the repository root marks the complete `System.Math` expansion block finished.

@@ -1961,44 +1961,362 @@ namespace System
     /// <summary><inu.api/>Primitive mathematical operations used by the Core v1 freestanding runtime.</summary>
     public static class Math
     {
+        public const Double E = 2.7182818284590452354;
+        public const Double PI = 3.14159265358979323846;
+
+        private const Double Ln2 = 0.69314718055994530942;
+        private const Double InvLn10 = 0.43429448190325182765;
+
+        public static SByte Abs(SByte value) { if (value == SByte.MinValue) throw new OverflowException(); return value < 0 ? (SByte)(-value) : value; }
+        public static Int16 Abs(Int16 value) { if (value == Int16.MinValue) throw new OverflowException(); return value < 0 ? (Int16)(-value) : value; }
         public static Int32 Abs(Int32 value) { if (value == Int32.MinValue) throw new OverflowException(); return value < 0 ? -value : value; }
         public static Int64 Abs(Int64 value) { if (value == Int64.MinValue) throw new OverflowException(); return value < 0 ? -value : value; }
-        public static Single Abs(Single value) => value < 0 ? -value : value;
-        public static Double Abs(Double value) => value < 0 ? -value : value;
+        public static Single Abs(Single value) => value == 0.0F ? 0.0F : (value < 0.0F ? -value : value);
+        public static Double Abs(Double value) => value == 0.0 ? 0.0 : (value < 0.0 ? -value : value);
+
+        public static SByte Min(SByte left, SByte right) => left < right ? left : right;
+        public static Byte Min(Byte left, Byte right) => left < right ? left : right;
+        public static Int16 Min(Int16 left, Int16 right) => left < right ? left : right;
+        public static UInt16 Min(UInt16 left, UInt16 right) => left < right ? left : right;
         public static Int32 Min(Int32 left, Int32 right) => left < right ? left : right;
+        public static UInt32 Min(UInt32 left, UInt32 right) => left < right ? left : right;
         public static Int64 Min(Int64 left, Int64 right) => left < right ? left : right;
-        public static Single Min(Single left, Single right) => left < right ? left : right;
-        public static Double Min(Double left, Double right) => left < right ? left : right;
+        public static UInt64 Min(UInt64 left, UInt64 right) => left < right ? left : right;
+        public static Single Min(Single left, Single right)
+        {
+            if (Single.IsNaN(left)) return left;
+            if (Single.IsNaN(right)) return right;
+            if (left == right && left == 0.0F) return IsNegativeZero(left) ? left : right;
+            return left < right ? left : right;
+        }
+        public static Double Min(Double left, Double right)
+        {
+            if (Double.IsNaN(left)) return left;
+            if (Double.IsNaN(right)) return right;
+            if (left == right && left == 0.0) return IsNegativeZero(left) ? left : right;
+            return left < right ? left : right;
+        }
+
+        public static SByte Max(SByte left, SByte right) => left > right ? left : right;
+        public static Byte Max(Byte left, Byte right) => left > right ? left : right;
+        public static Int16 Max(Int16 left, Int16 right) => left > right ? left : right;
+        public static UInt16 Max(UInt16 left, UInt16 right) => left > right ? left : right;
         public static Int32 Max(Int32 left, Int32 right) => left > right ? left : right;
+        public static UInt32 Max(UInt32 left, UInt32 right) => left > right ? left : right;
         public static Int64 Max(Int64 left, Int64 right) => left > right ? left : right;
-        public static Single Max(Single left, Single right) => left > right ? left : right;
-        public static Double Max(Double left, Double right) => left > right ? left : right;
+        public static UInt64 Max(UInt64 left, UInt64 right) => left > right ? left : right;
+        public static Single Max(Single left, Single right)
+        {
+            if (Single.IsNaN(left)) return left;
+            if (Single.IsNaN(right)) return right;
+            if (left == right && left == 0.0F) return IsNegativeZero(left) ? right : left;
+            return left > right ? left : right;
+        }
+        public static Double Max(Double left, Double right)
+        {
+            if (Double.IsNaN(left)) return left;
+            if (Double.IsNaN(right)) return right;
+            if (left == right && left == 0.0) return IsNegativeZero(left) ? right : left;
+            return left > right ? left : right;
+        }
+
+        public static Int32 Sign(SByte value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
+        public static Int32 Sign(Int16 value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
         public static Int32 Sign(Int32 value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
         public static Int32 Sign(Int64 value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
-        public static Int32 Sign(Single value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
-        public static Int32 Sign(Double value) => value < 0 ? -1 : (value > 0 ? 1 : 0);
-        public static Int32 Clamp(Int32 value, Int32 min, Int32 max) { if (min > max) throw new ArgumentException(); return value < min ? min : (value > max ? max : value); }
-        public static Int64 Clamp(Int64 value, Int64 min, Int64 max) { if (min > max) throw new ArgumentException(); return value < min ? min : (value > max ? max : value); }
-        public static Single Clamp(Single value, Single min, Single max) { if (min > max) throw new ArgumentException(); return value < min ? min : (value > max ? max : value); }
-        public static Double Clamp(Double value, Double min, Double max) { if (min > max) throw new ArgumentException(); return value < min ? min : (value > max ? max : value); }
-        public static Double Truncate(Double value) => value >= 0 ? (Double)(Int64)value : (Double)(Int64)value;
-        public static Double Floor(Double value) { Int64 truncated = (Int64)value; return value < truncated ? truncated - 1 : truncated; }
-        public static Double Ceiling(Double value) { Int64 truncated = (Int64)value; return value > truncated ? truncated + 1 : truncated; }
+        public static Int32 Sign(Single value)
+        {
+            if (Single.IsNaN(value)) throw new ArithmeticException();
+            return value < 0.0F ? -1 : (value > 0.0F ? 1 : 0);
+        }
+        public static Int32 Sign(Double value)
+        {
+            if (Double.IsNaN(value)) throw new ArithmeticException();
+            return value < 0.0 ? -1 : (value > 0.0 ? 1 : 0);
+        }
+
+        public static SByte Clamp(SByte value, SByte min, SByte max) { ValidateClamp(min, max); return value < min ? min : (value > max ? max : value); }
+        public static Byte Clamp(Byte value, Byte min, Byte max) { ValidateClamp(min, max); return value < min ? min : (value > max ? max : value); }
+        public static Int16 Clamp(Int16 value, Int16 min, Int16 max) { ValidateClamp(min, max); return value < min ? min : (value > max ? max : value); }
+        public static UInt16 Clamp(UInt16 value, UInt16 min, UInt16 max) { ValidateClamp(min, max); return value < min ? min : (value > max ? max : value); }
+        public static Int32 Clamp(Int32 value, Int32 min, Int32 max) { ValidateClamp(min, max); return value < min ? min : (value > max ? max : value); }
+        public static UInt32 Clamp(UInt32 value, UInt32 min, UInt32 max) { ValidateClamp(min, max); return value < min ? min : (value > max ? max : value); }
+        public static Int64 Clamp(Int64 value, Int64 min, Int64 max) { ValidateClamp(min, max); return value < min ? min : (value > max ? max : value); }
+        public static UInt64 Clamp(UInt64 value, UInt64 min, UInt64 max) { ValidateClamp(min, max); return value < min ? min : (value > max ? max : value); }
+        public static Single Clamp(Single value, Single min, Single max)
+        {
+            if (min > max) throw new ArgumentException();
+            return value < min ? min : (value > max ? max : value);
+        }
+        public static Double Clamp(Double value, Double min, Double max)
+        {
+            if (min > max) throw new ArgumentException();
+            return value < min ? min : (value > max ? max : value);
+        }
+
+        public static Double Truncate(Double value)
+        {
+            if (!Double.IsFinite(value) || value == 0.0) return value;
+            if (value >= 9223372036854775808.0 || value <= -9223372036854775808.0) return value;
+            return (Double)(Int64)value;
+        }
+
+        public static Double Floor(Double value)
+        {
+            if (!Double.IsFinite(value) || value == 0.0) return value;
+            if (value >= 9223372036854775808.0 || value <= -9223372036854775808.0) return value;
+            Int64 truncated = (Int64)value;
+            return value < truncated ? (Double)(truncated - 1L) : (Double)truncated;
+        }
+
+        public static Double Ceiling(Double value)
+        {
+            if (!Double.IsFinite(value) || value == 0.0) return value;
+            if (value >= 9223372036854775808.0 || value <= -9223372036854775808.0) return value;
+            Int64 truncated = (Int64)value;
+            return value > truncated ? (Double)(truncated + 1L) : (Double)truncated;
+        }
+
         public static Double Round(Double value)
         {
-            Int64 truncated = (Int64)value; Double fraction = value - truncated;
-            if (fraction > 0.5 || (fraction == 0.5 && (truncated & 1L) != 0)) return truncated + 1;
-            if (fraction < -0.5 || (fraction == -0.5 && (truncated & 1L) != 0)) return truncated - 1;
-            return truncated;
+            if (!Double.IsFinite(value) || value == 0.0) return value;
+            if (value >= 4503599627370496.0 || value <= -4503599627370496.0) return value;
+            Int64 truncated = (Int64)value;
+            Double fraction = value - truncated;
+            if (fraction > 0.5 || (fraction == 0.5 && (truncated & 1L) != 0L)) return truncated + 1L;
+            if (fraction < -0.5 || (fraction == -0.5 && (truncated & 1L) != 0L)) return truncated - 1L;
+            return (Double)truncated;
         }
+
         public static Double Sqrt(Double value)
         {
-            if (value < 0.0) return 0.0 / 0.0;
-            if (value == 0.0) return 0.0;
+            if (Double.IsNaN(value)) return Double.NaN;
+            if (value < 0.0) return Double.NaN;
+            if (value == 0.0 || Double.IsPositiveInfinity(value)) return value;
+
             Double guess = value >= 1.0 ? value : 1.0;
-            for (Int32 i = 0; i < 24; i++) guess = (guess + value / guess) * 0.5;
+            for (Int32 i = 0; i < 32; i++) guess = (guess + value / guess) * 0.5;
             return guess;
         }
+
+        public static Double Exp(Double value)
+        {
+            if (Double.IsNaN(value)) return Double.NaN;
+            if (Double.IsPositiveInfinity(value)) return Double.PositiveInfinity;
+            if (Double.IsNegativeInfinity(value)) return 0.0;
+            if (value > 709.782712893384) return Double.PositiveInfinity;
+            if (value < -745.133219101941) return 0.0;
+            if (value == 0.0) return 1.0;
+
+            Int32 exponent = (Int32)Floor(value / Ln2);
+            Double reduced = value - exponent * Ln2;
+            Double term = 1.0;
+            Double sum = 1.0;
+            for (Int32 i = 1; i <= 24; i++)
+            {
+                term *= reduced / i;
+                sum += term;
+            }
+
+            if (exponent > 0)
+            {
+                for (Int32 i = 0; i < exponent; i++) sum *= 2.0;
+            }
+            else if (exponent < 0)
+            {
+                for (Int32 i = 0; i > exponent; i--) sum *= 0.5;
+            }
+            return sum;
+        }
+
+        public static Double Log(Double value)
+        {
+            if (Double.IsNaN(value) || value < 0.0) return Double.NaN;
+            if (value == 0.0) return Double.NegativeInfinity;
+            if (Double.IsPositiveInfinity(value)) return Double.PositiveInfinity;
+            if (value == 1.0) return 0.0;
+
+            Int32 exponent = 0;
+            Double mantissa = value;
+            while (mantissa >= 2.0) { mantissa *= 0.5; exponent++; }
+            while (mantissa < 1.0) { mantissa *= 2.0; exponent--; }
+
+            Double y = (mantissa - 1.0) / (mantissa + 1.0);
+            Double ySquared = y * y;
+            Double term = y;
+            Double sum = 0.0;
+            for (Int32 n = 1; n <= 59; n += 2)
+            {
+                sum += term / n;
+                term *= ySquared;
+            }
+            return 2.0 * sum + exponent * Ln2;
+        }
+
+        public static Double Log(Double value, Double newBase)
+        {
+            if (Double.IsNaN(value) || Double.IsNaN(newBase)) return Double.NaN;
+            if (newBase == 1.0 || newBase == 0.0 || newBase < 0.0) return Double.NaN;
+            return Log(value) / Log(newBase);
+        }
+
+        public static Double Log10(Double value) => Log(value) * InvLn10;
+
+        public static Double Pow(Double x, Double y)
+        {
+            if (y == 0.0) return 1.0;
+            if (x == 1.0) return 1.0;
+            if (Double.IsNaN(x) || Double.IsNaN(y)) return Double.NaN;
+            if (Double.IsPositiveInfinity(y))
+            {
+                Double ax = Abs(x);
+                return ax > 1.0 ? Double.PositiveInfinity : (ax < 1.0 ? 0.0 : 1.0);
+            }
+            if (Double.IsNegativeInfinity(y))
+            {
+                Double ax = Abs(x);
+                return ax > 1.0 ? 0.0 : (ax < 1.0 ? Double.PositiveInfinity : 1.0);
+            }
+            if (x == 0.0)
+            {
+                if (y < 0.0) return Double.PositiveInfinity;
+                return 0.0;
+            }
+            if (Double.IsPositiveInfinity(x)) return y < 0.0 ? 0.0 : Double.PositiveInfinity;
+            if (Double.IsNegativeInfinity(x))
+            {
+                if (y < 0.0) return 0.0;
+                if (!IsInteger(y)) return Double.PositiveInfinity;
+                return IsOddInteger(y) ? Double.NegativeInfinity : Double.PositiveInfinity;
+            }
+
+            if (x < 0.0)
+            {
+                if (!IsInteger(y)) return Double.NaN;
+                Double magnitude = Exp(y * Log(-x));
+                return IsOddInteger(y) ? -magnitude : magnitude;
+            }
+            return Exp(y * Log(x));
+        }
+
+        public static Double Sin(Double value)
+        {
+            if (!Double.IsFinite(value)) return Double.NaN;
+            Double x = ReduceAngle(value);
+            Double xSquared = x * x;
+            Double term = x;
+            Double sum = x;
+            for (Int32 n = 1; n <= 12; n++)
+            {
+                Double denominator = (2.0 * n) * (2.0 * n + 1.0);
+                term *= -xSquared / denominator;
+                sum += term;
+            }
+            return sum;
+        }
+
+        public static Double Cos(Double value)
+        {
+            if (!Double.IsFinite(value)) return Double.NaN;
+            Double x = ReduceAngle(value);
+            Double xSquared = x * x;
+            Double term = 1.0;
+            Double sum = 1.0;
+            for (Int32 n = 1; n <= 12; n++)
+            {
+                Double denominator = (2.0 * n - 1.0) * (2.0 * n);
+                term *= -xSquared / denominator;
+                sum += term;
+            }
+            return sum;
+        }
+
+        public static Double Tan(Double value)
+        {
+            if (!Double.IsFinite(value)) return Double.NaN;
+            Double cosine = Cos(value);
+            Double sine = Sin(value);
+            return sine / cosine;
+        }
+
+        public static Double Atan(Double value)
+        {
+            if (Double.IsNaN(value)) return Double.NaN;
+            if (Double.IsPositiveInfinity(value)) return PI * 0.5;
+            if (Double.IsNegativeInfinity(value)) return -PI * 0.5;
+            if (value == 0.0) return value;
+
+            Boolean negative = value < 0.0;
+            Double x = negative ? -value : value;
+            if (x > 1.0)
+            {
+                Double reciprocalResult = PI * 0.5 - Atan(1.0 / x);
+                return negative ? -reciprocalResult : reciprocalResult;
+            }
+            Double reduced = x / (1.0 + Sqrt(1.0 + x * x));
+            Double squared = reduced * reduced;
+            Double term = reduced;
+            Double sum = reduced;
+            for (Int32 n = 1; n <= 24; n++)
+            {
+                term *= -squared;
+                sum += term / (2.0 * n + 1.0);
+            }
+            Double result = 2.0 * sum;
+            return negative ? -result : result;
+        }
+
+        public static Double Atan2(Double y, Double x)
+        {
+            if (Double.IsNaN(x) || Double.IsNaN(y)) return Double.NaN;
+            if (x > 0.0) return Atan(y / x);
+            if (x < 0.0)
+            {
+                if (y >= 0.0) return Atan(y / x) + PI;
+                return Atan(y / x) - PI;
+            }
+            if (y > 0.0) return PI * 0.5;
+            if (y < 0.0) return -PI * 0.5;
+            return y;
+        }
+
+        private static Double ReduceAngle(Double value)
+        {
+            const Double TwoPi = 6.28318530717958647692;
+            if (value >= 9223372036854775808.0 || value <= -9223372036854775808.0) return value;
+            Int64 turns = (Int64)(value / TwoPi);
+            Double reduced = value - turns * TwoPi;
+            if (reduced > PI) reduced -= TwoPi;
+            else if (reduced < -PI) reduced += TwoPi;
+            return reduced;
+        }
+
+        private static Boolean IsInteger(Double value)
+            => Double.IsFinite(value) && value == Truncate(value);
+
+        private static Boolean IsOddInteger(Double value)
+        {
+            if (!IsInteger(value)) return false;
+            Double absolute = Abs(value);
+            if (absolute >= 9007199254740992.0) return false;
+            Int64 integer = (Int64)value;
+            return (integer & 1L) != 0L;
+        }
+
+        private static Boolean IsNegativeZero(Double value)
+            => value == 0.0 && (1.0 / value) == Double.NegativeInfinity;
+
+        private static Boolean IsNegativeZero(Single value)
+            => value == 0.0F && (1.0F / value) == Single.NegativeInfinity;
+
+        private static void ValidateClamp(SByte min, SByte max) { if (min > max) throw new ArgumentException(); }
+        private static void ValidateClamp(Byte min, Byte max) { if (min > max) throw new ArgumentException(); }
+        private static void ValidateClamp(Int16 min, Int16 max) { if (min > max) throw new ArgumentException(); }
+        private static void ValidateClamp(UInt16 min, UInt16 max) { if (min > max) throw new ArgumentException(); }
+        private static void ValidateClamp(Int32 min, Int32 max) { if (min > max) throw new ArgumentException(); }
+        private static void ValidateClamp(UInt32 min, UInt32 max) { if (min > max) throw new ArgumentException(); }
+        private static void ValidateClamp(Int64 min, Int64 max) { if (min > max) throw new ArgumentException(); }
+        private static void ValidateClamp(UInt64 min, UInt64 max) { if (min > max) throw new ArgumentException(); }
 
         // NativeAOT/RyuJIT imports these exact CoreLib helpers for checked
         // floating-point-to-integer conversions. Keep the range tests here

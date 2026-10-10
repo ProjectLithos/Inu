@@ -43,7 +43,7 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 28 | `System.Text.ASCIIEncoding` | string-to-byte and byte-to-string round-trip |
 | 29 | `System.Text.UTF8Encoding` | multi-byte UTF-8 encode/decode round-trip |
 | 30 | `primitive numeric formatting / System.IFormattable` | signed/unsigned `G`/`D`/`X` plus invariant floating `G`/`F`/`E` formatting |
-| 31 | `System.Math` | integer/floating `Abs`, `Min`, `Max`, `Sign`, `Clamp`, plus `Floor`, `Ceiling`, `Truncate`, banker's `Round`, and `Sqrt` |
+| 31 | `System.Math` | primitive `Abs`, `Min`, `Max`, `Clamp`, `Sign`; `Floor`, `Ceiling`, `Round`, `Truncate`; `Sqrt`, `Pow`, `Exp`, `Log`, `Log10`; and `Sin`, `Cos`, `Tan`, `Atan`, `Atan2`, including NaN/infinity and documented exception paths covered by the paired gate |
 | 32 | `System.Convert` | Boolean, integer and floating primitive conversions, rounding on floating-to-integer conversion, and primitive invariant string conversion |
 | 33 | `System.IComparable / IComparable<T> / IEquatable<T>` | boxed and strongly typed ordering/equality across covered primitive families |
 | 34 | `delegate family` | managed delegate construction/invocation for `Action`/`Func` through four arguments plus `Predicate<T>`, `Comparison<T>`, and `Converter<TInput,TOutput>` |

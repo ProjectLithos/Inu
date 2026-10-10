@@ -739,13 +739,39 @@ internal static class Program
             && 12.5.ToString("G", null) == "12.5" && (-0.25f).ToString("G", null) == "-0.25";
 
     private static bool TestMath()
-        => Math.Abs(-17) == 17 && Math.Abs(-17L) == 17L && Math.Abs(-2.5) == 2.5
-            && Math.Min(5, 9) == 5 && Math.Max(5, 9) == 9 && Math.Min(5L, 9L) == 5L
-            && Math.Sign(-8) == -1 && Math.Sign(0L) == 0 && Math.Sign(8.0) == 1
-            && Math.Clamp(15, 0, 10) == 10 && Math.Clamp(-4L, 0L, 10L) == 0L
+    {
+        bool absOverflow = false;
+        bool signNaNThrows = false;
+        bool clampThrows = false;
+        try { _ = Math.Abs(int.MinValue); } catch (OverflowException) { absOverflow = true; }
+        try { _ = Math.Sign(double.NaN); } catch (ArithmeticException) { signNaNThrows = true; }
+        try { _ = Math.Clamp(1, 5, 4); } catch (ArgumentException) { clampThrows = true; }
+
+        return Math.Abs((sbyte)-17) == 17 && Math.Abs((short)-1234) == 1234
+            && Math.Abs(-17) == 17 && Math.Abs(-17L) == 17L && Math.Abs(-2.5) == 2.5
+            && Math.Min((byte)5, (byte)9) == 5 && Math.Max((ushort)5, (ushort)9) == 9
+            && Math.Min(5, 9) == 5 && Math.Max(5U, 9U) == 9U && Math.Min(5L, 9L) == 5L
+            && double.IsNaN(Math.Min(double.NaN, 1.0)) && double.IsNaN(Math.Max(1.0, double.NaN))
+            && Math.Sign((sbyte)-8) == -1 && Math.Sign((short)0) == 0 && Math.Sign(8.0) == 1
+            && Math.Clamp((byte)15, (byte)0, (byte)10) == 10 && Math.Clamp(-4L, 0L, 10L) == 0L
             && Math.Floor(2.75) == 2.0 && Math.Ceiling(2.25) == 3.0 && Math.Truncate(-2.75) == -2.0
             && Math.Round(2.5) == 2.0 && Math.Round(3.5) == 4.0
-            && Math.Abs(Math.Sqrt(81.0) - 9.0) < 0.000001;
+            && Math.Abs(Math.Sqrt(81.0) - 9.0) < 0.000001
+            && Math.Abs(Math.Pow(2.0, 10.0) - 1024.0) < 0.000001
+            && Math.Abs(Math.Exp(1.0) - Math.E) < 0.000001
+            && Math.Abs(Math.Log(Math.E) - 1.0) < 0.000001
+            && Math.Abs(Math.Log10(1000.0) - 3.0) < 0.000001
+            && Math.Abs(Math.Log(8.0, 2.0) - 3.0) < 0.000001
+            && Math.Abs(Math.Sin(Math.PI / 6.0) - 0.5) < 0.000001
+            && Math.Abs(Math.Cos(Math.PI / 3.0) - 0.5) < 0.000001
+            && Math.Abs(Math.Tan(Math.PI / 4.0) - 1.0) < 0.000001
+            && Math.Abs(Math.Atan(1.0) - Math.PI / 4.0) < 0.000001
+            && Math.Abs(Math.Atan2(1.0, -1.0) - (3.0 * Math.PI / 4.0)) < 0.000001
+            && double.IsNaN(Math.Sqrt(-1.0)) && double.IsNaN(Math.Pow(-2.0, 0.5))
+            && Math.Pow(-2.0, 3.0) == -8.0 && Math.Exp(double.NegativeInfinity) == 0.0
+            && Math.Log(0.0) == double.NegativeInfinity
+            && absOverflow && signNaNThrows && clampThrows;
+    }
 
     private static bool TestConvert()
     {
