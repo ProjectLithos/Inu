@@ -18,6 +18,17 @@ namespace Inu.Kernel.Bootstrap.Startup;
 /// </summary>
 public static unsafe class UserlandRuntimeStartup
 {
+    // Console presentation message names are part of the Get/Set/Event ABI. Keep these
+    // bootstrap-owned so a newer SDK bootstrap remains source-compatible with an older,
+    // coder-owned Inu.Kernel.SystemCalls implementation that predates these convenience
+    // constants. The syscall dispatcher only requires the string contract itself.
+    private const String ConsoleEditableInputMessage = "console.editable.input";
+    private const String ConsoleEditableCursorMessage = "console.editable.cursor";
+    private const String ConsoleCaretModeMessage = "console.caret.mode";
+    private const String ConsoleCaretHeightMessage = "console.caret.height";
+    private const String ConsoleCaretActiveMessage = "console.caret.active";
+    private const String ConsoleForegroundColorMessage = "console.foreground.rgb";
+    private const String ConsoleBackgroundColorMessage = "console.background.rgb";
     private const UInt32 InputCapacity=4096U;
     private const UInt32 PathCapacity=1536U;
     private const UInt32 ArgumentCapacity=2048U;
@@ -67,17 +78,17 @@ public static unsafe class UserlandRuntimeStartup
         if(!KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ConsoleInput,&ConsoleInputGet)||
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ConsoleOutput,&ConsoleOutputEvent)||
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ConsoleClear,&ConsoleClearEvent)||
-           !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ConsoleEditableInput,&ConsoleEditableInputEvent)||
-           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleEditableCursor,&ConsoleEditableCursorSet)||
-           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ConsoleCaretMode,&ConsoleCaretModeGet)||
-           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleCaretMode,&ConsoleCaretModeSet)||
-           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ConsoleCaretHeight,&ConsoleCaretHeightGet)||
-           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleCaretHeight,&ConsoleCaretHeightSet)||
-           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleCaretActive,&ConsoleCaretActiveSet)||
-           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ConsoleForegroundColor,&ConsoleForegroundColorGet)||
-           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleForegroundColor,&ConsoleForegroundColorSet)||
-           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ConsoleBackgroundColor,&ConsoleBackgroundColorGet)||
-           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.ConsoleBackgroundColor,&ConsoleBackgroundColorSet)||
+           !KernelSystemCalls.RegisterEvent(ConsoleEditableInputMessage,&ConsoleEditableInputEvent)||
+           !KernelSystemCalls.RegisterSet(ConsoleEditableCursorMessage,&ConsoleEditableCursorSet)||
+           !KernelSystemCalls.RegisterGet(ConsoleCaretModeMessage,&ConsoleCaretModeGet)||
+           !KernelSystemCalls.RegisterSet(ConsoleCaretModeMessage,&ConsoleCaretModeSet)||
+           !KernelSystemCalls.RegisterGet(ConsoleCaretHeightMessage,&ConsoleCaretHeightGet)||
+           !KernelSystemCalls.RegisterSet(ConsoleCaretHeightMessage,&ConsoleCaretHeightSet)||
+           !KernelSystemCalls.RegisterSet(ConsoleCaretActiveMessage,&ConsoleCaretActiveSet)||
+           !KernelSystemCalls.RegisterGet(ConsoleForegroundColorMessage,&ConsoleForegroundColorGet)||
+           !KernelSystemCalls.RegisterSet(ConsoleForegroundColorMessage,&ConsoleForegroundColorSet)||
+           !KernelSystemCalls.RegisterGet(ConsoleBackgroundColorMessage,&ConsoleBackgroundColorGet)||
+           !KernelSystemCalls.RegisterSet(ConsoleBackgroundColorMessage,&ConsoleBackgroundColorSet)||
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ProcessSpawn,&ProcessSpawnEvent)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessWait,&ProcessWaitGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessArguments,&ProcessArgumentsGet)||

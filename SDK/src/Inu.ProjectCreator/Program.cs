@@ -187,6 +187,7 @@ static int MainEntry(string[] args)
     RepairMalformedGeneratedStockShellSurface(output, projectName);
     MigrateGeneratedCommandSurface(output, projectName, sdkRoot);
     HideProvidedWorkspaceFolders(output);
+    if (!RefreshCentralKernelConsoleSourcePlan(sdkRoot, output)) return 1;
 
     File.WriteAllText(manifestPath, JsonSerializer.Serialize(new
     {
@@ -209,6 +210,105 @@ static int MainEntry(string[] args)
     Console.WriteLine($"[ OK ] Kernel project  : {mainProjectPath}");
     Console.WriteLine($"[ OK ] Project manifest: {manifestPath}");
     return 0;
+}
+
+static bool RefreshCentralKernelConsoleSourcePlan(string sdkRoot, string output)
+{
+    string planPath = Path.Combine(output, "Inu.KernelSources.json");
+    string targetsPath = Path.Combine(output, "Inu.KernelSources.targets");
+    if (!File.Exists(planPath) || !File.Exists(targetsPath)) return true;
+
+    try
+    {
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(planPath));
+        JsonElement root = document.RootElement;
+        if (!root.TryGetProperty("files", out JsonElement filesElement) || filesElement.ValueKind != JsonValueKind.Array) return true;
+
+        List<(string Source, string Destination, string Project, bool Central)> files = new();
+        bool hadMaterializedConsole = false;
+        foreach (JsonElement item in filesElement.EnumerateArray())
+        {
+            string source = item.TryGetProperty("source", out JsonElement sourceElement) ? sourceElement.GetString() ?? string.Empty : string.Empty;
+            string destination = item.TryGetProperty("destination", out JsonElement destinationElement) ? destinationElement.GetString() ?? string.Empty : string.Empty;
+            string project = item.TryGetProperty("project", out JsonElement projectElement) ? projectElement.GetString() ?? string.Empty : string.Empty;
+            bool central = item.TryGetProperty("central", out JsonElement centralElement) && centralElement.ValueKind == JsonValueKind.True;
+            if (string.Equals(project, "Inu.Kernel.Console", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!central) hadMaterializedConsole = true;
+                continue;
+            }
+            if (source.Length != 0 && destination.Length != 0 && project.Length != 0)
+                files.Add((source, destination, project, central));
+        }
+
+        // 0.0.134 ownership correction: Inu.Kernel.Console is a support dependency of
+        // the selected Boot node, not the Boot implementation itself. Older Kath releases
+        // accidentally marked it OS-owned, which left existing projects compiling a stale
+        // copied console while SDK-owned bootstrap code moved forward. Always link the
+        // current central console support source; leave any old physical copy untouched so
+        // no coder data is destroyed.
+        string consoleRoot = Path.Combine(sdkRoot, "src", "Inu.Kernel.Console");
+        if (!Directory.Exists(consoleRoot)) return FailBool($"Kernel console SDK source is missing: {consoleRoot}");
+        foreach (string sourcePath in Directory.EnumerateFiles(consoleRoot, "*.cs", SearchOption.AllDirectories).OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
+        {
+            string relative = Path.GetRelativePath(consoleRoot, sourcePath);
+            if (relative.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(part => string.Equals(part, "bin", StringComparison.OrdinalIgnoreCase) || string.Equals(part, "obj", StringComparison.OrdinalIgnoreCase))) continue;
+            string canonical = Path.Combine("src", "Inu.Kernel.Console", relative).Replace('\\', '/');
+            string destination = Path.Combine("Kernel", "Provided", "Dependencies", "Inu.Kernel.Console", relative).Replace('\\', '/');
+            files.Add((canonical, destination, "Inu.Kernel.Console", true));
+        }
+
+        files = files
+            .GroupBy(file => file.Source, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .OrderBy(file => file.Source, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        static string Xml(string value) => value.Replace("&", "&amp;").Replace("\"", "&quot;").Replace("<", "&lt;").Replace(">", "&gt;");
+        List<string> targetLines = ["<Project>", "  <ItemGroup>"];
+        foreach ((string Source, string Destination, string Project, bool Central) file in files)
+        {
+            if (file.Central)
+                targetLines.Add($"    <Compile Include=\"$(InuSdkRoot)\\{Xml(file.Source.Replace('/', '\\'))}\" Link=\"{Xml(file.Destination.Replace('/', '\\'))}\" />");
+            else
+                targetLines.Add($"    <Compile Include=\"$(MSBuildThisFileDirectory){Xml(file.Destination.Replace('/', '\\'))}\" />");
+        }
+        targetLines.Add("  </ItemGroup>");
+        targetLines.Add("</Project>");
+        targetLines.Add(string.Empty);
+        File.WriteAllText(targetsPath, string.Join(Environment.NewLine, targetLines));
+
+        string[] dependencyProjects = root.TryGetProperty("dependencyProjects", out JsonElement dependencyElement) && dependencyElement.ValueKind == JsonValueKind.Array
+            ? dependencyElement.EnumerateArray().Where(value => value.ValueKind == JsonValueKind.String).Select(value => value.GetString()!).Where(value => !string.IsNullOrWhiteSpace(value)).ToArray()
+            : Array.Empty<string>();
+        if (!dependencyProjects.Contains("Inu.Kernel.Console", StringComparer.OrdinalIgnoreCase))
+            dependencyProjects = dependencyProjects.Append("Inu.Kernel.Console").OrderBy(value => value, StringComparer.OrdinalIgnoreCase).ToArray();
+        string note = root.TryGetProperty("note", out JsonElement noteElement) && noteElement.ValueKind == JsonValueKind.String
+            ? noteElement.GetString() ?? string.Empty
+            : "Selected architectural source is OS-owned. Unselected build-only support source is linked from the single authoritative Inu/SDK/src tree; no duplicate physical copies are generated.";
+        File.WriteAllText(planPath, JsonSerializer.Serialize(new
+        {
+            schemaVersion = 1,
+            files = files.Select(file => new { source = file.Source, destination = file.Destination, project = file.Project, central = file.Central }).ToArray(),
+            dependencyProjects,
+            note
+        }, new JsonSerializerOptions { WriteIndented = true }) + Environment.NewLine);
+
+        if (hadMaterializedConsole)
+            Console.WriteLine("[ OK ] Refreshed Inu.Kernel.Console from central SDK support source; legacy Boot-owned copy remains untouched but is no longer compiled.");
+        return true;
+    }
+    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is JsonException)
+    {
+        Console.Error.WriteLine($"[FAIL] Could not refresh central kernel console source plan: {ex.Message}");
+        return false;
+    }
+}
+
+static bool FailBool(string message)
+{
+    Console.Error.WriteLine($"[FAIL] {message}");
+    return false;
 }
 
 static string? ResolveMainProjectPath(string output)

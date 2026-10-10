@@ -1,26 +1,27 @@
 {
-  "baseVersion": "0.0.132",
-  "version": "0.0.133",
+  "baseVersion": "0.0.133",
+  "version": "0.0.134",
   "changedFiles": [
-    "Build.ps1",
-    "CHANGED-0.0.133.txt",
+    "CHANGED-0.0.134.txt",
     "Inu/SDK/Directory.Build.props",
+    "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
-    "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/VERSION",
+    "Inu/SDK/src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
+    "Inu/SDK/src/Inu.ProjectCreator/Program.cs",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
-    "Kath/Build-Kath.ps1",
-    "Kath/JSON/package.json",
-    "Kath/VERSION",
+    "Inu/VERSION",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.0.133.md",
+    "Kath/docs/Release-0.0.134.md",
+    "Kath/JSON/package.json",
     "Kath/packages/kath/package.json",
+    "Kath/packages/kath/src/node/inu-project-generation.ts",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
+    "Kath/VERSION",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Reject mixed ChangedFiles overlays before version propagation and bind the Kath launcher cache/publish stamp to the authoritative release version."
+  "summary": "Refresh existing OS console support from the central SDK dependency and preserve source compatibility with older coder-owned syscall implementations."
 }

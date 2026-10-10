@@ -6,10 +6,10 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <Version>0.0.133</Version>
-    <AssemblyVersion>0.0.133.0</AssemblyVersion>
-    <FileVersion>0.0.133.0</FileVersion>
-    <PackageVersion>0.0.133</PackageVersion>
+    <Version>0.0.134</Version>
+    <AssemblyVersion>0.0.134.0</AssemblyVersion>
+    <FileVersion>0.0.134.0</FileVersion>
+    <PackageVersion>0.0.134</PackageVersion>
     <Authors>ProjectLithos</Authors>
     <Company>ProjectLithos</Company>
     <Product>Inu OS SDK</Product>
