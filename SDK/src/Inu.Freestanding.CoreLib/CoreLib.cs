@@ -245,6 +245,11 @@ namespace System
     public interface IEquatable<T> { Boolean Equals(T other); }
     /// <summary><inu.api/>Minimal formatting contract used by primitive values.</summary>
     public interface IFormattable { String ToString(String format, IFormatProvider formatProvider); }
+    /// <summary>Span formatting contract used by allocation-free primitive formatting.</summary>
+    public interface ISpanFormattable : IFormattable
+    {
+        Boolean TryFormat(Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, IFormatProvider provider);
+    }
     public interface IFormatProvider { Object GetFormat(Type formatType); }
 
     /// <summary>Full .NET value-conversion contract used by Boolean and later primitive completion work.</summary>
@@ -448,20 +453,123 @@ namespace System
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct Char : IComparable, IComparable<Char>, IEquatable<Char>
+    public struct Char : IComparable, IConvertible, IComparable<Char>, IEquatable<Char>, ISpanFormattable, ISpanParsable<Char>
     {
         private char _value;
         public const Char MaxValue = (Char)0xFFFF;
         public const Char MinValue = (Char)0x0000;
 
-        /// <summary>Returns whether the character is one of the ASCII whitespace characters supported during freestanding bootstrap.</summary>
+        public static Boolean IsAscii(Char value) => (UInt32)value <= 0x7FU;
+        public static Boolean IsAsciiLetter(Char value)
+            => (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
+        public static Boolean IsAsciiLetterLower(Char value) => value >= 'a' && value <= 'z';
+        public static Boolean IsAsciiLetterUpper(Char value) => value >= 'A' && value <= 'Z';
+        public static Boolean IsAsciiDigit(Char value) => value >= '0' && value <= '9';
+        public static Boolean IsAsciiLetterOrDigit(Char value) => IsAsciiLetter(value) || IsAsciiDigit(value);
+        public static Boolean IsAsciiHexDigit(Char value)
+            => IsAsciiDigit(value) || (value >= 'A' && value <= 'F') || (value >= 'a' && value <= 'f');
+        public static Boolean IsAsciiHexDigitLower(Char value)
+            => IsAsciiDigit(value) || (value >= 'a' && value <= 'f');
+        public static Boolean IsAsciiHexDigitUpper(Char value)
+            => IsAsciiDigit(value) || (value >= 'A' && value <= 'F');
+        public static Boolean IsBetween(Char value, Char minInclusive, Char maxInclusive)
+            => value >= minInclusive && value <= maxInclusive;
+        public static Boolean IsControl(Char value)
+            => value <= (Char)0x001F || (value >= (Char)0x007F && value <= (Char)0x009F);
+
+        /// <summary>Recognizes the Unicode whitespace code points used by .NET text parsing.</summary>
         public static Boolean IsWhiteSpace(Char value)
-            => value == ' ' || value == '\t' || value == '\r' || value == '\n' || value == '\f' || value == '\v';
+            => (value >= '\t' && value <= '\r') || value == ' '
+                || value == (Char)0x0085 || value == (Char)0x00A0 || value == (Char)0x1680
+                || (value >= (Char)0x2000 && value <= (Char)0x200A)
+                || value == (Char)0x2028 || value == (Char)0x2029 || value == (Char)0x202F
+                || value == (Char)0x205F || value == (Char)0x3000;
+
         public Boolean Equals(Char other) => _value == other._value;
         public override Boolean Equals(Object obj) => obj is Char && Equals((Char)obj);
-        public override Int32 GetHashCode() => _value;
-        public Int32 CompareTo(Char other) => _value < other._value ? -1 : (_value > other._value ? 1 : 0);
-        public Int32 CompareTo(Object obj) { if (obj == null) return 1; if (!(obj is Char)) throw new ArgumentException(); return CompareTo((Char)obj); }
+        public override Int32 GetHashCode() => (Int32)_value | ((Int32)_value << 16);
+        public Int32 CompareTo(Char other) => (Int32)_value - (Int32)other._value;
+        public Int32 CompareTo(Object obj)
+        {
+            if (obj == null) return 1;
+            if (!(obj is Char)) throw new ArgumentException();
+            return CompareTo((Char)obj);
+        }
+
+        public override String ToString() => ToString(_value);
+        public String ToString(IFormatProvider provider) => ToString(_value);
+        String IFormattable.ToString(String format, IFormatProvider formatProvider) => ToString(_value);
+        public static String ToString(Char value) => String.CreateFromChars(new Char[] { value }, 1);
+
+        Boolean ISpanFormattable.TryFormat(Span<Char> destination, out Int32 charsWritten, ReadOnlySpan<Char> format, IFormatProvider provider)
+        {
+            if (destination.Length == 0)
+            {
+                charsWritten = 0;
+                return false;
+            }
+            destination[0] = _value;
+            charsWritten = 1;
+            return true;
+        }
+
+        public static Char Parse(String value)
+        {
+            if (value == null) throw new ArgumentNullException();
+            if (value.Length != 1) throw new FormatException();
+            return value[0];
+        }
+
+        public static Char Parse(ReadOnlySpan<Char> value)
+        {
+            if (value.Length != 1) throw new FormatException();
+            return value[0];
+        }
+
+        public static Boolean TryParse(String value, out Char result)
+        {
+            if (value == null || value.Length != 1)
+            {
+                result = MinValue;
+                return false;
+            }
+            result = value[0];
+            return true;
+        }
+
+        public static Boolean TryParse(ReadOnlySpan<Char> value, out Char result)
+        {
+            if (value.Length != 1)
+            {
+                result = MinValue;
+                return false;
+            }
+            result = value[0];
+            return true;
+        }
+
+        static Char IParsable<Char>.Parse(String value, IFormatProvider provider) => Parse(value);
+        static Boolean IParsable<Char>.TryParse(String value, IFormatProvider provider, out Char result) => TryParse(value, out result);
+        static Char ISpanParsable<Char>.Parse(ReadOnlySpan<Char> value, IFormatProvider provider) => Parse(value);
+        static Boolean ISpanParsable<Char>.TryParse(ReadOnlySpan<Char> value, IFormatProvider provider, out Char result) => TryParse(value, out result);
+
+        public TypeCode GetTypeCode() => TypeCode.Char;
+        Boolean IConvertible.ToBoolean(IFormatProvider provider) => throw new InvalidCastException();
+        Char IConvertible.ToChar(IFormatProvider provider) => _value;
+        SByte IConvertible.ToSByte(IFormatProvider provider) => Convert.ToSByte(_value);
+        Byte IConvertible.ToByte(IFormatProvider provider) => Convert.ToByte(_value);
+        Int16 IConvertible.ToInt16(IFormatProvider provider) => Convert.ToInt16(_value);
+        UInt16 IConvertible.ToUInt16(IFormatProvider provider) => Convert.ToUInt16(_value);
+        Int32 IConvertible.ToInt32(IFormatProvider provider) => Convert.ToInt32(_value);
+        UInt32 IConvertible.ToUInt32(IFormatProvider provider) => Convert.ToUInt32(_value);
+        Int64 IConvertible.ToInt64(IFormatProvider provider) => Convert.ToInt64(_value);
+        UInt64 IConvertible.ToUInt64(IFormatProvider provider) => Convert.ToUInt64(_value);
+        Single IConvertible.ToSingle(IFormatProvider provider) => throw new InvalidCastException();
+        Double IConvertible.ToDouble(IFormatProvider provider) => throw new InvalidCastException();
+        Decimal IConvertible.ToDecimal(IFormatProvider provider) => throw new InvalidCastException();
+        DateTime IConvertible.ToDateTime(IFormatProvider provider) => throw new InvalidCastException();
+        String IConvertible.ToString(IFormatProvider provider) => ToString();
+        Object IConvertible.ToType(Type conversionType, IFormatProvider provider) => Convert.DefaultToType(this, conversionType, provider);
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -806,6 +914,7 @@ namespace System
     public static class Convert
     {
         public static Boolean ToBoolean(Boolean value) => value;
+        public static Boolean ToBoolean(Char value) => throw new InvalidCastException();
         public static Boolean ToBoolean(SByte value) => value != 0;
         public static Boolean ToBoolean(Byte value) => value != 0;
         public static Boolean ToBoolean(Int16 value) => value != 0;
@@ -817,7 +926,28 @@ namespace System
         public static Boolean ToBoolean(Single value) => value != 0;
         public static Boolean ToBoolean(Double value) => value != 0;
 
+        public static Char ToChar(Boolean value) => throw new InvalidCastException();
+        public static Char ToChar(Char value) => value;
+        public static Char ToChar(SByte value) => checked((Char)value);
+        public static Char ToChar(Byte value) => (Char)value;
+        public static Char ToChar(Int16 value) => checked((Char)value);
+        public static Char ToChar(UInt16 value) => (Char)value;
+        public static Char ToChar(Int32 value) => checked((Char)value);
+        public static Char ToChar(UInt32 value) => checked((Char)value);
+        public static Char ToChar(Int64 value) => checked((Char)value);
+        public static Char ToChar(UInt64 value) => checked((Char)value);
+        public static Char ToChar(String value)
+        {
+            if (value == null) throw new ArgumentNullException();
+            return Char.Parse(value);
+        }
+        public static Char ToChar(Single value) => throw new InvalidCastException();
+        public static Char ToChar(Double value) => throw new InvalidCastException();
+        public static Char ToChar(Decimal value) => throw new InvalidCastException();
+        public static Char ToChar(DateTime value) => throw new InvalidCastException();
+
         public static SByte ToSByte(Boolean value) => value ? (SByte)1 : (SByte)0;
+        public static SByte ToSByte(Char value) => checked((SByte)value);
         public static SByte ToSByte(SByte value) => value;
         public static SByte ToSByte(Byte value) => checked((SByte)value);
         public static SByte ToSByte(Int16 value) => checked((SByte)value);
@@ -830,6 +960,7 @@ namespace System
         public static SByte ToSByte(Double value) => checked((SByte)Math.Round(value));
 
         public static Byte ToByte(Boolean value) => value ? (Byte)1 : (Byte)0;
+        public static Byte ToByte(Char value) => checked((Byte)value);
         public static Byte ToByte(SByte value) => checked((Byte)value);
         public static Byte ToByte(Byte value) => value;
         public static Byte ToByte(Int16 value) => checked((Byte)value);
@@ -842,6 +973,7 @@ namespace System
         public static Byte ToByte(Double value) => checked((Byte)Math.Round(value));
 
         public static Int16 ToInt16(Boolean value) => value ? (Int16)1 : (Int16)0;
+        public static Int16 ToInt16(Char value) => checked((Int16)value);
         public static Int16 ToInt16(SByte value) => checked((Int16)value);
         public static Int16 ToInt16(Byte value) => checked((Int16)value);
         public static Int16 ToInt16(Int16 value) => value;
@@ -854,6 +986,7 @@ namespace System
         public static Int16 ToInt16(Double value) => checked((Int16)Math.Round(value));
 
         public static UInt16 ToUInt16(Boolean value) => value ? (UInt16)1 : (UInt16)0;
+        public static UInt16 ToUInt16(Char value) => value;
         public static UInt16 ToUInt16(SByte value) => checked((UInt16)value);
         public static UInt16 ToUInt16(Byte value) => checked((UInt16)value);
         public static UInt16 ToUInt16(Int16 value) => checked((UInt16)value);
@@ -902,6 +1035,7 @@ namespace System
         public static Int64 ToInt64(Double value) => checked((Int64)Math.Round(value));
 
         public static UInt64 ToUInt64(Boolean value) => value ? (UInt64)1 : (UInt64)0;
+        public static UInt64 ToUInt64(Char value) => value;
         public static UInt64 ToUInt64(SByte value) => checked((UInt64)value);
         public static UInt64 ToUInt64(Byte value) => checked((UInt64)value);
         public static UInt64 ToUInt64(Int16 value) => checked((UInt64)value);
@@ -914,6 +1048,7 @@ namespace System
         public static UInt64 ToUInt64(Double value) => checked((UInt64)Math.Round(value));
 
         public static Single ToSingle(Boolean value) => value ? 1F : 0F;
+        public static Single ToSingle(Char value) => throw new InvalidCastException();
         public static Single ToSingle(SByte value) => (Single)value;
         public static Single ToSingle(Byte value) => (Single)value;
         public static Single ToSingle(Int16 value) => (Single)value;
@@ -926,6 +1061,7 @@ namespace System
         public static Single ToSingle(Double value) => (Single)value;
 
         public static Double ToDouble(Boolean value) => value ? 1D : 0D;
+        public static Double ToDouble(Char value) => throw new InvalidCastException();
         public static Double ToDouble(SByte value) => (Double)value;
         public static Double ToDouble(Byte value) => (Double)value;
         public static Double ToDouble(Int16 value) => (Double)value;
@@ -938,6 +1074,7 @@ namespace System
         public static Double ToDouble(Double value) => value;
 
         public static Decimal ToDecimal(Boolean value) => value ? Decimal.One : Decimal.Zero;
+        public static Decimal ToDecimal(Char value) => throw new InvalidCastException();
 
         internal static Object DefaultToType(IConvertible value, Type targetType, IFormatProvider provider)
         {
@@ -962,6 +1099,7 @@ namespace System
             throw new InvalidCastException();
         }
 
+        public static String ToString(Char value) => value.ToString();
         public static String ToString(SByte value) => value.ToString();
         public static String ToString(Byte value) => value.ToString();
         public static String ToString(Int16 value) => value.ToString();

@@ -738,9 +738,90 @@ public static unsafe class ManagedRuntimeConformance
             && staticBooleanParsed && staticBooleanTryParsed && !staticBooleanTryValue
             && staticSpanBooleanParsed && staticSpanBooleanTryParsed && !staticSpanBooleanTryValue, ref passed, ref failed);
 
-        // 03 System.Char
-        Record(Char.IsWhiteSpace(' ') && Char.IsWhiteSpace('\n') && !Char.IsWhiteSpace('X')
-            && Char.MinValue == (Char)0 && Char.MaxValue == (Char)0xFFFF, ref passed, ref failed);
+        // 03 System.Char — comparison, selected classification, conversion and formatting
+        Boolean wrongCharCompareThrows = false;
+        Boolean nullCharParseThrows = false;
+        Boolean formatCharParseThrows = false;
+        Boolean charBooleanConvertThrows = false;
+        Boolean charSingleConvertThrows = false;
+        Boolean charDoubleConvertThrows = false;
+        Boolean charDecimalConvertThrows = false;
+        Boolean charDateConvertThrows = false;
+        Boolean badTypeCharConvertThrows = false;
+        Boolean nullTypeCharConvertThrows = false;
+        Boolean charSByteOverflowThrows = false;
+        Boolean nullStringCharConvertThrows = false;
+
+        try { ((IComparable)(Char)'B').CompareTo((Int32)66); } catch (ArgumentException) { wrongCharCompareThrows = true; }
+        try { Char.Parse((String)null); } catch (ArgumentNullException) { nullCharParseThrows = true; }
+        try { Char.Parse("AB"); } catch (FormatException) { formatCharParseThrows = true; }
+        try { Convert.ToChar((String)null); } catch (ArgumentNullException) { nullStringCharConvertThrows = true; }
+
+        IConvertible charConvertible = (Char)'A';
+        try { charConvertible.ToBoolean(null); } catch (InvalidCastException) { charBooleanConvertThrows = true; }
+        try { charConvertible.ToSingle(null); } catch (InvalidCastException) { charSingleConvertThrows = true; }
+        try { charConvertible.ToDouble(null); } catch (InvalidCastException) { charDoubleConvertThrows = true; }
+        try { charConvertible.ToDecimal(null); } catch (InvalidCastException) { charDecimalConvertThrows = true; }
+        try { charConvertible.ToDateTime(null); } catch (InvalidCastException) { charDateConvertThrows = true; }
+        try { charConvertible.ToType(typeof(Probe), null); } catch (InvalidCastException) { badTypeCharConvertThrows = true; }
+        try { charConvertible.ToType(null, null); } catch (ArgumentNullException) { nullTypeCharConvertThrows = true; }
+        try { ((IConvertible)(Char)0x0100).ToSByte(null); } catch (OverflowException) { charSByteOverflowThrows = true; }
+
+        Boolean charStaticParsed = ParseViaIParsable<Char>("Z", null) == 'Z';
+        Boolean charStaticTryParsed = TryParseViaIParsable<Char>("Q", null, out Char charStaticTryValue) && charStaticTryValue == 'Q';
+        Char[] charSpanParseArray = new Char[] { 'M' };
+        Char[] charSpanTryArray = new Char[] { 'N' };
+        Boolean charSpanStaticParsed = ParseViaISpanParsable<Char>(new ReadOnlySpan<Char>(charSpanParseArray), null) == 'M';
+        Boolean charSpanStaticTryParsed = TryParseViaISpanParsable<Char>(new ReadOnlySpan<Char>(charSpanTryArray), null, out Char charSpanTryValue) && charSpanTryValue == 'N';
+
+        Char[] charDestinationArray = new Char[1];
+        ISpanFormattable charFormattable = (Char)'K';
+        Boolean charFormatted = charFormattable.TryFormat(new Span<Char>(charDestinationArray), out Int32 charCharsWritten, new ReadOnlySpan<Char>(new Char[0]), null);
+        Boolean charEmptyFormatted = charFormattable.TryFormat(new Span<Char>(new Char[0]), out Int32 charEmptyCharsWritten, new ReadOnlySpan<Char>(new Char[0]), null);
+        Boolean charParsed = Char.TryParse("R", out Char parsedChar);
+        Boolean charInvalid = Char.TryParse("RR", out Char invalidChar);
+        Boolean charNullInvalid = Char.TryParse((String)null, out Char nullInvalidChar);
+
+        Record(Char.MinValue == (Char)0 && Char.MaxValue == (Char)0xFFFF
+            && ((Char)'A').CompareTo('B') == -1 && ((Char)'B').CompareTo('A') == 1 && ((Char)'A').CompareTo('A') == 0
+            && ((IComparable)(Char)'B').CompareTo(null) > 0 && wrongCharCompareThrows
+            && ((Char)'A').Equals('A') && !((Char)'A').Equals('B') && ((Object)(Char)'A').Equals((Char)'A')
+            && ((Char)'A').GetHashCode() == ((Int32)'A' | ((Int32)'A' << 16))
+            && Char.IsAscii('A') && Char.IsAscii((Char)0x7F) && !Char.IsAscii((Char)0x80)
+            && Char.IsAsciiLetter('A') && Char.IsAsciiLetter('z') && !Char.IsAsciiLetter('4')
+            && Char.IsAsciiLetterLower('z') && !Char.IsAsciiLetterLower('Z')
+            && Char.IsAsciiLetterUpper('Z') && !Char.IsAsciiLetterUpper('z')
+            && Char.IsAsciiDigit('7') && !Char.IsAsciiDigit('x')
+            && Char.IsAsciiLetterOrDigit('7') && Char.IsAsciiLetterOrDigit('x') && !Char.IsAsciiLetterOrDigit('-')
+            && Char.IsAsciiHexDigit('F') && Char.IsAsciiHexDigit('f') && !Char.IsAsciiHexDigit('G')
+            && Char.IsAsciiHexDigitLower('f') && !Char.IsAsciiHexDigitLower('F')
+            && Char.IsAsciiHexDigitUpper('F') && !Char.IsAsciiHexDigitUpper('f')
+            && Char.IsBetween('m', 'a', 'z') && !Char.IsBetween('M', 'a', 'z')
+            && Char.IsControl('\0') && Char.IsControl((Char)0x009F) && !Char.IsControl(' ')
+            && Char.IsWhiteSpace(' ') && Char.IsWhiteSpace('\n') && Char.IsWhiteSpace((Char)0x3000) && !Char.IsWhiteSpace('X')
+            && String.Equals(((Char)'K').ToString(), "K") && String.Equals(((Char)'K').ToString(null), "K") && String.Equals(Char.ToString('K'), "K")
+            && String.Equals(((IFormattable)(Char)'K').ToString("ignored", null), "K")
+            && charFormatted && charCharsWritten == 1 && charDestinationArray[0] == 'K'
+            && !charEmptyFormatted && charEmptyCharsWritten == 0
+            && Char.Parse("P") == 'P' && charParsed && parsedChar == 'R'
+            && !charInvalid && invalidChar == (Char)0 && !charNullInvalid && nullInvalidChar == (Char)0
+            && nullCharParseThrows && formatCharParseThrows
+            && charStaticParsed && charStaticTryParsed && charSpanStaticParsed && charSpanStaticTryParsed
+            && charConvertible.GetTypeCode() == TypeCode.Char && charConvertible.ToChar(null) == 'A'
+            && charConvertible.ToSByte(null) == (SByte)65 && charConvertible.ToByte(null) == (Byte)65
+            && charConvertible.ToInt16(null) == (Int16)65 && charConvertible.ToUInt16(null) == (UInt16)65
+            && charConvertible.ToInt32(null) == 65 && charConvertible.ToUInt32(null) == 65U
+            && charConvertible.ToInt64(null) == 65L && charConvertible.ToUInt64(null) == 65UL
+            && String.Equals(charConvertible.ToString(null), "A")
+            && (Char)charConvertible.ToType(typeof(Char), null) == 'A'
+            && (Int32)charConvertible.ToType(typeof(Int32), null) == 65
+            && String.Equals((String)charConvertible.ToType(typeof(String), null), "A")
+            && (Char)charConvertible.ToType(typeof(Object), null) == 'A'
+            && Convert.ToChar((Byte)65) == 'A' && Convert.ToChar((Int32)65) == 'A' && Convert.ToChar("A") == 'A'
+            && Convert.ToUInt16('A') == (UInt16)65 && Convert.ToInt32('A') == 65 && String.Equals(Convert.ToString('A'), "A")
+            && charBooleanConvertThrows && charSingleConvertThrows && charDoubleConvertThrows && charDecimalConvertThrows
+            && charDateConvertThrows && badTypeCharConvertThrows && nullTypeCharConvertThrows
+            && charSByteOverflowThrows && nullStringCharConvertThrows, ref passed, ref failed);
 
         // 04 System.Int32
         Int32 integer = 12345;

@@ -1,29 +1,28 @@
 {
-  "baseVersion": "0.0.139",
-  "version": "0.0.140",
+  "baseVersion": "0.0.142",
+  "version": "0.0.143",
   "changedFiles": [
-    "Build.ps1",
-    "CHANGED-0.0.140.txt",
+    "CHANGED-0.0.143.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
+    "Inu/SDK/docs/BCL-Conformance-Target.md",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Kernel.Storage/FileSystemPathPolicy.cs",
-    "Inu/SDK/src/Inu.Userland.Runtime/FileSystemPaths.cs",
-    "Inu/SDK/src/Inu.UserlandCompiler/Program.cs",
+    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
+    "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
+    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
-    "Inu/tools/Install-Source.ps1",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
+    "Kath/docs/Release-0.0.143.md",
     "Kath/packages/kath/package.json",
-    "Kath/packages/kath/src/browser/inu-editor-environment.ts",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Make path-separator diagnostics follow the coder-selected separator generically and preserve the authoritative root TODO.md through clean builds."
+  "summary": "Complete System.Char comparison, classification subset, conversion/parsing and formatting with paired reference/runtime conformance coverage."
 }

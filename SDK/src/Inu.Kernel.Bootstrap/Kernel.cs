@@ -58,7 +58,7 @@ namespace Inu.Kernel.Bootstrap;
 /// <summary>Defines the authoritative freestanding Inu bootstrap kernel.</summary>
 public static unsafe partial class Kernel
 {
-    private const UInt64 KeyboardRepeatInitialDelayNanoseconds=300000000UL;
+    private const UInt64 KeyboardRepeatInitialDelayNanoseconds=500000000UL;
     private const UInt64 KeyboardRepeatIntervalNanoseconds=40000000UL;
     private static Boolean _ps2RepeatActive,_usbRepeatActive;
     private static KernelGraphicsDisplayHandle _consoleGraphicsDisplay;
@@ -614,7 +614,7 @@ public static unsafe partial class Kernel
         if (!KernelConsole.Write("Keyboard layout: ")) return false;
         if (!KernelConsole.WriteLine(KeyboardLayouts.GetName(ps2.Layout))) return false;
         if (!KernelStructuredLogging.InfoLine("kernel","Kernel.KMain","Keyboard layouts loaded: English_UK, English_USA.")) return false;
-        if (!KernelStructuredLogging.InfoLine("kernel","Kernel.KMain","Keyboard repeat: software controlled; 300 ms delay, 40 ms interval; key-up cancels immediately.")) return false;
+        if (!KernelStructuredLogging.InfoLine("kernel","Kernel.KMain","Keyboard repeat: software controlled; 500 ms delay, 40 ms interval; key-up cancels immediately.")) return false;
         if (!KernelProcesses.Initialize()) return false;
         if (!KernelGui.Initialize()) return false;
         KernelProcessCapabilities processes = KernelProcesses.GetCapabilities();

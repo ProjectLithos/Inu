@@ -15,7 +15,7 @@ The target is intentionally type-level rather than a claim that every API on a l
 |---:|---|---|
 | 1 | `System.Object` | construction, identity, `ReferenceEquals`, default `Equals`, stable identity `GetHashCode`, runtime type identity, and default `ToString` for base, derived, array and closed-generic runtime types |
 | 2 | `System.Boolean` | full .NET 10 Boolean contract: constants, hashing/text, formatting, parsing, typed/boxed comparison/equality, `IConvertible`, `IParsable<bool>`, `ISpanParsable<bool>`, conversion/exception semantics and static-interface dispatch |
-| 3 | `System.Char` | min/max values and supported whitespace classification |
+| 3 | `System.Char` | comparison/equality/hash semantics; ASCII classification (`IsAscii`, letter/digit/hex variants, `IsBetween`), control and Unicode-whitespace classification; `Parse`/`TryParse` + `IParsable<char>`/`ISpanParsable<char>`; `IConvertible`/`Convert` character conversions and exception semantics; `ToString`/`IFormattable`/`ISpanFormattable` formatting |
 | 4 | `System.Int32` | value equality, hash code, min/max constants |
 | 5 | `System.IntPtr` | pointer-size contract, construction, add/subtract, integer round-trip |
 | 6 | `System.UIntPtr` | pointer-size contract, construction, add/subtract, integer round-trip |

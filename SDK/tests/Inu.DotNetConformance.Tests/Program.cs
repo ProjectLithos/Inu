@@ -178,8 +178,91 @@ internal static class Program
     }
 
     private static bool TestChar()
-        => char.IsWhiteSpace(' ') && char.IsWhiteSpace('\n') && !char.IsWhiteSpace('X')
-            && char.MinValue == (char)0 && char.MaxValue == (char)0xFFFF;
+    {
+        bool wrongCompareThrows = false;
+        bool nullParseThrows = false;
+        bool formatParseThrows = false;
+        bool booleanConvertThrows = false;
+        bool singleConvertThrows = false;
+        bool doubleConvertThrows = false;
+        bool decimalConvertThrows = false;
+        bool dateConvertThrows = false;
+        bool badTypeConvertThrows = false;
+        bool nullTypeConvertThrows = false;
+        bool sbyteOverflowThrows = false;
+        bool nullStringConvertThrows = false;
+
+        try { _ = ((IComparable)'B').CompareTo(66); } catch (ArgumentException) { wrongCompareThrows = true; }
+        try { _ = char.Parse((string)null!); } catch (ArgumentNullException) { nullParseThrows = true; }
+        try { _ = char.Parse("AB"); } catch (FormatException) { formatParseThrows = true; }
+        try { _ = Convert.ToChar((string)null!); } catch (ArgumentNullException) { nullStringConvertThrows = true; }
+
+        IConvertible convertible = 'A';
+        try { _ = convertible.ToBoolean(null); } catch (InvalidCastException) { booleanConvertThrows = true; }
+        try { _ = convertible.ToSingle(null); } catch (InvalidCastException) { singleConvertThrows = true; }
+        try { _ = convertible.ToDouble(null); } catch (InvalidCastException) { doubleConvertThrows = true; }
+        try { _ = convertible.ToDecimal(null); } catch (InvalidCastException) { decimalConvertThrows = true; }
+        try { _ = convertible.ToDateTime(null); } catch (InvalidCastException) { dateConvertThrows = true; }
+        try { _ = convertible.ToType(typeof(Program), null); } catch (InvalidCastException) { badTypeConvertThrows = true; }
+        try { _ = convertible.ToType(null!, null); } catch (ArgumentNullException) { nullTypeConvertThrows = true; }
+        try { _ = ((IConvertible)'\u0100').ToSByte(null); } catch (OverflowException) { sbyteOverflowThrows = true; }
+
+        char parsed;
+        char invalid;
+        bool staticParsed = ParseViaIParsable<char>("Z", null) == 'Z';
+        bool staticTryParsed = TryParseViaIParsable<char>("Q", null, out char staticTryValue) && staticTryValue == 'Q';
+        bool spanStaticParsed = ParseViaISpanParsable<char>("M".AsSpan(), null) == 'M';
+        bool spanStaticTryParsed = TryParseViaISpanParsable<char>("N".AsSpan(), null, out char spanTryValue) && spanTryValue == 'N';
+
+        Span<char> formatDestination = stackalloc char[1];
+        ISpanFormattable spanFormattable = 'K';
+        bool formatted = spanFormattable.TryFormat(formatDestination, out int charsWritten, default, null);
+        Span<char> emptyDestination = Span<char>.Empty;
+        bool emptyFormatted = spanFormattable.TryFormat(emptyDestination, out int emptyCharsWritten, default, null);
+
+        return char.MinValue == (char)0 && char.MaxValue == (char)0xFFFF
+            && 'A'.CompareTo('B') == -1 && 'B'.CompareTo('A') == 1 && 'A'.CompareTo('A') == 0
+            && ((IComparable)'B').CompareTo(null) > 0 && wrongCompareThrows
+            && 'A'.Equals('A') && !'A'.Equals('B') && ((object)'A').Equals('A')
+            && 'A'.GetHashCode() == ((int)'A' | ((int)'A' << 16))
+            && char.IsAscii('A') && char.IsAscii((char)0x7F) && !char.IsAscii((char)0x80)
+            && char.IsAsciiLetter('A') && char.IsAsciiLetter('z') && !char.IsAsciiLetter('4')
+            && char.IsAsciiLetterLower('z') && !char.IsAsciiLetterLower('Z')
+            && char.IsAsciiLetterUpper('Z') && !char.IsAsciiLetterUpper('z')
+            && char.IsAsciiDigit('7') && !char.IsAsciiDigit('x')
+            && char.IsAsciiLetterOrDigit('7') && char.IsAsciiLetterOrDigit('x') && !char.IsAsciiLetterOrDigit('-')
+            && char.IsAsciiHexDigit('F') && char.IsAsciiHexDigit('f') && !char.IsAsciiHexDigit('G')
+            && char.IsAsciiHexDigitLower('f') && !char.IsAsciiHexDigitLower('F')
+            && char.IsAsciiHexDigitUpper('F') && !char.IsAsciiHexDigitUpper('f')
+            && char.IsBetween('m', 'a', 'z') && !char.IsBetween('M', 'a', 'z')
+            && char.IsControl('\0') && char.IsControl((char)0x009F) && !char.IsControl(' ')
+            && char.IsWhiteSpace(' ') && char.IsWhiteSpace('\n') && char.IsWhiteSpace('\u3000') && !char.IsWhiteSpace('X')
+            && 'K'.ToString() == "K" && 'K'.ToString(null) == "K" && char.ToString('K') == "K"
+            && ((IFormattable)'K').ToString("ignored", null) == "K"
+            && formatted && charsWritten == 1 && formatDestination[0] == 'K'
+            && !emptyFormatted && emptyCharsWritten == 0
+            && char.Parse("P") == 'P'
+            && char.TryParse("R", out parsed) && parsed == 'R'
+            && !char.TryParse("RR", out invalid) && invalid == '\0'
+            && !char.TryParse((string?)null, out invalid) && invalid == '\0'
+            && nullParseThrows && formatParseThrows
+            && staticParsed && staticTryParsed && spanStaticParsed && spanStaticTryParsed
+            && convertible.GetTypeCode() == TypeCode.Char && convertible.ToChar(null) == 'A'
+            && convertible.ToSByte(null) == 65 && convertible.ToByte(null) == 65
+            && convertible.ToInt16(null) == 65 && convertible.ToUInt16(null) == 65
+            && convertible.ToInt32(null) == 65 && convertible.ToUInt32(null) == 65U
+            && convertible.ToInt64(null) == 65L && convertible.ToUInt64(null) == 65UL
+            && convertible.ToString(null) == "A"
+            && (char)convertible.ToType(typeof(char), null) == 'A'
+            && (int)convertible.ToType(typeof(int), null) == 65
+            && (string)convertible.ToType(typeof(string), null) == "A"
+            && (char)convertible.ToType(typeof(object), null) == 'A'
+            && Convert.ToChar((byte)65) == 'A' && Convert.ToChar(65) == 'A' && Convert.ToChar("A") == 'A'
+            && Convert.ToUInt16('A') == 65 && Convert.ToInt32('A') == 65 && Convert.ToString('A') == "A"
+            && booleanConvertThrows && singleConvertThrows && doubleConvertThrows && decimalConvertThrows
+            && dateConvertThrows && badTypeConvertThrows && nullTypeConvertThrows
+            && sbyteOverflowThrows && nullStringConvertThrows;
+    }
 
     private static bool TestInt32()
     {

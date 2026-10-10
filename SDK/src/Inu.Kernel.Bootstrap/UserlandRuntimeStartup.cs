@@ -137,6 +137,32 @@ public static unsafe class UserlandRuntimeStartup
     /// <summary>Cancels the current foreground ring-3 program. The shell is relaunched by the supervisor.</summary>
     public static Boolean HandleControlC()=>KernelProcesses.RequestForegroundCommandCancellation();
 
+    /// <summary>Creates any installed command executable by name for kernel-owned policy code. The command list remains filesystem-driven; no command names are hard-coded here.</summary>
+    public static Boolean TryCreateCommandProcess(String command,KernelProcessOwnership ownership,out KernelProcessInfo process)
+    {
+        process=default;
+        if(!_initialized||String.IsNullOrEmpty(command)||command.Length>255)return false;
+        Byte* name=stackalloc Byte[256];
+        UInt32 length=0U;
+        for(Int32 i=0;i<command.Length;i++)
+        {
+            Char c=command[i];
+            if(c==0||c>0x7F)return false;
+            name[length++]=(Byte)c;
+        }
+        return TryCreateCommandExecutable(name,length,ownership,out process);
+    }
+
+    /// <summary>Runs any installed command from kernel policy while preserving ordinary isolated ring-3 execution.</summary>
+    public static Boolean TryRunCommand(String command,KernelProcessOwnership ownership,out KernelProcessInfo process)
+    {
+        if(!TryCreateCommandProcess(command,ownership,out process))return false;
+        if(KernelProcesses.TryStart(process.Id,0UL))return true;
+        KernelProcesses.TryTerminate(process.Id,-1L);
+        process=default;
+        return false;
+    }
+
     /// <summary>
     /// Runs the shell as an ordinary ring-3 process. Spawn requests are created by the generic
     /// process.spawn syscall; the supervisor runs the requested child and then starts a fresh shell.
