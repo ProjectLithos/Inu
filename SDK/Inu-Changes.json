@@ -1,6 +1,6 @@
 {
-  "baseVersion": "0.0.136",
-  "version": "0.0.137",
+  "baseVersion": "0.0.137",
+  "version": "0.0.138",
   "changedFiles": [
     "CHANGED-0.0.137.txt",
     "Inu/SDK/Directory.Build.props",

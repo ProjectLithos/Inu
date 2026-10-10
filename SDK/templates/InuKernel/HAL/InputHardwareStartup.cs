@@ -157,9 +157,9 @@ public static unsafe class InputHardwareStartup
 
     private static Boolean TryMapPs2Navigation(Ps2Key key, out Byte code)
     {
-        code=0U;
-        if(key==Ps2Key.Up)code=0x80U;else if(key==Ps2Key.Down)code=0x81U;else if(key==Ps2Key.Left)code=0x82U;else if(key==Ps2Key.Right)code=0x83U;
-        else if(key==Ps2Key.Home)code=0x84U;else if(key==Ps2Key.End)code=0x85U;else if(key==Ps2Key.Delete)code=0x86U;
+        code=0;
+        if(key==Ps2Key.Up)code=0x80;else if(key==Ps2Key.Down)code=0x81;else if(key==Ps2Key.Left)code=0x82;else if(key==Ps2Key.Right)code=0x83;
+        else if(key==Ps2Key.Home)code=0x84;else if(key==Ps2Key.End)code=0x85;else if(key==Ps2Key.Delete)code=0x86;
         return code!=0U;
     }
 
@@ -188,9 +188,9 @@ public static unsafe class InputHardwareStartup
 
     private static Boolean TryMapUsbNavigation(Byte usage, out Byte code)
     {
-        code=0U;
-        if(usage==82U)code=0x80U;else if(usage==81U)code=0x81U;else if(usage==80U)code=0x82U;else if(usage==79U)code=0x83U;
-        else if(usage==74U)code=0x84U;else if(usage==77U)code=0x85U;else if(usage==76U)code=0x86U;
+        code=0;
+        if(usage==82U)code=0x80;else if(usage==81U)code=0x81;else if(usage==80U)code=0x82;else if(usage==79U)code=0x83;
+        else if(usage==74U)code=0x84;else if(usage==77U)code=0x85;else if(usage==76U)code=0x86;
         return code!=0U;
     }
 
