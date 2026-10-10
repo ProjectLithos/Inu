@@ -1,28 +1,25 @@
 {
-  "baseVersion": "0.0.142",
-  "version": "0.0.143",
+  "baseVersion": "0.0.143",
+  "version": "0.0.144",
   "changedFiles": [
-    "CHANGED-0.0.143.txt",
+    "CHANGED-0.0.144.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
-    "Inu/SDK/docs/BCL-Conformance-Target.md",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
     "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.0.143.md",
+    "Kath/docs/Release-0.0.144.md",
     "Kath/packages/kath/package.json",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Complete System.Char comparison, classification subset, conversion/parsing and formatting with paired reference/runtime conformance coverage."
+  "summary": "Fix the in-kernel System.Char conformance gate compile failure caused by duplicate Boolean/Char conversion result local names."
 }

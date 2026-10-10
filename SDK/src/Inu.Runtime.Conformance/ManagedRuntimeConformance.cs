@@ -742,7 +742,7 @@ public static unsafe class ManagedRuntimeConformance
         Boolean wrongCharCompareThrows = false;
         Boolean nullCharParseThrows = false;
         Boolean formatCharParseThrows = false;
-        Boolean charBooleanConvertThrows = false;
+        Boolean charToBooleanConvertThrows = false;
         Boolean charSingleConvertThrows = false;
         Boolean charDoubleConvertThrows = false;
         Boolean charDecimalConvertThrows = false;
@@ -758,7 +758,7 @@ public static unsafe class ManagedRuntimeConformance
         try { Convert.ToChar((String)null); } catch (ArgumentNullException) { nullStringCharConvertThrows = true; }
 
         IConvertible charConvertible = (Char)'A';
-        try { charConvertible.ToBoolean(null); } catch (InvalidCastException) { charBooleanConvertThrows = true; }
+        try { charConvertible.ToBoolean(null); } catch (InvalidCastException) { charToBooleanConvertThrows = true; }
         try { charConvertible.ToSingle(null); } catch (InvalidCastException) { charSingleConvertThrows = true; }
         try { charConvertible.ToDouble(null); } catch (InvalidCastException) { charDoubleConvertThrows = true; }
         try { charConvertible.ToDecimal(null); } catch (InvalidCastException) { charDecimalConvertThrows = true; }
@@ -819,7 +819,7 @@ public static unsafe class ManagedRuntimeConformance
             && (Char)charConvertible.ToType(typeof(Object), null) == 'A'
             && Convert.ToChar((Byte)65) == 'A' && Convert.ToChar((Int32)65) == 'A' && Convert.ToChar("A") == 'A'
             && Convert.ToUInt16('A') == (UInt16)65 && Convert.ToInt32('A') == 65 && String.Equals(Convert.ToString('A'), "A")
-            && charBooleanConvertThrows && charSingleConvertThrows && charDoubleConvertThrows && charDecimalConvertThrows
+            && charToBooleanConvertThrows && charSingleConvertThrows && charDoubleConvertThrows && charDecimalConvertThrows
             && charDateConvertThrows && badTypeCharConvertThrows && nullTypeCharConvertThrows
             && charSByteOverflowThrows && nullStringCharConvertThrows, ref passed, ref failed);
 

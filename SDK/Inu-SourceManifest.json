@@ -1,5 +1,5 @@
 {
-  "version": "0.0.143",
+  "version": "0.0.144",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -815,7 +815,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "211b2ef149773630e81d3e4936aa1f0e020fe2da2a4869747bb618e36f1c36aa"
+      "sha256": "282b0ce9fba575e039f8b540d03714800de14d637a23d2887403d18b1227f1ee"
     },
     {
       "path": "Directory.Build.targets",
@@ -923,7 +923,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "da9790d0af9915f9ff1f53c48796b07d93cd2b3aa0f393e67b93291cc41a17f5"
+      "sha256": "e8f09d1f24156c0a4dc52b237fdf92c831cfc19d7ee4a658438be5b9cde833f6"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2979,7 +2979,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "5e392566224431925b156c2a351c89b70547da48242ef7f323fc7f8dfb2d3c23"
+      "sha256": "b7c81328b434aadcc5d15646a486297003bd495844c85e011c72952061827049"
     },
     {
       "path": "Inu-Package.bat",
@@ -3015,7 +3015,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "efc78526717bbc0b76c06ef4db5b7becda57bf596c8670baee477fac94051c2b"
+      "sha256": "263160c69ee8309137da2d78c07b73d8a437a74c7bbcd04e56c0336981e6ff63"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3527,7 +3527,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "da801b84b75821c697d5af3419f52c8770c05f1500d79c77fbefd5a50899d509"
+      "sha256": "e43db4030d30682bff34d6ed9a7df48f9e99b7f53ca9f2dc62a694a4525dd293"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5599,7 +5599,7 @@
     },
     {
       "path": "src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-      "sha256": "ED91C05FC7DF9540769355E7B4847A88C4274B09D102E046E7BDFD690E5C3791"
+      "sha256": "746DAB02A8EA13D8AB617243E4948B0C16B2D6F05B805164EC253153B82EDCF0"
     },
     {
       "path": "src/Inu.Runtime.Contracts/Inu.Runtime.Contracts.csproj",
