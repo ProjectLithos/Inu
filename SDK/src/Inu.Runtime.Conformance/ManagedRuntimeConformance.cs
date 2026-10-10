@@ -633,7 +633,7 @@ public static unsafe class ManagedRuntimeConformance
     public const String BclTargetName = "Inu.BCL.Core.v1";
 
     /// <summary>Number of type-level BCL items in <see cref="BclTargetName"/>.</summary>
-    public const Int32 BclTargetItemCount = 37;
+    public const Int32 BclTargetItemCount = 38;
 
     /// <summary>
     /// Hard in-kernel gate for the named BCL subset. Keep this list in lock-step with
@@ -1280,27 +1280,78 @@ public static unsafe class ManagedRuntimeConformance
             && Math.Log(0.0) == Double.NegativeInfinity
             && mathAbsOverflow && mathSignNaNThrows && mathClampThrows, ref passed, ref failed);
 
-        // 32 System.Convert: all primitive integer widths plus NativeAOT checked floating/integer helper paths.
+
+        // 32 System.MathF: single-precision counterpart to the completed System.Math surface.
+        Boolean mathFSignNaNThrows = false, mathFClampThrows = false;
+        try { _ = MathF.Sign(Single.NaN); } catch (ArithmeticException) { mathFSignNaNThrows = true; }
+        try { _ = MathF.Clamp(1.0F, 5.0F, 4.0F); } catch (ArgumentException) { mathFClampThrows = true; }
+        Record(MathF.Abs(-2.5F) == 2.5F
+            && MathF.Min(5.0F, 9.0F) == 5.0F && MathF.Max(5.0F, 9.0F) == 9.0F
+            && Single.IsNaN(MathF.Min(Single.NaN, 1.0F)) && Single.IsNaN(MathF.Max(1.0F, Single.NaN))
+            && MathF.Sign(-8.0F) == -1 && MathF.Sign(0.0F) == 0 && MathF.Sign(8.0F) == 1
+            && MathF.Clamp(15.0F, 0.0F, 10.0F) == 10.0F
+            && MathF.Floor(2.75F) == 2.0F && MathF.Ceiling(2.25F) == 3.0F && MathF.Truncate(-2.75F) == -2.0F
+            && MathF.Round(2.5F) == 2.0F && MathF.Round(3.5F) == 4.0F
+            && MathF.Abs(MathF.Sqrt(81.0F) - 9.0F) < 0.0001F
+            && MathF.Abs(MathF.Pow(2.0F, 10.0F) - 1024.0F) < 0.001F
+            && MathF.Abs(MathF.Exp(1.0F) - MathF.E) < 0.0001F
+            && MathF.Abs(MathF.Log(MathF.E) - 1.0F) < 0.0001F
+            && MathF.Abs(MathF.Log10(1000.0F) - 3.0F) < 0.0001F
+            && MathF.Abs(MathF.Log(8.0F, 2.0F) - 3.0F) < 0.0001F
+            && MathF.Abs(MathF.Sin(MathF.PI / 6.0F) - 0.5F) < 0.0001F
+            && MathF.Abs(MathF.Cos(MathF.PI / 3.0F) - 0.5F) < 0.0001F
+            && MathF.Abs(MathF.Tan(MathF.PI / 4.0F) - 1.0F) < 0.0002F
+            && MathF.Abs(MathF.Atan(1.0F) - MathF.PI / 4.0F) < 0.0001F
+            && MathF.Abs(MathF.Atan2(1.0F, -1.0F) - (3.0F * MathF.PI / 4.0F)) < 0.0001F
+            && Single.IsNaN(MathF.Sqrt(-1.0F)) && Single.IsNaN(MathF.Pow(-2.0F, 0.5F))
+            && MathF.Pow(-2.0F, 3.0F) == -8.0F && MathF.Exp(Single.NegativeInfinity) == 0.0F
+            && MathF.Log(0.0F) == Single.NegativeInfinity
+            && mathFSignNaNThrows && mathFClampThrows, ref passed, ref failed);
+
+        // 33 System.Convert: primitive-to-primitive, string/object bridges and failure semantics.
         Boolean intOverflow = false, uintOverflow = false, longOverflow = false, ulongOverflow = false;
+        Boolean stringOverflow = false, badFormat = false, invalidChar = false, invalidFloat = false;
         try { Convert.ToInt32(2147483648.0); } catch (OverflowException) { intOverflow = true; }
         try { Convert.ToUInt32(-1.0); } catch (OverflowException) { uintOverflow = true; }
         try { Convert.ToInt64(9223372036854775808.0); } catch (OverflowException) { longOverflow = true; }
         try { Convert.ToUInt64(-1.0); } catch (OverflowException) { ulongOverflow = true; }
+        try { Convert.ToByte("256"); } catch (OverflowException) { stringOverflow = true; }
+        try { Convert.ToInt32("not-a-number"); } catch (FormatException) { badFormat = true; }
+        try { Convert.ToChar((Boolean)true); } catch (InvalidCastException) { invalidChar = true; }
+        try { Convert.ToSingle((Char)'A'); } catch (InvalidCastException) { invalidFloat = true; }
+
+        Object boxedString = (String)"123";
+        Object boxedInt = (Int32)456;
+
         Record(Convert.ToInt32(true) == 1 && Convert.ToInt32(false) == 0
             && Convert.ToByte(255) == 255 && Convert.ToSByte(-12) == -12
             && Convert.ToInt16(-32000) == -32000 && Convert.ToUInt16(65000) == 65000
             && Convert.ToUInt32(123) == 123U && Convert.ToInt64(-123) == -123L
             && Convert.ToUInt64(123) == 123UL && Convert.ToBoolean(1) && !Convert.ToBoolean(0)
+            && Convert.ToInt32((Char)'A') == 65 && Convert.ToUInt32((Char)'A') == 65U && Convert.ToInt64((Char)'A') == 65L
             && Convert.ToInt32(2.5) == 2 && Convert.ToInt32(3.5) == 4
             && Convert.ToInt32(2147483647.0) == 2147483647
             && Convert.ToUInt32(4294967295.0) == 4294967295U
             && Convert.ToDouble(123) == 123.0 && Convert.ToSingle(12) == 12.0F
+            && Convert.ToBoolean("True") && !Convert.ToBoolean("false")
+            && Convert.ToSByte("-12") == (SByte)(-12) && Convert.ToByte("255") == (Byte)255
+            && Convert.ToInt16("-32000") == (Int16)(-32000) && Convert.ToUInt16("65000") == (UInt16)65000
+            && Convert.ToInt32("-2147483648") == Int32.MinValue
+            && Convert.ToUInt32("4294967295") == UInt32.MaxValue
+            && Convert.ToInt64("-9223372036854775808") == Int64.MinValue
+            && Convert.ToUInt64("18446744073709551615") == UInt64.MaxValue
+            && Convert.ToSingle("12.5") == 12.5F && Convert.ToDouble("-0.25") == -0.25D
+            && Convert.ToInt32((String)null) == 0 && !Convert.ToBoolean((String)null)
+            && Convert.ToInt32(boxedString) == 123 && Convert.ToInt32(boxedInt) == 456
             && String.Equals(Convert.ToString(-321), "-321")
             && String.Equals(Convert.ToString(12.5), "12.5")
             && String.Equals(Convert.ToString(true), "True")
-            && intOverflow && uintOverflow && longOverflow && ulongOverflow, ref passed, ref failed);
+            && String.Equals(Convert.ToString((Char)'A'), "A")
+            && String.Equals(Convert.ToString((Object)null), String.Empty)
+            && intOverflow && uintOverflow && longOverflow && ulongOverflow
+            && stringOverflow && badFormat && invalidChar && invalidFloat, ref passed, ref failed);
 
-        // 33 System.IComparable / IComparable<T> / IEquatable<T> across primitive families.
+        // 34 System.IComparable / IComparable<T> / IEquatable<T> across primitive families.
         IComparable nonGenericComparable = (Int32)7;
         IComparable<Int32> genericComparable = (Int32)7;
         IComparable<Int64> longComparable = (Int64)9;
@@ -1311,7 +1362,7 @@ public static unsafe class ManagedRuntimeConformance
             && ((IComparable<Char>)(Char)'b').CompareTo('a') > 0
             && ((IEquatable<Boolean>)(Boolean)true).Equals(true), ref passed, ref failed);
 
-        // 34 Delegate family: multiple arities plus Predicate/Comparison/Converter.
+        // 35 Delegate family: multiple arities plus Predicate/Comparison/Converter.
         _bclDelegateObserved = 0;
         Action<Int32> bclAction = BclCapture;
         Action<Int32, Int32> bclAdd = BclAddCapture;
@@ -1327,7 +1378,7 @@ public static unsafe class ManagedRuntimeConformance
         Record(firstDelegatePass && _bclDelegateObserved == 15 && bclSum(4, 5) == 9
             && bclPositive(1) && !bclPositive(-1) && bclCompare(3, 7) < 0 && bclWiden(44) == 44L, ref passed, ref failed);
 
-        // 35 System.Span<T> / ReadOnlySpan<T>: empty/null, fill, slicing and overlap-safe copy.
+        // 36 System.Span<T> / ReadOnlySpan<T>: empty/null, fill, slicing and overlap-safe copy.
         Int32[] spanValues = new Int32[] { 1, 2, 3, 4, 5 };
         Span<Int32> span = spanValues;
         span[1] = 20;
@@ -1347,7 +1398,7 @@ public static unsafe class ManagedRuntimeConformance
             && !span.TryCopyTo(tooSmall) && Span<Int32>.Empty.IsEmpty && ReadOnlySpan<Int32>.Empty.IsEmpty
             && nullSpan.IsEmpty, ref passed, ref failed);
 
-        // 36 System.Memory<T> / ReadOnlyMemory<T>: storable array-backed windows over Span.
+        // 37 System.Memory<T> / ReadOnlyMemory<T>: storable array-backed windows over Span.
         Int32[] memoryValues = new Int32[] { 10, 20, 30, 40 };
         Memory<Int32> memory = memoryValues;
         Memory<Int32> memoryMiddle = memory.Slice(1, 2);
@@ -1359,7 +1410,7 @@ public static unsafe class ManagedRuntimeConformance
             && readOnlyMemory.Span[1] == 25 && memoryCopy.Length == 2 && memoryCopy[0] == 25 && memoryCopy[1] == 30
             && Memory<Int32>.Empty.IsEmpty && ReadOnlyMemory<Int32>.Empty.IsEmpty && nullMemory.IsEmpty, ref passed, ref failed);
 
-        // 37 Generic comparison/equality consistency.
+        // 38 Generic comparison/equality consistency.
         Comparer<Int32> intOrdering = Comparer<Int32>.Default;
         Comparer<Int64> longOrdering = Comparer<Int64>.Default;
         EqualityComparer<UInt32> uintEquality = EqualityComparer<UInt32>.Default;

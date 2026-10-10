@@ -7,7 +7,7 @@ namespace Inu.DotNetConformance.Tests;
 internal static class Program
 {
     private const string TargetName = "Inu.BCL.Core.v1";
-    private const int TargetItemCount = 37;
+    private const int TargetItemCount = 38;
     private static int _passed;
     private static int _failed;
 
@@ -48,6 +48,7 @@ internal static class Program
         Check("System.Text.UTF8Encoding", TestUtf8Encoding());
         Check("Primitive formatting", TestPrimitiveFormatting());
         Check("System.Math", TestMath());
+        Check("System.MathF", TestMathF());
         Check("System.Convert", TestConvert());
         Check("System.IComparable / IComparable<T>", TestComparables());
         Check("System.Delegate / Action / Func", TestDelegates());
@@ -773,25 +774,78 @@ internal static class Program
             && absOverflow && signNaNThrows && clampThrows;
     }
 
+    private static bool TestMathF()
+    {
+        bool signNaNThrows = false;
+        bool clampThrows = false;
+        try { _ = MathF.Sign(float.NaN); } catch (ArithmeticException) { signNaNThrows = true; }
+        try { _ = MathF.Clamp(1.0F, 5.0F, 4.0F); } catch (ArgumentException) { clampThrows = true; }
+
+        return MathF.Abs(-2.5F) == 2.5F
+            && MathF.Min(5.0F, 9.0F) == 5.0F && MathF.Max(5.0F, 9.0F) == 9.0F
+            && float.IsNaN(MathF.Min(float.NaN, 1.0F)) && float.IsNaN(MathF.Max(1.0F, float.NaN))
+            && MathF.Sign(-8.0F) == -1 && MathF.Sign(0.0F) == 0 && MathF.Sign(8.0F) == 1
+            && MathF.Clamp(15.0F, 0.0F, 10.0F) == 10.0F
+            && MathF.Floor(2.75F) == 2.0F && MathF.Ceiling(2.25F) == 3.0F && MathF.Truncate(-2.75F) == -2.0F
+            && MathF.Round(2.5F) == 2.0F && MathF.Round(3.5F) == 4.0F
+            && MathF.Abs(MathF.Sqrt(81.0F) - 9.0F) < 0.0001F
+            && MathF.Abs(MathF.Pow(2.0F, 10.0F) - 1024.0F) < 0.001F
+            && MathF.Abs(MathF.Exp(1.0F) - MathF.E) < 0.0001F
+            && MathF.Abs(MathF.Log(MathF.E) - 1.0F) < 0.0001F
+            && MathF.Abs(MathF.Log10(1000.0F) - 3.0F) < 0.0001F
+            && MathF.Abs(MathF.Log(8.0F, 2.0F) - 3.0F) < 0.0001F
+            && MathF.Abs(MathF.Sin(MathF.PI / 6.0F) - 0.5F) < 0.0001F
+            && MathF.Abs(MathF.Cos(MathF.PI / 3.0F) - 0.5F) < 0.0001F
+            && MathF.Abs(MathF.Tan(MathF.PI / 4.0F) - 1.0F) < 0.0002F
+            && MathF.Abs(MathF.Atan(1.0F) - MathF.PI / 4.0F) < 0.0001F
+            && MathF.Abs(MathF.Atan2(1.0F, -1.0F) - (3.0F * MathF.PI / 4.0F)) < 0.0001F
+            && float.IsNaN(MathF.Sqrt(-1.0F)) && float.IsNaN(MathF.Pow(-2.0F, 0.5F))
+            && MathF.Pow(-2.0F, 3.0F) == -8.0F && MathF.Exp(float.NegativeInfinity) == 0.0F
+            && MathF.Log(0.0F) == float.NegativeInfinity
+            && signNaNThrows && clampThrows;
+    }
+
     private static bool TestConvert()
     {
         bool intOverflow = false, uintOverflow = false, longOverflow = false, ulongOverflow = false;
+        bool stringOverflow = false, badFormat = false, invalidChar = false, invalidFloat = false;
         try { _ = Convert.ToInt32(2147483648.0); } catch (OverflowException) { intOverflow = true; }
         try { _ = Convert.ToUInt32(-1.0); } catch (OverflowException) { uintOverflow = true; }
         try { _ = Convert.ToInt64(9223372036854775808.0); } catch (OverflowException) { longOverflow = true; }
         try { _ = Convert.ToUInt64(-1.0); } catch (OverflowException) { ulongOverflow = true; }
+        try { _ = Convert.ToByte("256"); } catch (OverflowException) { stringOverflow = true; }
+        try { _ = Convert.ToInt32("not-a-number"); } catch (FormatException) { badFormat = true; }
+        try { _ = Convert.ToChar(true); } catch (InvalidCastException) { invalidChar = true; }
+        try { _ = Convert.ToSingle('A'); } catch (InvalidCastException) { invalidFloat = true; }
+
+        object boxedString = "123";
+        object boxedInt = 456;
+
         return Convert.ToInt32(true) == 1 && Convert.ToInt32(false) == 0
             && Convert.ToByte(255) == 255 && Convert.ToSByte(-12) == -12
             && Convert.ToInt16(-32000) == -32000 && Convert.ToUInt16(65000) == 65000
             && Convert.ToUInt32(123) == 123U && Convert.ToInt64(-123) == -123L
             && Convert.ToUInt64(123) == 123UL && Convert.ToBoolean(1) && !Convert.ToBoolean(0)
+            && Convert.ToInt32('A') == 65 && Convert.ToUInt32('A') == 65U && Convert.ToInt64('A') == 65L
             && Convert.ToInt32(2.5) == 2 && Convert.ToInt32(3.5) == 4
             && Convert.ToInt32(2147483647.0) == 2147483647
             && Convert.ToUInt32(4294967295.0) == 4294967295U
             && Convert.ToDouble(123) == 123.0 && Convert.ToSingle(12) == 12.0f
+            && Convert.ToBoolean("True") && !Convert.ToBoolean("false")
+            && Convert.ToSByte("-12") == -12 && Convert.ToByte("255") == 255
+            && Convert.ToInt16("-32000") == -32000 && Convert.ToUInt16("65000") == 65000
+            && Convert.ToInt32("-2147483648") == int.MinValue
+            && Convert.ToUInt32("4294967295") == uint.MaxValue
+            && Convert.ToInt64("-9223372036854775808") == long.MinValue
+            && Convert.ToUInt64("18446744073709551615") == ulong.MaxValue
+            && Convert.ToSingle("12.5") == 12.5f && Convert.ToDouble("-0.25") == -0.25
+            && Convert.ToInt32((string?)null) == 0 && Convert.ToBoolean((string?)null) == false
+            && Convert.ToInt32(boxedString) == 123 && Convert.ToInt32(boxedInt) == 456
             && Convert.ToString(-321) == "-321" && Convert.ToString(12.5) == "12.5"
-            && Convert.ToString(true) == "True"
-            && intOverflow && uintOverflow && longOverflow && ulongOverflow;
+            && Convert.ToString(true) == "True" && Convert.ToString('A') == "A"
+            && Convert.ToString((object?)null) == string.Empty
+            && intOverflow && uintOverflow && longOverflow && ulongOverflow
+            && stringOverflow && badFormat && invalidChar && invalidFloat;
     }
 
     private static bool TestComparables()

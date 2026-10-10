@@ -2356,6 +2356,35 @@ namespace System
         }
     }
 
+    /// <summary><inu.api/>Single-precision mathematical operations matching the Profile 1 System.Math surface.</summary>
+    public static class MathF
+    {
+        public const Single E = 2.7182817F;
+        public const Single PI = 3.1415927F;
+
+        public static Single Abs(Single value) => Math.Abs(value);
+        public static Single Min(Single left, Single right) => Math.Min(left, right);
+        public static Single Max(Single left, Single right) => Math.Max(left, right);
+        public static Single Clamp(Single value, Single min, Single max) => Math.Clamp(value, min, max);
+        public static Int32 Sign(Single value) => Math.Sign(value);
+
+        public static Single Truncate(Single value) => (Single)Math.Truncate(value);
+        public static Single Floor(Single value) => (Single)Math.Floor(value);
+        public static Single Ceiling(Single value) => (Single)Math.Ceiling(value);
+        public static Single Round(Single value) => (Single)Math.Round(value);
+        public static Single Sqrt(Single value) => (Single)Math.Sqrt(value);
+        public static Single Exp(Single value) => (Single)Math.Exp(value);
+        public static Single Log(Single value) => (Single)Math.Log(value);
+        public static Single Log(Single value, Single newBase) => (Single)Math.Log(value, newBase);
+        public static Single Log10(Single value) => (Single)Math.Log10(value);
+        public static Single Pow(Single x, Single y) => (Single)Math.Pow(x, y);
+        public static Single Sin(Single value) => (Single)Math.Sin(value);
+        public static Single Cos(Single value) => (Single)Math.Cos(value);
+        public static Single Tan(Single value) => (Single)Math.Tan(value);
+        public static Single Atan(Single value) => (Single)Math.Atan(value);
+        public static Single Atan2(Single y, Single x) => (Single)Math.Atan2(y, x);
+    }
+
     /// <summary><inu.api/>Invariant primitive conversions for the Core v1 freestanding runtime.</summary>
     public static class Convert
     {
@@ -2371,6 +2400,14 @@ namespace System
         public static Boolean ToBoolean(UInt64 value) => value != 0;
         public static Boolean ToBoolean(Single value) => value != 0;
         public static Boolean ToBoolean(Double value) => value != 0;
+        public static Boolean ToBoolean(String value) => value == null ? false : Boolean.Parse(value);
+        public static Boolean ToBoolean(Object value)
+        {
+            if (value is String) return ToBoolean((String)value);
+            if (value == null) return false;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToBoolean(null);
+        }
 
         public static Char ToChar(Boolean value) => throw new InvalidCastException();
         public static Char ToChar(Char value) => value;
@@ -2391,6 +2428,13 @@ namespace System
         public static Char ToChar(Double value) => throw new InvalidCastException();
         public static Char ToChar(Decimal value) => throw new InvalidCastException();
         public static Char ToChar(DateTime value) => throw new InvalidCastException();
+        public static Char ToChar(Object value)
+        {
+            if (value is String) return ToChar((String)value);
+            if (value == null) return (Char)0;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToChar(null);
+        }
 
         public static SByte ToSByte(Boolean value) => value ? (SByte)1 : (SByte)0;
         public static SByte ToSByte(Char value) => checked((SByte)value);
@@ -2404,6 +2448,14 @@ namespace System
         public static SByte ToSByte(UInt64 value) => checked((SByte)value);
         public static SByte ToSByte(Single value) => checked((SByte)Math.Round(value));
         public static SByte ToSByte(Double value) => checked((SByte)Math.Round(value));
+        public static SByte ToSByte(String value) => value == null ? (SByte)0 : SByte.Parse(value);
+        public static SByte ToSByte(Object value)
+        {
+            if (value is String) return ToSByte((String)value);
+            if (value == null) return (SByte)0;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToSByte(null);
+        }
 
         public static Byte ToByte(Boolean value) => value ? (Byte)1 : (Byte)0;
         public static Byte ToByte(Char value) => checked((Byte)value);
@@ -2417,6 +2469,14 @@ namespace System
         public static Byte ToByte(UInt64 value) => checked((Byte)value);
         public static Byte ToByte(Single value) => checked((Byte)Math.Round(value));
         public static Byte ToByte(Double value) => checked((Byte)Math.Round(value));
+        public static Byte ToByte(String value) => value == null ? (Byte)0 : Byte.Parse(value);
+        public static Byte ToByte(Object value)
+        {
+            if (value is String) return ToByte((String)value);
+            if (value == null) return (Byte)0;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToByte(null);
+        }
 
         public static Int16 ToInt16(Boolean value) => value ? (Int16)1 : (Int16)0;
         public static Int16 ToInt16(Char value) => checked((Int16)value);
@@ -2430,6 +2490,14 @@ namespace System
         public static Int16 ToInt16(UInt64 value) => checked((Int16)value);
         public static Int16 ToInt16(Single value) => checked((Int16)Math.Round(value));
         public static Int16 ToInt16(Double value) => checked((Int16)Math.Round(value));
+        public static Int16 ToInt16(String value) => value == null ? (Int16)0 : Int16.Parse(value);
+        public static Int16 ToInt16(Object value)
+        {
+            if (value is String) return ToInt16((String)value);
+            if (value == null) return (Int16)0;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToInt16(null);
+        }
 
         public static UInt16 ToUInt16(Boolean value) => value ? (UInt16)1 : (UInt16)0;
         public static UInt16 ToUInt16(Char value) => value;
@@ -2443,8 +2511,17 @@ namespace System
         public static UInt16 ToUInt16(UInt64 value) => checked((UInt16)value);
         public static UInt16 ToUInt16(Single value) => checked((UInt16)Math.Round(value));
         public static UInt16 ToUInt16(Double value) => checked((UInt16)Math.Round(value));
+        public static UInt16 ToUInt16(String value) => value == null ? (UInt16)0 : UInt16.Parse(value);
+        public static UInt16 ToUInt16(Object value)
+        {
+            if (value is String) return ToUInt16((String)value);
+            if (value == null) return (UInt16)0;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToUInt16(null);
+        }
 
         public static Int32 ToInt32(Boolean value) => value ? (Int32)1 : (Int32)0;
+        public static Int32 ToInt32(Char value) => value;
         public static Int32 ToInt32(SByte value) => checked((Int32)value);
         public static Int32 ToInt32(Byte value) => checked((Int32)value);
         public static Int32 ToInt32(Int16 value) => checked((Int32)value);
@@ -2455,8 +2532,17 @@ namespace System
         public static Int32 ToInt32(UInt64 value) => checked((Int32)value);
         public static Int32 ToInt32(Single value) => checked((Int32)Math.Round(value));
         public static Int32 ToInt32(Double value) => checked((Int32)Math.Round(value));
+        public static Int32 ToInt32(String value) => value == null ? 0 : Int32.Parse(value);
+        public static Int32 ToInt32(Object value)
+        {
+            if (value is String) return ToInt32((String)value);
+            if (value == null) return 0;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToInt32(null);
+        }
 
         public static UInt32 ToUInt32(Boolean value) => value ? (UInt32)1 : (UInt32)0;
+        public static UInt32 ToUInt32(Char value) => value;
         public static UInt32 ToUInt32(SByte value) => checked((UInt32)value);
         public static UInt32 ToUInt32(Byte value) => checked((UInt32)value);
         public static UInt32 ToUInt32(Int16 value) => checked((UInt32)value);
@@ -2467,8 +2553,17 @@ namespace System
         public static UInt32 ToUInt32(UInt64 value) => checked((UInt32)value);
         public static UInt32 ToUInt32(Single value) => checked((UInt32)Math.Round(value));
         public static UInt32 ToUInt32(Double value) => checked((UInt32)Math.Round(value));
+        public static UInt32 ToUInt32(String value) => value == null ? 0U : UInt32.Parse(value);
+        public static UInt32 ToUInt32(Object value)
+        {
+            if (value is String) return ToUInt32((String)value);
+            if (value == null) return 0U;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToUInt32(null);
+        }
 
         public static Int64 ToInt64(Boolean value) => value ? (Int64)1 : (Int64)0;
+        public static Int64 ToInt64(Char value) => value;
         public static Int64 ToInt64(SByte value) => checked((Int64)value);
         public static Int64 ToInt64(Byte value) => checked((Int64)value);
         public static Int64 ToInt64(Int16 value) => checked((Int64)value);
@@ -2479,6 +2574,14 @@ namespace System
         public static Int64 ToInt64(UInt64 value) => checked((Int64)value);
         public static Int64 ToInt64(Single value) => checked((Int64)Math.Round(value));
         public static Int64 ToInt64(Double value) => checked((Int64)Math.Round(value));
+        public static Int64 ToInt64(String value) => value == null ? 0L : Int64.Parse(value);
+        public static Int64 ToInt64(Object value)
+        {
+            if (value is String) return ToInt64((String)value);
+            if (value == null) return 0L;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToInt64(null);
+        }
 
         public static UInt64 ToUInt64(Boolean value) => value ? (UInt64)1 : (UInt64)0;
         public static UInt64 ToUInt64(Char value) => value;
@@ -2492,6 +2595,14 @@ namespace System
         public static UInt64 ToUInt64(UInt64 value) => value;
         public static UInt64 ToUInt64(Single value) => checked((UInt64)Math.Round(value));
         public static UInt64 ToUInt64(Double value) => checked((UInt64)Math.Round(value));
+        public static UInt64 ToUInt64(String value) => value == null ? 0UL : UInt64.Parse(value);
+        public static UInt64 ToUInt64(Object value)
+        {
+            if (value is String) return ToUInt64((String)value);
+            if (value == null) return 0UL;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToUInt64(null);
+        }
 
         public static Single ToSingle(Boolean value) => value ? 1F : 0F;
         public static Single ToSingle(Char value) => throw new InvalidCastException();
@@ -2505,6 +2616,14 @@ namespace System
         public static Single ToSingle(UInt64 value) => (Single)value;
         public static Single ToSingle(Single value) => value;
         public static Single ToSingle(Double value) => (Single)value;
+        public static Single ToSingle(String value) => value == null ? 0F : Single.Parse(value);
+        public static Single ToSingle(Object value)
+        {
+            if (value is String) return ToSingle((String)value);
+            if (value == null) return 0F;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToSingle(null);
+        }
 
         public static Double ToDouble(Boolean value) => value ? 1D : 0D;
         public static Double ToDouble(Char value) => throw new InvalidCastException();
@@ -2518,6 +2637,14 @@ namespace System
         public static Double ToDouble(UInt64 value) => (Double)value;
         public static Double ToDouble(Single value) => (Double)value;
         public static Double ToDouble(Double value) => value;
+        public static Double ToDouble(String value) => value == null ? 0D : Double.Parse(value);
+        public static Double ToDouble(Object value)
+        {
+            if (value is String) return ToDouble((String)value);
+            if (value == null) return 0D;
+            if (!(value is IConvertible)) throw new InvalidCastException();
+            return ((IConvertible)value).ToDouble(null);
+        }
 
         public static Decimal ToDecimal(Boolean value) => value ? Decimal.One : Decimal.Zero;
         public static Decimal ToDecimal(Char value) => throw new InvalidCastException();
@@ -2567,6 +2694,13 @@ namespace System
         public static String ToString(Single value) => value.ToString();
         public static String ToString(Double value) => value.ToString();
         public static String ToString(Boolean value) => value.ToString();
+        public static String ToString(String value) => value ?? String.Empty;
+        public static String ToString(Object value)
+        {
+            if (value == null) return String.Empty;
+            if (value is IConvertible) return ((IConvertible)value).ToString(null);
+            return value.ToString();
+        }
     }
 
     // CONTRACT with Roslyn / .NET 10 NativeAOT:
