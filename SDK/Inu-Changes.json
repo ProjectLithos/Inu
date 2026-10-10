@@ -1,23 +1,29 @@
 {
-  "baseVersion": "0.0.137",
-  "version": "0.0.138",
+  "baseVersion": "0.0.138",
+  "version": "0.0.139",
   "changedFiles": [
-    "CHANGED-0.0.137.txt",
+    "CHANGED-0.0.139.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.ProjectCreator/Program.cs",
+    "Inu/SDK/src/Inu.Kernel.Storage/FileSystemPathPolicy.cs",
+    "Inu/SDK/src/Inu.Userland.Runtime/FileSystemPaths.cs",
+    "Inu/SDK/src/Inu.UserlandCompiler/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
+    "Kath/packages/kath/src/browser/inu-editor-environment.ts",
+    "Kath/packages/kath/src/browser/inu-problems-widget.tsx",
+    "Kath/packages/kath/src/browser/style/inu.css",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
+    "TODO.md",
     "VERSION"
   ],
-  "summary": "Fix Inu.ProjectCreator compilation by importing System.Text.RegularExpressions for the command-namespace migration added in 0.0.136."
+  "summary": "Add INU1007 live/build/runtime path-separator validation and visually distinguish source-navigable Kath Problems entries from non-clickable build summaries."
 }

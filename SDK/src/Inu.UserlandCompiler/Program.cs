@@ -55,6 +55,7 @@ static int MainEntry(string[] args)
     Console.WriteLine($"[INFO] Ring-3 build is compiling {executableCount} userland executable(s) ({(File.Exists(shellSource)?"Shell + ":String.Empty)}{commandCount} command(s)). This is host-side compilation, not guest execution.");
     if(File.Exists(shellSource))
     {
+        if(!ValidateLiteralPathPolicy(shellSource))return 1;
         string shellType=FindTypeWithMethod(shellSource,"Configure")??returnFail($"Could not find Shell.Configure in {shellSource}");
         if(FindTypeWithMethod(shellSource,"Run") is string runType && string.Equals(runType,shellType,StringComparison.Ordinal))
         {
@@ -76,6 +77,7 @@ static int MainEntry(string[] args)
     {
         foreach(string source in Directory.GetFiles(commands,"*.cs",SearchOption.TopDirectoryOnly).OrderBy(Path.GetFileName,StringComparer.OrdinalIgnoreCase))
         {
+            if(!ValidateLiteralPathPolicy(source))return 1;
             string? type=FindTypeWithMethod(source,"Main");if(type is null)return Fail($"Command source has no public static Main: {source}");
             Boolean withArguments=HasStringArrayMain(source,type),returnsVoid=MainReturnsVoid(source);
             string invocation=withArguments?$"global::{type}.Main(global::Inu.Userland.Runtime.CommandLine.GetArguments())":$"global::{type}.Main()";
@@ -84,7 +86,7 @@ static int MainEntry(string[] args)
             // The generated GUI command is a normal executable and may include the coder GUI entry source.
             if(string.Equals(Path.GetFileNameWithoutExtension(source),"Gui",StringComparison.OrdinalIgnoreCase))
             {
-                string gui=Path.Combine(coderRoot,"Gui.cs");if(File.Exists(gui))sources.Add(gui);
+                string gui=Path.Combine(coderRoot,"Gui.cs");if(File.Exists(gui)){if(!ValidateLiteralPathPolicy(gui))return 1;sources.Add(gui);}
             }
             string name=Sanitize(Path.GetFileNameWithoutExtension(source));
             rc=CompileApp(name,sources,body,false,Path.Combine(outputRoot,"Commands",name.ToUpperInvariant()+".EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
@@ -99,6 +101,78 @@ static int MainEntry(string[] args)
     return 0;
 
     static string returnFail(string message)=>throw new ArgumentException(message);
+}
+
+static bool ValidateLiteralPathPolicy(string sourcePath)
+{
+    string text=File.ReadAllText(sourcePath);
+    MatchCollection separatorMatches=Regex.Matches(text,@"\bFileSystemPaths\.SetPathSeparator\s*\(\s*'(\\.|[^'\\])'\s*\)");
+    List<(int Index,char Separator)> separators=[];
+    foreach(Match match in separatorMatches)
+    {
+        string token=match.Groups[1].Value;
+        char value=token==@"\\"?'\\':token==@"\'"?'\'':token.Length==1?token[0]:'\0';
+        if(value is ':' or '/' or '\\')separators.Add((match.Index,value));
+    }
+
+    bool valid=true;
+    foreach(Match call in Regex.Matches(text,@"\bFileSystemPaths\.SetCommandsPaths?\s*\("))
+    {
+        char separator='\0';
+        foreach((int index,char candidate) in separators){if(index>=call.Index)break;separator=candidate;}
+        if(separator=='\0')continue;
+        int end=text.IndexOf(';',call.Index);
+        if(end<0)end=text.Length;
+        bool inString=false,verbatim=false;
+        for(int i=call.Index;i<end;i++)
+        {
+            char c=text[i];
+            if(!inString)
+            {
+                if(c=='@'&&i+1<end&&text[i+1]=='\"'){inString=true;verbatim=true;i++;continue;}
+                if(c=='\"'){inString=true;verbatim=false;continue;}
+                continue;
+            }
+            if(verbatim)
+            {
+                if(c=='\"')
+                {
+                    if(i+1<end&&text[i+1]=='\"'){i++;continue;}
+                    inString=false;verbatim=false;continue;
+                }
+            }
+            else
+            {
+                if(c=='\\'&&i+1<end)
+                {
+                    if(text[i+1]=='\\')
+                    {
+                        if(separator!='\\')ReportInvalidSeparator(sourcePath,text,i,separator,'\\',ref valid);
+                        i++;continue;
+                    }
+                    i++;continue;
+                }
+                if(c=='\"'){inString=false;continue;}
+            }
+            if((c is ':' or '/' or '\\')&&c!=separator)ReportInvalidSeparator(sourcePath,text,i,separator,c,ref valid);
+        }
+    }
+    return valid;
+}
+
+static void ReportInvalidSeparator(string sourcePath,string text,int index,char separator,char invalid,ref bool valid)
+{
+    (int line,int column)=SourceLocation(text,index);
+    string shown=invalid=='\\'?@"\\":invalid.ToString();
+    Console.Error.WriteLine($"{sourcePath}({line},{column}): error INU1007: Path uses '{shown}' as a separator, but FileSystemPaths.SetPathSeparator('{separator}') selected '{separator}' as the OS path separator.");
+    valid=false;
+}
+
+static (int Line,int Column) SourceLocation(string text,int index)
+{
+    int line=1,column=1;
+    for(int i=0;i<index&&i<text.Length;i++){if(text[i]=='\n'){line++;column=1;}else column++;}
+    return (line,column);
 }
 
 static int CompileApp(string name,IReadOnlyList<string> sources,string callBody,bool shellLifecycle,string output,string dotnet,string ilc,string lld,string userEntry,string userException,string nativeRoot,string sdkRoot,string configuration,string cacheDirectory,string sharedIdentity,string ilcIdentity,bool force)

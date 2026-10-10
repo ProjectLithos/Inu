@@ -113,7 +113,7 @@ public static unsafe partial class FileSystemPathPolicyRuntime
                 if(componentLength==0U||i+1==input.Length)return false;
                 componentLength=0U;value.Append('/');continue;
             }
-            if(separator!='/'&&c=='/')return false;
+            if((c=='/'||c=='\\'||c==':')&&c!=separator)return false;
             if(!ValidComponentChar(c)||++componentLength>_maximumComponentLength)return false;
             value.Append(c);
         }
@@ -155,9 +155,9 @@ public static unsafe partial class FileSystemPathPolicyRuntime
                 output[i]=(Byte)'/';
                 continue;
             }
-            // The selected separator is the only external joiner. A literal canonical slash
-            // is therefore rejected when the OS selected another joiner.
-            if(separator!=(Byte)'/'&&b==(Byte)'/')return false;
+            // The selected separator is the only external joiner. Other common path joiners
+            // are rejected rather than being accepted as ordinary component characters.
+            if((b==(Byte)'/'||b==(Byte)'\\'||b==(Byte)':')&&b!=separator)return false;
             if(!ValidComponentChar((Char)b)||++componentLength>_maximumComponentLength)return false;
             output[i]=b;
         }

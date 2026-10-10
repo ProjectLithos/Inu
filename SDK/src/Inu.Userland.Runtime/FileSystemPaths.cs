@@ -84,10 +84,16 @@ public static unsafe class FileSystemPaths
     public static Boolean SetCommandsPaths(String[] paths)
     {
         if(paths==null||paths.Length==0||(UInt32)paths.Length>MaximumCommandPaths)return false;
+        Char separator=GetPathSeparator();
         UInt32 bytes=0U;
         for(Int32 i=0;i<paths.Length;i++)
         {
             String path=paths[i];if(path==null||path.Length==0||(UInt32)path.Length>MaximumPathBytes)return false;
+            for(Int32 j=0;j<path.Length;j++)
+            {
+                Char c=path[j];
+                if((c=='/'||c=='\\'||c==':')&&c!=separator)return false;
+            }
             bytes+=(UInt32)path.Length;if(i+1<paths.Length)bytes++;
         }
         Byte* payload=stackalloc Byte[(Int32)bytes];UInt32 offset=0U;
