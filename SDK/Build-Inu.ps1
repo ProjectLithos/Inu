@@ -676,7 +676,10 @@ if (-not [string]::Equals([IO.Path]::GetFullPath($projectManifest), [IO.Path]::G
     $selectedProjectDirectory = Split-Path -Parent $projectManifest
     Invoke-InuBuildStage -Stage "Refresh selected Inu project" -FilePath $dotnet -Arguments @(
         $projectCreator, "create", "--output", $selectedProjectDirectory, "--sdk-root", $root
-    ) -Inputs (@($selectedProjectDirectory,(Join-Path $root 'templates'),(Join-Path $root 'src\Userland')) + @((Get-InuStageFiles -Paths @((Split-Path -Parent $projectCreator)) -Outputs).FullName)) -Outputs (@((Get-InuStageFiles -Paths @($selectedProjectDirectory)).FullName) + @((Join-Path $selectedProjectDirectory 'InuProject.json')))
+    ) -Inputs (@($selectedProjectDirectory,(Join-Path $root 'templates'),(Join-Path $root 'src\Userland')) + @((Get-InuStageFiles -Paths @((Split-Path -Parent $projectCreator)) -Outputs).FullName)) -Outputs @(
+        (Join-Path $selectedProjectDirectory 'InuProject.json'),
+        (Join-Path $selectedProjectDirectory 'InuKernel.csproj')
+    )
     $projectManifest = Join-Path $selectedProjectDirectory "InuProject.json"
 
     $selectedOsName = $null

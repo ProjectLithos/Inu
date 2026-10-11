@@ -1,5 +1,5 @@
 {
-  "version": "0.1.14",
+  "version": "0.1.15",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -399,7 +399,7 @@
     },
     {
       "path": "Build-Inu.ps1",
-      "sha256": "877f1af611f1fca6ee1ff339300e7e7b322dbf74ff1cd0a293260c5fda0b6d25"
+      "sha256": "3fee555f4d522834594c045bde9f602a0e7b37c12e5d8c45881990bac3dcb596"
     },
     {
       "path": "Build-InuDocumentation.bat",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "a21982cbda607a9449a183a4f26378849cdd9c92519a07d5cd4e47484c372863"
+      "sha256": "2115eaae5684e261dc22a8b5fc83aa0bce3948daa018fb309f22e10cae637a86"
     },
     {
       "path": "Directory.Build.targets",
@@ -931,7 +931,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "cb19614718bb5c4bd2e807de3eb16e3056773dc7d13e6fb027a863b9585d0cd4"
+      "sha256": "701d3a35c918f15931eb5ea3f0fdd9cb5e778ebb7622bea96c55c5a0117f57de"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2991,7 +2991,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "14017bf64f79a6380607cdaeaa08b6feadfeb87f2dce9d9c1005960714d3f27f"
+      "sha256": "8bf11bea1624c1879676fd96cc45c795a2e5fa32863ec7b1b2a3a92cc27c4364"
     },
     {
       "path": "Inu-Package.bat",
@@ -3027,7 +3027,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "9323a7ca052ab43a8368cfa5d11afa94904961c8d37bbf02604ed4265d16329a"
+      "sha256": "f4a071c9fb2d3098d8f4d05f662fdf108cbc182a88752d4be4553dba67f0a2c7"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3539,7 +3539,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "9ec69b22b311aac173f3bcc27b6ec12129c4ee6f98cbb03f5be50a78a8c50d07"
+      "sha256": "2c45083d512fc7ce0d630f1c3b05ba577314a0a62341c98140d346a7d3417da7"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
