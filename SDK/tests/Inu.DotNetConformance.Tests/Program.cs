@@ -925,7 +925,12 @@ internal static class Program
         bool multicastOk = order == 123 && invocationList.Length == 3
             && invocationList[0].Equals(first) && invocationList[1].Equals(second) && invocationList[2].Equals(third);
         order = 0;
-        Action removed = multicast - second;
+        Action? removed = multicast - second;
+        if (removed is null)
+        {
+            return false;
+        }
+
         removed();
         multicastOk &= order == 13 && removed.GetInvocationList().Length == 2;
         Action multicastCopy = first + second + third;
