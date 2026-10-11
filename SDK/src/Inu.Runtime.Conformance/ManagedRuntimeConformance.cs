@@ -1318,15 +1318,15 @@ public static unsafe class ManagedRuntimeConformance
 
         // 33 System.Convert: primitive-to-primitive, string/object bridges and failure semantics.
         Boolean intOverflow = false, uintOverflow = false, longOverflow = false, ulongOverflow = false;
-        Boolean stringOverflow = false, badFormat = false, invalidChar = false, invalidFloat = false;
+        Boolean stringOverflow = false, badFormat = false, invalidCharConversion = false, invalidFloatConversion = false;
         try { Convert.ToInt32(2147483648.0); } catch (OverflowException) { intOverflow = true; }
         try { Convert.ToUInt32(-1.0); } catch (OverflowException) { uintOverflow = true; }
         try { Convert.ToInt64(9223372036854775808.0); } catch (OverflowException) { longOverflow = true; }
         try { Convert.ToUInt64(-1.0); } catch (OverflowException) { ulongOverflow = true; }
         try { Convert.ToByte("256"); } catch (OverflowException) { stringOverflow = true; }
         try { Convert.ToInt32("not-a-number"); } catch (FormatException) { badFormat = true; }
-        try { Convert.ToChar((Boolean)true); } catch (InvalidCastException) { invalidChar = true; }
-        try { Convert.ToSingle((Char)'A'); } catch (InvalidCastException) { invalidFloat = true; }
+        try { Convert.ToChar((Boolean)true); } catch (InvalidCastException) { invalidCharConversion = true; }
+        try { Convert.ToSingle((Char)'A'); } catch (InvalidCastException) { invalidFloatConversion = true; }
 
         Object boxedString = (String)"123";
         Object boxedInt = (Int32)456;
@@ -1357,7 +1357,7 @@ public static unsafe class ManagedRuntimeConformance
             && String.Equals(Convert.ToString((Char)'A'), "A")
             && String.Equals(Convert.ToString((Object)null), String.Empty)
             && intOverflow && uintOverflow && longOverflow && ulongOverflow
-            && stringOverflow && badFormat && invalidChar && invalidFloat, ref passed, ref failed);
+            && stringOverflow && badFormat && invalidCharConversion && invalidFloatConversion, ref passed, ref failed);
 
         // 34 System.IComparable / IComparable<T> / IEquatable<T> across primitive families.
         IComparable nonGenericComparable = (Int32)7;
