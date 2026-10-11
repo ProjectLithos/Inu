@@ -2365,7 +2365,6 @@ namespace System
         public static Single Abs(Single value) => Math.Abs(value);
         public static Single Min(Single left, Single right) => Math.Min(left, right);
         public static Single Max(Single left, Single right) => Math.Max(left, right);
-        public static Single Clamp(Single value, Single min, Single max) => Math.Clamp(value, min, max);
         public static Int32 Sign(Single value) => Math.Sign(value);
 
         public static Single Truncate(Single value) => (Single)Math.Truncate(value);

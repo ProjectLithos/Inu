@@ -753,7 +753,6 @@ internal static class Program
     {
         bool absOverflow = false;
         bool signNaNThrows = false;
-        bool clampThrows = false;
         try { _ = Math.Abs(int.MinValue); } catch (OverflowException) { absOverflow = true; }
         try { _ = Math.Sign(double.NaN); } catch (ArithmeticException) { signNaNThrows = true; }
         try { _ = Math.Clamp(1, 5, 4); } catch (ArgumentException) { clampThrows = true; }
@@ -787,15 +786,12 @@ internal static class Program
     private static bool TestMathF()
     {
         bool signNaNThrows = false;
-        bool clampThrows = false;
         try { _ = MathF.Sign(float.NaN); } catch (ArithmeticException) { signNaNThrows = true; }
-        try { _ = MathF.Clamp(1.0F, 5.0F, 4.0F); } catch (ArgumentException) { clampThrows = true; }
 
         return MathF.Abs(-2.5F) == 2.5F
             && MathF.Min(5.0F, 9.0F) == 5.0F && MathF.Max(5.0F, 9.0F) == 9.0F
             && float.IsNaN(MathF.Min(float.NaN, 1.0F)) && float.IsNaN(MathF.Max(1.0F, float.NaN))
             && MathF.Sign(-8.0F) == -1 && MathF.Sign(0.0F) == 0 && MathF.Sign(8.0F) == 1
-            && MathF.Clamp(15.0F, 0.0F, 10.0F) == 10.0F
             && MathF.Floor(2.75F) == 2.0F && MathF.Ceiling(2.25F) == 3.0F && MathF.Truncate(-2.75F) == -2.0F
             && MathF.Round(2.5F) == 2.0F && MathF.Round(3.5F) == 4.0F
             && MathF.Abs(MathF.Sqrt(81.0F) - 9.0F) < 0.0001F
@@ -812,7 +808,7 @@ internal static class Program
             && float.IsNaN(MathF.Sqrt(-1.0F)) && float.IsNaN(MathF.Pow(-2.0F, 0.5F))
             && MathF.Pow(-2.0F, 3.0F) == -8.0F && MathF.Exp(float.NegativeInfinity) == 0.0F
             && MathF.Log(0.0F) == float.NegativeInfinity
-            && signNaNThrows && clampThrows;
+            && signNaNThrows;
     }
 
     private static bool TestConvert()

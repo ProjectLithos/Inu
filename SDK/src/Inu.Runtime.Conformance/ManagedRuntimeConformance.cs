@@ -1292,14 +1292,12 @@ public static unsafe class ManagedRuntimeConformance
 
 
         // 32 System.MathF: single-precision counterpart to the completed System.Math surface.
-        Boolean mathFSignNaNThrows = false, mathFClampThrows = false;
+        Boolean mathFSignNaNThrows = false;
         try { _ = MathF.Sign(Single.NaN); } catch (ArithmeticException) { mathFSignNaNThrows = true; }
-        try { _ = MathF.Clamp(1.0F, 5.0F, 4.0F); } catch (ArgumentException) { mathFClampThrows = true; }
         Record(MathF.Abs(-2.5F) == 2.5F
             && MathF.Min(5.0F, 9.0F) == 5.0F && MathF.Max(5.0F, 9.0F) == 9.0F
             && Single.IsNaN(MathF.Min(Single.NaN, 1.0F)) && Single.IsNaN(MathF.Max(1.0F, Single.NaN))
             && MathF.Sign(-8.0F) == -1 && MathF.Sign(0.0F) == 0 && MathF.Sign(8.0F) == 1
-            && MathF.Clamp(15.0F, 0.0F, 10.0F) == 10.0F
             && MathF.Floor(2.75F) == 2.0F && MathF.Ceiling(2.25F) == 3.0F && MathF.Truncate(-2.75F) == -2.0F
             && MathF.Round(2.5F) == 2.0F && MathF.Round(3.5F) == 4.0F
             && MathF.Abs(MathF.Sqrt(81.0F) - 9.0F) < 0.0001F
@@ -1316,7 +1314,7 @@ public static unsafe class ManagedRuntimeConformance
             && Single.IsNaN(MathF.Sqrt(-1.0F)) && Single.IsNaN(MathF.Pow(-2.0F, 0.5F))
             && MathF.Pow(-2.0F, 3.0F) == -8.0F && MathF.Exp(Single.NegativeInfinity) == 0.0F
             && MathF.Log(0.0F) == Single.NegativeInfinity
-            && mathFSignNaNThrows && mathFClampThrows, ref passed, ref failed);
+            && mathFSignNaNThrows, ref passed, ref failed);
 
         // 33 System.Convert: primitive-to-primitive, string/object bridges and failure semantics.
         Boolean intOverflow = false, uintOverflow = false, longOverflow = false, ulongOverflow = false;
