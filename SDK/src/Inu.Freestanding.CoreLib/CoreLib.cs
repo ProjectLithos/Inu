@@ -3214,6 +3214,36 @@ namespace System
             _helperObject = firstParameter;
         }
 
+        private void InitializeClosedInstanceWithGVMResolution(Object firstParameter, RuntimeMethodHandle tokenOfGenericVirtualMethod)
+        {
+            if (Object.ReferenceEquals(firstParameter, null)) throw new NullReferenceException();
+
+            IntPtr functionResolution = global::System.Runtime.TypeLoaderExports.GVMLookupForSlot(firstParameter, tokenOfGenericVirtualMethod);
+            if (functionResolution == IntPtr.Zero) throw new InvalidOperationException();
+
+            if (!global::Internal.Runtime.CompilerServices.FunctionPointerOps.IsGenericMethodPointer(functionResolution))
+            {
+                _functionPointer = functionResolution;
+                _firstParameter = firstParameter;
+                return;
+            }
+
+            _firstParameter = this;
+            _functionPointer = GetThunk(ClosedInstanceThunkOverGenericMethod);
+            _extraFunctionPointerOrData = functionResolution;
+            _helperObject = firstParameter;
+        }
+
+        private void InitializeClosedInstanceToInterface(Object firstParameter, IntPtr dispatchCell)
+        {
+            if (Object.ReferenceEquals(firstParameter, null)) throw new NullReferenceException();
+
+            IntPtr target = global::Internal.Runtime.CompilerHelpers.StartupCodeHelpers.ResolveInterfaceDispatch(firstParameter, dispatchCell);
+            if (target == IntPtr.Zero) throw new InvalidOperationException();
+            _functionPointer = target;
+            _firstParameter = firstParameter;
+        }
+
         private void InitializeClosedInstanceWithoutNullCheck(Object firstParameter, IntPtr functionPointer)
         {
             if (!global::Internal.Runtime.CompilerServices.FunctionPointerOps.IsGenericMethodPointer(functionPointer))
@@ -3249,6 +3279,17 @@ namespace System
             _firstParameter = this;
             _functionPointer = functionPointerThunk;
             _extraFunctionPointerOrData = functionPointer;
+        }
+
+        // CONTRACT with .NET 10 NativeAOT DelegateInvokeOpenInstanceThunk. Inu's
+        // current open-instance path stores the resolved target directly in the
+        // extra pointer slot; future resolver-backed forms can extend this method
+        // without changing the compiler-visible method contract.
+        [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        private IntPtr GetActualTargetFunctionPointer(Object thisObject)
+        {
+            if (Object.ReferenceEquals(thisObject, null)) throw new NullReferenceException();
+            return (IntPtr)_extraFunctionPointerOrData;
         }
 
         private static Boolean InternalEqualTypes(Delegate first, Delegate second)
@@ -4706,6 +4747,20 @@ namespace Internal.Runtime.CompilerHelpers
 {
     using System;
     using System.Runtime;
+
+    // CONTRACT with .NET 10 NativeAOT System.Private.CoreLib. The ILC-generated
+    // DelegateInvokeObjectArrayThunk calls this exact helper when a delegate has
+    // zero parameters so it can reuse a single empty object[] rather than allocate.
+    // Keep the type/method names and signature aligned with dotnet/runtime v10.0.0.
+    internal static class DelegateHelpers
+    {
+        private static Object[] s_emptyObjectArray = Array.Empty<Object>();
+
+        internal static Object[] GetEmptyObjectArray()
+        {
+            return s_emptyObjectArray;
+        }
+    }
 
     // CONTRACT with .NET 10 NativeAOT Test.CoreLib. ILC resolves these exact
     // private helpers when lowering the IL ldtoken instruction used by typeof.
