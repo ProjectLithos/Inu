@@ -753,6 +753,7 @@ internal static class Program
     {
         bool absOverflow = false;
         bool signNaNThrows = false;
+        bool clampThrows = false;
         try { _ = Math.Abs(int.MinValue); } catch (OverflowException) { absOverflow = true; }
         try { _ = Math.Sign(double.NaN); } catch (ArithmeticException) { signNaNThrows = true; }
         try { _ = Math.Clamp(1, 5, 4); } catch (ArgumentException) { clampThrows = true; }
