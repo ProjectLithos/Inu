@@ -1,5 +1,5 @@
 {
-  "version": "0.1.15",
+  "version": "0.1.16",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "2115eaae5684e261dc22a8b5fc83aa0bce3948daa018fb309f22e10cae637a86"
+      "sha256": "f5f4a682aaee6af9982f16b536eb85927608a1b7b54f23f454c072e09289f702"
     },
     {
       "path": "Directory.Build.targets",
@@ -931,7 +931,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "701d3a35c918f15931eb5ea3f0fdd9cb5e778ebb7622bea96c55c5a0117f57de"
+      "sha256": "1eabf095866427d23eb2af0131bbc43b2bddc4c9d8bca19f3499a1ebe5986eb8"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2991,7 +2991,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "8bf11bea1624c1879676fd96cc45c795a2e5fa32863ec7b1b2a3a92cc27c4364"
+      "sha256": "0b30ac5e22c34e30ae564749202d7e7fce50abf7f0fc66ca6c0514e134e429cf"
     },
     {
       "path": "Inu-Package.bat",
@@ -3027,7 +3027,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "f4a071c9fb2d3098d8f4d05f662fdf108cbc182a88752d4be4553dba67f0a2c7"
+      "sha256": "fd18f44d9e52d4a569d59173159d2a756e07e6035c13eb3d150a82dbec692c3e"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3539,7 +3539,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "2c45083d512fc7ce0d630f1c3b05ba577314a0a62341c98140d346a7d3417da7"
+      "sha256": "7fb8af3eff1d791b3cef21a20e7042ad3029d9a0781fff348c9c45dbf2ea8dbf"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3895,7 +3895,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-      "sha256": "369e80e7ccf93de23ed893756c7f4078128bee2bcbaeb8116f1831d8e4270b8f"
+      "sha256": "2385d85f96e4552574985c77573c2a9fdbea68cde62e8e5d9b4c7ffe5a42899d"
     },
     {
       "path": "src/Inu.Kernel.Console/BitmapFont.cs",
@@ -5763,7 +5763,7 @@
     },
     {
       "path": "src/Inu.Userland.Runtime/UserlandRuntime.cs",
-      "sha256": "be6eaa1de4eeccaacab3b4e3e978c84de9167fc49d0121548e41d9599f159438"
+      "sha256": "42e389d1de50660be6dd8ed9298c9e05060a003b157ed79ca87b332237e22659"
     },
     {
       "path": "src/Inu.Userland.RuntimeSupport/Inu.Userland.RuntimeSupport.csproj",

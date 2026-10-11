@@ -31,12 +31,16 @@ public static unsafe class UserlandRuntimeStartup
     private const String ConsoleCaretActiveMessage = "console.caret.active";
     private const String ConsoleForegroundColorMessage = "console.foreground.rgb";
     private const String ConsoleBackgroundColorMessage = "console.background.rgb";
+    private const String ConsoleHistoryCountMessage = "console.history.count";
+    private const String ConsoleHistoryItemMessage = "console.history.item";
+    private const String ConsoleHistoryAddMessage = "console.history.add";
     private const UInt32 InputCapacity=4096U;
     private const UInt32 PathCapacity=1536U;
     private const UInt32 ArgumentCapacity=2048U;
     private const UInt32 EnvironmentCapacity=2048U;
     private const UInt32 IoChunkCapacity=4096U;
     private const UInt32 AssetHandleSlots=8U;
+    private const Int32 ConsoleHistoryCapacity=64;
     private const UInt64 AssetFileHandleBase=0x70000000UL;
     private const UInt64 AssetDirectoryHandleBase=0x71000000UL;
     private const UInt64 IndexedDirectoryHandleBase=0x72000000UL;
@@ -60,6 +64,8 @@ public static unsafe class UserlandRuntimeStartup
     private static Boolean _initialized;
     private static UInt64 _shellProcessId;
     private static Boolean _shellOutputWritten,_interactiveReadyPublished;
+    private static String[] _consoleHistory=new String[ConsoleHistoryCapacity];
+    private static Int32 _consoleHistoryStart,_consoleHistoryCount;
     // Read-only handles over the bootloader-preloaded system asset catalogue. These make the
     // system tree usable even in deliberately minimal OSes that have not selected a runtime
     // storage driver yet. Real VFS handles remain preferred whenever a mounted volume exists.
@@ -93,6 +99,9 @@ public static unsafe class UserlandRuntimeStartup
            !KernelSystemCalls.RegisterSet(ConsoleForegroundColorMessage,&ConsoleForegroundColorSet)||
            !KernelSystemCalls.RegisterGet(ConsoleBackgroundColorMessage,&ConsoleBackgroundColorGet)||
            !KernelSystemCalls.RegisterSet(ConsoleBackgroundColorMessage,&ConsoleBackgroundColorSet)||
+           !KernelSystemCalls.RegisterGet(ConsoleHistoryCountMessage,&ConsoleHistoryCountGet)||
+           !KernelSystemCalls.RegisterGet(ConsoleHistoryItemMessage,&ConsoleHistoryItemGet)||
+           !KernelSystemCalls.RegisterEvent(ConsoleHistoryAddMessage,&ConsoleHistoryAddEvent)||
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ProcessSpawn,&ProcessSpawnEvent)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessWait,&ProcessWaitGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessArguments,&ProcessArgumentsGet)||
@@ -132,10 +141,32 @@ public static unsafe class UserlandRuntimeStartup
         _inputWrite=next;return true;
     }
 
-    /// <summary>Queues one non-text console editing/navigation code (0x80-0xFF) for the foreground terminal process.</summary>
+    /// <summary>Queues one non-text console editing/navigation key using standard ANSI terminal escape sequences.</summary>
     public static Boolean QueueInputCode(Byte value)
     {
-        if(!_initialized||value<0x80U)return false;UInt32 next=(_inputWrite+1U)%InputCapacity;if(next==_inputRead)return false;fixed(Byte* input=_state.Input)input[_inputWrite]=value;_inputWrite=next;return true;
+        if(!_initialized||value<0x80U)return false;
+        Byte* sequence=stackalloc Byte[4];UInt32 length=0U;
+        sequence[length++]=0x1BU;sequence[length++]=(Byte)'[';
+        if(value==0x80U)sequence[length++]=(Byte)'A';
+        else if(value==0x81U)sequence[length++]=(Byte)'B';
+        else if(value==0x82U)sequence[length++]=(Byte)'D';
+        else if(value==0x83U)sequence[length++]=(Byte)'C';
+        else if(value==0x84U)sequence[length++]=(Byte)'H';
+        else if(value==0x85U)sequence[length++]=(Byte)'F';
+        else if(value==0x86U){sequence[length++]=(Byte)'3';sequence[length++]=(Byte)'~';}
+        else if(value==0x87U){sequence[length++]=(Byte)'5';sequence[length++]=(Byte)'~';}
+        else if(value==0x88U){sequence[length++]=(Byte)'6';sequence[length++]=(Byte)'~';}
+        else return false;
+        return QueueInputBytes(sequence,length);
+    }
+
+    private static Boolean QueueInputBytes(Byte* values,UInt32 length)
+    {
+        if(values==null||length==0U||length>=InputCapacity)return false;
+        UInt32 used=_inputWrite>=_inputRead?_inputWrite-_inputRead:InputCapacity-(_inputRead-_inputWrite);
+        if(InputCapacity-1U-used<length)return false;
+        fixed(Byte* input=_state.Input)for(UInt32 i=0U;i<length;i++){input[_inputWrite]=values[i];_inputWrite=(_inputWrite+1U)%InputCapacity;}
+        return true;
     }
 
     /// <summary>Cancels the current foreground ring-3 program. The shell is relaunched by the supervisor.</summary>
@@ -314,6 +345,30 @@ public static unsafe class UserlandRuntimeStartup
     private static Int64 ConsoleCaretHeightGet(KernelSystemCallFrame* frame)=>(Int64)KernelConsole.GetCaretHeightPercent();
     private static Int64 ConsoleCaretHeightSet(KernelSystemCallFrame* frame)=>frame!=null&&KernelConsole.SetCaretHeightPercent((UInt32)frame->NativeMessage.Value0)?0L:(Int64)KernelSystemCallError.InvalidArgument;
     private static Int64 ConsoleCaretActiveSet(KernelSystemCallFrame* frame)=>frame!=null&&KernelConsole.SetCaretActive(frame->NativeMessage.Value0!=0UL)?0L:(Int64)KernelSystemCallError.Fault;
+
+    private static Int64 ConsoleHistoryCountGet(KernelSystemCallFrame* frame)=>(Int64)_consoleHistoryCount;
+
+    private static Int64 ConsoleHistoryItemGet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.OutputAddress==0UL||frame->NativeMessage.OutputCapacity==0UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt64 requested=frame->NativeMessage.Value0;if(requested>=(UInt64)_consoleHistoryCount)return (Int64)KernelSystemCallError.NotFound;
+        Int32 index=(_consoleHistoryStart+_consoleHistoryCount-1-(Int32)requested)%ConsoleHistoryCapacity;String value=_consoleHistory[index]??String.Empty;
+        if((UInt64)value.Length>frame->NativeMessage.OutputCapacity)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* bytes=stackalloc Byte[value.Length==0?1:value.Length];for(Int32 i=0;i<value.Length;i++){Char c=value[i];bytes[i]=(Byte)(c<=0x7F?c:'?');}
+        return value.Length==0?0L:(KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)bytes,(UInt64)value.Length)?value.Length:(Int64)KernelSystemCallError.Fault);
+    }
+
+    private static Int64 ConsoleHistoryAddEvent(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>1023UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt32 length=(UInt32)frame->NativeMessage.DataLength;Byte* bytes=stackalloc Byte[(Int32)length];if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)bytes,length))return (Int64)KernelSystemCallError.Fault;
+        StringBuilder builder=new StringBuilder((Int32)length);for(UInt32 i=0U;i<length;i++){Byte b=bytes[i];if(b<32U||b>126U)return (Int64)KernelSystemCallError.InvalidArgument;builder.Append((Char)b);}
+        String value=builder.ToString();if(_consoleHistoryCount>0){Int32 newest=(_consoleHistoryStart+_consoleHistoryCount-1)%ConsoleHistoryCapacity;if(String.Equals(_consoleHistory[newest],value))return 0L;}
+        if(_consoleHistoryCount<ConsoleHistoryCapacity){_consoleHistory[(_consoleHistoryStart+_consoleHistoryCount)%ConsoleHistoryCapacity]=value;_consoleHistoryCount++;}
+        else{_consoleHistory[_consoleHistoryStart]=value;_consoleHistoryStart=(_consoleHistoryStart+1)%ConsoleHistoryCapacity;}
+        return 0L;
+    }
+
     private static Int64 ConsoleForegroundColorGet(KernelSystemCallFrame* frame)=>(Int64)KernelConsole.GetForegroundRgb();
     private static Int64 ConsoleForegroundColorSet(KernelSystemCallFrame* frame)=>frame!=null&&KernelConsole.SetForegroundRgb((UInt32)frame->NativeMessage.Value0)?0L:(Int64)KernelSystemCallError.InvalidArgument;
     private static Int64 ConsoleBackgroundColorGet(KernelSystemCallFrame* frame)=>(Int64)KernelConsole.GetBackgroundRgb();

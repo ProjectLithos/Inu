@@ -85,8 +85,6 @@ public static unsafe class UserlandConsole
 {
     private const Int32 NavigationUp=0x80,NavigationDown=0x81,NavigationLeft=0x82,NavigationRight=0x83,NavigationHome=0x84,NavigationEnd=0x85,NavigationDelete=0x86,NavigationPageUp=0x87,NavigationPageDown=0x88;
     private const Int32 HistoryCapacity=64;
-    private static String[] _history=new String[HistoryCapacity];
-    private static Int32 _historyStart,_historyCount;
 
     public static Boolean Write(String text){if(text==null)return false;const UInt32 ChunkBytes=1024U;Byte* b=stackalloc Byte[(Int32)ChunkBytes];Int32 offset=0;while(offset<text.Length){UInt32 n=(UInt32)(text.Length-offset);if(n>ChunkBytes)n=ChunkBytes;for(UInt32 i=0;i<n;i++){Char c=text[offset+(Int32)i];b[i]=(Byte)(c<=255?c:'?');}Int64 r=UserlandSystem.Call(UserlandOperation.Event,"console.output",b,n,null,0UL);if(r<0L)return false;offset+=(Int32)n;}return true;}
     public static Boolean WriteLine(String text){return Write(text)&&Write("\n");}
@@ -112,6 +110,15 @@ public static unsafe class UserlandConsole
     /// <summary>Waits for one decoded character or non-text console editing key through the kernel's interrupt-driven input service.</summary>
     internal static Int32 ReadChar(){Int64 value=UserlandSystem.Call(UserlandOperation.Get,"console.input",null,0UL,null,0UL);return value>=0L?(Int32)value:-1;}
 
+    private static Int32 ReadEditedInput()
+    {
+        Int32 first=ReadChar();if(first!=0x1B)return first;
+        Int32 second=ReadChar();if(second!='[')return first;Int32 third=ReadChar();
+        if(third=='A')return NavigationUp;if(third=='B')return NavigationDown;if(third=='C')return NavigationRight;if(third=='D')return NavigationLeft;if(third=='H')return NavigationHome;if(third=='F')return NavigationEnd;
+        if(third=='3'||third=='5'||third=='6'){Int32 fourth=ReadChar();if(fourth!='~')return first;if(third=='3')return NavigationDelete;if(third=='5')return NavigationPageUp;return NavigationPageDown;}
+        return first;
+    }
+
     private static Boolean SetCaretActive(Boolean active)=>UserlandSystem.Call(UserlandOperation.Set,"console.caret.active",null,0UL,null,0UL,active?1UL:0UL)>=0L;
 
     private static Boolean SyncEditable(StringBuilder line,UInt32 oldLength,UInt32 cursor)
@@ -127,17 +134,21 @@ public static unsafe class UserlandConsole
         line.Clear();if(value!=null)line.Append(value);
     }
 
+    private static Int32 GetHistoryCount()
+    {
+        Int64 value=UserlandSystem.Call(UserlandOperation.Get,"console.history.count",null,0UL,null,0UL);return value<0L?0:value>HistoryCapacity?HistoryCapacity:(Int32)value;
+    }
+
     private static String GetHistoryNewest(Int32 offset)
     {
-        if(offset<0||offset>=_historyCount)return String.Empty;Int32 index=(_historyStart+_historyCount-1-offset)%HistoryCapacity;return _history[index]??String.Empty;
+        if(offset<0||offset>=HistoryCapacity)return String.Empty;Byte* bytes=stackalloc Byte[1024];Int64 length=UserlandSystem.Call(UserlandOperation.Get,"console.history.item",null,0UL,bytes,1024UL,(UInt64)offset);
+        if(length<=0L)return String.Empty;StringBuilder result=new StringBuilder((Int32)length);for(Int32 i=0;i<(Int32)length;i++)result.Append((Char)bytes[i]);return result.ToString();
     }
 
     private static void RememberHistory(String value)
     {
-        if(String.IsNullOrWhiteSpace(value))return;
-        if(_historyCount>0&&String.Equals(GetHistoryNewest(0),value))return;
-        if(_historyCount<HistoryCapacity){_history[(_historyStart+_historyCount)%HistoryCapacity]=value;_historyCount++;return;}
-        _history[_historyStart]=value;_historyStart=(_historyStart+1)%HistoryCapacity;
+        if(String.IsNullOrWhiteSpace(value)||value.Length>1023)return;Byte* bytes=stackalloc Byte[value.Length];for(Int32 i=0;i<value.Length;i++){Char c=value[i];if(c<32||c>126)return;bytes[i]=(Byte)c;}
+        UserlandSystem.Call(UserlandOperation.Event,"console.history.add",bytes,(UInt64)value.Length,null,0UL);
     }
 
     private static String ReadEditedLine(Boolean commandCompletion)
@@ -147,14 +158,14 @@ public static unsafe class UserlandConsole
         SetCaretActive(true);
         for(;;)
         {
-            Int32 value=ReadChar();if(value<0){SetCaretActive(false);throw new InvalidOperationException();}
+            Int32 value=ReadEditedInput();if(value<0){SetCaretActive(false);throw new InvalidOperationException();}
             if(value=='\r'||value=='\n')
             {
                 SetCaretActive(false);Write("\n");String result=line.ToString();RememberHistory(result);return result;
             }
             if(value==NavigationUp)
             {
-                if(_historyCount==0)continue;if(historyOffset<0){draft=line.ToString();historyOffset=0;}else if(historyOffset<_historyCount-1)historyOffset++;
+                Int32 historyCount=GetHistoryCount();if(historyCount==0)continue;if(historyOffset<0){draft=line.ToString();historyOffset=0;}else if(historyOffset<historyCount-1)historyOffset++;
                 UInt32 old=renderedLength;ReplaceBuilder(line,GetHistoryNewest(historyOffset));cursor=(UInt32)line.Length;renderedLength=(UInt32)line.Length;ResetCompletion(ref completionPrefix,ref completionMatches,ref completionIndex);SyncEditable(line,old,cursor);continue;
             }
             if(value==NavigationDown)
