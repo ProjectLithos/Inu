@@ -146,7 +146,7 @@ public static unsafe class UserlandRuntimeStartup
     {
         if(!_initialized||value<0x80U)return false;
         Byte* sequence=stackalloc Byte[4];UInt32 length=0U;
-        sequence[length++]=0x1BU;sequence[length++]=(Byte)'[';
+        sequence[length++]=(Byte)0x1B;sequence[length++]=(Byte)'[';
         if(value==0x80U)sequence[length++]=(Byte)'A';
         else if(value==0x81U)sequence[length++]=(Byte)'B';
         else if(value==0x82U)sequence[length++]=(Byte)'D';
