@@ -125,8 +125,6 @@ private static Boolean HandleUsbKeyboardEvent(UsbHidKeyboardEvent input)
 private static Boolean DispatchPs2Press(Ps2KeyboardEvent input)
     {
         if (input.Control && input.Key == Ps2Key.C) return UserlandRuntimeStartup.HandleControlC();
-        if (input.Key == Ps2Key.PageUp) return KernelConsole.ScrollPageUp();
-        if (input.Key == Ps2Key.PageDown) return KernelConsole.ScrollPageDown();
         if (TryMapPs2Navigation(input.Key,out Byte navigationCode)) return UserlandRuntimeStartup.QueueInputCode(navigationCode);
         if (input.Control && input.Key == Ps2Key.D1) return KernelConsole.SetFramebufferBufferCount(1U);
         if (input.Control && input.Key == Ps2Key.D2) return KernelConsole.SetFramebufferBufferCount(2U);
@@ -139,8 +137,6 @@ private static Boolean DispatchPs2Press(Ps2KeyboardEvent input)
 
 private static Boolean DispatchUsbPress(UsbHidKeyboardEvent input)
     {
-        if (input.Usage==75U) return KernelConsole.ScrollPageUp();
-        if (input.Usage==78U) return KernelConsole.ScrollPageDown();
         if (TryMapUsbNavigation(input.Usage,out Byte navigationCode)) return UserlandRuntimeStartup.QueueInputCode(navigationCode);
         Boolean control=(input.Modifiers&0x11U)!=0;
         Boolean alt=(input.Modifiers&0x44U)!=0;
@@ -157,23 +153,23 @@ private static Boolean DispatchUsbPress(UsbHidKeyboardEvent input)
 private static Boolean IsPs2Repeatable(Ps2KeyboardEvent input)
     {
         if(input.Control||input.Alt)return false;
-        return input.Key==Ps2Key.Up||input.Key==Ps2Key.Down||input.Key==Ps2Key.Left||input.Key==Ps2Key.Right||IsRepeatableCharacter(input.Character);
+        return input.Key==Ps2Key.Up||input.Key==Ps2Key.Down||input.Key==Ps2Key.Left||input.Key==Ps2Key.Right||input.Key==Ps2Key.PageUp||input.Key==Ps2Key.PageDown||IsRepeatableCharacter(input.Character);
     }
 
 private static Boolean IsUsbRepeatable(UsbHidKeyboardEvent input)
     {
         if((input.Modifiers&0x55U)!=0U)return false;
-        return input.Usage==82U||input.Usage==81U||input.Usage==80U||input.Usage==79U||IsRepeatableCharacter(input.Character);
+        return input.Usage==82U||input.Usage==81U||input.Usage==80U||input.Usage==79U||input.Usage==75U||input.Usage==78U||IsRepeatableCharacter(input.Character);
     }
 
 private static Boolean TryMapPs2Navigation(Ps2Key key,out Byte code)
     {
-        code=0U;if(key==Ps2Key.Up)code=0x80U;else if(key==Ps2Key.Down)code=0x81U;else if(key==Ps2Key.Left)code=0x82U;else if(key==Ps2Key.Right)code=0x83U;else if(key==Ps2Key.Home)code=0x84U;else if(key==Ps2Key.End)code=0x85U;else if(key==Ps2Key.Delete)code=0x86U;return code!=0U;
+        code=0U;if(key==Ps2Key.Up)code=0x80U;else if(key==Ps2Key.Down)code=0x81U;else if(key==Ps2Key.Left)code=0x82U;else if(key==Ps2Key.Right)code=0x83U;else if(key==Ps2Key.Home)code=0x84U;else if(key==Ps2Key.End)code=0x85U;else if(key==Ps2Key.Delete)code=0x86U;else if(key==Ps2Key.PageUp)code=0x87U;else if(key==Ps2Key.PageDown)code=0x88U;return code!=0U;
     }
 
 private static Boolean TryMapUsbNavigation(Byte usage,out Byte code)
     {
-        code=0U;if(usage==82U)code=0x80U;else if(usage==81U)code=0x81U;else if(usage==80U)code=0x82U;else if(usage==79U)code=0x83U;else if(usage==74U)code=0x84U;else if(usage==77U)code=0x85U;else if(usage==76U)code=0x86U;return code!=0U;
+        code=0U;if(usage==82U)code=0x80U;else if(usage==81U)code=0x81U;else if(usage==80U)code=0x82U;else if(usage==79U)code=0x83U;else if(usage==74U)code=0x84U;else if(usage==77U)code=0x85U;else if(usage==76U)code=0x86U;else if(usage==75U)code=0x87U;else if(usage==78U)code=0x88U;return code!=0U;
     }
 
 private static Boolean IsRepeatableCharacter(Char character)=>character=='\b'||(character>=' '&&character<='~');
@@ -195,7 +191,7 @@ private static Boolean ServiceKeyboardRepeat()
             // work cannot accumulate queued repeat actions that continue after key-up.
             _ps2RepeatDeadline=UInt64.MaxValue-now<KeyboardRepeatIntervalNanoseconds?UInt64.MaxValue:now+KeyboardRepeatIntervalNanoseconds;
             Boolean repeated;
-            if(_ps2RepeatKey==Ps2Key.PageUp)repeated=KernelConsole.ScrollPageUp();else if(_ps2RepeatKey==Ps2Key.PageDown)repeated=KernelConsole.ScrollPageDown();else if(TryMapPs2Navigation(_ps2RepeatKey,out Byte ps2Code))repeated=UserlandRuntimeStartup.QueueInputCode(ps2Code);else repeated=UserlandRuntimeStartup.QueueCharacter(_ps2RepeatCharacter);
+            if(TryMapPs2Navigation(_ps2RepeatKey,out Byte ps2Code))repeated=UserlandRuntimeStartup.QueueInputCode(ps2Code);else repeated=UserlandRuntimeStartup.QueueCharacter(_ps2RepeatCharacter);
             if(!repeated){_ps2RepeatActive=false;ok=false;}
         }
 
@@ -203,7 +199,7 @@ private static Boolean ServiceKeyboardRepeat()
         {
             _usbRepeatDeadline=UInt64.MaxValue-now<KeyboardRepeatIntervalNanoseconds?UInt64.MaxValue:now+KeyboardRepeatIntervalNanoseconds;
             Boolean repeated;
-            if(_usbRepeatUsage==75U)repeated=KernelConsole.ScrollPageUp();else if(_usbRepeatUsage==78U)repeated=KernelConsole.ScrollPageDown();else if(TryMapUsbNavigation(_usbRepeatUsage,out Byte usbCode))repeated=UserlandRuntimeStartup.QueueInputCode(usbCode);else repeated=UserlandRuntimeStartup.QueueCharacter(_usbRepeatCharacter);
+            if(TryMapUsbNavigation(_usbRepeatUsage,out Byte usbCode))repeated=UserlandRuntimeStartup.QueueInputCode(usbCode);else repeated=UserlandRuntimeStartup.QueueCharacter(_usbRepeatCharacter);
             if(!repeated){_usbRepeatActive=false;ok=false;}
         }
 

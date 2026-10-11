@@ -1,0 +1,10 @@
+FGCOLOUR
+
+Changes the system text-console foreground colour.
+
+Usage:
+  fgcolour <red> <green> <blue>
+
+Each component is an integer from 0 through 255.
+Example:
+  fgcolour 255 255 255

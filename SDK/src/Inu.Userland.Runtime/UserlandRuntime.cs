@@ -83,7 +83,7 @@ public static unsafe class ConsolePresentation
 
 public static unsafe class UserlandConsole
 {
-    private const Int32 NavigationUp=0x80,NavigationDown=0x81,NavigationLeft=0x82,NavigationRight=0x83,NavigationHome=0x84,NavigationEnd=0x85,NavigationDelete=0x86;
+    private const Int32 NavigationUp=0x80,NavigationDown=0x81,NavigationLeft=0x82,NavigationRight=0x83,NavigationHome=0x84,NavigationEnd=0x85,NavigationDelete=0x86,NavigationPageUp=0x87,NavigationPageDown=0x88;
     private const Int32 HistoryCapacity=64;
     private static String[] _history=new String[HistoryCapacity];
     private static Int32 _historyStart,_historyCount;
@@ -140,9 +140,10 @@ public static unsafe class UserlandConsole
         _history[_historyStart]=value;_historyStart=(_historyStart+1)%HistoryCapacity;
     }
 
-    private static String ReadEditedLine()
+    private static String ReadEditedLine(Boolean commandCompletion)
     {
         StringBuilder line=new StringBuilder();UInt32 cursor=0U,renderedLength=0U;Int32 historyOffset=-1;String draft=String.Empty;
+        String completionPrefix=String.Empty;String[] completionMatches=Array.Empty<String>();Int32 completionIndex=-1;
         SetCaretActive(true);
         for(;;)
         {
@@ -154,35 +155,120 @@ public static unsafe class UserlandConsole
             if(value==NavigationUp)
             {
                 if(_historyCount==0)continue;if(historyOffset<0){draft=line.ToString();historyOffset=0;}else if(historyOffset<_historyCount-1)historyOffset++;
-                UInt32 old=renderedLength;ReplaceBuilder(line,GetHistoryNewest(historyOffset));cursor=(UInt32)line.Length;renderedLength=(UInt32)line.Length;SyncEditable(line,old,cursor);continue;
+                UInt32 old=renderedLength;ReplaceBuilder(line,GetHistoryNewest(historyOffset));cursor=(UInt32)line.Length;renderedLength=(UInt32)line.Length;ResetCompletion(ref completionPrefix,ref completionMatches,ref completionIndex);SyncEditable(line,old,cursor);continue;
             }
             if(value==NavigationDown)
             {
-                if(historyOffset<0)continue;UInt32 old=renderedLength;if(historyOffset>0){historyOffset--;ReplaceBuilder(line,GetHistoryNewest(historyOffset));}else{historyOffset=-1;ReplaceBuilder(line,draft);}cursor=(UInt32)line.Length;renderedLength=(UInt32)line.Length;SyncEditable(line,old,cursor);continue;
+                if(historyOffset<0)continue;UInt32 old=renderedLength;if(historyOffset>0){historyOffset--;ReplaceBuilder(line,GetHistoryNewest(historyOffset));}else{historyOffset=-1;ReplaceBuilder(line,draft);}cursor=(UInt32)line.Length;renderedLength=(UInt32)line.Length;ResetCompletion(ref completionPrefix,ref completionMatches,ref completionIndex);SyncEditable(line,old,cursor);continue;
             }
             if(value==NavigationLeft){if(cursor>0U)cursor--;SyncCursor((UInt32)line.Length,cursor);continue;}
             if(value==NavigationRight){if(cursor<(UInt32)line.Length)cursor++;SyncCursor((UInt32)line.Length,cursor);continue;}
             if(value==NavigationHome){cursor=0U;SyncCursor((UInt32)line.Length,cursor);continue;}
             if(value==NavigationEnd){cursor=(UInt32)line.Length;SyncCursor((UInt32)line.Length,cursor);continue;}
+            if(value==NavigationPageUp){ScrollPage(true);continue;}
+            if(value==NavigationPageDown){ScrollPage(false);continue;}
+            if(value=='\t'&&commandCompletion)
+            {
+                UInt32 old=(UInt32)line.Length;
+                if(TryCompleteCommand(line,ref cursor,ref completionPrefix,ref completionMatches,ref completionIndex))
+                {
+                    historyOffset=-1;renderedLength=(UInt32)line.Length;SyncEditable(line,old,cursor);
+                }
+                continue;
+            }
             if(value==NavigationDelete)
             {
-                if(cursor>=(UInt32)line.Length)continue;UInt32 old=(UInt32)line.Length;for(Int32 i=(Int32)cursor;i<line.Length-1;i++)line[i]=line[i+1];line.Length=line.Length-1;historyOffset=-1;renderedLength=(UInt32)line.Length;SyncEditable(line,old,cursor);continue;
+                if(cursor>=(UInt32)line.Length)continue;UInt32 old=(UInt32)line.Length;for(Int32 i=(Int32)cursor;i<line.Length-1;i++)line[i]=line[i+1];line.Length=line.Length-1;historyOffset=-1;renderedLength=(UInt32)line.Length;ResetCompletion(ref completionPrefix,ref completionMatches,ref completionIndex);SyncEditable(line,old,cursor);continue;
             }
             if(value=='\b')
             {
-                if(cursor==0U)continue;UInt32 old=(UInt32)line.Length;UInt32 remove=cursor-1U;for(Int32 i=(Int32)remove;i<line.Length-1;i++)line[i]=line[i+1];line.Length=line.Length-1;cursor--;historyOffset=-1;renderedLength=(UInt32)line.Length;SyncEditable(line,old,cursor);continue;
+                if(cursor==0U)continue;UInt32 old=(UInt32)line.Length;UInt32 remove=cursor-1U;for(Int32 i=(Int32)remove;i<line.Length-1;i++)line[i]=line[i+1];line.Length=line.Length-1;cursor--;historyOffset=-1;renderedLength=(UInt32)line.Length;ResetCompletion(ref completionPrefix,ref completionMatches,ref completionIndex);SyncEditable(line,old,cursor);continue;
             }
             if(value<32||value>126)continue;
             if(line.Length>=1023)continue;
-            UInt32 oldLength=(UInt32)line.Length;line.Append('\0');for(Int32 i=line.Length-1;i>(Int32)cursor;i--)line[i]=line[i-1];line[(Int32)cursor]=(Char)value;cursor++;historyOffset=-1;renderedLength=(UInt32)line.Length;SyncEditable(line,oldLength,cursor);
+            UInt32 oldLength=(UInt32)line.Length;line.Append('\0');for(Int32 i=line.Length-1;i>(Int32)cursor;i--)line[i]=line[i-1];line[(Int32)cursor]=(Char)value;cursor++;historyOffset=-1;renderedLength=(UInt32)line.Length;ResetCompletion(ref completionPrefix,ref completionMatches,ref completionIndex);SyncEditable(line,oldLength,cursor);
         }
     }
 
-    internal static String ReadLine()=>ReadEditedLine();
+    private static Boolean ScrollPage(Boolean up)=>UserlandSystem.Call(UserlandOperation.Event,up?"console.scroll.page-up":"console.scroll.page-down",null,0UL,null,0UL)>=0L;
+
+    private static void ResetCompletion(ref String prefix,ref String[] matches,ref Int32 index)
+    { prefix=String.Empty;matches=Array.Empty<String>();index=-1; }
+
+    private static Boolean TryCompleteCommand(StringBuilder line,ref UInt32 cursor,ref String prefix,ref String[] matches,ref Int32 index)
+    {
+        Int32 tokenEnd=0;while(tokenEnd<line.Length&&line[tokenEnd]!=' ')tokenEnd++;
+        if((Int32)cursor>tokenEnd)return false;
+        String current=line.ToString().Substring(0,tokenEnd);
+        Boolean currentIsSelection=index>=0&&index<matches.Length&&String.Equals(matches[index],current);
+        if(matches.Length==0||(!currentIsSelection&&!String.Equals(prefix,current)))
+        {
+            prefix=current;matches=FindCommandMatches(current);index=-1;
+        }
+        if(matches.Length==0)return false;
+        index=(index+1)%matches.Length;String replacement=matches[index];
+        String tail=tokenEnd<line.Length?line.ToString().Substring(tokenEnd):String.Empty;
+        line.Clear();line.Append(replacement);line.Append(tail);cursor=(UInt32)replacement.Length;
+        return true;
+    }
+
+    private static String[] FindCommandMatches(String prefix)
+    {
+        String[] roots=FileSystemPaths.GetCommandsPaths();System.Collections.Generic.List<String> matches=new System.Collections.Generic.List<String>();
+        for(Int32 r=0;r<roots.Length;r++)
+        {
+            String root=roots[r];if(String.IsNullOrEmpty(root))continue;
+            String[] entries;try{entries=System.IO.Directory.GetFileSystemEntries(root);}catch(Exception){continue;}
+            for(Int32 i=0;i<entries.Length;i++)
+            {
+                String name=GetCommandName(entries[i]);if(String.IsNullOrEmpty(name)||!StartsWithAsciiIgnoreCase(name,prefix))continue;
+                Boolean duplicate=false;for(Int32 m=0;m<matches.Count;m++)if(CompareAsciiIgnoreCase(matches[m],name)==0){duplicate=true;break;}
+                if(!duplicate)matches.Add(name);
+            }
+        }
+        SortAsciiIgnoreCase(matches);return matches.ToArray();
+    }
+
+    private static String GetCommandName(String path)
+    {
+        if(String.IsNullOrEmpty(path))return String.Empty;Char separator=FileSystemPaths.GetPathSeparator();Int32 start=path.Length-1;while(start>=0&&path[start]!=separator)start--;start++;
+        String name=path.Substring(start);if(name.Length>4&&EndsWithExe(name))name=name.Substring(0,name.Length-4);return name;
+    }
+
+    private static Boolean EndsWithExe(String value)
+    {
+        Int32 n=value.Length;return n>=4&&value[n-4]=='.'&&Upper(value[n-3])=='E'&&Upper(value[n-2])=='X'&&Upper(value[n-1])=='E';
+    }
+
+    private static Boolean StartsWithAsciiIgnoreCase(String value,String prefix)
+    {
+        if(prefix==null||value==null||prefix.Length>value.Length)return false;for(Int32 i=0;i<prefix.Length;i++)if(Upper(value[i])!=Upper(prefix[i]))return false;return true;
+    }
+
+    private static Char Upper(Char value)=>value>='a'&&value<='z'?(Char)(value-('a'-'A')):value;
+
+    private static void SortAsciiIgnoreCase(System.Collections.Generic.List<String> values)
+    {
+        for(Int32 i=1;i<values.Count;i++){String value=values[i];Int32 j=i-1;while(j>=0&&CompareAsciiIgnoreCase(values[j],value)>0){values[j+1]=values[j];j--;}values[j+1]=value;}
+    }
+
+    private static Int32 CompareAsciiIgnoreCase(String left,String right)
+    {
+        Int32 length=left.Length<right.Length?left.Length:right.Length;for(Int32 i=0;i<length;i++){Char a=Upper(left[i]),b=Upper(right[i]);if(a<b)return -1;if(a>b)return 1;}return left.Length<right.Length?-1:left.Length>right.Length?1:0;
+    }
+
+    internal static String ReadLine()=>ReadEditedLine(false);
+    internal static String ReadCommandLine()=>ReadEditedLine(true);
 
     public static Int32 ReadLineAscii(Byte* buffer,UInt32 capacity)
     {
-        if(buffer==null||capacity<2U)return -1;String line=ReadEditedLine();UInt32 length=(UInt32)line.Length;if(length+1U>capacity)length=capacity-1U;for(UInt32 i=0U;i<length;i++){Char c=line[(Int32)i];buffer[i]=(Byte)(c<=255?c:'?');}return (Int32)length;
+        if(buffer==null||capacity<2U)return -1;String line=ReadEditedLine(false);UInt32 length=(UInt32)line.Length;if(length+1U>capacity)length=capacity-1U;for(UInt32 i=0U;i<length;i++){Char c=line[(Int32)i];buffer[i]=(Byte)(c<=255?c:'?');}return (Int32)length;
+    }
+
+    /// <summary>Reads one shell command line with command-name Tab search/completion enabled.</summary>
+    public static Int32 ReadCommandLineAscii(Byte* buffer,UInt32 capacity)
+    {
+        if(buffer==null||capacity<2U)return -1;String line=ReadEditedLine(true);UInt32 length=(UInt32)line.Length;if(length+1U>capacity)length=capacity-1U;for(UInt32 i=0U;i<length;i++){Char c=line[(Int32)i];buffer[i]=(Byte)(c<=255?c:'?');}return (Int32)length;
     }
     public static Boolean Clear()=>UserlandSystem.Call(UserlandOperation.Event,"console.clear",null,0UL,null,0UL)>=0L;
 }

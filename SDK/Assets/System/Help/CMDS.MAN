@@ -28,7 +28,7 @@ SYSTEM AND SERVICE COMMANDS
     capabilities, info, uptime, cpu, memory, drivers, devices
     filesystem, networking, network, storage, graphics, display
     audio, input, time, power, timers, font, buffering, keyboard
-    clear, echo
+    clear, echo, console, fgcolour, bgcolour
 
 KERNEL ADMINISTRATION
     interrupts, scheduler, smp, syscalls, processes

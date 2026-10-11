@@ -1,0 +1,61 @@
+using System;
+using Inu.Userland.Runtime;
+
+namespace Inu.Userland.Commands;
+
+/// <summary>Changes the system text-console background colour.</summary>
+public static class BgColour
+{
+    public static int Main(string[] args)
+    {
+        if (!TryParseRgb(args, out byte red, out byte green, out byte blue))
+        {
+            Console.WriteLine("Usage: bgcolour <red> <green> <blue>");
+            Console.WriteLine("Each colour component must be between 0 and 255.");
+            return 1;
+        }
+
+        return ConsolePresentation.SetBackgroundRgb(red, green, blue) ? 0 : 1;
+    }
+
+    private static bool TryParseRgb(string[] args, out byte red, out byte green, out byte blue)
+    {
+        red = 0;
+        green = 0;
+        blue = 0;
+
+        return args != null &&
+               args.Length == 3 &&
+               TryByte(args[0], out red) &&
+               TryByte(args[1], out green) &&
+               TryByte(args[2], out blue);
+    }
+
+    private static bool TryByte(string text, out byte value)
+    {
+        value = 0;
+        if (String.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        uint parsed = 0;
+        for (int index = 0; index < text.Length; index++)
+        {
+            char character = text[index];
+            if (character < '0' || character > '9')
+            {
+                return false;
+            }
+
+            parsed = (parsed * 10U) + (uint)(character - '0');
+            if (parsed > 255U)
+            {
+                return false;
+            }
+        }
+
+        value = (byte)parsed;
+        return true;
+    }
+}

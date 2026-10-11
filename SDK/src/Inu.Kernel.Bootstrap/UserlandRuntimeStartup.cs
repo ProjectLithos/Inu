@@ -24,6 +24,8 @@ public static unsafe class UserlandRuntimeStartup
     // constants. The syscall dispatcher only requires the string contract itself.
     private const String ConsoleEditableInputMessage = "console.editable.input";
     private const String ConsoleEditableCursorMessage = "console.editable.cursor";
+    private const String ConsoleScrollPageUpMessage = "console.scroll.page-up";
+    private const String ConsoleScrollPageDownMessage = "console.scroll.page-down";
     private const String ConsoleCaretModeMessage = "console.caret.mode";
     private const String ConsoleCaretHeightMessage = "console.caret.height";
     private const String ConsoleCaretActiveMessage = "console.caret.active";
@@ -80,6 +82,8 @@ public static unsafe class UserlandRuntimeStartup
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ConsoleClear,&ConsoleClearEvent)||
            !KernelSystemCalls.RegisterEvent(ConsoleEditableInputMessage,&ConsoleEditableInputEvent)||
            !KernelSystemCalls.RegisterSet(ConsoleEditableCursorMessage,&ConsoleEditableCursorSet)||
+           !KernelSystemCalls.RegisterEvent(ConsoleScrollPageUpMessage,&ConsoleScrollPageUpEvent)||
+           !KernelSystemCalls.RegisterEvent(ConsoleScrollPageDownMessage,&ConsoleScrollPageDownEvent)||
            !KernelSystemCalls.RegisterGet(ConsoleCaretModeMessage,&ConsoleCaretModeGet)||
            !KernelSystemCalls.RegisterSet(ConsoleCaretModeMessage,&ConsoleCaretModeSet)||
            !KernelSystemCalls.RegisterGet(ConsoleCaretHeightMessage,&ConsoleCaretHeightGet)||
@@ -303,6 +307,8 @@ public static unsafe class UserlandRuntimeStartup
 
     private static Int64 ConsoleEditableCursorSet(KernelSystemCallFrame* frame)
         => frame!=null&&frame->NativeMessage.Value0<=1023UL&&frame->NativeMessage.Value1<=frame->NativeMessage.Value0&&KernelConsole.SetEditableInputCursor((UInt32)frame->NativeMessage.Value0,(UInt32)frame->NativeMessage.Value1)?0L:(Int64)KernelSystemCallError.InvalidArgument;
+    private static Int64 ConsoleScrollPageUpEvent(KernelSystemCallFrame* frame)=>KernelConsole.ScrollPageUp()?0L:(Int64)KernelSystemCallError.Fault;
+    private static Int64 ConsoleScrollPageDownEvent(KernelSystemCallFrame* frame)=>KernelConsole.ScrollPageDown()?0L:(Int64)KernelSystemCallError.Fault;
     private static Int64 ConsoleCaretModeGet(KernelSystemCallFrame* frame)=>(Int64)KernelConsole.GetCaretMode();
     private static Int64 ConsoleCaretModeSet(KernelSystemCallFrame* frame)=>frame!=null&&KernelConsole.SetCaretMode((UInt32)frame->NativeMessage.Value0)?0L:(Int64)KernelSystemCallError.InvalidArgument;
     private static Int64 ConsoleCaretHeightGet(KernelSystemCallFrame* frame)=>(Int64)KernelConsole.GetCaretHeightPercent();

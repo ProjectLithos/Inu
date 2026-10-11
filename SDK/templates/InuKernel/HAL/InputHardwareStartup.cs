@@ -6,6 +6,7 @@ using Inu.Kernel.Bootstrap.Startup;
 using Inu.Kernel.Gui;
 #endif
 using Inu.Kernel.TimerDispatch;
+using Inu.Kernel.Time;
 #if INU_KERNELAREA_INPUT
 using Inu.Kernel.Ps2;
 #endif
@@ -24,6 +25,18 @@ public static unsafe class InputHardwareStartup
     private static Boolean _initialized;
 #if INU_KERNELAREA_INPUT
     private static UInt32 _inputTimerHandle;
+    private const UInt64 KeyboardRepeatInitialDelayNanoseconds = 500000000UL;
+    private const UInt64 KeyboardRepeatIntervalNanoseconds = 40000000UL;
+    private static Boolean _ps2RepeatActive;
+    private static Ps2Key _ps2RepeatKey;
+    private static Char _ps2RepeatCharacter;
+    private static UInt64 _ps2RepeatDeadline;
+#if INU_KERNELAREA_USB
+    private static Boolean _usbRepeatActive;
+    private static Byte _usbRepeatUsage;
+    private static Char _usbRepeatCharacter;
+    private static UInt64 _usbRepeatDeadline;
+#endif
 #if INU_KERNELAREA_DRIVERS
     private static UInt64 _keyboardIrqHandle;
     private static UInt64 _mouseIrqHandle;
@@ -113,6 +126,7 @@ public static unsafe class InputHardwareStartup
 #if INU_KERNELAREA_USB
         if (UsbHid.IsInitialized()) ok = UsbHid.Service() & ok;
 #endif
+        ok = ServiceKeyboardRepeat() & ok;
         return ok;
     }
 
@@ -139,12 +153,32 @@ public static unsafe class InputHardwareStartup
     private static Boolean HandlePs2KeyboardEvent(Ps2KeyboardEvent input)
     {
 #if INU_KERNELAREA_GUI
-        if (KernelGui.IsInitialized() && KernelGui.HandleKeyboardEvent(input)) return true;
+        if (KernelGui.IsInitialized() && KernelGui.HandleKeyboardEvent(input))
+        {
+            if (!input.Pressed && _ps2RepeatActive && _ps2RepeatKey == input.Key) _ps2RepeatActive = false;
+            return true;
+        }
 #endif
-        if (!input.Pressed) return true;
+        if (!input.Pressed)
+        {
+            if (_ps2RepeatActive && _ps2RepeatKey == input.Key) _ps2RepeatActive = false;
+            return true;
+        }
+
+        Boolean ok = DispatchPs2Press(input);
+        if (ok && IsPs2Repeatable(input))
+        {
+            _ps2RepeatActive = true;
+            _ps2RepeatKey = input.Key;
+            _ps2RepeatCharacter = input.Character;
+            _ps2RepeatDeadline = NextRepeatDeadline(KeyboardRepeatInitialDelayNanoseconds);
+        }
+        return ok;
+    }
+
+    private static Boolean DispatchPs2Press(Ps2KeyboardEvent input)
+    {
         if (input.Control && input.Key == Ps2Key.C) return UserlandRuntimeStartup.HandleControlC();
-        if (input.Key == Ps2Key.PageUp) return KernelConsole.ScrollPageUp();
-        if (input.Key == Ps2Key.PageDown) return KernelConsole.ScrollPageDown();
         if (TryMapPs2Navigation(input.Key, out Byte navigationCode)) return UserlandRuntimeStartup.QueueInputCode(navigationCode);
         if (input.Control && input.Key == Ps2Key.D1) return KernelConsole.SetFramebufferBufferCount(1U);
         if (input.Control && input.Key == Ps2Key.D2) return KernelConsole.SetFramebufferBufferCount(2U);
@@ -159,7 +193,7 @@ public static unsafe class InputHardwareStartup
     {
         code=0;
         if(key==Ps2Key.Up)code=0x80;else if(key==Ps2Key.Down)code=0x81;else if(key==Ps2Key.Left)code=0x82;else if(key==Ps2Key.Right)code=0x83;
-        else if(key==Ps2Key.Home)code=0x84;else if(key==Ps2Key.End)code=0x85;else if(key==Ps2Key.Delete)code=0x86;
+        else if(key==Ps2Key.Home)code=0x84;else if(key==Ps2Key.End)code=0x85;else if(key==Ps2Key.Delete)code=0x86;else if(key==Ps2Key.PageUp)code=0x87;else if(key==Ps2Key.PageDown)code=0x88;
         return code!=0U;
     }
 
@@ -168,11 +202,31 @@ public static unsafe class InputHardwareStartup
     {
 #if INU_KERNELAREA_GUI
         UInt32 guiModifiers=(UInt32)(((input.Modifiers&0x22U)!=0U?1U:0U)|((input.Modifiers&0x11U)!=0U?2U:0U)|((input.Modifiers&0x44U)!=0U?4U:0U));
-        if (KernelGui.IsInitialized() && KernelGui.HandleKeyboard(input.Usage,input.Character,input.Pressed,guiModifiers)) return true;
+        if (KernelGui.IsInitialized() && KernelGui.HandleKeyboard(input.Usage,input.Character,input.Pressed,guiModifiers))
+        {
+            if (!input.Pressed && _usbRepeatActive && _usbRepeatUsage == input.Usage) _usbRepeatActive = false;
+            return true;
+        }
 #endif
-        if (!input.Pressed) return true;
-        if (input.Usage == 75U) return KernelConsole.ScrollPageUp();
-        if (input.Usage == 78U) return KernelConsole.ScrollPageDown();
+        if (!input.Pressed)
+        {
+            if (_usbRepeatActive && _usbRepeatUsage == input.Usage) _usbRepeatActive = false;
+            return true;
+        }
+
+        Boolean ok = DispatchUsbPress(input);
+        if (ok && IsUsbRepeatable(input))
+        {
+            _usbRepeatActive = true;
+            _usbRepeatUsage = input.Usage;
+            _usbRepeatCharacter = input.Character;
+            _usbRepeatDeadline = NextRepeatDeadline(KeyboardRepeatInitialDelayNanoseconds);
+        }
+        return ok;
+    }
+
+    private static Boolean DispatchUsbPress(UsbHidKeyboardEvent input)
+    {
         if (TryMapUsbNavigation(input.Usage, out Byte navigationCode)) return UserlandRuntimeStartup.QueueInputCode(navigationCode);
         Boolean control = (input.Modifiers & 0x11U) != 0U;
         Boolean alt = (input.Modifiers & 0x44U) != 0U;
@@ -190,10 +244,56 @@ public static unsafe class InputHardwareStartup
     {
         code=0;
         if(usage==82U)code=0x80;else if(usage==81U)code=0x81;else if(usage==80U)code=0x82;else if(usage==79U)code=0x83;
-        else if(usage==74U)code=0x84;else if(usage==77U)code=0x85;else if(usage==76U)code=0x86;
+        else if(usage==74U)code=0x84;else if(usage==77U)code=0x85;else if(usage==76U)code=0x86;else if(usage==75U)code=0x87;else if(usage==78U)code=0x88;
         return code!=0U;
     }
-
 #endif
+
+    private static Boolean IsPs2Repeatable(Ps2KeyboardEvent input)
+    {
+        if (input.Control || input.Alt) return false;
+        return input.Key == Ps2Key.Up || input.Key == Ps2Key.Down || input.Key == Ps2Key.Left || input.Key == Ps2Key.Right ||
+               input.Key == Ps2Key.PageUp || input.Key == Ps2Key.PageDown || IsRepeatableCharacter(input.Character);
+    }
+
+#if INU_KERNELAREA_USB
+    private static Boolean IsUsbRepeatable(UsbHidKeyboardEvent input)
+    {
+        if ((input.Modifiers & 0x55U) != 0U) return false;
+        return input.Usage == 82U || input.Usage == 81U || input.Usage == 80U || input.Usage == 79U ||
+               input.Usage == 75U || input.Usage == 78U || IsRepeatableCharacter(input.Character);
+    }
+#endif
+
+    private static Boolean IsRepeatableCharacter(Char character) => character == '\b' || (character >= ' ' && character <= '~');
+
+    private static UInt64 NextRepeatDeadline(UInt64 delay)
+    {
+        UInt64 now = KernelTime.GetMonotonicNanoseconds();
+        return UInt64.MaxValue - now < delay ? UInt64.MaxValue : now + delay;
+    }
+
+    private static Boolean ServiceKeyboardRepeat()
+    {
+        UInt64 now = KernelTime.GetMonotonicNanoseconds();
+        Boolean ok = true;
+        if (_ps2RepeatActive && now >= _ps2RepeatDeadline)
+        {
+            _ps2RepeatDeadline = NextRepeatDeadline(KeyboardRepeatIntervalNanoseconds);
+            Boolean repeated = TryMapPs2Navigation(_ps2RepeatKey, out Byte code) ?
+                UserlandRuntimeStartup.QueueInputCode(code) : UserlandRuntimeStartup.QueueCharacter(_ps2RepeatCharacter);
+            if (!repeated) { _ps2RepeatActive = false; ok = false; }
+        }
+#if INU_KERNELAREA_USB
+        if (_usbRepeatActive && now >= _usbRepeatDeadline)
+        {
+            _usbRepeatDeadline = NextRepeatDeadline(KeyboardRepeatIntervalNanoseconds);
+            Boolean repeated = TryMapUsbNavigation(_usbRepeatUsage, out Byte code) ?
+                UserlandRuntimeStartup.QueueInputCode(code) : UserlandRuntimeStartup.QueueCharacter(_usbRepeatCharacter);
+            if (!repeated) { _usbRepeatActive = false; ok = false; }
+        }
+#endif
+        return ok;
+    }
 #endif
 }

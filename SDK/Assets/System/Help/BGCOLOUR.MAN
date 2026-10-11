@@ -1,0 +1,10 @@
+BGCOLOUR
+
+Changes the system text-console background colour.
+
+Usage:
+  bgcolour <red> <green> <blue>
+
+Each component is an integer from 0 through 255.
+Example:
+  bgcolour 0 0 64

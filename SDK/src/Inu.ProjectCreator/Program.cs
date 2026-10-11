@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -186,6 +187,7 @@ static int MainEntry(string[] args)
     if (!MaterializeCoderCommands(sdkRoot, output, projectName)) return 1;
     MigrateGeneratedShellSurface(output, projectName);
     RepairMalformedGeneratedStockShellSurface(output, projectName);
+    MigrateStockShellCommandLineInput(output, projectName);
     MigrateGeneratedCommandSurface(output, projectName, sdkRoot);
     HideProvidedWorkspaceFolders(output);
     if (!RefreshCentralKernelConsoleSourcePlan(sdkRoot, output)) return 1;
@@ -399,9 +401,31 @@ static bool MaterializeCanonicalUserlandWorkspace(string sdkRoot, string output)
     }
 
     string destinationRoot = Path.Combine(output, "Userland", "Provided");
+
+    // Stock command implementations have one SDK source of reference:
+    // SDK/src/Userland/Commands/*.cs. They are materialised only into the coder-owned
+    // Userland/<OS>/Commands workspace by MaterializeCoderCommands. Older releases also
+    // copied them into Userland/Provided, which made each command appear twice in Kath.
+    foreach (string legacyCommandTree in new[]
+    {
+        Path.Combine(destinationRoot, "Commands"),
+        Path.Combine(destinationRoot, "SysInfo")
+    })
+    {
+        if (!Directory.Exists(legacyCommandTree)) continue;
+        Directory.Delete(legacyCommandTree, true);
+        Console.WriteLine($"[ OK ] Removed duplicate provided command source tree: {legacyCommandTree}");
+    }
+
     foreach (string source in Directory.EnumerateFiles(sourceRoot, "*", SearchOption.AllDirectories))
     {
         string relative = Path.GetRelativePath(sourceRoot, source);
+        if (relative.StartsWith("Commands" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
+            relative.StartsWith("SysInfo" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        {
+            continue;
+        }
+
         string destination = Path.Combine(destinationRoot, relative);
         if (File.Exists(destination)) continue;
         Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
@@ -462,7 +486,7 @@ static void MigrateGeneratedShellSurface(string output, string projectName)
         $"    public const string Prompt = \"{escapedPrompt}\";\n\n" +
         "    public static void Configure()\n    {\n" + configureBody + "\n    }\n\n" +
         "    public static void Run()\n    {\n        while (true)\n        {\n" +
-        "            Console.Write(Prompt);\n            String input = Console.ReadLine();\n            if (String.IsNullOrWhiteSpace(input)) continue;\n" +
+        "            Console.Write(Prompt);\n            String input = Console.ReadCommandLine();\n            if (String.IsNullOrWhiteSpace(input)) continue;\n" +
         "            Int32 start=0,end=input.Length; while(start<end&&input[start]==' ')start++; while(end>start&&input[end-1]==' ')end--; if(start==end)continue;\n" +
         "            Int32 split=start;while(split<end&&input[split]!=' ')split++;Int32 argumentStart=split;while(argumentStart<end&&input[argumentStart]==' ')argumentStart++;\n" +
         "            String command=input.Substring(start,split-start);String arguments=argumentStart<end?input.Substring(argumentStart,end-argumentStart):String.Empty;\n" +
@@ -528,7 +552,7 @@ static void RepairMalformedGeneratedStockShellSurface(string output, string proj
         $"    public const string Prompt = \"{escapedPrompt}\";\n\n" +
         "    public static void Configure()\n    {\n" + configureBody + "\n    }\n\n" +
         "    public static void Run()\n    {\n        while (true)\n        {\n" +
-        "            Console.Write(Prompt);\n            String input = Console.ReadLine();\n            if (String.IsNullOrWhiteSpace(input)) continue;\n" +
+        "            Console.Write(Prompt);\n            String input = Console.ReadCommandLine();\n            if (String.IsNullOrWhiteSpace(input)) continue;\n" +
         "            Int32 start=0,end=input.Length; while(start<end&&input[start]==' ')start++; while(end>start&&input[end-1]==' ')end--; if(start==end)continue;\n" +
         "            Int32 split=start;while(split<end&&input[split]!=' ')split++;Int32 argumentStart=split;while(argumentStart<end&&input[argumentStart]==' ')argumentStart++;\n" +
         "            String command=input.Substring(start,split-start);String arguments=argumentStart<end?input.Substring(argumentStart,end-argumentStart):String.Empty;\n" +
@@ -577,6 +601,20 @@ static bool HasUnterminatedCSharpLiteral(string source)
     return false;
 }
 
+
+static void MigrateStockShellCommandLineInput(string output, string projectName)
+{
+    string file = Path.Combine(output, "Userland", SafeProjectSegment(projectName), "Shell.cs");
+    if (!File.Exists(file)) return;
+    string source = File.ReadAllText(file);
+    if (!source.Contains("Coder-owned shell behaviour. Configure runs once", StringComparison.Ordinal)) return;
+    const string oldCall = "Console.ReadLine()";
+    if (!source.Contains(oldCall, StringComparison.Ordinal)) return;
+    string migrated = source.Replace(oldCall, "Console.ReadCommandLine()", StringComparison.Ordinal);
+    File.WriteAllText(file, migrated);
+    Console.WriteLine($"[ OK ] Enabled shell Tab command search/completion: {file}");
+}
+
 static void MigrateGeneratedCommandSurface(string output, string projectName, string sdkRoot)
 {
     string root = Path.Combine(output, "Userland", SafeProjectSegment(projectName), "Commands");
@@ -601,17 +639,57 @@ static bool MaterializeCoderCommands(string sdkRoot, string output, string proje
 {
     string sourceRoot = Path.Combine(sdkRoot, "src", "Userland", "Commands");
     if (!Directory.Exists(sourceRoot)) return true;
+
+    // These hashes identify the unmodified 0.0.141 stock command files. They are metadata,
+    // not alternate command implementations. If a generated project still has one of these
+    // exact files, refresh it from the single canonical SDK source so existing projects gain
+    // the normal human-readable formatting. Any coder edit changes the hash and is preserved.
+    Dictionary<string, string> legacyStockHashes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Cd.cs"] = "25D671C1207ACB2AB858A87E23FB6AEAAD0162AB150CC01445E8EF3440CEF06C",
+        ["Clear.cs"] = "15FCB1D9569B4A33ED217C48EEF661359E8FA7917EC9568D60B78D993568656B",
+        ["Console.cs"] = "A1CEA1E0ABD89082113AFCCA8B31A2F48C7AD2E1F7EEB4B43AFBF108A4840FE2",
+        ["Del.cs"] = "0ABAA467AEC82DC507B0588A3DF783BB1625D4E1CDE3F88C454385AA763954C1",
+        ["Dir.cs"] = "7D8135BBAA2C0D451512197340D2700A625F2654382877FE5E6C8E168D1E263D",
+        ["Echo.cs"] = "988AAF7DDE592B559959625119F05BBD87366A26B28EB830C998505E0C54D744",
+        ["Mkdir.cs"] = "DAED009E340552BCEA19D16E762DAB7D05C3AC7FA189D265E0A3E0C75D4452DC",
+        ["Pwd.cs"] = "0CEB763BC00AFD64B25C18D2A4913E330E2B6F9ED787680C69D73F41C32FD3FB",
+        ["Rmdir.cs"] = "631A84C0BA3F0C98042F0C4971AE815281A547CD1899CCCF56BD18EC887521F3",
+        ["SysInfo.cs"] = "A46E39376354D46A3F7974359B54A1179A1CC3D60507684A332B7BFCBDE5D1BE",
+        ["Type.cs"] = "E71FF2D4CD995261E72280B5D9625986F92E324EE30014F004A9F531304CEEE2",
+        ["View.cs"] = "FB1503C0D52615EEB1CF2F48A0D42EDF47DFD446831B8531D9706F0E03DCD5"
+    };
+
     string safeName = SafeProjectSegment(projectName);
     string destinationRoot = Path.Combine(output, "Userland", safeName, "Commands");
     Directory.CreateDirectory(destinationRoot);
+
     foreach (string source in Directory.EnumerateFiles(sourceRoot, "*.cs", SearchOption.TopDirectoryOnly))
     {
-        string destination = Path.Combine(destinationRoot, Path.GetFileName(source));
-        if (File.Exists(destination)) continue;
+        string fileName = Path.GetFileName(source);
+        string destination = Path.Combine(destinationRoot, fileName);
+
+        if (File.Exists(destination))
+        {
+            if (legacyStockHashes.TryGetValue(fileName, out string? legacyHash) &&
+                string.Equals(Sha256File(destination), legacyHash, StringComparison.OrdinalIgnoreCase))
+            {
+                File.Copy(source, destination, true);
+                Console.WriteLine($"[ OK ] Refreshed unmodified stock command from canonical source: {destination}");
+            }
+            continue;
+        }
+
         File.Copy(source, destination, false);
         Console.WriteLine($"[ OK ] Added coder-visible command source: {destination}");
     }
+
     return true;
+}
+
+static string Sha256File(string path)
+{
+    return Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path)));
 }
 
 static void HideProvidedWorkspaceFolders(string output)

@@ -24,7 +24,7 @@ public static unsafe class InuShell
         for(;;)
         {
             if(!UserlandConsole.Write(prompt))return 2;
-            Int32 length=UserlandConsole.ReadLineAscii(line,MaximumLineBytes);if(length<0)return 3;
+            Int32 length=UserlandConsole.ReadCommandLineAscii(line,MaximumLineBytes);if(length<0)return 3;
             UInt32 start=0U,end=(UInt32)length;while(start<end&&line[start]==' ')start++;while(end>start&&line[end-1U]==' ')end--;
             if(start==end)continue;
             UInt32 split=start;while(split<end&&line[split]!=' ')split++;

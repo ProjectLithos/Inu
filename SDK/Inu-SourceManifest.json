@@ -1,5 +1,5 @@
 {
-  "version": "0.1.13",
+  "version": "0.1.14",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -190,6 +190,10 @@
       "sha256": "f88a8d156bd4961f2665dca5b07ecce9def5fe3e7238f0596dfc58d819920027"
     },
     {
+      "path": "Assets/System/Help/BGCOLOUR.MAN",
+      "sha256": "b676b79695602ab58a258c7cc95c2f4547f69386c9e356423902517671b5cc81"
+    },
+    {
       "path": "Assets/System/Help/BUFFER.MAN",
       "sha256": "9c2cd22a6f134df8ed8da3a7b2965ef500156234beed7a89c0282408253fa3c5"
     },
@@ -207,7 +211,7 @@
     },
     {
       "path": "Assets/System/Help/CMDS.MAN",
-      "sha256": "6a3d2fd038ddf303cb25d4e5aa92684afb021b332f88e4bad2e652dd355c44f6"
+      "sha256": "67dc36238acac1e5bce352f68e9cb9283dcef09f2c869a14cb67a1f15d4c591d"
     },
     {
       "path": "Assets/System/Help/CONSOLE.MAN",
@@ -244,6 +248,10 @@
     {
       "path": "Assets/System/Help/ECHO.MAN",
       "sha256": "bcad20f6fb549be49e854a5af587db9c1e849020c810e2965215cf6d377e075c"
+    },
+    {
+      "path": "Assets/System/Help/FGCOLOUR.MAN",
+      "sha256": "bb7056d63e5d7155715d263d9b804a984022624892520ec1683fb3314910311e"
     },
     {
       "path": "Assets/System/Help/FILESYS.MAN",
@@ -815,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "72191554e161327612a07db56fd5644009294057169a788aa1a969ceb57c28ba"
+      "sha256": "a21982cbda607a9449a183a4f26378849cdd9c92519a07d5cd4e47484c372863"
     },
     {
       "path": "Directory.Build.targets",
@@ -923,7 +931,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "019e3931e63f0dc69e6418c80eb0205fe812b80d37c61dc17d4123c5cc257508"
+      "sha256": "cb19614718bb5c4bd2e807de3eb16e3056773dc7d13e6fb027a863b9585d0cd4"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2983,7 +2991,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "0ae06918421c1589cb437f5854a92aadc27cfdd81316ff92313f67421d756a5f"
+      "sha256": "14017bf64f79a6380607cdaeaa08b6feadfeb87f2dce9d9c1005960714d3f27f"
     },
     {
       "path": "Inu-Package.bat",
@@ -3019,7 +3027,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "488e73b68b7a2c83f252eb246af4bddb8be3392891b11c9fc35f6008f226df47"
+      "sha256": "9323a7ca052ab43a8368cfa5d11afa94904961c8d37bbf02604ed4265d16329a"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3531,7 +3539,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "99df54f026a6704ee3f6108a29f5347d228cc860f905b861b66bf9c63ac5d9a7"
+      "sha256": "9ec69b22b311aac173f3bcc27b6ec12129c4ee6f98cbb03f5be50a78a8c50d07"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3855,7 +3863,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/Kernel.ConsoleInput.cs",
-      "sha256": "f1f929145a9b771949b1e0485e8fbe13bc64e71ae45463166813daf2d5031559"
+      "sha256": "112e98407f68c21e154628314033735e2227dbe859d62458b217894c8f0a7f3e"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/Kernel.cs",
@@ -3887,7 +3895,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-      "sha256": "aa515ff61a1523276a31aa7526e38f22378a35f013039d00365270a84891c597"
+      "sha256": "369e80e7ccf93de23ed893756c7f4078128bee2bcbaeb8116f1831d8e4270b8f"
     },
     {
       "path": "src/Inu.Kernel.Console/BitmapFont.cs",
@@ -5579,7 +5587,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "8dc637eaaf090024438c70eab3e044989f03834f22fa7c00df6ce26e65acd62c"
+      "sha256": "6bf521214ca173938a0ad787a4c3b6336ae85a865a2aa4cc141c47470852ad96"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",
@@ -5727,7 +5735,7 @@
     },
     {
       "path": "src/Inu.Userland.Runtime/Console.cs",
-      "sha256": "84ab8baf3c39c69cedc9755ea84f99cf1703572a56368ccaa1138c1b5944f50d"
+      "sha256": "31ce2fb7e31bea2589cc5e81e0069b60ceebfa023303de2066a979881e7c8a0f"
     },
     {
       "path": "src/Inu.Userland.Runtime/FileSystemPaths.cs",
@@ -5755,7 +5763,7 @@
     },
     {
       "path": "src/Inu.Userland.Runtime/UserlandRuntime.cs",
-      "sha256": "9ebddfb1f64a5a6854da3e13794ee9e78bbea7303d2610852575708ca404be43"
+      "sha256": "be6eaa1de4eeccaacab3b4e3e978c84de9167fc49d0121548e41d9599f159438"
     },
     {
       "path": "src/Inu.Userland.RuntimeSupport/Inu.Userland.RuntimeSupport.csproj",
@@ -5776,6 +5784,10 @@
     {
       "path": "src/Inu.UserlandCompiler/UserlandStageCache.cs",
       "sha256": "28c2fcd5df9d7cd24b6de11b77beae54d48affb836527f4333c30b235a3cc800"
+    },
+    {
+      "path": "src/Userland/Commands/BgColour.cs",
+      "sha256": "91b1362c27c3ea567232b6a5e12978685f09b7319ac89ae6837d1d1baee945e7"
     },
     {
       "path": "src/Userland/Commands/Cd.cs",
@@ -5800,6 +5812,10 @@
     {
       "path": "src/Userland/Commands/Echo.cs",
       "sha256": "dcf075a7432139d8eb5446cc812bb97ef3d7def7ae43e536c2fc4564ac99ef22"
+    },
+    {
+      "path": "src/Userland/Commands/FgColour.cs",
+      "sha256": "118a95af7cf688454b12ff5fe0cfbcd21751da2a14d284b3edd6e132fd92bb18"
     },
     {
       "path": "src/Userland/Commands/Mkdir.cs",
@@ -5919,7 +5935,7 @@
     },
     {
       "path": "src/Userland/Shell/InuShell.cs",
-      "sha256": "18911cc30a81a03e22beb7e7d4140476dc39a378e3eb5be0fa7e62d86201a21e"
+      "sha256": "139e1cc73610f52d3885697b7cc6f411c9c7026a25b6767d4af9b596d4f47ac0"
     },
     {
       "path": "templates/InuKernel/Boot/AcpiStartup.cs",
@@ -5995,7 +6011,7 @@
     },
     {
       "path": "templates/InuKernel/HAL/InputHardwareStartup.cs",
-      "sha256": "b402e22e16afefb1877a935dc69db066c9b5d3cdc2deb2d57b2d67fff4f57797"
+      "sha256": "cd1a4743f4a8699918bf93809c1a2b2aed717235e1ff07996a98ae62dd5d4c60"
     },
     {
       "path": "templates/InuKernel/HAL/NetworkingHardwareStartup.cs",

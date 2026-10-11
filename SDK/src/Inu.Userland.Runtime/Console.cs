@@ -56,6 +56,9 @@ public static class Console
     /// <summary><inu.api>Reads one editable line from the console and returns it as a managed string.</inu.api></summary>
     public static String ReadLine() => UserlandConsole.ReadLine();
 
+    /// <summary><inu.api>Reads one shell command line with command-name Tab search/completion enabled.</inu.api></summary>
+    public static String ReadCommandLine() => UserlandConsole.ReadCommandLine();
+
     /// <summary><inu.api>Clears all visible text from the current text console.</inu.api></summary>
     public static void Clear() => UserlandConsole.Clear();
 }
