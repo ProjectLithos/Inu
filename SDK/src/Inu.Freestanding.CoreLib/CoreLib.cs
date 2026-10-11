@@ -3720,8 +3720,37 @@ namespace System
         }
         public T GetValueOrDefault() => value;
         public T GetValueOrDefault(T defaultValue) => hasValue ? value : defaultValue;
+
+        public override Boolean Equals(Object other)
+        {
+            if (!hasValue) return Object.ReferenceEquals(other, null);
+            if (Object.ReferenceEquals(other, null)) return false;
+            return value.Equals((T)other);
+        }
+
+        public override Int32 GetHashCode() => hasValue ? value.GetHashCode() : 0;
+        public override String ToString() => hasValue ? value.ToString() : String.Empty;
+
         public static implicit operator Nullable<T>(T value) => new Nullable<T>(value);
         public static explicit operator T(Nullable<T> value) => value.Value;
+    }
+
+    /// <summary><inu.api/>Nullable comparison and equality helpers matching the normal System.Nullable surface.</summary>
+    public static class Nullable
+    {
+        public static Int32 Compare<T>(Nullable<T> left, Nullable<T> right) where T : struct
+        {
+            if (!left.HasValue) return right.HasValue ? -1 : 0;
+            if (!right.HasValue) return 1;
+            return Collections.Generic.Comparer<T>.Default.Compare(left.GetValueOrDefault(), right.GetValueOrDefault());
+        }
+
+        public static Boolean Equals<T>(Nullable<T> left, Nullable<T> right) where T : struct
+        {
+            if (!left.HasValue) return !right.HasValue;
+            if (!right.HasValue) return false;
+            return Collections.Generic.EqualityComparer<T>.Default.Equals(left.GetValueOrDefault(), right.GetValueOrDefault());
+        }
     }
 
     namespace Reflection
@@ -5763,6 +5792,7 @@ namespace System.Collections.Generic
                 Object right = y;
                 if (Object.ReferenceEquals(left, right)) return true;
                 if (Object.ReferenceEquals(left, null) || Object.ReferenceEquals(right, null)) return false;
+                if (left is IEquatable<T>) return ((IEquatable<T>)left).Equals(y);
                 return left.Equals(right);
             }
 

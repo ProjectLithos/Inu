@@ -15,6 +15,16 @@ public static unsafe class ManagedRuntimeConformance
         public Int32 Value;
     }
 
+    private sealed class ComparableProbe : IComparable<ComparableProbe>, IEquatable<ComparableProbe>
+    {
+        internal ComparableProbe(Int32 value) { Value = value; }
+        internal Int32 Value;
+        public Int32 CompareTo(ComparableProbe other) => Object.ReferenceEquals(other, null) ? 1 : Value.CompareTo(other.Value);
+        public Boolean Equals(ComparableProbe other) => !Object.ReferenceEquals(other, null) && Value == other.Value;
+        public override Boolean Equals(Object obj) => obj is ComparableProbe && Equals((ComparableProbe)obj);
+        public override Int32 GetHashCode() => Value;
+    }
+
     private sealed class ReferenceHolder
     {
         public Probe Value;
@@ -1410,15 +1420,32 @@ public static unsafe class ManagedRuntimeConformance
             && readOnlyMemory.Span[1] == 25 && memoryCopy.Length == 2 && memoryCopy[0] == 25 && memoryCopy[1] == 30
             && Memory<Int32>.Empty.IsEmpty && ReadOnlyMemory<Int32>.Empty.IsEmpty && nullMemory.IsEmpty, ref passed, ref failed);
 
-        // 38 Generic comparison/equality consistency.
+        // 38 Generic comparison/equality consistency, including nullable and custom typed contracts.
         Comparer<Int32> intOrdering = Comparer<Int32>.Default;
         Comparer<Int64> longOrdering = Comparer<Int64>.Default;
+        Comparer<String> stringOrdering = Comparer<String>.Default;
+        Comparer<ComparableProbe> probeOrdering = Comparer<ComparableProbe>.Default;
         EqualityComparer<UInt32> uintEquality = EqualityComparer<UInt32>.Default;
         EqualityComparer<Int64> longEquality = EqualityComparer<Int64>.Default;
+        EqualityComparer<ComparableProbe> probeEquality = EqualityComparer<ComparableProbe>.Default;
+        EqualityComparer<Nullable<Int32>> nullableEquality = EqualityComparer<Nullable<Int32>>.Default;
+        Nullable<Int32> absentInt = default;
+        Nullable<Int32> fiveInt = new Nullable<Int32>(5);
+        Nullable<Int32> fiveAgainInt = new Nullable<Int32>(5);
+        Nullable<Int32> sixInt = new Nullable<Int32>(6);
+        ComparableProbe lowProbe = new ComparableProbe(3);
+        ComparableProbe highProbe = new ComparableProbe(8);
+        ComparableProbe lowAgainProbe = new ComparableProbe(3);
         Record(intOrdering.Compare(2, 7) < 0 && intOrdering.Compare(7, 2) > 0 && intOrdering.Compare(4, 4) == 0
             && longOrdering.Compare(9L, 10L) < 0
+            && stringOrdering.Compare(null, "a") < 0 && stringOrdering.Compare("a", null) > 0 && stringOrdering.Compare(null, null) == 0
+            && probeOrdering.Compare(lowProbe, highProbe) < 0 && probeOrdering.Compare(highProbe, lowProbe) > 0 && probeOrdering.Compare(lowProbe, lowAgainProbe) == 0
             && uintEquality.Equals(99U, 99U) && !uintEquality.Equals(99U, 100U)
-            && longEquality.Equals(-5L, -5L) && !longEquality.Equals(-5L, 5L), ref passed, ref failed);
+            && longEquality.Equals(-5L, -5L) && !longEquality.Equals(-5L, 5L)
+            && probeEquality.Equals(lowProbe, lowAgainProbe) && !probeEquality.Equals(lowProbe, highProbe)
+            && nullableEquality.Equals(absentInt, default) && nullableEquality.Equals(fiveInt, fiveAgainInt) && !nullableEquality.Equals(fiveInt, sixInt)
+            && Nullable.Compare(absentInt, fiveInt) < 0 && Nullable.Compare(fiveInt, absentInt) > 0 && Nullable.Compare(fiveInt, fiveAgainInt) == 0
+            && Nullable.Equals(absentInt, default) && Nullable.Equals(fiveInt, fiveAgainInt) && !Nullable.Equals(fiveInt, sixInt), ref passed, ref failed);
 
         UInt32 exercised = (passed + failed) - before;
         Record(exercised == (UInt32)BclTargetItemCount, ref passed, ref failed);

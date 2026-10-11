@@ -13,6 +13,16 @@ internal static class Program
 
     private sealed class Probe { }
 
+    private sealed class ComparableProbe : IComparable<ComparableProbe>, IEquatable<ComparableProbe>
+    {
+        internal ComparableProbe(int value) => Value = value;
+        internal int Value { get; }
+        public int CompareTo(ComparableProbe? other) => other is null ? 1 : Value.CompareTo(other.Value);
+        public bool Equals(ComparableProbe? other) => other is not null && Value == other.Value;
+        public override bool Equals(object? obj) => obj is ComparableProbe other && Equals(other);
+        public override int GetHashCode() => Value;
+    }
+
     private static int Main()
     {
         Console.WriteLine($"[INFO] Reference BCL target: {TargetName} ({TargetItemCount} items)");
@@ -920,12 +930,30 @@ internal static class Program
     {
         Comparer<int> ints = Comparer<int>.Default;
         Comparer<long> longs = Comparer<long>.Default;
+        Comparer<string> strings = Comparer<string>.Default;
+        Comparer<ComparableProbe> probes = Comparer<ComparableProbe>.Default;
         EqualityComparer<uint> uints = EqualityComparer<uint>.Default;
         EqualityComparer<long> longEquality = EqualityComparer<long>.Default;
+        EqualityComparer<ComparableProbe> probeEquality = EqualityComparer<ComparableProbe>.Default;
+        EqualityComparer<int?> nullableEquality = EqualityComparer<int?>.Default;
+        int? absent = null;
+        int? five = 5;
+        int? fiveAgain = 5;
+        int? six = 6;
+        var low = new ComparableProbe(3);
+        var high = new ComparableProbe(8);
+        var lowAgain = new ComparableProbe(3);
+
         return ints.Compare(2, 7) < 0 && ints.Compare(7, 2) > 0 && ints.Compare(4, 4) == 0
             && longs.Compare(9L, 10L) < 0
+            && strings.Compare(null, "a") < 0 && strings.Compare("a", null) > 0 && strings.Compare(null, null) == 0
+            && probes.Compare(low, high) < 0 && probes.Compare(high, low) > 0 && probes.Compare(low, lowAgain) == 0
             && uints.Equals(99U, 99U) && !uints.Equals(99U, 100U)
-            && longEquality.Equals(-5L, -5L) && !longEquality.Equals(-5L, 5L);
+            && longEquality.Equals(-5L, -5L) && !longEquality.Equals(-5L, 5L)
+            && probeEquality.Equals(low, lowAgain) && !probeEquality.Equals(low, high)
+            && nullableEquality.Equals(absent, null) && nullableEquality.Equals(five, fiveAgain) && !nullableEquality.Equals(five, six)
+            && Nullable.Compare(absent, five) < 0 && Nullable.Compare(five, absent) > 0 && Nullable.Compare(five, fiveAgain) == 0
+            && Nullable.Equals(absent, null) && Nullable.Equals(five, fiveAgain) && !Nullable.Equals(five, six);
     }
 
 }
