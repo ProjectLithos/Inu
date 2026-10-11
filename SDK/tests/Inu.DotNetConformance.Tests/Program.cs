@@ -23,6 +23,16 @@ internal static class Program
         public override int GetHashCode() => Value;
     }
 
+    private delegate int CustomDelegate(int value);
+
+    private sealed class DelegateTarget
+    {
+        private readonly int _offset;
+        internal DelegateTarget(int offset) => _offset = offset;
+        internal int AddOffset(int value) => value + _offset;
+        internal static int Double(int value) => value * 2;
+    }
+
     private static int Main()
     {
         Console.WriteLine($"[INFO] Reference BCL target: {TargetName} ({TargetItemCount} items)");
@@ -871,19 +881,57 @@ internal static class Program
     private static bool TestDelegates()
     {
         int observed = 0;
-        Action<int> action = value => observed = value;
-        Action<int, int> add = (a, b) => observed = a + b;
-        Func<int, int> twice = value => value * 2;
-        Func<int, int, int> sum = (a, b) => a + b;
-        Func<int> constant = () => 11;
+        Action action0 = () => observed = 1;
+        Action<int> action1 = value => observed = value;
+        Action<int, int> action2 = (a, b) => observed = a + b;
+        Action<int, int, int, int, int> action5 = (a, b, c, d, e) => observed = a + b + c + d + e;
+        Func<int> func0 = () => 11;
+        Func<int, int> func1 = value => value * 2;
+        Func<int, int, int> func2 = (a, b) => a + b;
+        Func<int, int, int, int, int, int> func5 = (a, b, c, d, e) => a + b + c + d + e;
         Predicate<int> positive = value => value > 0;
         Comparison<int> compare = (a, b) => a.CompareTo(b);
         Converter<int, long> widen = value => value;
-        action(9);
-        bool first = observed == 9 && twice(6) == 12 && constant() == 11;
-        add(7, 8);
-        return first && observed == 15 && sum(4, 5) == 9
+
+        action0();
+        bool standard = observed == 1 && func0() == 11;
+        action1(9);
+        standard &= observed == 9 && func1(6) == 12;
+        action2(7, 8);
+        standard &= observed == 15 && func2(4, 5) == 9;
+        action5(1, 2, 3, 4, 5);
+        standard &= observed == 15 && func5(1, 2, 3, 4, 5) == 15
             && positive(1) && !positive(-1) && compare(3, 7) < 0 && widen(44) == 44L;
+
+        DelegateTarget target = new DelegateTarget(10);
+        DelegateTarget otherTarget = new DelegateTarget(10);
+        CustomDelegate instanceA = target.AddOffset;
+        CustomDelegate instanceB = target.AddOffset;
+        CustomDelegate instanceOther = otherTarget.AddOffset;
+        CustomDelegate staticA = DelegateTarget.Double;
+        CustomDelegate staticB = DelegateTarget.Double;
+        bool identity = instanceA(5) == 15 && staticA(6) == 12
+            && instanceA == instanceB && instanceA.Equals(instanceB)
+            && instanceA != instanceOther && staticA == staticB
+            && ReferenceEquals(instanceA.Target, target) && staticA.Target is null;
+
+        int order = 0;
+        Action first = () => order = order * 10 + 1;
+        Action second = () => order = order * 10 + 2;
+        Action third = () => order = order * 10 + 3;
+        Action multicast = first + second + third;
+        multicast();
+        Delegate[] invocationList = multicast.GetInvocationList();
+        bool multicastOk = order == 123 && invocationList.Length == 3
+            && invocationList[0].Equals(first) && invocationList[1].Equals(second) && invocationList[2].Equals(third);
+        order = 0;
+        Action removed = multicast - second;
+        removed();
+        multicastOk &= order == 13 && removed.GetInvocationList().Length == 2;
+        Action multicastCopy = first + second + third;
+        multicastOk &= multicast == multicastCopy && multicast != removed;
+
+        return standard && identity && multicastOk;
     }
 
     private static bool TestSpan()

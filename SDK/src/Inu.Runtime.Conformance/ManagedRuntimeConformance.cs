@@ -617,11 +617,27 @@ public static unsafe class ManagedRuntimeConformance
         return failed == 0U;
     }
 
+    private delegate Int32 BclCustomDelegate(Int32 value);
+
+    private sealed class BclDelegateTarget
+    {
+        private readonly Int32 _offset;
+        public BclDelegateTarget(Int32 offset) { _offset = offset; }
+        public Int32 AddOffset(Int32 value) => value + _offset;
+        public static Int32 Double(Int32 value) => value * 2;
+    }
+
     private static Int32 _bclDelegateObserved;
+    private static void BclNoArgs() => _bclDelegateObserved = 1;
     private static void BclCapture(Int32 value) => _bclDelegateObserved = value;
     private static void BclAddCapture(Int32 left, Int32 right) => _bclDelegateObserved = left + right;
+    private static void BclCaptureFive(Int32 a, Int32 b, Int32 c, Int32 d, Int32 e) => _bclDelegateObserved = a + b + c + d + e;
+    private static void BclStepOne() => _bclDelegateObserved = _bclDelegateObserved * 10 + 1;
+    private static void BclStepTwo() => _bclDelegateObserved = _bclDelegateObserved * 10 + 2;
+    private static void BclStepThree() => _bclDelegateObserved = _bclDelegateObserved * 10 + 3;
     private static Int32 BclDouble(Int32 value) => value * 2;
     private static Int32 BclSum(Int32 left, Int32 right) => left + right;
+    private static Int32 BclSumFive(Int32 a, Int32 b, Int32 c, Int32 d, Int32 e) => a + b + c + d + e;
     private static Int32 BclConstant() => 11;
     private static Boolean BclPositive(Int32 value) => value > 0;
 
@@ -1370,21 +1386,58 @@ public static unsafe class ManagedRuntimeConformance
             && ((IComparable<Char>)(Char)'b').CompareTo('a') > 0
             && ((IEquatable<Boolean>)(Boolean)true).Equals(true), ref passed, ref failed);
 
-        // 35 Delegate family: multiple arities plus Predicate/Comparison/Converter.
+        // 35 Delegate family: Action/Func arities, custom delegates, multicast, equality, and targets.
         _bclDelegateObserved = 0;
+        Action bclAction0 = BclNoArgs;
         Action<Int32> bclAction = BclCapture;
         Action<Int32, Int32> bclAdd = BclAddCapture;
+        Action<Int32, Int32, Int32, Int32, Int32> bclActionFive = BclCaptureFive;
         Func<Int32, Int32> bclTwice = BclDouble;
         Func<Int32, Int32, Int32> bclSum = BclSum;
+        Func<Int32, Int32, Int32, Int32, Int32, Int32> bclSumFive = BclSumFive;
         Func<Int32> bclConstant = BclConstant;
         Predicate<Int32> bclPositive = BclPositive;
         Comparison<Int32> bclCompare = BclCompare;
         Converter<Int32, Int64> bclWiden = BclWiden;
+        bclAction0();
+        Boolean delegateBasics = _bclDelegateObserved == 1 && bclConstant() == 11;
         bclAction(9);
-        Boolean firstDelegatePass = _bclDelegateObserved == 9 && bclTwice(6) == 12 && bclConstant() == 11;
+        delegateBasics = delegateBasics && _bclDelegateObserved == 9 && bclTwice(6) == 12;
         bclAdd(7, 8);
-        Record(firstDelegatePass && _bclDelegateObserved == 15 && bclSum(4, 5) == 9
-            && bclPositive(1) && !bclPositive(-1) && bclCompare(3, 7) < 0 && bclWiden(44) == 44L, ref passed, ref failed);
+        delegateBasics = delegateBasics && _bclDelegateObserved == 15 && bclSum(4, 5) == 9;
+        bclActionFive(1, 2, 3, 4, 5);
+        delegateBasics = delegateBasics && _bclDelegateObserved == 15 && bclSumFive(1, 2, 3, 4, 5) == 15
+            && bclPositive(1) && !bclPositive(-1) && bclCompare(3, 7) < 0 && bclWiden(44) == 44L;
+
+        BclDelegateTarget bclTarget = new BclDelegateTarget(10);
+        BclDelegateTarget bclOtherTarget = new BclDelegateTarget(10);
+        BclCustomDelegate bclInstanceA = bclTarget.AddOffset;
+        BclCustomDelegate bclInstanceB = bclTarget.AddOffset;
+        BclCustomDelegate bclInstanceOther = bclOtherTarget.AddOffset;
+        BclCustomDelegate bclStaticA = BclDelegateTarget.Double;
+        BclCustomDelegate bclStaticB = BclDelegateTarget.Double;
+        Boolean delegateIdentity = bclInstanceA(5) == 15 && bclStaticA(6) == 12
+            && bclInstanceA == bclInstanceB && bclInstanceA.Equals(bclInstanceB)
+            && bclInstanceA != bclInstanceOther && bclStaticA == bclStaticB
+            && Object.ReferenceEquals(bclInstanceA.Target, bclTarget) && Object.ReferenceEquals(bclStaticA.Target, null);
+
+        Action bclFirst = BclStepOne;
+        Action bclSecond = BclStepTwo;
+        Action bclThird = BclStepThree;
+        Action bclMulticast = bclFirst + bclSecond + bclThird;
+        _bclDelegateObserved = 0;
+        bclMulticast();
+        Delegate[] bclInvocationList = bclMulticast.GetInvocationList();
+        Boolean multicastOk = _bclDelegateObserved == 123 && bclInvocationList.Length == 3
+            && bclInvocationList[0].Equals(bclFirst) && bclInvocationList[1].Equals(bclSecond) && bclInvocationList[2].Equals(bclThird);
+        Action bclRemoved = bclMulticast - bclSecond;
+        _bclDelegateObserved = 0;
+        bclRemoved();
+        multicastOk = multicastOk && _bclDelegateObserved == 13 && bclRemoved.GetInvocationList().Length == 2;
+        Action bclMulticastCopy = bclFirst + bclSecond + bclThird;
+        multicastOk = multicastOk && bclMulticast == bclMulticastCopy && bclMulticast != bclRemoved;
+
+        Record(delegateBasics && delegateIdentity && multicastOk, ref passed, ref failed);
 
         // 36 System.Span<T> / ReadOnlySpan<T>: empty/null, fill, slicing and overlap-safe copy.
         Int32[] spanValues = new Int32[] { 1, 2, 3, 4, 5 };

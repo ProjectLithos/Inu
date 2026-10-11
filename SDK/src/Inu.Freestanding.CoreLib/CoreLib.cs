@@ -3161,15 +3161,15 @@ namespace System
     #pragma warning restore CS0660, CS0661
     // CONTRACT with .NET 10 NativeAOT System.Private.CoreLib. ILC recognizes
     // both this four-field order and the initializer method names below.
-    public class Delegate
+    public unsafe class Delegate
     {
         private Object _firstParameter;
         private Object _helperObject;
         private nint _extraFunctionPointerOrData;
         private IntPtr _functionPointer;
 
-        // NativeAOT's generated multicast thunk looks this nested type up by
-        // name. It has no impact on a single-cast delegate's object layout.
+        // NativeAOT's multicast invoke thunk identifies its own invocation-list
+        // arrays through this wrapper rather than exposing a raw Delegate[].
         private struct Wrapper
         {
             public Wrapper(Delegate value) { Value = value; }
@@ -3185,6 +3185,12 @@ namespace System
 
         private protected virtual IntPtr GetThunk(Int32 whichThunk) => default;
 
+#pragma warning disable CS0626
+        [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        [Runtime.RuntimeImport("*", "RhpNewFast")]
+        private static extern void* RhpNewFast(global::Internal.Runtime.MethodTable* methodTable);
+#pragma warning restore CS0626
+
         private void InitializeClosedInstance(Object firstParameter, IntPtr functionPointer)
         {
             if (Object.ReferenceEquals(firstParameter, null)) throw new ArgumentException();
@@ -3193,12 +3199,34 @@ namespace System
         }
 
         private void InitializeClosedInstanceSlow(Object firstParameter, IntPtr functionPointer)
-            => InitializeClosedInstance(firstParameter, functionPointer);
+        {
+            if (Object.ReferenceEquals(firstParameter, null)) throw new ArgumentException();
+            if (!global::Internal.Runtime.CompilerServices.FunctionPointerOps.IsGenericMethodPointer(functionPointer))
+            {
+                _functionPointer = functionPointer;
+                _firstParameter = firstParameter;
+                return;
+            }
+
+            _firstParameter = this;
+            _functionPointer = GetThunk(ClosedInstanceThunkOverGenericMethod);
+            _extraFunctionPointerOrData = functionPointer;
+            _helperObject = firstParameter;
+        }
 
         private void InitializeClosedInstanceWithoutNullCheck(Object firstParameter, IntPtr functionPointer)
         {
-            _functionPointer = functionPointer;
-            _firstParameter = firstParameter;
+            if (!global::Internal.Runtime.CompilerServices.FunctionPointerOps.IsGenericMethodPointer(functionPointer))
+            {
+                _functionPointer = functionPointer;
+                _firstParameter = firstParameter;
+                return;
+            }
+
+            _firstParameter = this;
+            _functionPointer = GetThunk(ClosedInstanceThunkOverGenericMethod);
+            _extraFunctionPointerOrData = functionPointer;
+            _helperObject = firstParameter;
         }
 
         private void InitializeClosedStaticThunk(Object firstParameter, IntPtr functionPointer, IntPtr functionPointerThunk)
@@ -3222,6 +3250,193 @@ namespace System
             _functionPointer = functionPointerThunk;
             _extraFunctionPointerOrData = functionPointer;
         }
+
+        private static Boolean InternalEqualTypes(Delegate first, Delegate second)
+            => Runtime.CompilerServices.RuntimeHelpers.GetMethodTable(first) == Runtime.CompilerServices.RuntimeHelpers.GetMethodTable(second);
+
+        private Delegate NewMulticastDelegate(Wrapper[] invocationList, Int32 invocationCount, Boolean thisIsMulticastAlready = false)
+        {
+            void* address = RhpNewFast(Runtime.CompilerServices.RuntimeHelpers.GetMethodTable(this));
+            if (address == null) throw new OutOfMemoryException();
+            UInt64 raw = (UInt64)(nuint)address;
+            Delegate result = Runtime.CompilerServices.Unsafe.As<UInt64, Delegate>(ref raw);
+            result._functionPointer = thisIsMulticastAlready ? _functionPointer : GetThunk(MulticastThunk);
+            if (result._functionPointer == IntPtr.Zero) throw new InvalidOperationException();
+            result._firstParameter = result;
+            result._helperObject = invocationList;
+            result._extraFunctionPointerOrData = (nint)invocationCount;
+            return result;
+        }
+
+        private static Wrapper[] DeleteFromInvocationList(Wrapper[] invocationList, Int32 invocationCount, Int32 deleteIndex, Int32 deleteCount)
+        {
+            Int32 newCount = invocationCount - deleteCount;
+            Wrapper[] result = new Wrapper[newCount];
+            for (Int32 i = 0; i < deleteIndex; i++) result[i] = invocationList[i];
+            for (Int32 i = deleteIndex + deleteCount; i < invocationCount; i++) result[i - deleteCount] = invocationList[i];
+            return result;
+        }
+
+        private static Boolean EqualInvocationLists(Wrapper[] source, Wrapper[] value, Int32 start, Int32 count)
+        {
+            for (Int32 i = 0; i < count; i++)
+            {
+                if (!source[start + i].Value.Equals(value[i].Value)) return false;
+            }
+            return true;
+        }
+
+        protected virtual Delegate CombineImpl(Delegate follow)
+        {
+            if (Object.ReferenceEquals(follow, null)) return this;
+            if (!InternalEqualTypes(this, follow)) throw new ArgumentException();
+
+            Wrapper[] followList = follow._helperObject as Wrapper[];
+            Int32 followCount = Object.ReferenceEquals(followList, null) ? 1 : (Int32)follow._extraFunctionPointerOrData;
+            Wrapper[] currentList = _helperObject as Wrapper[];
+            Int32 currentCount = Object.ReferenceEquals(currentList, null) ? 1 : (Int32)_extraFunctionPointerOrData;
+            Wrapper[] result = new Wrapper[currentCount + followCount];
+
+            if (Object.ReferenceEquals(currentList, null)) result[0] = new Wrapper(this);
+            else for (Int32 i = 0; i < currentCount; i++) result[i] = currentList[i];
+
+            if (Object.ReferenceEquals(followList, null)) result[currentCount] = new Wrapper(follow);
+            else for (Int32 i = 0; i < followCount; i++) result[currentCount + i] = followList[i];
+
+            return NewMulticastDelegate(result, result.Length, !Object.ReferenceEquals(currentList, null));
+        }
+
+        protected virtual Delegate RemoveImpl(Delegate value)
+        {
+            if (Object.ReferenceEquals(value, null)) return this;
+            if (!InternalEqualTypes(this, value)) return this;
+
+            Wrapper[] invocationList = _helperObject as Wrapper[];
+            Wrapper[] valueList = value._helperObject as Wrapper[];
+            if (Object.ReferenceEquals(invocationList, null)) return Equals(value) ? null : this;
+
+            Int32 invocationCount = (Int32)_extraFunctionPointerOrData;
+            if (Object.ReferenceEquals(valueList, null))
+            {
+                for (Int32 i = invocationCount - 1; i >= 0; i--)
+                {
+                    if (!invocationList[i].Value.Equals(value)) continue;
+                    if (invocationCount == 2) return invocationList[1 - i].Value;
+                    Wrapper[] result = DeleteFromInvocationList(invocationList, invocationCount, i, 1);
+                    return NewMulticastDelegate(result, invocationCount - 1, true);
+                }
+                return this;
+            }
+
+            Int32 valueCount = (Int32)value._extraFunctionPointerOrData;
+            for (Int32 i = invocationCount - valueCount; i >= 0; i--)
+            {
+                if (!EqualInvocationLists(invocationList, valueList, i, valueCount)) continue;
+                Int32 remaining = invocationCount - valueCount;
+                if (remaining == 0) return null;
+                if (remaining == 1) return invocationList[i != 0 ? 0 : invocationCount - 1].Value;
+                Wrapper[] result = DeleteFromInvocationList(invocationList, invocationCount, i, valueCount);
+                return NewMulticastDelegate(result, remaining, true);
+            }
+            return this;
+        }
+
+        public static Delegate Combine(Delegate first, Delegate second)
+        {
+            if (Object.ReferenceEquals(first, null)) return second;
+            return first.CombineImpl(second);
+        }
+
+        public static Delegate Remove(Delegate source, Delegate value)
+        {
+            if (Object.ReferenceEquals(source, null)) return null;
+            return source.RemoveImpl(value);
+        }
+
+        public Delegate[] GetInvocationList()
+        {
+            Wrapper[] invocationList = _helperObject as Wrapper[];
+            if (Object.ReferenceEquals(invocationList, null)) return new Delegate[] { this };
+            Int32 count = (Int32)_extraFunctionPointerOrData;
+            Delegate[] result = new Delegate[count];
+            for (Int32 i = 0; i < count; i++) result[i] = invocationList[i].Value;
+            return result;
+        }
+
+        public Object Target
+        {
+            get
+            {
+                Wrapper[] invocationList = _helperObject as Wrapper[];
+                if (!Object.ReferenceEquals(invocationList, null))
+                {
+                    Int32 count = (Int32)_extraFunctionPointerOrData;
+                    return invocationList[count - 1].Value.Target;
+                }
+
+                if (_functionPointer == GetThunk(ClosedStaticThunk) ||
+                    _functionPointer == GetThunk(ClosedInstanceThunkOverGenericMethod) ||
+                    _functionPointer == GetThunk(ObjectArrayThunk)) return _helperObject;
+                if (Object.ReferenceEquals(_firstParameter, this)) return null;
+                return _firstParameter;
+            }
+        }
+
+        public Boolean HasSingleTarget => !(_helperObject is Wrapper[]);
+
+        public sealed override Boolean Equals(Object value)
+        {
+            Delegate other = value as Delegate;
+            if (Object.ReferenceEquals(other, null)) return false;
+            if (Object.ReferenceEquals(this, other)) return true;
+            if (!InternalEqualTypes(this, other)) return false;
+
+            Wrapper[] invocationList = _helperObject as Wrapper[];
+            if (!Object.ReferenceEquals(invocationList, null))
+            {
+                if (_extraFunctionPointerOrData != other._extraFunctionPointerOrData) return false;
+                Wrapper[] otherList = other._helperObject as Wrapper[];
+                if (Object.ReferenceEquals(otherList, null)) return false;
+                Int32 count = (Int32)_extraFunctionPointerOrData;
+                for (Int32 i = 0; i < count; i++)
+                    if (!invocationList[i].Value.Equals(otherList[i].Value)) return false;
+                return true;
+            }
+
+            if (!Object.ReferenceEquals(_helperObject, other._helperObject)) return false;
+            if (!global::Internal.Runtime.CompilerServices.FunctionPointerOps.Compare((IntPtr)_extraFunctionPointerOrData, (IntPtr)other._extraFunctionPointerOrData)) return false;
+            if (!global::Internal.Runtime.CompilerServices.FunctionPointerOps.Compare(_functionPointer, other._functionPointer)) return false;
+            if (Object.ReferenceEquals(_firstParameter, this)) return Object.ReferenceEquals(other._firstParameter, other);
+            return Object.ReferenceEquals(_firstParameter, other._firstParameter);
+        }
+
+        public sealed override Int32 GetHashCode()
+        {
+            Wrapper[] invocationList = _helperObject as Wrapper[];
+            if (!Object.ReferenceEquals(invocationList, null))
+            {
+                Int32 hash = 0;
+                Int32 count = (Int32)_extraFunctionPointerOrData;
+                for (Int32 i = 0; i < count; i++) hash = unchecked(hash * 33 + invocationList[i].Value.GetHashCode());
+                return hash;
+            }
+
+            Int32 result = Runtime.CompilerServices.RuntimeHelpers.GetHashCode(_helperObject);
+            result = unchecked(result + 7 * global::Internal.Runtime.CompilerServices.FunctionPointerOps.GetHashCode((IntPtr)_extraFunctionPointerOrData));
+            result = unchecked(result + 13 * global::Internal.Runtime.CompilerServices.FunctionPointerOps.GetHashCode(_functionPointer));
+            if (!Object.ReferenceEquals(_firstParameter, this))
+                result = unchecked(result + 17 * Runtime.CompilerServices.RuntimeHelpers.GetHashCode(_firstParameter));
+            return result;
+        }
+
+        public static Boolean operator ==(Delegate first, Delegate second)
+        {
+            if (Object.ReferenceEquals(first, second)) return true;
+            if (Object.ReferenceEquals(first, null)) return false;
+            return first.Equals(second);
+        }
+
+        public static Boolean operator !=(Delegate first, Delegate second) => !(first == second);
     }
     public class MulticastDelegate : Delegate { }
     public delegate void Action();
@@ -3229,11 +3444,35 @@ namespace System
     public delegate void Action<in T1, in T2>(T1 arg1, T2 arg2);
     public delegate void Action<in T1, in T2, in T3>(T1 arg1, T2 arg2, T3 arg3);
     public delegate void Action<in T1, in T2, in T3, in T4>(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, in T12>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, in T12, in T13>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, in T12, in T13, in T14>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, in T12, in T13, in T14, in T15>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15);
+    public delegate void Action<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, in T12, in T13, in T14, in T15, in T16>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16);
     public delegate TResult Func<out TResult>();
     public delegate TResult Func<in T, out TResult>(T arg);
     public delegate TResult Func<in T1, in T2, out TResult>(T1 arg1, T2 arg2);
     public delegate TResult Func<in T1, in T2, in T3, out TResult>(T1 arg1, T2 arg2, T3 arg3);
     public delegate TResult Func<in T1, in T2, in T3, in T4, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, in T7, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, in T12, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, in T12, in T13, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, in T12, in T13, in T14, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, in T12, in T13, in T14, in T15, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15);
+    public delegate TResult Func<in T1, in T2, in T3, in T4, in T5, in T6, in T7, in T8, in T9, in T10, in T11, in T12, in T13, in T14, in T15, in T16, out TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16);
     public delegate Boolean Predicate<in T>(T obj);
     public delegate Int32 Comparison<in T>(T x, T y);
     public delegate TOutput Converter<in TInput, out TOutput>(TInput input);
