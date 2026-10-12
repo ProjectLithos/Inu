@@ -798,7 +798,10 @@ if ($Configuration -eq 'Debug') { $linkOutputs += @((Join-Path $outputDirectory 
         "--sdk-root", $root,
         "--configuration", $Configuration
     )
-    $userlandInputs = $projectMetadata + $dotnetStageInputs + $ilcStageInputs + @($lldLink,$nasm,(Join-Path $nativeOutput 'Runtime.obj'),(Join-Path $root 'native\x64\UserEntry.asm'),(Join-Path $root 'native\x64\ExceptionHandling.asm')) + @((Get-InuStageFiles -Paths @((Split-Path -Parent $userlandCompiler)) -Outputs).FullName)
+    # Key the Ring-3 stage to the userland compiler source/project rather than its freshly
+    # rebuilt host DLL. A host-tool rebuild must not make unchanged commands stale.
+    $userlandInputs = $projectMetadata + $dotnetStageInputs + $ilcStageInputs + @($lldLink,$nasm,(Join-Path $nativeOutput 'Runtime.obj'),(Join-Path $root 'native\x64\UserEntry.asm'),(Join-Path $root 'native\x64\ExceptionHandling.asm'))
+    $userlandInputs += @(Get-InuProjectStageInputs -ProjectFile (Join-Path $root 'src\Inu.UserlandCompiler\Inu.UserlandCompiler.csproj'))
     $userlandInputs += @(Get-ChildItem -LiteralPath (Join-Path $projectDirectory 'Userland') -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne 'Provided' } | ForEach-Object { $_.FullName }) + @((Join-Path $projectDirectory 'Userland\Provided\Shell'),(Join-Path $root 'src\Userland\Shell'))
     foreach ($library in @('Inu.Freestanding.CoreLib','Inu.Userland.RuntimeSupport','Inu.Runtime.UserlandNativeAot','Inu.Userland.Runtime')) {
         $userlandInputs += @(Get-InuProjectStageInputs -ProjectFile (Join-Path $root "src\$library\$library.csproj"))

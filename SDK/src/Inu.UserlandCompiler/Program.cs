@@ -41,10 +41,13 @@ static int MainEntry(string[] args)
     rc=UserlandStageCache.Run("Userland exception assembly",cacheDirectory,[userExceptionSource,nasm],[userExceptionObject],["-f","win64","-DINU_USERLAND=1"],force,()=>Run(nasm,["-f","win64","-DINU_USERLAND=1",userExceptionSource,"-o",userExceptionObject],sdkRoot));
     if(rc!=0)return Fail($"NASM failed for ring-3 exception helpers with exit code {rc}.");
     string directoryBuildProps=Path.Combine(sdkRoot,"Directory.Build.props");
-    List<string> sharedInputs=[typeof(UserlandStageCache).Assembly.Location,dotnet];
+    // Cache against the compiler source/project rather than this freshly rebuilt host DLL.
+    // Rebuilding Inu.UserlandCompiler can produce a different binary identity even when its
+    // source is unchanged; using that DLL as an input caused every unchanged command to miss
+    // the cache on the next Kath run.
+    List<string> sharedInputs=[dotnet];
+    sharedInputs.AddRange(UserlandStageCache.ProjectInputs(Path.Combine(sdkRoot,"src","Inu.UserlandCompiler","Inu.UserlandCompiler.csproj")));
     foreach(string library in new[]{"Inu.Freestanding.CoreLib","Inu.Userland.RuntimeSupport","Inu.Runtime.UserlandNativeAot","Inu.Userland.Runtime"})sharedInputs.AddRange(UserlandStageCache.ProjectInputs(Path.Combine(sdkRoot,"src",library,library+".csproj")));
-    string sdkDirectory=Path.Combine(Path.GetDirectoryName(Path.GetFullPath(dotnet))!,"sdk");
-    if(Directory.Exists(sdkDirectory))sharedInputs.Add(sdkDirectory);
     string sharedIdentity=UserlandStageCache.Fingerprint(sharedInputs,[configuration,CompilationRelevantBuildProps(directoryBuildProps)]);
     string ilcIdentity=UserlandStageCache.Fingerprint([Path.GetDirectoryName(Path.GetFullPath(ilc))!],[]);
 
@@ -52,7 +55,7 @@ static int MainEntry(string[] args)
     string commands=Path.Combine(coderRoot,"Commands");
     int commandCount=Directory.Exists(commands)?Directory.GetFiles(commands,"*.cs",SearchOption.TopDirectoryOnly).Length:0;
     int executableCount=(File.Exists(shellSource)?1:0)+commandCount;
-    Console.WriteLine($"[INFO] Ring-3 build is compiling {executableCount} userland executable(s) ({(File.Exists(shellSource)?"Shell + ":String.Empty)}{commandCount} command(s)). This is host-side compilation, not guest execution.");
+    Console.WriteLine($"[INFO] Ring-3 build is checking {executableCount} userland executable(s) ({(File.Exists(shellSource)?"Shell + ":String.Empty)}{commandCount} command(s)); only stale inputs will be recompiled.");
     if(File.Exists(shellSource))
     {
         if(!ValidateLiteralPathPolicy(shellSource))return 1;

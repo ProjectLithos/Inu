@@ -3580,6 +3580,11 @@ namespace System
             }
             return true;
         }
+        public override Boolean Equals(Object obj) => throw new NotSupportedException("Span<T> cannot be boxed for equality. Use the == operator for window identity.");
+        public override Int32 GetHashCode() => throw new NotSupportedException("Span<T> does not support hashing.");
+        public static Boolean operator ==(Span<T> left, Span<T> right)
+            => Object.ReferenceEquals(left._array, right._array) && left._start == right._start && left._length == right._length;
+        public static Boolean operator !=(Span<T> left, Span<T> right) => !(left == right);
         public static implicit operator Span<T>(T[] array) => new Span<T>(array);
         public static implicit operator ReadOnlySpan<T>(Span<T> span) => new ReadOnlySpan<T>(span._array, span._start, span._length, true);
     }
@@ -3635,6 +3640,11 @@ namespace System
             for (Int32 i = 0; i < _length; i++) destination[i] = _array[_start + i];
             return true;
         }
+        public override Boolean Equals(Object obj) => throw new NotSupportedException("ReadOnlySpan<T> cannot be boxed for equality. Use the == operator for window identity.");
+        public override Int32 GetHashCode() => throw new NotSupportedException("ReadOnlySpan<T> does not support hashing.");
+        public static Boolean operator ==(ReadOnlySpan<T> left, ReadOnlySpan<T> right)
+            => Object.ReferenceEquals(left._array, right._array) && left._start == right._start && left._length == right._length;
+        public static Boolean operator !=(ReadOnlySpan<T> left, ReadOnlySpan<T> right) => !(left == right);
         public static implicit operator ReadOnlySpan<T>(T[] array) => new ReadOnlySpan<T>(array);
     }
 

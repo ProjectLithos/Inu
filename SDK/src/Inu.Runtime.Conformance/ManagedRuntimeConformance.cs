@@ -1439,25 +1439,56 @@ public static unsafe class ManagedRuntimeConformance
 
         Record(delegateBasics && delegateIdentity && multicastOk, ref passed, ref failed);
 
-        // 36 System.Span<T> / ReadOnlySpan<T>: empty/null, fill, slicing and overlap-safe copy.
+        // 36 System.Span<T> / ReadOnlySpan<T>: array-backed indexing, slicing, length,
+        // empty/null spans, overlap-safe copy, fill, clear and window-identity equality.
         Int32[] spanValues = new Int32[] { 1, 2, 3, 4, 5 };
         Span<Int32> span = spanValues;
+        Span<Int32> sameWhole = spanValues;
+        Span<Int32> sameWindowA = new Span<Int32>(spanValues, 1, 3);
+        Span<Int32> sameWindowB = new Span<Int32>(spanValues, 1, 3);
+        Span<Int32> differentWindow = new Span<Int32>(spanValues, 2, 2);
+        Span<Int32> differentBacking = new Span<Int32>(new Int32[] { 1, 2, 3, 4, 5 });
+
         span[1] = 20;
+        Boolean spanIndexing = spanValues[1] == 20 && span[0] == 1 && span[4] == 5;
         Span<Int32> middle = span.Slice(1, 3);
+        Span<Int32> tail = span.Slice(5);
+        Boolean spanSlicing = middle.Length == 3 && middle[0] == 20 && middle[2] == 4
+            && tail.Length == 0 && tail.IsEmpty;
+
         middle.Fill(7);
-        ReadOnlySpan<Int32> readOnlySpan = span;
-        Int32[] spanCopy = readOnlySpan.Slice(1, 3).ToArray();
-        Int32[] overlapping = new Int32[] { 1, 2, 3, 4, 5 };
-        Span<Int32> overlapSource = new Span<Int32>(overlapping, 0, 4);
-        Span<Int32> overlapDestination = new Span<Int32>(overlapping, 1, 4);
-        overlapSource.CopyTo(overlapDestination);
+        Boolean spanFill = spanValues[0] == 1 && spanValues[1] == 7 && spanValues[2] == 7
+            && spanValues[3] == 7 && spanValues[4] == 5;
+        Span<Int32> clearWindow = span.Slice(2, 2);
+        clearWindow.Clear();
+        Boolean spanClear = spanValues[1] == 7 && spanValues[2] == 0 && spanValues[3] == 0 && spanValues[4] == 5;
+
+        Int32[] overlapRightValues = new Int32[] { 1, 2, 3, 4, 5 };
+        Span<Int32> overlapRightSource = new Span<Int32>(overlapRightValues, 0, 4);
+        Span<Int32> overlapRightDestination = new Span<Int32>(overlapRightValues, 1, 4);
+        overlapRightSource.CopyTo(overlapRightDestination);
+        Int32[] overlapLeftValues = new Int32[] { 1, 2, 3, 4, 5 };
+        Span<Int32> overlapLeftSource = new Span<Int32>(overlapLeftValues, 1, 4);
+        Span<Int32> overlapLeftDestination = new Span<Int32>(overlapLeftValues, 0, 4);
+        overlapLeftSource.CopyTo(overlapLeftDestination);
         Span<Int32> tooSmall = new Span<Int32>(new Int32[2]);
+        Boolean spanCopy = overlapRightValues[0] == 1 && overlapRightValues[1] == 1 && overlapRightValues[4] == 4
+            && overlapLeftValues[0] == 2 && overlapLeftValues[1] == 3 && overlapLeftValues[3] == 5
+            && !span.TryCopyTo(tooSmall);
+
+        ReadOnlySpan<Int32> readOnlySpan = span;
+        Int32[] spanCopyValues = readOnlySpan.Slice(1, 3).ToArray();
         Span<Int32> nullSpan = new Span<Int32>((Int32[])null);
-        Record(span.Length == 5 && span[0] == 1 && span[1] == 7 && span[3] == 7
-            && readOnlySpan.Length == 5 && spanCopy.Length == 3 && spanCopy[0] == 7 && spanCopy[2] == 7
-            && overlapping[0] == 1 && overlapping[1] == 1 && overlapping[4] == 4
-            && !span.TryCopyTo(tooSmall) && Span<Int32>.Empty.IsEmpty && ReadOnlySpan<Int32>.Empty.IsEmpty
-            && nullSpan.IsEmpty, ref passed, ref failed);
+        Boolean spanEmpty = Span<Int32>.Empty.Length == 0 && Span<Int32>.Empty.IsEmpty
+            && ReadOnlySpan<Int32>.Empty.Length == 0 && ReadOnlySpan<Int32>.Empty.IsEmpty
+            && nullSpan.Length == 0 && nullSpan.IsEmpty;
+        Boolean spanEquality = span == sameWhole && sameWindowA == sameWindowB
+            && sameWindowA != differentWindow && span != differentBacking;
+
+        Record(spanIndexing && spanSlicing && spanFill && spanClear && spanCopy && spanEmpty && spanEquality
+            && span.Length == 5 && readOnlySpan.Length == 5
+            && spanCopyValues.Length == 3 && spanCopyValues[0] == 7 && spanCopyValues[1] == 0 && spanCopyValues[2] == 0,
+            ref passed, ref failed);
 
         // 37 System.Memory<T> / ReadOnlyMemory<T>: storable array-backed windows over Span.
         Int32[] memoryValues = new Int32[] { 10, 20, 30, 40 };

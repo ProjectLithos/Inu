@@ -943,22 +943,55 @@ internal static class Program
     {
         int[] values = { 1, 2, 3, 4, 5 };
         Span<int> span = values;
-        span[1] = 20;
-        Span<int> middle = span.Slice(1, 3);
-        middle.Fill(7);
-        ReadOnlySpan<int> readOnly = span;
-        int[] copy = readOnly.Slice(1, 3).ToArray();
+        Span<int> sameWhole = values;
+        Span<int> sameWindowA = new Span<int>(values, 1, 3);
+        Span<int> sameWindowB = new Span<int>(values, 1, 3);
+        Span<int> differentWindow = new Span<int>(values, 2, 2);
+        int[] equalValues = { 1, 2, 3, 4, 5 };
+        Span<int> differentBacking = equalValues;
 
-        int[] overlapping = { 1, 2, 3, 4, 5 };
-        overlapping.AsSpan(0, 4).CopyTo(overlapping.AsSpan(1, 4));
+        // Array-backed indexing must mutate the original array.
+        span[1] = 20;
+        bool indexing = values[1] == 20 && span[0] == 1 && span[4] == 5;
+
+        // Slices are windows over the same backing array, including zero-length end slices.
+        Span<int> middle = span.Slice(1, 3);
+        Span<int> tail = span.Slice(5);
+        bool slicing = middle.Length == 3 && middle[0] == 20 && middle[2] == 4
+            && tail.Length == 0 && tail.IsEmpty;
+
+        // Fill and Clear affect only the selected window.
+        middle.Fill(7);
+        bool fill = values[0] == 1 && values[1] == 7 && values[2] == 7 && values[3] == 7 && values[4] == 5;
+        Span<int> clearWindow = span.Slice(2, 2);
+        clearWindow.Clear();
+        bool clear = values[1] == 7 && values[2] == 0 && values[3] == 0 && values[4] == 5;
+
+        // Copy is overlap-safe in both directions and TryCopyTo reports a short destination.
+        int[] overlapRight = { 1, 2, 3, 4, 5 };
+        overlapRight.AsSpan(0, 4).CopyTo(overlapRight.AsSpan(1, 4));
+        int[] overlapLeft = { 1, 2, 3, 4, 5 };
+        overlapLeft.AsSpan(1, 4).CopyTo(overlapLeft.AsSpan(0, 4));
         Span<int> tooSmall = new int[2];
+        bool copy = overlapRight[0] == 1 && overlapRight[1] == 1 && overlapRight[4] == 4
+            && overlapLeft[0] == 2 && overlapLeft[1] == 3 && overlapLeft[3] == 5
+            && !span.TryCopyTo(tooSmall);
+
+        ReadOnlySpan<int> readOnly = span;
+        int[] copied = readOnly.Slice(1, 3).ToArray();
         int[]? nullArrayForSpan = null;
         Span<int> nullSpan = nullArrayForSpan;
-        return span.Length == 5 && span[0] == 1 && span[1] == 7 && span[3] == 7
-            && readOnly.Length == 5 && copy.Length == 3 && copy[0] == 7 && copy[2] == 7
-            && overlapping[0] == 1 && overlapping[1] == 1 && overlapping[4] == 4
-            && !span.TryCopyTo(tooSmall) && Span<int>.Empty.IsEmpty && ReadOnlySpan<int>.Empty.IsEmpty
-            && nullSpan.IsEmpty;
+        bool empty = Span<int>.Empty.Length == 0 && Span<int>.Empty.IsEmpty
+            && ReadOnlySpan<int>.Empty.Length == 0 && ReadOnlySpan<int>.Empty.IsEmpty
+            && nullSpan.Length == 0 && nullSpan.IsEmpty;
+
+        // Span equality is window identity, not sequence equality.
+        bool equality = span == sameWhole && sameWindowA == sameWindowB
+            && sameWindowA != differentWindow && span != differentBacking;
+
+        return indexing && slicing && fill && clear && copy && empty && equality
+            && span.Length == 5 && readOnly.Length == 5
+            && copied.Length == 3 && copied[0] == 7 && copied[1] == 0 && copied[2] == 0;
     }
 
     private static bool TestMemory()

@@ -1,13 +1,13 @@
 {
-  "baseVersion": "0.1.22",
-  "version": "0.1.23",
+  "baseVersion": "0.1.23",
+  "version": "0.1.24",
   "changedFiles": [
-    "CHANGED-0.1.23.txt",
-    "Inu/SDK/Build-Inu-Progress.ps1",
+    "CHANGED-0.1.24.txt",
     "Inu/SDK/Build-Inu.ps1",
-    "Inu/SDK/templates/InuKernel/Startup/DesktopOrTextSessionStartup.cs",
-    "Inu/SDK/src/Inu.Kernel.Bootstrap/Kernel.cs",
-    "Kath/packages/kath/src/browser/inu-toolbar-widget.tsx",
+    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
+    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
+    "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
+    "Inu/SDK/src/Inu.UserlandCompiler/Program.cs",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -24,5 +24,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Fix freestanding CLI startup compilation and make elapsed-time progress overwrite the same visible value each second."
+  "summary": "Prevent unchanged ring-3 commands from recompiling across host-tool rebuilds and complete the requested Span<T> foundation with matching host and in-kernel conformance coverage."
 }
