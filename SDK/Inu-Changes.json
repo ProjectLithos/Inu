@@ -1,17 +1,14 @@
 {
-  "baseVersion": "0.1.28",
-  "version": "0.1.29",
+  "baseVersion": "0.1.29",
+  "version": "0.1.30",
   "changedFiles": [
-    "CHANGED-0.1.29.txt",
+    "CHANGED-0.1.30.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
-    "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/Inu-SourceManifest.json",
-    "Inu/SDK/docs/BCL-Conformance-Target.md",
+    "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/docs/Inu.Documentation.json",
-    "Inu/SDK/docs/Managed-Runtime.md",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
     "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
     "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/VERSION",
@@ -24,5 +21,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Complete the Inu Profile 1 System.String checklist with constructors, comparison/search, mutation-by-copy APIs, trim/casing subset, split/join/concat, null helpers, enumeration, and paired conformance coverage."
+  "summary": "Correct the System.String LastIndexOf reference/in-kernel conformance expectation and add granular host-side String diagnostics."
 }

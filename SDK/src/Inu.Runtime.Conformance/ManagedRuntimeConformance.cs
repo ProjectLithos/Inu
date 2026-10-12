@@ -1208,7 +1208,7 @@ public static unsafe class ManagedRuntimeConformance
             && "Inu kernel".StartsWith("Inu") && "Inu kernel".EndsWith("kernel")
             && "Inu kernel".Contains("kernel") && "Inu kernel".Contains('u')
             && "bananas".IndexOf("ana") == 1 && "bananas".IndexOf('n') == 2
-            && "bananas".LastIndexOf("ana") == 3 && "bananas".LastIndexOf('a') == 6
+            && "bananas".LastIndexOf("ana") == 3 && "bananas".LastIndexOf('a') == 5
             && String.Equals("Inu kernel".Substring(4, 6), "kernel")
             && String.Equals("abcdef".Remove(2, 2), "abef") && String.Equals("abcdef".Remove(3), "abc")
             && String.Equals("abcdef".Insert(3, "XYZ"), "abcXYZdef")
