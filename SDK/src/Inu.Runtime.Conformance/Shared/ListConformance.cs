@@ -70,7 +70,8 @@ namespace Inu.Runtime.Conformance.Shared
             try { Int32 ignored = list[list.Count]; } catch (ArgumentOutOfRangeException) { highIndexThrows = true; }
 
             Boolean addRangeNullThrows = false;
-            try { list.AddRange(null); } catch (ArgumentNullException) { addRangeNullThrows = true; }
+            System.Collections.Generic.IEnumerable<Int32> nullSource = null!;
+            try { list.AddRange(nullSource); } catch (ArgumentNullException) { addRangeNullThrows = true; }
 
             list.Clear();
             Boolean clear = list.Count == 0 && list.Capacity == 20 && list.ToArray().Length == 0;
