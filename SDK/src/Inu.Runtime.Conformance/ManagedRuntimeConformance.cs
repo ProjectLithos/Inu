@@ -1325,8 +1325,8 @@ public static unsafe class ManagedRuntimeConformance
         String interpolationFormatted = $"{interpolationValue:D4}/{interpolationHex:X4}/{interpolationFraction:F2}";
         String interpolationAlignedFormatted = $"[{interpolationHex,6:X4}]";
         String interpolationEscaped = $"{{{interpolationName}}}";
-        Runtime.CompilerServices.DefaultInterpolatedStringHandler directHandler =
-            new Runtime.CompilerServices.DefaultInterpolatedStringHandler(4, 1);
+        System.Runtime.CompilerServices.DefaultInterpolatedStringHandler directHandler =
+            new System.Runtime.CompilerServices.DefaultInterpolatedStringHandler(4, 1);
         directHandler.AppendLiteral("Inu ");
         directHandler.AppendFormatted(7);
         ReadOnlySpan<Char> directText = directHandler.Text;

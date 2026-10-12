@@ -1,5 +1,5 @@
 {
-  "version": "0.1.33",
+  "version": "0.1.34",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "49bd98185d9b5add27dafbb0fe446456e6e4e13ea2c906223883141b2c71d9b1"
+      "sha256": "95e06f5178ce819f378113e0d7a698e7d62462569c8e90dad05779806f6c982f"
     },
     {
       "path": "Directory.Build.targets",
@@ -931,7 +931,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "7df206c27e64251ed2249970ee38987602cdabd4077a90dbb4af1d27615d0823"
+      "sha256": "d658dfd2a7d484a383ba90b8741d03550a6833f4e35dbe39c2e02230a463a5be"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2991,7 +2991,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "81447f8054ca93feaa09aca6d1865c1ee588f4d98227c57a5217b2c46410de70"
+      "sha256": "1e6017091699ebb6521585967877744667e02baafb3728bc8103e1758efc90d0"
     },
     {
       "path": "Inu-Package.bat",
@@ -3027,7 +3027,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "691d1d277917addd3989bbb728e923146bd2ffe0d9ca65ac720eb146e7c9afee"
+      "sha256": "f4d7eefef9c30f2c8c1122e3bda3ca18abd67117a70a24b372e766ef42f808c3"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3539,7 +3539,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "f3022b12bd86d75bd78135a47ea4aa59c2262f466c86614fc83ca56817dd211f"
+      "sha256": "76ba71971bd7f70c7e4a37d1e94221a6a6e3fe9f1af4451cdc41611c34bfb6d7"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5611,7 +5611,7 @@
     },
     {
       "path": "src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-      "sha256": "4814a1e86a17eb5d5a9d46accc7f982c1998369ff426f24e7f6c1b3f69534cba"
+      "sha256": "92dde766570ec0e15089da7674c163a1512db1c040bd977e61f8283225be73e5"
     },
     {
       "path": "src/Inu.Runtime.Contracts/Inu.Runtime.Contracts.csproj",

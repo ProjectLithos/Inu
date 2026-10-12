@@ -1,18 +1,15 @@
 {
-  "baseVersion": "0.1.32",
-  "version": "0.1.33",
+  "baseVersion": "0.1.33",
+  "version": "0.1.34",
   "changedFiles": [
-    "CHANGED-0.1.33.txt",
+    "CHANGED-0.1.34.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
-    "Inu/SDK/docs/BCL-Conformance-Target.md",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
     "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
@@ -23,5 +20,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Complete Profile 1 string interpolation runtime support and composite formatting with shared invariant primitive formatting and paired conformance coverage."
+  "summary": "Fix the in-kernel interpolation conformance namespace qualification so the completed DefaultInterpolatedStringHandler contract compiles inside Inu.Runtime.Conformance."
 }
