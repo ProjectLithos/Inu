@@ -12,14 +12,14 @@ public static class DesktopOrTextSessionStartup
     public static Boolean Run()
     {
         KernelConsole.WriteLine("NOKMAIN:SESSION");
+        Boolean graphicalSessionSelected = GeneratedConfiguration.Gui != "none";
         Boolean sessionReady = true;
-        if (sessionReady && !InputHardwareStartup.EnsureGraphicalInputProviders())
+        if (graphicalSessionSelected && !InputHardwareStartup.EnsureGraphicalInputProviders())
         {
             KernelConsole.WriteLine("NOKMAIN:GUI-INPUT:FAIL");
             sessionReady = false;
         }
 
-        Boolean graphicalSessionSelected = !String.Equals(GeneratedConfiguration.Gui, "none", StringComparison.OrdinalIgnoreCase);
         Boolean consoleFramebufferReleased = !graphicalSessionSelected || !sessionReady || !KernelConsole.HasFramebuffer() || KernelConsole.SetFramebufferPresentationEnabled(false);
         if (graphicalSessionSelected)
         {

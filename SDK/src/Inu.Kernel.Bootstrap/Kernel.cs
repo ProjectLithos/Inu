@@ -908,7 +908,7 @@ public static unsafe partial class Kernel
         // Select the graphical or text session only after the ordinary user-session
         // environment has reached the same point used by the interactive CLI.
         Boolean sessionReady=true;
-        Boolean graphicalSessionSelected=!String.Equals(GeneratedConfiguration.Gui,"none",StringComparison.OrdinalIgnoreCase);
+        Boolean graphicalSessionSelected=GeneratedConfiguration.Gui!="none";
         // Only a selected GUI session may take framebuffer presentation away from the text console.
         // CLI-only startup leaves the console fully active and enters the shell directly.
         Boolean consoleFramebufferReleased=!graphicalSessionSelected||!sessionReady||!KernelConsole.HasFramebuffer()||KernelConsole.SetFramebufferPresentationEnabled(false);

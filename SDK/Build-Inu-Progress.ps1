@@ -84,7 +84,8 @@ $arguments = @(
     '-ExecutionPolicy',
     'Bypass',
     '-File',
-    $buildScript
+    $buildScript,
+    '-NoHeartbeat'
 )
 if ($null -ne $BuildArguments -and $BuildArguments.Count -gt 0) {
     $arguments += $BuildArguments
@@ -103,6 +104,7 @@ $stageName = 'Inu build'
 $heartbeatIntervalSeconds = 1
 $heartbeatDueUtc = $lastActualOutputUtc.AddSeconds($heartbeatIntervalSeconds)
 $heartbeatActive = $false
+$heartbeatWidth = 0
 
 try {
     $process = Start-Process -FilePath $powershellHost -ArgumentList $argumentLine `
@@ -113,7 +115,7 @@ try {
         $hadActualOutput = $false
 
         foreach ($line in @(Get-NewLines -Path $stdoutPath -ReadCount ([ref]$stdoutRead))) {
-            if ($heartbeatActive) { [Console]::WriteLine(); $heartbeatActive = $false }
+            if ($heartbeatActive) { [Console]::Write(("`r{0}`r" -f (' ' * $heartbeatWidth))); $heartbeatActive = $false; $heartbeatWidth = 0 }
             Write-Host $line
             $hadActualOutput = $true
             $lastActualOutputUtc = [DateTime]::UtcNow
@@ -124,7 +126,7 @@ try {
         }
 
         foreach ($line in @(Get-NewLines -Path $stderrPath -ReadCount ([ref]$stderrRead))) {
-            if ($heartbeatActive) { [Console]::WriteLine(); $heartbeatActive = $false }
+            if ($heartbeatActive) { [Console]::Write(("`r{0}`r" -f (' ' * $heartbeatWidth))); $heartbeatActive = $false; $heartbeatWidth = 0 }
             Write-Host $line
             $hadActualOutput = $true
             $lastActualOutputUtc = [DateTime]::UtcNow
@@ -136,14 +138,17 @@ try {
         elseif ([DateTime]::UtcNow -ge $heartbeatDueUtc) {
             $elapsedSeconds = [int][Math]::Floor(([DateTime]::UtcNow - $stageStartUtc).TotalSeconds)
             if ($elapsedSeconds -lt $heartbeatIntervalSeconds) { $elapsedSeconds = $heartbeatIntervalSeconds }
-            if (-not $heartbeatActive) { [Console]::Write(("[INFO] {0}: {1}s elapsed..." -f $stageName, $elapsedSeconds)) } else { [Console]::Write((" {0}s" -f $elapsedSeconds)) }
+            $heartbeatText = ("[INFO] {0}: {1}s elapsed..." -f $stageName, $elapsedSeconds)
+            $padding = if ($heartbeatWidth -gt $heartbeatText.Length) { ' ' * ($heartbeatWidth - $heartbeatText.Length) } else { '' }
+            [Console]::Write(("`r{0}{1}" -f $heartbeatText, $padding))
+            $heartbeatWidth = [Math]::Max($heartbeatWidth, $heartbeatText.Length)
             $heartbeatActive = $true
             $heartbeatDueUtc = [DateTime]::UtcNow.AddSeconds($heartbeatIntervalSeconds)
         }
     }
 
     $process.WaitForExit()
-    if ($heartbeatActive) { [Console]::WriteLine(); $heartbeatActive = $false }
+    if ($heartbeatActive) { [Console]::WriteLine(); $heartbeatActive = $false; $heartbeatWidth = 0 }
 
     foreach ($line in @(Get-NewLines -Path $stdoutPath -ReadCount ([ref]$stdoutRead))) {
         Write-Host $line

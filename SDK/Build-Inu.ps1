@@ -7,6 +7,7 @@ param(
     [switch]$NoRun,
     [switch]$ForceRebuild,
     [switch]$RuntimeConformance,
+    [switch]$NoHeartbeat,
     [switch]$DryRun
 )
 
@@ -139,12 +140,13 @@ function Invoke-InuCapturedStage {
         $stderrTask = $process.StandardError.ReadToEndAsync()
 
         $clock = [Diagnostics.Stopwatch]::StartNew()
-        # Keep long-running stages visibly alive on one horizontal line. Once a second is
-        # frequent enough to show progress without growing Kath's Output pane vertically.
-        # Successive elapsed values are appended because Output views do not reliably honour carriage-return repainting.
+        # Keep long-running stages visibly alive without accumulating one elapsed value per second.
+        # Standalone builds repaint the same console line with carriage return. Kath's relay passes
+        # -NoHeartbeat and owns the single visible heartbeat so nested timers can never interleave.
         $heartbeatIntervalSeconds = 1
         $nextHeartbeatSeconds = $heartbeatIntervalSeconds
         $heartbeatActive = $false
+        $heartbeatWidth = 0
         while (-not $process.HasExited) {
             Start-Sleep -Milliseconds 250
             $process.Refresh()
@@ -154,13 +156,15 @@ function Invoke-InuCapturedStage {
                 if ($heartbeatActive) { [Console]::WriteLine() }
                 throw ("{0} exceeded its hard stage timeout of {1} seconds." -f $Stage, $TimeoutSeconds)
             }
-            if ($elapsedSeconds -ge $nextHeartbeatSeconds) {
+            if (-not $NoHeartbeat -and $elapsedSeconds -ge $nextHeartbeatSeconds) {
                 if ($Stage -eq 'Ring-3 userland executables') {
                     $heartbeatText = "[INFO] Ring-3 userland compilation: ${elapsedSeconds}s elapsed - building Shell/commands on host..."
                 } else {
                     $heartbeatText = "[INFO] ${Stage}: ${elapsedSeconds}s elapsed..."
                 }
-                if (-not $heartbeatActive) { [Console]::Write($heartbeatText) } else { [Console]::Write((" {0}s" -f $elapsedSeconds)) }
+                $padding = if ($heartbeatWidth -gt $heartbeatText.Length) { ' ' * ($heartbeatWidth - $heartbeatText.Length) } else { '' }
+                [Console]::Write(("`r{0}{1}" -f $heartbeatText, $padding))
+                $heartbeatWidth = [Math]::Max($heartbeatWidth, $heartbeatText.Length)
                 $heartbeatActive = $true
                 $nextHeartbeatSeconds = $elapsedSeconds + $heartbeatIntervalSeconds
             }
