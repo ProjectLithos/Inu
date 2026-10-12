@@ -3187,6 +3187,120 @@ namespace System
             return result;
         }
 
+        /// <summary>Formats one value using the Inu composite-formatting subset.</summary>
+        public static String Format(String format, Object arg0) => Format(null, format, new Object[] { arg0 });
+        public static String Format(String format, Object arg0, Object arg1) => Format(null, format, new Object[] { arg0, arg1 });
+        public static String Format(String format, Object arg0, Object arg1, Object arg2) => Format(null, format, new Object[] { arg0, arg1, arg2 });
+        public static String Format(String format, params Object[] args) => Format(null, format, args);
+        public static String Format(IFormatProvider provider, String format, Object arg0) => Format(provider, format, new Object[] { arg0 });
+        public static String Format(IFormatProvider provider, String format, Object arg0, Object arg1) => Format(provider, format, new Object[] { arg0, arg1 });
+        public static String Format(IFormatProvider provider, String format, Object arg0, Object arg1, Object arg2) => Format(provider, format, new Object[] { arg0, arg1, arg2 });
+
+        /// <summary>
+        /// Formats placeholders of the form {index[,alignment][:format]}. Inu Profile 1 uses
+        /// invariant primitive formatting and supports escaped braces via {{ and }}.
+        /// </summary>
+        public static String Format(IFormatProvider provider, String format, params Object[] args)
+        {
+            if (Object.ReferenceEquals(format, null)) throw new ArgumentNullException();
+            if (args == null) throw new ArgumentNullException();
+
+            Text.StringBuilder builder = new Text.StringBuilder(format.Length + 16);
+            Int32 position = 0;
+            while (position < format.Length)
+            {
+                Char c = format[position++];
+                if (c == '{')
+                {
+                    if (position < format.Length && format[position] == '{')
+                    {
+                        builder.Append('{'); position++; continue;
+                    }
+
+                    if (position >= format.Length || format[position] < '0' || format[position] > '9') throw new FormatException();
+                    Int32 index = 0;
+                    while (position < format.Length && format[position] >= '0' && format[position] <= '9')
+                    {
+                        index = checked(index * 10 + (format[position] - '0'));
+                        position++;
+                    }
+                    if ((UInt32)index >= (UInt32)args.Length) throw new FormatException();
+
+                    while (position < format.Length && format[position] == ' ') position++;
+                    Int32 alignment = 0;
+                    if (position < format.Length && format[position] == ',')
+                    {
+                        position++;
+                        while (position < format.Length && format[position] == ' ') position++;
+                        Boolean negative = false;
+                        if (position < format.Length && (format[position] == '-' || format[position] == '+'))
+                        {
+                            negative = format[position] == '-'; position++;
+                        }
+                        if (position >= format.Length || format[position] < '0' || format[position] > '9') throw new FormatException();
+                        Int32 width = 0;
+                        while (position < format.Length && format[position] >= '0' && format[position] <= '9')
+                        {
+                            width = checked(width * 10 + (format[position] - '0'));
+                            position++;
+                        }
+                        alignment = negative ? -width : width;
+                        while (position < format.Length && format[position] == ' ') position++;
+                    }
+
+                    String itemFormat = null;
+                    if (position < format.Length && format[position] == ':')
+                    {
+                        position++;
+                        Int32 start = position;
+                        while (position < format.Length && format[position] != '}')
+                        {
+                            if (format[position] == '{') throw new FormatException();
+                            position++;
+                        }
+                        if (position >= format.Length) throw new FormatException();
+                        itemFormat = format.Substring(start, position - start);
+                    }
+
+                    if (position >= format.Length || format[position] != '}') throw new FormatException();
+                    position++;
+                    AppendFormattedValue(builder, args[index], alignment, itemFormat, provider);
+                }
+                else if (c == '}')
+                {
+                    if (position < format.Length && format[position] == '}')
+                    {
+                        builder.Append('}'); position++; continue;
+                    }
+                    throw new FormatException();
+                }
+                else builder.Append(c);
+            }
+            return builder.ToString();
+        }
+
+        internal static String FormatValue(Object value, String format, IFormatProvider provider)
+        {
+            if (Object.ReferenceEquals(value, null)) return Empty;
+            if (value is IFormattable formattable)
+            {
+                String formatted = formattable.ToString(format, provider);
+                return Object.ReferenceEquals(formatted, null) ? Empty : formatted;
+            }
+            String text = value.ToString();
+            return Object.ReferenceEquals(text, null) ? Empty : text;
+        }
+
+        internal static void AppendFormattedValue(Text.StringBuilder builder, Object value, Int32 alignment, String format, IFormatProvider provider)
+        {
+            String text = FormatValue(value, format, provider);
+            Int32 width = alignment < 0 ? -alignment : alignment;
+            Int32 padding = width > text.Length ? width - text.Length : 0;
+            if (alignment > 0) for (Int32 index = 0; index < padding; index++) builder.Append(' ');
+            builder.Append(text);
+            if (alignment < 0) for (Int32 index = 0; index < padding; index++) builder.Append(' ');
+        }
+
         public static Int32 Compare(String first, String second) => CompareOrdinal(first, second);
 
         public static Int32 Compare(String first, String second, Boolean ignoreCase)
@@ -4260,6 +4374,8 @@ namespace System
     }
 
     public class Attribute { }
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+    public sealed class ParamArrayAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate, Inherited = false)]
     public sealed class SerializableAttribute : Attribute { }
@@ -4785,6 +4901,98 @@ namespace System
         public sealed class CompilerLoweringPreserveAttribute : Attribute
         {
             public CompilerLoweringPreserveAttribute() { }
+        }
+
+        /// <summary>Marks a type as a C# interpolated-string handler.</summary>
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
+        public sealed class InterpolatedStringHandlerAttribute : Attribute { }
+
+        /// <summary>Declares which call-site arguments are forwarded to an interpolated-string handler constructor.</summary>
+        [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
+        public sealed class InterpolatedStringHandlerArgumentAttribute : Attribute
+        {
+            private readonly String[] _arguments;
+            public InterpolatedStringHandlerArgumentAttribute(String argument) { _arguments = new String[] { argument }; }
+            public InterpolatedStringHandlerArgumentAttribute(params String[] arguments) { _arguments = arguments; }
+            public String[] Arguments => _arguments;
+        }
+
+        /// <summary>
+        /// Freestanding implementation of the compiler-known .NET default interpolated-string handler.
+        /// It shares System.String's composite/primitive formatter so interpolation and String.Format
+        /// have identical Profile 1 formatting semantics.
+        /// </summary>
+        [InterpolatedStringHandler]
+        public ref struct DefaultInterpolatedStringHandler
+        {
+            private global::System.Text.StringBuilder _builder;
+            private readonly IFormatProvider _provider;
+
+            public DefaultInterpolatedStringHandler(Int32 literalLength, Int32 formattedCount)
+                : this(literalLength, formattedCount, null) { }
+
+            public DefaultInterpolatedStringHandler(Int32 literalLength, Int32 formattedCount, IFormatProvider provider)
+            {
+                _provider = provider;
+                _builder = new global::System.Text.StringBuilder(literalLength + formattedCount * 8);
+            }
+
+            public DefaultInterpolatedStringHandler(Int32 literalLength, Int32 formattedCount, IFormatProvider provider, Span<Char> initialBuffer)
+                : this(literalLength, formattedCount, provider) { }
+
+            public void AppendLiteral(String value) => _builder.Append(value);
+
+            public void AppendFormatted<T>(T value) => AppendValue(value, 0, null);
+            public void AppendFormatted<T>(T value, String format) => AppendValue(value, 0, format);
+            public void AppendFormatted<T>(T value, Int32 alignment) => AppendValue(value, alignment, null);
+            public void AppendFormatted<T>(T value, Int32 alignment, String format) => AppendValue(value, alignment, format);
+
+            public void AppendFormatted(String value) => String.AppendFormattedValue(_builder, value, 0, null, _provider);
+            public void AppendFormatted(String value, Int32 alignment = 0, String format = null)
+                => String.AppendFormattedValue(_builder, value, alignment, format, _provider);
+            public void AppendFormatted(Object value, Int32 alignment = 0, String format = null)
+                => String.AppendFormattedValue(_builder, value, alignment, format, _provider);
+            public void AppendFormatted(Char value) => _builder.Append(value);
+
+            public void AppendFormatted(ReadOnlySpan<Char> value)
+            {
+                for (Int32 index = 0; index < value.Length; index++) _builder.Append(value[index]);
+            }
+
+            public void AppendFormatted(ReadOnlySpan<Char> value, Int32 alignment = 0, String format = null)
+            {
+                Char[] chars = value.ToArray();
+                String text = String.CreateFromChars(chars, chars.Length);
+                String.AppendFormattedValue(_builder, text, alignment, format, _provider);
+            }
+
+            private void AppendValue<T>(T value, Int32 alignment, String format)
+            {
+                Object boxed = value;
+                String.AppendFormattedValue(_builder, boxed, alignment, format, _provider);
+            }
+
+            public ReadOnlySpan<Char> Text
+            {
+                get
+                {
+                    String text = _builder.ToString();
+                    if (text.Length == 0) return ReadOnlySpan<Char>.Empty;
+                    ref Char first = ref Unsafe.AsRef(in text.GetPinnableReference());
+                    return new ReadOnlySpan<Char>(ref first, text.Length);
+                }
+            }
+
+            public void Clear() => _builder.Clear();
+
+            public override String ToString() => _builder.ToString();
+
+            public String ToStringAndClear()
+            {
+                String result = _builder.ToString();
+                _builder.Clear();
+                return result;
+            }
         }
 
         public static class RuntimeFeature

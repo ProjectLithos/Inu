@@ -659,7 +659,7 @@ public static unsafe class ManagedRuntimeConformance
     public const String BclTargetName = "Inu.BCL.Core.v1";
 
     /// <summary>Number of type-level BCL items in <see cref="BclTargetName"/>.</summary>
-    public const Int32 BclTargetItemCount = 38;
+    public const Int32 BclTargetItemCount = 40;
 
     /// <summary>
     /// Hard in-kernel gate for the named BCL subset. Keep this list in lock-step with
@@ -1314,7 +1314,52 @@ public static unsafe class ManagedRuntimeConformance
             && String.Equals(((Double)12.5).ToString("G", null), "12.5")
             && String.Equals(((Single)(-0.25F)).ToString("G", null), "-0.25"), ref passed, ref failed);
 
-        // 31 System.Math: completed Profile 1 primitive/transcendental surface.
+        // 31 String interpolation runtime support. This deliberately uses normal C# interpolation so
+        // Roslyn validates Inu's compiler-known DefaultInterpolatedStringHandler contract.
+        String interpolationName = "Inu";
+        Int32 interpolationValue = 42;
+        Int32 interpolationHex = 0x2A;
+        Double interpolationFraction = 12.5;
+        String interpolationSimple = $"SDK {interpolationName} {interpolationValue}";
+        String interpolationAligned = $"[{interpolationValue,5}][{interpolationName,-5}]";
+        String interpolationFormatted = $"{interpolationValue:D4}/{interpolationHex:X4}/{interpolationFraction:F2}";
+        String interpolationAlignedFormatted = $"[{interpolationHex,6:X4}]";
+        String interpolationEscaped = $"{{{interpolationName}}}";
+        Runtime.CompilerServices.DefaultInterpolatedStringHandler directHandler =
+            new Runtime.CompilerServices.DefaultInterpolatedStringHandler(4, 1);
+        directHandler.AppendLiteral("Inu ");
+        directHandler.AppendFormatted(7);
+        ReadOnlySpan<Char> directText = directHandler.Text;
+        Boolean directTextOk = directText.Length == 5 && directText[0] == 'I' && directText[4] == '7';
+        String directMaterialized = directHandler.ToStringAndClear();
+        Boolean directCleared = directHandler.Text.Length == 0;
+        directHandler.AppendLiteral("x");
+        directHandler.Clear();
+        Record(String.Equals(interpolationSimple, "SDK Inu 42")
+            && String.Equals(interpolationAligned, "[   42][Inu  ]")
+            && String.Equals(interpolationFormatted, "0042/002A/12.50")
+            && String.Equals(interpolationAlignedFormatted, "[  002A]")
+            && String.Equals(interpolationEscaped, "{Inu}")
+            && directTextOk && String.Equals(directMaterialized, "Inu 7")
+            && directCleared && directHandler.Text.Length == 0, ref passed, ref failed);
+
+        // 32 Composite formatting: indexed placeholders, alignment, escaped braces and the
+        // Profile 1 primitive numeric format subset share the same formatter as interpolation.
+        Boolean compositeMalformedThrows = false;
+        Boolean compositeMissingThrows = false;
+        try { String ignored = String.Format("{0", 1); } catch (FormatException) { compositeMalformedThrows = true; }
+        try { String ignored = String.Format("{1}", 1); } catch (FormatException) { compositeMissingThrows = true; }
+        Record(String.Equals(String.Format("{0}", "Inu"), "Inu")
+            && String.Equals(String.Format("A={0}, B={1}", 7, "OS"), "A=7, B=OS")
+            && String.Equals(String.Format("[{0,5}][{1,-5}]", 42, "Inu"), "[   42][Inu  ]")
+            && String.Equals(String.Format("{0:D4} {1:X4} {2:F2}", 42, 42, 12.5), "0042 002A 12.50")
+            && String.Equals(String.Format("[{0,6:X4}]", 42), "[  002A]")
+            && String.Equals(String.Format("{0}-{1}-{2}-{3}", new Object[] { "I", "n", "u", 7 }), "I-n-u-7")
+            && String.Equals(String.Format("{{{0}}}", "Inu"), "{Inu}")
+            && String.Equals(String.Format("<{0}>", (Object)null), "<>")
+            && compositeMalformedThrows && compositeMissingThrows, ref passed, ref failed);
+
+        // 33 System.Math: completed Profile 1 primitive/transcendental surface.
         Boolean mathAbsOverflow = false, mathSignNaNThrows = false, mathClampThrows = false;
         try { _ = Math.Abs(Int32.MinValue); } catch (OverflowException) { mathAbsOverflow = true; }
         try { _ = Math.Sign(Double.NaN); } catch (ArithmeticException) { mathSignNaNThrows = true; }
@@ -1346,7 +1391,7 @@ public static unsafe class ManagedRuntimeConformance
             && mathAbsOverflow && mathSignNaNThrows && mathClampThrows, ref passed, ref failed);
 
 
-        // 32 System.MathF: single-precision counterpart to the completed System.Math surface.
+        // 34 System.MathF: single-precision counterpart to the completed System.Math surface.
         Boolean mathFSignNaNThrows = false;
         try { _ = MathF.Sign(Single.NaN); } catch (ArithmeticException) { mathFSignNaNThrows = true; }
         Record(MathF.Abs(-2.5F) == 2.5F
@@ -1371,7 +1416,7 @@ public static unsafe class ManagedRuntimeConformance
             && MathF.Log(0.0F) == Single.NegativeInfinity
             && mathFSignNaNThrows, ref passed, ref failed);
 
-        // 33 System.Convert: primitive-to-primitive, string/object bridges and failure semantics.
+        // 35 System.Convert: primitive-to-primitive, string/object bridges and failure semantics.
         Boolean intOverflow = false, uintOverflow = false, longOverflow = false, ulongOverflow = false;
         Boolean stringOverflow = false, badFormat = false, invalidCharConversion = false, invalidFloatConversion = false;
         try { Convert.ToInt32(2147483648.0); } catch (OverflowException) { intOverflow = true; }
@@ -1414,7 +1459,7 @@ public static unsafe class ManagedRuntimeConformance
             && intOverflow && uintOverflow && longOverflow && ulongOverflow
             && stringOverflow && badFormat && invalidCharConversion && invalidFloatConversion, ref passed, ref failed);
 
-        // 34 System.IComparable / IComparable<T> / IEquatable<T> across primitive families.
+        // 36 System.IComparable / IComparable<T> / IEquatable<T> across primitive families.
         IComparable nonGenericComparable = (Int32)7;
         IComparable<Int32> genericComparable = (Int32)7;
         IComparable<Int64> longComparable = (Int64)9;
@@ -1425,7 +1470,7 @@ public static unsafe class ManagedRuntimeConformance
             && ((IComparable<Char>)(Char)'b').CompareTo('a') > 0
             && ((IEquatable<Boolean>)(Boolean)true).Equals(true), ref passed, ref failed);
 
-        // 35 Delegate family: Action/Func arities, custom delegates, multicast, equality, and targets.
+        // 37 Delegate family: Action/Func arities, custom delegates, multicast, equality, and targets.
         _bclDelegateObserved = 0;
         Action bclAction0 = BclNoArgs;
         Action<Int32> bclAction = BclCapture;
@@ -1478,7 +1523,7 @@ public static unsafe class ManagedRuntimeConformance
 
         Record(delegateBasics && delegateIdentity && multicastOk, ref passed, ref failed);
 
-        // 36 System.Span<T> / ReadOnlySpan<T>: array-backed indexing, slicing, length,
+        // 38 System.Span<T> / ReadOnlySpan<T>: array-backed indexing, slicing, length,
         // empty/null spans, overlap-safe copy, fill, clear and window-identity equality.
         Int32[] spanValues = new Int32[] { 1, 2, 3, 4, 5 };
         Span<Int32> span = spanValues;
@@ -1579,7 +1624,7 @@ public static unsafe class ManagedRuntimeConformance
             && spanCopyValues.Length == 3 && spanCopyValues[0] == 7 && spanCopyValues[1] == 0 && spanCopyValues[2] == 0,
             ref passed, ref failed);
 
-        // 37 System.Memory<T> / ReadOnlyMemory<T>: complete .NET 10 type-owned surface.
+        // 39 System.Memory<T> / ReadOnlyMemory<T>: complete .NET 10 type-owned surface.
         Int32[] memoryValues = new Int32[] { 10, 20, 30, 40 };
         Memory<Int32> memory = memoryValues;
         Memory<Int32> memoryMiddle = memory.Slice(1, 2);
@@ -1651,7 +1696,7 @@ public static unsafe class ManagedRuntimeConformance
             && Memory<Int32>.Empty.IsEmpty && ReadOnlyMemory<Int32>.Empty.IsEmpty
             && nullMemory.IsEmpty && nullReadOnlyMemory.IsEmpty, ref passed, ref failed);
 
-        // 38 Generic comparison/equality consistency, including nullable and custom typed contracts.
+        // 40 Generic comparison/equality consistency, including nullable and custom typed contracts.
         Comparer<Int32> intOrdering = Comparer<Int32>.Default;
         Comparer<Int64> longOrdering = Comparer<Int64>.Default;
         Comparer<String> stringOrdering = Comparer<String>.Default;

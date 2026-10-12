@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Inu.DotNetConformance.Tests;
@@ -7,7 +8,7 @@ namespace Inu.DotNetConformance.Tests;
 internal static class Program
 {
     private const string TargetName = "Inu.BCL.Core.v1";
-    private const int TargetItemCount = 38;
+    private const int TargetItemCount = 40;
     private static int _passed;
     private static int _failed;
 
@@ -67,6 +68,8 @@ internal static class Program
         Check("System.Text.ASCIIEncoding", TestAsciiEncoding());
         Check("System.Text.UTF8Encoding", TestUtf8Encoding());
         Check("Primitive formatting", TestPrimitiveFormatting());
+        Check("String interpolation runtime support", TestStringInterpolation());
+        Check("Composite formatting", TestCompositeFormatting());
         Check("System.Math", TestMath());
         Check("System.MathF", TestMathF());
         Check("System.Convert", TestConvert());
@@ -812,6 +815,53 @@ internal static class Program
             && ((uint)99).ToString("D4", null) == "0099"
             && ((long)-9000000000L).ToString("D12", null) == "-009000000000"
             && 12.5.ToString("G", null) == "12.5" && (-0.25f).ToString("G", null) == "-0.25";
+
+    private static bool TestStringInterpolation()
+    {
+        string name = "Inu";
+        int value = 42;
+        int hex = 0x2A;
+        double fraction = 12.5;
+        string simple = $"SDK {name} {value}";
+        string aligned = $"[{value,5}][{name,-5}]";
+        string formatted = $"{value:D4}/{hex:X4}/{fraction:F2}";
+        string alignedFormatted = $"[{hex,6:X4}]";
+        string escaped = $"{{{name}}}";
+
+        var handler = new DefaultInterpolatedStringHandler(4, 1);
+        handler.AppendLiteral("Inu ");
+        handler.AppendFormatted(7);
+        bool textView = handler.Text.Length == 5 && handler.Text[0] == 'I' && handler.Text[4] == '7';
+        string materialized = handler.ToStringAndClear();
+        bool cleared = handler.Text.Length == 0;
+        handler.AppendLiteral("x");
+        handler.Clear();
+
+        return simple == "SDK Inu 42"
+            && aligned == "[   42][Inu  ]"
+            && formatted == "0042/002A/12.50"
+            && alignedFormatted == "[  002A]"
+            && escaped == "{Inu}"
+            && textView && materialized == "Inu 7" && cleared && handler.Text.Length == 0;
+    }
+
+    private static bool TestCompositeFormatting()
+    {
+        bool malformedThrows = false;
+        bool missingThrows = false;
+        try { _ = string.Format("{0", 1); } catch (FormatException) { malformedThrows = true; }
+        try { _ = string.Format("{1}", 1); } catch (FormatException) { missingThrows = true; }
+
+        return string.Format("{0}", "Inu") == "Inu"
+            && string.Format("A={0}, B={1}", 7, "OS") == "A=7, B=OS"
+            && string.Format("[{0,5}][{1,-5}]", 42, "Inu") == "[   42][Inu  ]"
+            && string.Format("{0:D4} {1:X4} {2:F2}", 42, 42, 12.5) == "0042 002A 12.50"
+            && string.Format("[{0,6:X4}]", 42) == "[  002A]"
+            && string.Format("{0}-{1}-{2}-{3}", new object[] { "I", "n", "u", 7 }) == "I-n-u-7"
+            && string.Format("{{{0}}}", "Inu") == "{Inu}"
+            && string.Format("<{0}>", (object?)null) == "<>"
+            && malformedThrows && missingThrows;
+    }
 
     private static bool TestMath()
     {

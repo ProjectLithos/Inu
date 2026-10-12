@@ -43,13 +43,16 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 28 | `System.Text.ASCIIEncoding` | string-to-byte and byte-to-string round-trip |
 | 29 | `System.Text.UTF8Encoding` | multi-byte UTF-8 encode/decode round-trip |
 | 30 | `primitive numeric formatting / System.IFormattable` | signed/unsigned `G`/`D`/`X` plus invariant floating `G`/`F`/`E` formatting |
-| 31 | `System.Math` | primitive `Abs`, `Min`, `Max`, `Clamp`, `Sign`; `Floor`, `Ceiling`, `Round`, `Truncate`; `Sqrt`, `Pow`, `Exp`, `Log`, `Log10`; and `Sin`, `Cos`, `Tan`, `Atan`, `Atan2`, including NaN/infinity and documented exception paths covered by the paired gate |
-| 32 | `System.Convert` | Boolean, integer and floating primitive conversions, rounding on floating-to-integer conversion, and primitive invariant string conversion |
-| 33 | `System.IComparable / IComparable<T> / IEquatable<T>` | boxed and strongly typed ordering/equality across covered primitive families |
-| 34 | `delegate family` | managed delegate construction/invocation for `Action`/`Func` through four arguments plus `Predicate<T>`, `Comparison<T>`, and `Converter<TInput,TOutput>` |
-| 35 | `System.Span<T> / System.ReadOnlySpan<T>` | full .NET 10 type-owned `Span<T>` / `ReadOnlySpan<T>` surface: managed/native byref windows, array/ref/pointer construction, indexing, slicing, fill/clear, overlap-safe copy/try-copy, enumeration, pinning, `ToArray`, `ToString`, window identity, `ArraySegment<T>` conversion, and read-only covariance |
-| 36 | `System.Memory<T> / System.ReadOnlyMemory<T>` | complete .NET 10 type-owned array-backed surface: constructors/range/covariance rules, `Empty`/`IsEmpty`/`Length`/`Span`, slicing, copy/try-copy, equality/hash, non-moving-heap `Pin`/`MemoryHandle`, `ToArray`, `ToString`, and array/`ArraySegment<T>` conversions |
-| 37 | `System.Collections.Generic.Comparer<T> + equality consistency` | default generic ordering and equality across multiple primitive families |
+| 31 | `string interpolation runtime support` | compiler-known `DefaultInterpolatedStringHandler`, literal/formatted segments, strings/chars/spans, alignment, basic format strings, numeric formats, `Text`, `Clear`, `ToString` and `ToStringAndClear` |
+| 32 | `System.String` composite formatting | indexed placeholders such as `{0}`, escaped braces, positive/negative alignment, null arguments, basic item format strings, malformed-format exceptions, and the Profile 1 primitive numeric format subset |
+| 33 | `System.Math` | primitive `Abs`, `Min`, `Max`, `Clamp`, `Sign`; `Floor`, `Ceiling`, `Round`, `Truncate`; `Sqrt`, `Pow`, `Exp`, `Log`, `Log10`; and `Sin`, `Cos`, `Tan`, `Atan`, `Atan2`, including NaN/infinity and documented exception paths covered by the paired gate |
+| 34 | `System.MathF` | single-precision counterpart to the covered `System.Math` surface |
+| 35 | `System.Convert` | Boolean, integer and floating primitive conversions, rounding on floating-to-integer conversion, and primitive invariant string conversion |
+| 36 | `System.IComparable / IComparable<T> / IEquatable<T>` | boxed and strongly typed ordering/equality across covered primitive families |
+| 37 | `delegate family` | managed delegate construction/invocation for `Action`/`Func` through four arguments plus `Predicate<T>`, `Comparison<T>`, and `Converter<TInput,TOutput>` |
+| 38 | `System.Span<T> / System.ReadOnlySpan<T>` | full .NET 10 type-owned `Span<T>` / `ReadOnlySpan<T>` surface: managed/native byref windows, array/ref/pointer construction, indexing, slicing, fill/clear, overlap-safe copy/try-copy, enumeration, pinning, `ToArray`, `ToString`, window identity, `ArraySegment<T>` conversion, and read-only covariance |
+| 39 | `System.Memory<T> / System.ReadOnlyMemory<T>` | complete .NET 10 type-owned array-backed surface: constructors/range/covariance rules, `Empty`/`IsEmpty`/`Length`/`Span`, slicing, copy/try-copy, equality/hash, non-moving-heap `Pin`/`MemoryHandle`, `ToArray`, `ToString`, and array/`ArraySegment<T>` conversions |
+| 40 | `System.Collections.Generic.Comparer<T> + equality consistency` | default generic ordering and equality across multiple primitive families |
 
 ## Primitive/runtime foundation status
 
@@ -66,7 +69,7 @@ Where one of these areas is explicitly listed in `TODO.md` (for example `System.
 
 ## Change rule
 
-The target is fixed by name and count. `ManagedRuntimeConformance.BclTargetName` is `Inu.BCL.Core.v1` and `BclTargetItemCount` is `37`. The reference executable independently carries the same name and count and fails if it does not execute exactly 37 target items.
+The target is fixed by name and count. `ManagedRuntimeConformance.BclTargetName` is `Inu.BCL.Core.v1` and `BclTargetItemCount` is `40`. The reference executable independently carries the same name and count and fails if it does not execute exactly 40 target items.
 
 When adding a new item:
 

@@ -4,7 +4,7 @@ namespace Inu.Core;
 public static class InuSdkContract
 {
     /// <summary>Gets the Inu SDK product release version.</summary>
-    public const string SdkVersion = "0.1.32";
+    public const string SdkVersion = "0.1.33";
 
     /// <summary>Gets the stable Inu public API contract version.</summary>
     public const string ApiVersion = "3.0";
