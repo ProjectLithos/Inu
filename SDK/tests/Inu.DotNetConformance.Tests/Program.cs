@@ -653,6 +653,7 @@ internal static class Program
         string concatenated = string.Concat("Inu", " ", "kernel");
         string fromChars = new string(new[] { 'I', 'n', 'u' });
         string repeated = new string('*', 3);
+        string slicedChars = new string(new[] { 'x', 'I', 'n', 'u', 'y' }, 1, 3);
         string[] split = "one,two,,three".Split(',');
         int enumerated = 0;
         int charSum = 0;
@@ -667,7 +668,7 @@ internal static class Program
 
         bool ok = true;
         ok &= StringCheck("constructors/Length/indexer/Empty",
-            string.Empty.Length == 0 && fromChars == "Inu" && repeated == "***"
+            string.Empty.Length == 0 && fromChars == "Inu" && repeated == "***" && slicedChars == "Inu"
             && text.Length == 14 && text[2] == 'I' && indexThrows);
         ok &= StringCheck("Equals/Compare/CompareOrdinal",
             string.Equals("Inu kernel", concatenated)

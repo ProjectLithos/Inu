@@ -109,3 +109,4 @@ SDK\Run-InuDotNetConformance.bat
 - broader collections, threading and task/runtime library surface.
 
 Each of these should be added to the executable conformance suite before it is advertised as supported.
+- `System.String` constructor support includes the NativeAOT compiler companion contract: each supported public `String(...)` constructor has a matching private static `Ctor(...)` implementation for ILC string allocation lowering.

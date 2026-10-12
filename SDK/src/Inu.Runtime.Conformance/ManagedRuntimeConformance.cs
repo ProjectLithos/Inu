@@ -1188,6 +1188,7 @@ public static unsafe class ManagedRuntimeConformance
         String concatenated = String.Concat("Inu", " ", "kernel");
         String fromChars = new String(new Char[] { 'I', 'n', 'u' });
         String repeated = new String('*', 3);
+        String slicedChars = new String(new Char[] { 'x', 'I', 'n', 'u', 'y' }, 1, 3);
         String[] splitStrings = "one,two,,three".Split(',');
         Int32 enumeratedChars = 0;
         Int32 enumeratedSum = 0;
@@ -1200,7 +1201,7 @@ public static unsafe class ManagedRuntimeConformance
         try { Char ignored = "x"[1]; } catch (IndexOutOfRangeException) { stringIndexThrows = true; }
 
         Record(String.Empty.Length == 0
-            && String.Equals(fromChars, "Inu") && String.Equals(repeated, "***")
+            && String.Equals(fromChars, "Inu") && String.Equals(repeated, "***") && String.Equals(slicedChars, "Inu")
             && text.Length == 14 && text[2] == 'I' && stringIndexThrows
             && String.Equals("Inu kernel", concatenated)
             && String.Compare("abc", "abd") < 0 && String.Compare("ABC", "abc", true) == 0

@@ -1,15 +1,19 @@
 {
-  "baseVersion": "0.1.30",
-  "version": "0.1.31",
+  "baseVersion": "0.1.31",
+  "version": "0.1.32",
   "changedFiles": [
-    "CHANGED-0.1.31.txt",
+    "CHANGED-0.1.32.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
+    "Inu/SDK/docs/BCL-Conformance-Target.md",
     "Inu/SDK/docs/Inu.Documentation.json",
+    "Inu/SDK/docs/Managed-Runtime.md",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
     "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
+    "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
+    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
@@ -20,5 +24,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Fix the freestanding System.String indexer metadata contract so Roslyn can resolve compiler-required System.String.get_Chars."
+  "summary": "Restore the NativeAOT System.String constructor companion contract by implementing the compiler-required private static Ctor overloads for every constructor Inu exposes."
 }

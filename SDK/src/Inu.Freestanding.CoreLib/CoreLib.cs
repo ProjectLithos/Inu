@@ -2983,6 +2983,50 @@ namespace System
         [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.InternalCall)]
         public extern String(Char[] value, Int32 startIndex, Int32 length);
 
+        // NativeAOT does not execute the public String .ctor declarations above. The compiler
+        // recognizes them as string-construction intrinsics and redirects each supported shape
+        // to a same-signature method named Ctor on System.String. Keep these companions in step
+        // with every constructor Inu exposes; otherwise ILC fails during StringAllocator lowering.
+        private static String Ctor(Char value, Int32 count)
+        {
+            if (count < 0) throw new ArgumentOutOfRangeException();
+            if (count == 0) return Empty;
+            if (count > MaxLength) throw new OutOfMemoryException();
+
+            void* address = AllocateRuntimeString(global::Internal.Runtime.MethodTable.Of<String>(), count);
+            if (address == null) throw new OutOfMemoryException();
+            UInt64 raw = (UInt64)(nuint)address;
+            String result = Runtime.CompilerServices.Unsafe.As<UInt64, String>(ref raw);
+            ref Char destination = ref result.GetRawStringData();
+            Char* pointer = (Char*)Runtime.CompilerServices.Unsafe.AsPointer(ref destination);
+            for (Int32 index = 0; index < count; index++) pointer[index] = value;
+            return result;
+        }
+
+        private static String Ctor(Char[] value)
+        {
+            if (value == null) throw new ArgumentNullException();
+            return CreateFromChars(value, value.Length);
+        }
+
+        private static String Ctor(Char[] value, Int32 startIndex, Int32 length)
+        {
+            if (value == null) throw new ArgumentNullException();
+            if (startIndex < 0 || length < 0 || startIndex > value.Length - length)
+                throw new ArgumentOutOfRangeException();
+            if (length == 0) return Empty;
+            if (length > MaxLength) throw new OutOfMemoryException();
+
+            void* address = AllocateRuntimeString(global::Internal.Runtime.MethodTable.Of<String>(), length);
+            if (address == null) throw new OutOfMemoryException();
+            UInt64 raw = (UInt64)(nuint)address;
+            String result = Runtime.CompilerServices.Unsafe.As<UInt64, String>(ref raw);
+            ref Char destination = ref result.GetRawStringData();
+            Char* pointer = (Char*)Runtime.CompilerServices.Unsafe.AsPointer(ref destination);
+            for (Int32 index = 0; index < length; index++) pointer[index] = value[startIndex + index];
+            return result;
+        }
+
         /// <summary>Represents the empty string. This is the canonical zero-length string literal and requires no managed allocation.</summary>
         public static String Empty => "";
 
