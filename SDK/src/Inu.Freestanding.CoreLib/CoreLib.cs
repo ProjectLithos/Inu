@@ -2855,31 +2855,186 @@ namespace System
 #pragma warning restore CS0169, CS0649
     public abstract class ValueType { }
     public abstract class Enum : ValueType { }
-    public abstract class Array
+    public abstract unsafe class Array : Collections.IEnumerable
     {
         // NativeAOT SZ-array layout is [method table][number of components][data...].
-        // NativeAotRuntime writes this field immediately after the object header. Keeping
-        // the field on System.Array gives Roslyn/ILC the normal managed Array.Length contract
-        // while preserving the runtime layout expected by RhpNewArray.
-        #pragma warning disable CS0649 // Populated by RhpNewArray before the array reference is published.
+#pragma warning disable CS0649
         private readonly Int32 _numComponents;
 #pragma warning restore CS0649, CS0169
 
-        /// <summary>Gets the total number of elements in this one-dimensional managed array.</summary>
         public Int32 Length => _numComponents;
-
-        /// <summary>Gets the total number of elements as a 64-bit value.</summary>
         public Int64 LongLength => _numComponents;
+        public Int32 Rank => 1;
 
-        /// <summary>Returns an empty array of the requested element type.</summary>
         public static T[] Empty<T>() => new T[0];
 
-        // .NET 10 NativeAOT class-library callback. The runtime asks CoreLib for
-        // the canonical System.Array MethodTable when resolving array base-type
-        // relationships and array type-system helpers.
+        [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        [Runtime.RuntimeImport("*", "RhpNewArray")]
+        private static extern Object RhpNewArray(void* methodTable, Int32 elementCount);
+
+        [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        [Runtime.RuntimeImport("*", "RhpNewFast")]
+        private static extern Object RhpNewFast(void* methodTable);
+
+        private static ref Byte Data(Array array)
+            => ref Runtime.CompilerServices.Unsafe.As<RawArrayData>(array).Data;
+
+        private static Internal.Runtime.MethodTable* MethodTableOf(Array array)
+            => Runtime.CompilerServices.RuntimeHelpers.GetMethodTable(array);
+
+        private static Boolean IsReferenceArray(Internal.Runtime.MethodTable* arrayType)
+            => arrayType != null && arrayType->RelatedParameterType != null && !arrayType->RelatedParameterType->IsValueType;
+
+        public Object Clone()
+        {
+            Internal.Runtime.MethodTable* type = MethodTableOf(this);
+            Array clone = Runtime.CompilerServices.Unsafe.As<Array>(RhpNewArray(type, Length));
+            UIntPtr bytes = (UIntPtr)((UInt64)(UInt32)Length * type->ComponentSize);
+            if ((UInt64)(nuint)bytes != 0UL)
+                Buffer.BulkMoveWithWriteBarrier(ref Data(clone), ref Data(this), bytes);
+            return clone;
+        }
+
+        public static void Clear(Array array, Int32 index, Int32 length)
+        {
+            if (array == null) throw new ArgumentNullException("array");
+            if (index < 0 || length < 0 || index > array.Length - length) throw new IndexOutOfRangeException();
+            if (length == 0) return;
+            Internal.Runtime.MethodTable* type = MethodTableOf(array);
+            if (IsReferenceArray(type))
+            {
+                Object[] refs = Runtime.CompilerServices.Unsafe.As<Object[]>((Object)array);
+                for (Int32 i = 0; i < length; i++) Runtime.TypeCast.StelemRef(refs, index + i, null);
+                return;
+            }
+            ref Byte first = ref Data(array);
+            ref Byte destination = ref Runtime.CompilerServices.Unsafe.Add(ref first, index * (Int32)type->ComponentSize);
+            SpanHelpers.ClearWithoutReferences(ref destination, (UIntPtr)((UInt64)(UInt32)length * type->ComponentSize));
+        }
+
+        public static void Copy(Array sourceArray, Array destinationArray, Int32 length)
+            => Copy(sourceArray, 0, destinationArray, 0, length);
+
+        public static void Copy(Array sourceArray, Int32 sourceIndex, Array destinationArray, Int32 destinationIndex, Int32 length)
+        {
+            if (sourceArray == null) throw new ArgumentNullException("sourceArray");
+            if (destinationArray == null) throw new ArgumentNullException("destinationArray");
+            if (sourceIndex < 0 || destinationIndex < 0 || length < 0 || sourceIndex > sourceArray.Length - length || destinationIndex > destinationArray.Length - length)
+                throw new IndexOutOfRangeException();
+            if (length == 0) return;
+
+            Internal.Runtime.MethodTable* sourceType = MethodTableOf(sourceArray);
+            Internal.Runtime.MethodTable* destinationType = MethodTableOf(destinationArray);
+            Boolean sourceRefs = IsReferenceArray(sourceType);
+            Boolean destinationRefs = IsReferenceArray(destinationType);
+            if (sourceRefs != destinationRefs) throw new ArrayTypeMismatchException();
+
+            if (sourceRefs)
+            {
+                Object[] source = Runtime.CompilerServices.Unsafe.As<Object[]>((Object)sourceArray);
+                Object[] destination = Runtime.CompilerServices.Unsafe.As<Object[]>((Object)destinationArray);
+                if (Object.ReferenceEquals(sourceArray, destinationArray) && destinationIndex > sourceIndex && destinationIndex < sourceIndex + length)
+                {
+                    for (Int32 i = length - 1; i >= 0; i--) Runtime.TypeCast.StelemRef(destination, destinationIndex + i, source[sourceIndex + i]);
+                }
+                else
+                {
+                    for (Int32 i = 0; i < length; i++) Runtime.TypeCast.StelemRef(destination, destinationIndex + i, source[sourceIndex + i]);
+                }
+                return;
+            }
+
+            if (sourceType != destinationType || sourceType->ComponentSize != destinationType->ComponentSize) throw new ArrayTypeMismatchException();
+            ref Byte sourceFirst = ref Data(sourceArray);
+            ref Byte destinationFirst = ref Data(destinationArray);
+            ref Byte sourceData = ref Runtime.CompilerServices.Unsafe.Add(ref sourceFirst, sourceIndex * (Int32)sourceType->ComponentSize);
+            ref Byte destinationData = ref Runtime.CompilerServices.Unsafe.Add(ref destinationFirst, destinationIndex * (Int32)destinationType->ComponentSize);
+            SpanHelpers.Memmove(ref destinationData, ref sourceData, (UIntPtr)((UInt64)(UInt32)length * sourceType->ComponentSize));
+        }
+
+        internal Object GetValueForEnumeration(Int32 index)
+        {
+            if ((UInt32)index >= (UInt32)Length) throw new IndexOutOfRangeException();
+            Internal.Runtime.MethodTable* arrayType = MethodTableOf(this);
+            Internal.Runtime.MethodTable* elementType = arrayType->RelatedParameterType;
+            if (!elementType->IsValueType)
+            {
+                Object[] refs = Runtime.CompilerServices.Unsafe.As<Object[]>((Object)this);
+                return refs[index];
+            }
+            Object boxed = RhpNewFast(elementType);
+            ref Byte source = ref Runtime.CompilerServices.Unsafe.Add(ref Data(this), index * (Int32)arrayType->ComponentSize);
+            ref Byte destination = ref boxed.GetRawData();
+            Buffer.BulkMoveWithWriteBarrier(ref destination, ref source, (UIntPtr)arrayType->ComponentSize);
+            return boxed;
+        }
+
+        public Collections.IEnumerator GetEnumerator() => new ArrayEnumerator(this);
+
+        private sealed class ArrayEnumerator : Collections.IEnumerator
+        {
+            private readonly Array _array;
+            private Int32 _index;
+            internal ArrayEnumerator(Array array) { _array = array; _index = -1; }
+            public Object Current
+            {
+                get
+                {
+                    if (_index < 0 || _index >= _array.Length) throw new InvalidOperationException();
+                    return _array.GetValueForEnumeration(_index);
+                }
+            }
+            public Boolean MoveNext()
+            {
+                Int32 next = _index + 1;
+                if (next < _array.Length) { _index = next; return true; }
+                _index = _array.Length; return false;
+            }
+            public void Reset() { _index = -1; }
+        }
+
         [System.Runtime.RuntimeExport("GetSystemArrayEEType")]
-        private static unsafe Internal.Runtime.MethodTable* GetSystemArrayEEType()
+        private static Internal.Runtime.MethodTable* GetSystemArrayEEType()
             => Internal.Runtime.MethodTable.Of<Array>();
+    }
+
+    // NativeAOT's array interface dispatcher redirects generic SZ-array interface
+    // calls to this exact companion type/method name. The runtime 'this' is the array.
+    internal sealed class SZArrayHelper
+    {
+        private SZArrayHelper() { }
+
+        [Runtime.CompilerServices.Intrinsic]
+        internal Collections.Generic.IEnumerator<T> GetEnumerator<T>()
+        {
+            T[] array = Runtime.CompilerServices.Unsafe.As<T[]>((Object)this);
+            return array.Length == 0 ? SZGenericArrayEnumerator<T>.Empty : new SZGenericArrayEnumerator<T>(array);
+        }
+    }
+
+    internal sealed class SZGenericArrayEnumerator<T> : Collections.Generic.IEnumerator<T>
+    {
+        internal static readonly SZGenericArrayEnumerator<T> Empty = new SZGenericArrayEnumerator<T>(new T[0]);
+        private readonly T[] _array;
+        private Int32 _index;
+        internal SZGenericArrayEnumerator(T[] array) { _array = array; _index = -1; }
+        public T Current
+        {
+            get
+            {
+                if (_index < 0 || _index >= _array.Length) throw new InvalidOperationException();
+                return _array[_index];
+            }
+        }
+        Object Collections.IEnumerator.Current => Current;
+        public Boolean MoveNext()
+        {
+            Int32 next = _index + 1;
+            if (next < _array.Length) { _index = next; return true; }
+            _index = _array.Length; return false;
+        }
+        public void Reset() { _index = -1; }
+        public void Dispose() { }
     }
     internal class Array<T> : Array { }
 

@@ -121,3 +121,7 @@ Profile 1 completes the requested `System.Text` encoding substrate for ASCII and
 
 UTF-16 is **not** a Profile 1 encoding API. Inu strings are still stored as UTF-16, but `UnicodeEncoding`, `Encoding.Unicode`, and `Encoding.BigEndianUnicode` are deferred together with BOM/endian policy, streaming `Encoder`/`Decoder`, configurable fallback objects, UTF-32 and broader code-page support.
 
+
+## Profile 1 SZ-array and enumeration completion (0.1.38)
+
+Profile 1 one-dimensional managed arrays now include compiler-enforced bounds checks, NativeAOT covariance/store checks, `Clone`, `Array.Clear`, overlap-safe `Array.Copy`, `Array.Empty<T>`, direct `foreach`, and both generic and non-generic interface enumeration. NativeAOT generic SZ-array interface dispatch is supplied through the compiler/runtime-known `SZArrayHelper` companion and a typed `SZGenericArrayEnumerator<T>`. Non-generic enumeration boxes value-type elements and enforces `IEnumerator.Current` state rules before the first element and after the end. `IEnumerable`, `IEnumerator`, `IEnumerable<T>`, and `IEnumerator<T>` are explicit Profile 1 conformance targets.

@@ -659,7 +659,7 @@ public static unsafe class ManagedRuntimeConformance
     public const String BclTargetName = "Inu.BCL.Core.v1";
 
     /// <summary>Number of type-level BCL items in <see cref="BclTargetName"/>.</summary>
-    public const Int32 BclTargetItemCount = 40;
+    public const Int32 BclTargetItemCount = 44;
 
     /// <summary>
     /// Hard in-kernel gate for the named BCL subset. Keep this list in lock-step with
@@ -1177,13 +1177,68 @@ public static unsafe class ManagedRuntimeConformance
             && unsignedFormatChars[2] == '1' && unsignedFormatChars[3] == '2' && unsignedFormatChars[4] == '3', ref passed, ref failed);
 
         // 16 System.Array
-        Int32[] array = new Int32[3];
-        array[1] = 9;
+        Int32[] array = new Int32[] { 1, 2, 3, 4 };
+        Boolean arrayLowBounds = false;
+        Boolean arrayHighBounds = false;
+        try { Int32 ignored = array[-1]; } catch (IndexOutOfRangeException) { arrayLowBounds = true; }
+        try { Int32 ignored = array[array.Length]; } catch (IndexOutOfRangeException) { arrayHighBounds = true; }
+        Int32[] clonedArray = (Int32[])array.Clone();
+        Array.Clear(clonedArray, 1, 2);
+        Int32[] copiedArray = new Int32[4];
+        Array.Copy(array, copiedArray, array.Length);
+        Array.Copy(copiedArray, 0, copiedArray, 1, 3);
+        String[] covarianceStrings = new String[] { "a", "b" };
+        Object[] covarianceObjects = covarianceStrings;
+        Boolean covarianceRejected = false;
+        try { covarianceObjects[0] = new Object(); } catch (ArrayTypeMismatchException) { covarianceRejected = true; }
+        Int32 arrayForeachSum = 0;
+        foreach (Int32 value in array) arrayForeachSum += value;
         Int32[] emptyArray = Array.Empty<Int32>();
-        Record(array.Length == 3 && array.LongLength == 3L && array[1] == 9
-            && emptyArray != null && emptyArray.Length == 0, ref passed, ref failed);
+        Record(array.Length == 4 && array.LongLength == 4L && array.Rank == 1
+            && arrayLowBounds && arrayHighBounds && covarianceRejected
+            && clonedArray[0] == 1 && clonedArray[1] == 0 && clonedArray[2] == 0 && clonedArray[3] == 4
+            && copiedArray[0] == 1 && copiedArray[1] == 1 && copiedArray[2] == 2 && copiedArray[3] == 3
+            && arrayForeachSum == 10 && emptyArray != null && emptyArray.Length == 0, ref passed, ref failed);
 
-        // 17 System.String
+        // 17 System.Collections.IEnumerable
+        System.Collections.IEnumerable nonGenericEnumerable = new Int32[] { 3, 4, 5 };
+        System.Collections.IEnumerator nonGenericIterator = nonGenericEnumerable.GetEnumerator();
+        Int32 nonGenericSum = 0;
+        while (nonGenericIterator.MoveNext()) nonGenericSum += (Int32)nonGenericIterator.Current;
+        nonGenericIterator.Reset();
+        Record(nonGenericSum == 12 && nonGenericIterator.MoveNext() && (Int32)nonGenericIterator.Current == 3, ref passed, ref failed);
+
+        // 18 System.Collections.IEnumerator
+        System.Collections.IEnumerator stateIterator = ((System.Collections.IEnumerable)new String[] { "a", "b" }).GetEnumerator();
+        Boolean enumeratorBeforeThrows = false;
+        Boolean enumeratorAfterThrows = false;
+        try { Object ignored = stateIterator.Current; } catch (InvalidOperationException) { enumeratorBeforeThrows = true; }
+        Boolean enumeratorMoved = stateIterator.MoveNext() && String.Equals((String)stateIterator.Current, "a")
+            && stateIterator.MoveNext() && String.Equals((String)stateIterator.Current, "b") && !stateIterator.MoveNext();
+        try { Object ignored = stateIterator.Current; } catch (InvalidOperationException) { enumeratorAfterThrows = true; }
+        Record(enumeratorBeforeThrows && enumeratorMoved && enumeratorAfterThrows, ref passed, ref failed);
+
+        // 19 System.Collections.Generic.IEnumerable<T>
+        System.Collections.Generic.IEnumerable<Int32> genericEnumerable = new Int32[] { 7, 8 };
+        Int32 genericSum = 0;
+        foreach (Int32 value in genericEnumerable) genericSum += value;
+        System.Collections.Generic.IEnumerable<Object> genericCovariantEnumerable = new String[] { "x", "y" };
+        Int32 genericCovariantCount = 0;
+        foreach (Object value in genericCovariantEnumerable) if (value is String) genericCovariantCount++;
+        Record(genericSum == 15 && genericCovariantCount == 2, ref passed, ref failed);
+
+        // 20 System.Collections.Generic.IEnumerator<T>
+        System.Collections.Generic.IEnumerator<Int32> genericIterator = ((System.Collections.Generic.IEnumerable<Int32>)new Int32[] { 9, 10 }).GetEnumerator();
+        Boolean genericBeforeThrows = false;
+        try { Int32 ignored = genericIterator.Current; } catch (InvalidOperationException) { genericBeforeThrows = true; }
+        Boolean genericMoved = genericIterator.MoveNext() && genericIterator.Current == 9
+            && genericIterator.MoveNext() && genericIterator.Current == 10 && !genericIterator.MoveNext();
+        genericIterator.Reset();
+        Boolean genericReset = genericIterator.MoveNext() && genericIterator.Current == 9;
+        genericIterator.Dispose();
+        Record(genericBeforeThrows && genericMoved && genericReset, ref passed, ref failed);
+
+        // 21 System.String
         String text = "  Inu kernel  ";
         String concatenated = String.Concat("Inu", " ", "kernel");
         String fromChars = new String(new Char[] { 'I', 'n', 'u' });
