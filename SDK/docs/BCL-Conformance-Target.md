@@ -36,27 +36,28 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 21 | `System.String` | Inu-required constructors; empty; length/indexing; equality/hash; ordinal compare; prefix/suffix; char/string contains/index/last-index; substring/remove/insert/replace; trim; ASCII/invariant upper/lower subset; split/join/concat; null/whitespace helpers; character enumeration |
 | 22 | `System.Nullable<T>` | present/empty state, `Value`, `GetValueOrDefault` |
 | 23 | `System.Type` | value/primitive/array identity, `Name` from NativeAOT metadata, element/base type, assignability and subclass checks |
-| 24 | `System.Collections.Generic.KeyValuePair<TKey,TValue>` | construction and key/value access |
-| 25 | `System.Collections.Generic.EqualityComparer<T>` | default integer/string equality and stable equal-value hashing |
+| 24 | `System.Collections.Generic.KeyValuePair<TKey,TValue>` | construction, key/value access, deconstruction, formatting and `KeyValuePair.Create` |
+| 25 | `System.Collections.Generic.EqualityComparer<T>` | `IEqualityComparer<T>` contract plus default integer/string equality and stable equal-value hashing |
 | 26 | `System.Collections.Generic.List<T>` | add/add-range (including self-add), insert, indexer get/set and bounds, contains/index lookup, remove/remove-at, clear, count/capacity, generic/non-generic enumeration state/version semantics, and independent `ToArray` |
-| 27 | `System.Collections.Generic.Dictionary<TKey,TValue>` | add/indexer/count/lookup/`TryAdd`/remove |
-| 28 | `System.Collections.Generic.Queue<T>` | enqueue/peek/dequeue/count and FIFO ordering |
-| 29 | `System.Collections.Generic.Stack<T>` | push/peek/pop/count and LIFO ordering |
-| 30 | `System.Text.StringBuilder` | append/object append, line append, insert, remove, character/string replace, index/length, clear, capacity growth/set, materialisation, and argument-error paths |
-| 31 | `System.Text.Encoding` | Profile 1 ASCII/UTF-8 factories by property/name/code page plus byte/character counts and allocating/range/span/buffer conversion contracts |
-| 32 | `System.Text.ASCIIEncoding` | 7-bit replacement semantics plus byte/character counts and allocating/range/span/buffer encode/decode |
-| 33 | `System.Text.UTF8Encoding` | UTF-8 BMP/supplementary-scalar byte/character counts and allocating/range/span/buffer encode/decode with replacement fallback |
-| 34 | `primitive numeric formatting / System.IFormattable` | signed/unsigned `G`/`D`/`X` plus invariant floating `G`/`F`/`E` formatting |
-| 35 | `string interpolation runtime support` | compiler-known `DefaultInterpolatedStringHandler`, literal/formatted segments, strings/chars/spans, alignment, basic format strings, numeric formats, `Text`, `Clear`, `ToString` and `ToStringAndClear` |
-| 36 | `System.String` composite formatting | indexed placeholders such as `{0}`, escaped braces, positive/negative alignment, null arguments, basic item format strings, malformed-format exceptions, and the Profile 1 primitive numeric format subset |
-| 37 | `System.Math` | primitive `Abs`, `Min`, `Max`, `Clamp`, `Sign`; `Floor`, `Ceiling`, `Round`, `Truncate`; `Sqrt`, `Pow`, `Exp`, `Log`, `Log10`; and `Sin`, `Cos`, `Tan`, `Atan`, `Atan2`, including NaN/infinity and documented exception paths covered by the paired gate |
-| 38 | `System.MathF` | single-precision counterpart to the covered `System.Math` surface |
-| 39 | `System.Convert` | Boolean, integer and floating primitive conversions, rounding on floating-to-integer conversion, and primitive invariant string conversion |
-| 40 | `System.IComparable / IComparable<T> / IEquatable<T>` | boxed and strongly typed ordering/equality across covered primitive families |
-| 41 | `delegate family` | managed delegate construction/invocation for `Action`/`Func` through four arguments plus `Predicate<T>`, `Comparison<T>`, and `Converter<TInput,TOutput>` |
-| 42 | `System.Span<T> / System.ReadOnlySpan<T>` | full .NET 10 type-owned `Span<T>` / `ReadOnlySpan<T>` surface: managed/native byref windows, array/ref/pointer construction, indexing, slicing, fill/clear, overlap-safe copy/try-copy, enumeration, pinning, `ToArray`, `ToString`, window identity, `ArraySegment<T>` conversion, and read-only covariance |
-| 43 | `System.Memory<T> / System.ReadOnlyMemory<T>` | complete .NET 10 type-owned array-backed surface: constructors/range/covariance rules, `Empty`/`IsEmpty`/`Length`/`Span`, slicing, copy/try-copy, equality/hash, non-moving-heap `Pin`/`MemoryHandle`, `ToArray`, `ToString`, and array/`ArraySegment<T>` conversions |
-| 44 | `System.Collections.Generic.Comparer<T> + equality consistency` | default generic ordering and equality across multiple primitive families |
+| 27 | `System.Collections.Generic.Dictionary<TKey,TValue>` | add/try-add/remove, indexer, count, lookup, key/value views, generic/non-generic enumeration, collision chains, resizing and custom `IEqualityComparer<TKey>` |
+| 28 | `System.Collections.Generic.HashSet<T>` | hash-set construction, add/remove/contains, copy, count, custom comparer, collision/resizing behaviour, try-get-value and versioned enumeration |
+| 29 | `System.Collections.Generic.Queue<T>` | constructors, enqueue/dequeue/peek plus try variants, contains/copy/to-array/clear/count, capacity/trim operations and mutation-invalidating FIFO enumeration |
+| 30 | `System.Collections.Generic.Stack<T>` | constructors, push/pop/peek plus try variants, contains/copy/to-array/clear/count, capacity/trim operations and mutation-invalidating LIFO enumeration |
+| 31 | `System.Text.StringBuilder` | append/object append, line append, insert, remove, character/string replace, index/length, clear, capacity growth/set, materialisation, and argument-error paths |
+| 32 | `System.Text.Encoding` | Profile 1 ASCII/UTF-8 factories by property/name/code page plus byte/character counts and allocating/range/span/buffer conversion contracts |
+| 33 | `System.Text.ASCIIEncoding` | 7-bit replacement semantics plus byte/character counts and allocating/range/span/buffer encode/decode |
+| 34 | `System.Text.UTF8Encoding` | UTF-8 BMP/supplementary-scalar byte/character counts and allocating/range/span/buffer encode/decode with replacement fallback |
+| 35 | `primitive numeric formatting / System.IFormattable` | signed/unsigned `G`/`D`/`X` plus invariant floating `G`/`F`/`E` formatting |
+| 36 | `string interpolation runtime support` | compiler-known `DefaultInterpolatedStringHandler`, literal/formatted segments, strings/chars/spans, alignment, basic format strings, numeric formats, `Text`, `Clear`, `ToString` and `ToStringAndClear` |
+| 37 | `System.String` composite formatting | indexed placeholders such as `{0}`, escaped braces, positive/negative alignment, null arguments, basic item format strings, malformed-format exceptions, and the Profile 1 primitive numeric format subset |
+| 38 | `System.Math` | primitive `Abs`, `Min`, `Max`, `Clamp`, `Sign`; `Floor`, `Ceiling`, `Round`, `Truncate`; `Sqrt`, `Pow`, `Exp`, `Log`, `Log10`; and `Sin`, `Cos`, `Tan`, `Atan`, `Atan2`, including NaN/infinity and documented exception paths covered by the paired gate |
+| 39 | `System.MathF` | single-precision counterpart to the covered `System.Math` surface |
+| 40 | `System.Convert` | Boolean, integer and floating primitive conversions, rounding on floating-to-integer conversion, and primitive invariant string conversion |
+| 41 | `System.IComparable / IComparable<T> / IEquatable<T>` | boxed and strongly typed ordering/equality across covered primitive families |
+| 42 | `delegate family` | managed delegate construction/invocation for `Action`/`Func` through four arguments plus `Predicate<T>`, `Comparison<T>`, and `Converter<TInput,TOutput>` |
+| 43 | `System.Span<T> / System.ReadOnlySpan<T>` | full .NET 10 type-owned `Span<T>` / `ReadOnlySpan<T>` surface: managed/native byref windows, array/ref/pointer construction, indexing, slicing, fill/clear, overlap-safe copy/try-copy, enumeration, pinning, `ToArray`, `ToString`, window identity, `ArraySegment<T>` conversion, and read-only covariance |
+| 44 | `System.Memory<T> / System.ReadOnlyMemory<T>` | complete .NET 10 type-owned array-backed surface: constructors/range/covariance rules, `Empty`/`IsEmpty`/`Length`/`Span`, slicing, copy/try-copy, equality/hash, non-moving-heap `Pin`/`MemoryHandle`, `ToArray`, `ToString`, and array/`ArraySegment<T>` conversions |
+| 45 | `System.Collections.Generic.Comparer<T> + equality consistency` | default generic ordering and equality across multiple primitive families |
 
 
 ### Profile 1 encoding boundary
@@ -78,7 +79,7 @@ Where one of these areas is explicitly listed in `TODO.md` (for example `System.
 
 ## Change rule
 
-The target is fixed by name and count. `ManagedRuntimeConformance.BclTargetName` is `Inu.BCL.Core.v1` and `BclTargetItemCount` is `44`. The reference executable independently carries the same name and count and fails if it does not execute exactly 44 target items.
+The target is fixed by name and count. `ManagedRuntimeConformance.BclTargetName` is `Inu.BCL.Core.v1` and `BclTargetItemCount` is `45`. The reference executable independently carries the same name and count and fails if it does not execute exactly 45 target items.
 
 When adding a new item:
 

@@ -1,15 +1,15 @@
 {
-  "baseVersion": "0.1.40",
-  "version": "0.1.41",
+  "baseVersion": "0.1.42",
+  "version": "0.1.43",
   "changedFiles": [
-    "CHANGED-0.1.41.txt",
+    "CHANGED-0.1.43.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Runtime.Conformance/Shared/ListConformance.cs",
+    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
@@ -20,5 +20,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Fix the shared List<T> AddRange(null) conformance test so nullable warnings-as-errors do not prevent the reference suite from compiling."
+  "summary": "Restore the System.Text CoreLib section accidentally removed during the 0.1.42 collections edit while preserving all completed collection changes."
 }

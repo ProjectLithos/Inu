@@ -659,7 +659,7 @@ public static unsafe class ManagedRuntimeConformance
     public const String BclTargetName = "Inu.BCL.Core.v1";
 
     /// <summary>Number of type-level BCL items in <see cref="BclTargetName"/>.</summary>
-    public const Int32 BclTargetItemCount = 44;
+    public const Int32 BclTargetItemCount = 45;
 
     /// <summary>
     /// Hard in-kernel gate for the named BCL subset. Keep this list in lock-step with
@@ -1242,8 +1242,7 @@ public static unsafe class ManagedRuntimeConformance
             && typeof(Object).IsAssignableFrom(typeof(Probe)) && typeof(Probe).IsSubclassOf(typeof(Object)), ref passed, ref failed);
 
         // 20 System.Collections.Generic.KeyValuePair<TKey,TValue>
-        KeyValuePair<String, Int32> pair = new KeyValuePair<String, Int32>("answer", 42);
-        Record(String.Equals(pair.Key, "answer") && pair.Value == 42, ref passed, ref failed);
+        Record(Shared.CoreCollectionsConformance.TestKeyValuePair(), ref passed, ref failed);
 
         // 21 System.Collections.Generic.EqualityComparer<T>
         EqualityComparer<Int32> intComparer = EqualityComparer<Int32>.Default;
@@ -1253,29 +1252,15 @@ public static unsafe class ManagedRuntimeConformance
             && stringComparer.GetHashCode("same") == stringComparer.GetHashCode("same"), ref passed, ref failed);
 
         // 22 System.Collections.Generic.List<T>
-        // Shared with the host reference runner so the List<T> expectations are authored once.
         Record(Shared.ListConformance.TestList(), ref passed, ref failed);
 
-        // 23 System.Collections.Generic.Dictionary<TKey,TValue>
-        Dictionary<String, Int32> dictionary = new Dictionary<String, Int32>();
-        dictionary.Add("one", 1);
-        dictionary["two"] = 2;
-        Int32 dictionaryValue;
-        Record(dictionary.Count == 2 && dictionary.ContainsKey("one")
-            && dictionary.TryGetValue("two", out dictionaryValue) && dictionaryValue == 2
-            && !dictionary.TryAdd("one", 11) && dictionary.Remove("one") && !dictionary.ContainsKey("one"), ref passed, ref failed);
+        // 23-27 core generic collections share the exact host reference expectations.
+        Record(Shared.CoreCollectionsConformance.TestDictionary(), ref passed, ref failed);
+        Record(Shared.CoreCollectionsConformance.TestHashSet(), ref passed, ref failed);
+        Record(Shared.CoreCollectionsConformance.TestQueue(), ref passed, ref failed);
+        Record(Shared.CoreCollectionsConformance.TestStack(), ref passed, ref failed);
 
-        // 24 System.Collections.Generic.Queue<T>
-        Queue<Int32> queue = new Queue<Int32>();
-        queue.Enqueue(4); queue.Enqueue(5); queue.Enqueue(6);
-        Record(queue.Count == 3 && queue.Peek() == 4 && queue.Dequeue() == 4 && queue.Peek() == 5 && queue.Count == 2, ref passed, ref failed);
-
-        // 25 System.Collections.Generic.Stack<T>
-        Stack<Int32> stack = new Stack<Int32>();
-        stack.Push(4); stack.Push(5); stack.Push(6);
-        Record(stack.Count == 3 && stack.Peek() == 6 && stack.Pop() == 6 && stack.Peek() == 5 && stack.Count == 2, ref passed, ref failed);
-
-        // 26 System.Text.StringBuilder
+        // 28 System.Text.StringBuilder
         StringBuilder builder = new StringBuilder(2);
         Int32 builderInitialCapacity = builder.Capacity;
         builder.Append("Inu").Append(' ').Append(95).AppendLine();

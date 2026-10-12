@@ -7036,6 +7036,28 @@ namespace System.Collections.Generic
         public TKey Key => _key;
         /// <summary><inu.api/></summary>
         public TValue Value => _value;
+
+        /// <summary><inu.api/>Deconstructs this pair into its key and value.</summary>
+        public void Deconstruct(out TKey key, out TValue value)
+        {
+            key = _key;
+            value = _value;
+        }
+
+        /// <summary><inu.api/></summary>
+        public override String ToString()
+        {
+            String key = Object.ReferenceEquals((Object)_key, null) ? String.Empty : ((Object)_key).ToString();
+            String value = Object.ReferenceEquals((Object)_value, null) ? String.Empty : ((Object)_value).ToString();
+            return String.Concat(String.Concat("[", key, ", ", value), "]");
+        }
+    }
+
+    /// <summary><inu.api/>Factory helpers for generic key/value pairs.</summary>
+    public static class KeyValuePair
+    {
+        /// <summary><inu.api/></summary>
+        public static KeyValuePair<TKey, TValue> Create<TKey, TValue>(TKey key, TValue value) => new KeyValuePair<TKey, TValue>(key, value);
     }
 
     /// <summary><inu.api/>Provides the default strongly typed ordering used by freestanding generic code.</summary>
@@ -7058,8 +7080,15 @@ namespace System.Collections.Generic
         public abstract Int32 Compare(T x, T y);
     }
 
+    /// <summary><inu.api/>Defines equality and hashing for generic collections.</summary>
+    public interface IEqualityComparer<in T>
+    {
+        Boolean Equals(T x, T y);
+        Int32 GetHashCode(T obj);
+    }
+
     /// <summary><inu.api/>Provides equality and hashing used by freestanding generic collections.</summary>
-    public abstract class EqualityComparer<T>
+    public abstract class EqualityComparer<T> : IEqualityComparer<T>
     {
         private sealed class DefaultComparer : EqualityComparer<T>
         {
@@ -7410,29 +7439,18 @@ namespace System.Collections.Generic
     /// <summary><inu.api/>Freestanding key/value collection compatible with System.Collections.Generic.Dictionary&lt;TKey,TValue&gt;.</summary>
     public class Dictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>
     {
-        private struct Entry
-        {
-            public Int32 HashCode;
-            public Int32 Next;
-            public TKey Key;
-            public TValue Value;
-        }
-
+        private struct Entry { public Int32 HashCode; public Int32 Next; public TKey Key; public TValue Value; }
         private Int32[] _buckets;
         private Entry[] _entries;
         private Int32 _used;
         private Int32 _count;
         private Int32 _version;
-        private readonly EqualityComparer<TKey> _comparer;
+        private readonly IEqualityComparer<TKey> _comparer;
 
-        /// <summary><inu.api/></summary>
         public Dictionary() : this(0, null) { }
-        /// <summary><inu.api/></summary>
         public Dictionary(Int32 capacity) : this(capacity, null) { }
-        /// <summary><inu.api/></summary>
-        public Dictionary(EqualityComparer<TKey> comparer) : this(0, comparer) { }
-        /// <summary><inu.api/></summary>
-        public Dictionary(Int32 capacity, EqualityComparer<TKey> comparer)
+        public Dictionary(IEqualityComparer<TKey> comparer) : this(0, comparer) { }
+        public Dictionary(Int32 capacity, IEqualityComparer<TKey> comparer)
         {
             if (capacity < 0) throw new ArgumentOutOfRangeException();
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
@@ -7441,407 +7459,226 @@ namespace System.Collections.Generic
             _entries = new Entry[size];
         }
 
-        /// <summary><inu.api/></summary>
         public Int32 Count => _count;
+        public IEqualityComparer<TKey> Comparer => _comparer;
+        public KeyCollection Keys => new KeyCollection(this);
+        public ValueCollection Values => new ValueCollection(this);
 
-        /// <summary><inu.api/></summary>
         public TValue this[TKey key]
         {
-            get
-            {
-                TValue value;
-                if (!TryGetValue(key, out value)) System.Collections.CollectionThrowHelper.ThrowKeyNotFound();
-                return value;
-            }
+            get { TValue value; if (!TryGetValue(key, out value)) System.Collections.CollectionThrowHelper.ThrowKeyNotFound(); return value; }
             set { Insert(key, value, false); }
         }
 
-        /// <summary><inu.api/></summary>
         public void Add(TKey key, TValue value) => Insert(key, value, true);
-        /// <summary><inu.api/></summary>
-        public Boolean TryAdd(TKey key, TValue value)
-        {
-            if (FindEntry(key) >= 0) return false;
-            Insert(key, value, true);
-            return true;
-        }
-        /// <summary><inu.api/></summary>
+        public Boolean TryAdd(TKey key, TValue value) { if (FindEntry(key) >= 0) return false; Insert(key, value, true); return true; }
         public Boolean ContainsKey(TKey key) => FindEntry(key) >= 0;
-
-        /// <summary><inu.api/></summary>
+        public Boolean ContainsValue(TValue value)
+        {
+            EqualityComparer<TValue> comparer = EqualityComparer<TValue>.Default;
+            for (Int32 i = 0; i < _used; i++) if (_entries[i].HashCode >= 0 && comparer.Equals(_entries[i].Value, value)) return true;
+            return false;
+        }
         public Boolean TryGetValue(TKey key, out TValue value)
         {
             Int32 index = FindEntry(key);
-            if (index >= 0)
-            {
-                value = _entries[index].Value;
-                return true;
-            }
-            value = default(TValue);
-            return false;
+            if (index >= 0) { value = _entries[index].Value; return true; }
+            value = default(TValue); return false;
         }
-
-        /// <summary><inu.api/></summary>
         public Boolean Remove(TKey key)
         {
             if (IsNullKey(key)) throw new ArgumentNullException();
-            Int32 hash = GetHash(key);
-            Int32 bucket = hash % _buckets.Length;
-            Int32 previous = -1;
+            Int32 hash = GetHash(key), bucket = hash % _buckets.Length, previous = -1;
             for (Int32 i = _buckets[bucket] - 1; i >= 0; previous = i, i = _entries[i].Next)
             {
                 if (_entries[i].HashCode == hash && _comparer.Equals(_entries[i].Key, key))
                 {
-                    if (previous < 0) _buckets[bucket] = _entries[i].Next + 1;
-                    else _entries[previous].Next = _entries[i].Next;
-                    _entries[i].HashCode = -1;
-                    _entries[i].Next = -1;
-                    _entries[i].Key = default(TKey);
-                    _entries[i].Value = default(TValue);
-                    _count--;
-                    _version++;
-                    return true;
+                    if (previous < 0) _buckets[bucket] = _entries[i].Next + 1; else _entries[previous].Next = _entries[i].Next;
+                    _entries[i].HashCode = -1; _entries[i].Next = -1; _entries[i].Key = default(TKey); _entries[i].Value = default(TValue);
+                    _count--; _version++; return true;
                 }
             }
             return false;
         }
-
-        /// <summary><inu.api/></summary>
         public void Clear()
         {
             for (Int32 i = 0; i < _buckets.Length; i++) _buckets[i] = 0;
-            for (Int32 i = 0; i < _used; i++)
-            {
-                _entries[i].HashCode = -1;
-                _entries[i].Next = -1;
-                _entries[i].Key = default(TKey);
-                _entries[i].Value = default(TValue);
-            }
-            _used = 0;
-            _count = 0;
-            _version++;
+            for (Int32 i = 0; i < _used; i++) { _entries[i].HashCode = -1; _entries[i].Next = -1; _entries[i].Key = default(TKey); _entries[i].Value = default(TValue); }
+            _used = 0; _count = 0; _version++;
         }
-
         private void Insert(TKey key, TValue value, Boolean throwOnExisting)
         {
             if (IsNullKey(key)) throw new ArgumentNullException();
-            if (_used == _entries.Length) Resize();
-
-            Int32 hash = GetHash(key);
-            Int32 bucket = hash % _buckets.Length;
+            Int32 hash = GetHash(key), bucket = hash % _buckets.Length;
             for (Int32 i = _buckets[bucket] - 1; i >= 0; i = _entries[i].Next)
             {
                 if (_entries[i].HashCode == hash && _comparer.Equals(_entries[i].Key, key))
                 {
-                    if (throwOnExisting)
-                    {
-                        System.Collections.CollectionThrowHelper.ThrowDuplicateKey();
-                        return;
-                    }
-                    _entries[i].Value = value;
-                    _version++;
-                    return;
+                    if (throwOnExisting) { System.Collections.CollectionThrowHelper.ThrowDuplicateKey(); return; }
+                    _entries[i].Value = value; _version++; return;
                 }
             }
-
+            if (_used == _entries.Length) { Resize(); bucket = hash % _buckets.Length; }
             Int32 index = _used++;
-            _entries[index].HashCode = hash;
-            _entries[index].Next = _buckets[bucket] - 1;
-            _entries[index].Key = key;
-            _entries[index].Value = value;
-            _buckets[bucket] = index + 1;
-            _count++;
-            _version++;
+            _entries[index].HashCode = hash; _entries[index].Next = _buckets[bucket] - 1; _entries[index].Key = key; _entries[index].Value = value;
+            _buckets[bucket] = index + 1; _count++; _version++;
         }
-
         private Int32 FindEntry(TKey key)
         {
             if (IsNullKey(key)) throw new ArgumentNullException();
-            Int32 hash = GetHash(key);
-            Int32 bucket = hash % _buckets.Length;
-            for (Int32 i = _buckets[bucket] - 1; i >= 0; i = _entries[i].Next)
-                if (_entries[i].HashCode == hash && _comparer.Equals(_entries[i].Key, key)) return i;
+            Int32 hash = GetHash(key), bucket = hash % _buckets.Length;
+            for (Int32 i = _buckets[bucket] - 1; i >= 0; i = _entries[i].Next) if (_entries[i].HashCode == hash && _comparer.Equals(_entries[i].Key, key)) return i;
             return -1;
         }
-
         private Int32 GetHash(TKey key) => _comparer.GetHashCode(key) & 0x7FFFFFFF;
-        private static Boolean IsNullKey(TKey key)
-        {
-            Object boxed = key;
-            return Object.ReferenceEquals(boxed, null);
-        }
-
+        private static Boolean IsNullKey(TKey key) { Object boxed = key; return Object.ReferenceEquals(boxed, null); }
         private void Resize()
         {
             Int32 newSize = _entries.Length < 4 ? 4 : _entries.Length * 2 + 1;
-            Int32[] newBuckets = new Int32[newSize];
-            Entry[] newEntries = new Entry[newSize];
+            Int32[] newBuckets = new Int32[newSize]; Entry[] newEntries = new Entry[newSize];
             for (Int32 i = 0; i < _used; i++) newEntries[i] = _entries[i];
-            for (Int32 i = 0; i < _used; i++)
-            {
-                if (newEntries[i].HashCode < 0) continue;
-                Int32 bucket = newEntries[i].HashCode % newSize;
-                newEntries[i].Next = newBuckets[bucket] - 1;
-                newBuckets[bucket] = i + 1;
-            }
-            _buckets = newBuckets;
-            _entries = newEntries;
+            for (Int32 i = 0; i < _used; i++) if (newEntries[i].HashCode >= 0) { Int32 bucket = newEntries[i].HashCode % newSize; newEntries[i].Next = newBuckets[bucket] - 1; newBuckets[bucket] = i + 1; }
+            _buckets = newBuckets; _entries = newEntries;
         }
 
-        /// <summary><inu.api/></summary>
-        public Enumerator GetEnumerator()
-        {
-            // 0.0.108: mirror the List<T> return-boundary diagnostics for
-            // Dictionary<TKey,TValue>. If 18E0 is absent after conformance emits
-            // 184A, the fault is before the managed getter body. If 18EE is present
-            // but 184B is absent, construction completed and the remaining fault is
-            // propagating the returned value type to the caller.
-            global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18E0UL);
-            global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E1UL, (global::System.UInt64)(global::System.UInt32)_count);
-            global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E2UL, (global::System.UInt64)(global::System.UInt32)_used);
-            global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E3UL, (global::System.UInt64)(global::System.UInt32)_version);
-            global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E4UL, (global::System.UInt64)(global::System.UInt32)_entries.Length);
-            global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E5UL, (global::System.UInt64)(global::System.UInt32)_buckets.Length);
-            return new Enumerator(this);
-        }
+        public Enumerator GetEnumerator() => new Enumerator(this);
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => new InterfaceEnumerator(this);
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => new InterfaceEnumerator(this);
 
-        private sealed class InterfaceEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>
+        public sealed class KeyCollection : ICollection<TKey>, IReadOnlyCollection<TKey>
         {
-            private readonly Dictionary<TKey, TValue> _dictionary;
-            private readonly Int32 _version;
-            private Int32 _index;
-            private KeyValuePair<TKey, TValue> _current;
-
-            internal InterfaceEnumerator(Dictionary<TKey, TValue> dictionary)
-            {
-                _dictionary = dictionary;
-                _version = dictionary._version;
-                _index = 0;
-                _current = default(KeyValuePair<TKey, TValue>);
-            }
-
-            public KeyValuePair<TKey, TValue> Current => _current;
-            Object System.Collections.IEnumerator.Current => _current;
-            public Boolean MoveNext()
-            {
-                if (_version != _dictionary._version) System.Collections.CollectionThrowHelper.ThrowModified();
-                while (_index < _dictionary._used)
-                {
-                    Int32 i = _index++;
-                    if (_dictionary._entries[i].HashCode >= 0)
-                    {
-                        _current = new KeyValuePair<TKey, TValue>(_dictionary._entries[i].Key, _dictionary._entries[i].Value);
-                        return true;
-                    }
-                }
-                _current = default(KeyValuePair<TKey, TValue>);
-                return false;
-            }
-            public void Reset()
-            {
-                if (_version != _dictionary._version) System.Collections.CollectionThrowHelper.ThrowModified();
-                _index = 0;
-                _current = default(KeyValuePair<TKey, TValue>);
-            }
-            public void Dispose() { }
+            private readonly Dictionary<TKey,TValue> _dictionary;
+            internal KeyCollection(Dictionary<TKey,TValue> dictionary) { _dictionary = dictionary; }
+            public Int32 Count => _dictionary.Count; public Boolean IsReadOnly => true;
+            void ICollection<TKey>.Add(TKey item) { throw new NotSupportedException(); }
+            void ICollection<TKey>.Clear() { throw new NotSupportedException(); }
+            Boolean ICollection<TKey>.Remove(TKey item) { throw new NotSupportedException(); }
+            public Boolean Contains(TKey item) => _dictionary.ContainsKey(item);
+            public void CopyTo(TKey[] array, Int32 arrayIndex)
+            { if (array == null) throw new ArgumentNullException(); if (arrayIndex < 0 || arrayIndex > array.Length || array.Length-arrayIndex < Count) throw new ArgumentException(); Int32 n=0; for(Int32 i=0;i<_dictionary._used;i++) if(_dictionary._entries[i].HashCode>=0) array[arrayIndex+n++]=_dictionary._entries[i].Key; }
+            public Enumerator GetEnumerator() => new Enumerator(_dictionary);
+            IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator() => new Enumerator(_dictionary);
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => new Enumerator(_dictionary);
+            public sealed class Enumerator : IEnumerator<TKey>
+            { private readonly Dictionary<TKey,TValue> _d; private readonly Int32 _v; private Int32 _i; private TKey _c; private Boolean _valid;
+              internal Enumerator(Dictionary<TKey,TValue> d){_d=d;_v=d._version;_i=0;_c=default(TKey);_valid=false;}
+              public TKey Current=>_c; Object System.Collections.IEnumerator.Current { get { if(!_valid) throw new InvalidOperationException(); return _c; } }
+              public Boolean MoveNext(){ if(_v!=_d._version) System.Collections.CollectionThrowHelper.ThrowModified(); while(_i<_d._used){Int32 i=_i++; if(_d._entries[i].HashCode>=0){_c=_d._entries[i].Key;_valid=true;return true;}} _valid=false;_c=default(TKey);return false;}
+              public void Reset(){if(_v!=_d._version) System.Collections.CollectionThrowHelper.ThrowModified();_i=0;_valid=false;_c=default(TKey);} public void Dispose(){} }
         }
-
-        public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>
+        public sealed class ValueCollection : ICollection<TValue>, IReadOnlyCollection<TValue>
         {
-            private readonly Dictionary<TKey, TValue> _dictionary;
-            private readonly Int32 _version;
-            private Int32 _index;
-            private KeyValuePair<TKey, TValue> _current;
-
-            internal Enumerator(Dictionary<TKey, TValue> dictionary)
-            {
-                // 0.0.108: bracket each write in the generic value-type
-                // Dictionary<TKey,TValue>.Enumerator constructor. This does not
-                // add fields or alter the public enumerator layout.
-                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18E6UL);
-                _dictionary = dictionary;
-                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18E7UL);
-                _version = dictionary._version;
-                global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E8UL, (global::System.UInt64)(global::System.UInt32)_version);
-                _index = 0;
-                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18E9UL);
-                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18EAUL);
-                _current = default(KeyValuePair<TKey, TValue>);
-                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18EBUL);
-                global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18ECUL, (global::System.UInt64)(global::System.UInt32)dictionary._count);
-                global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18EDUL, (global::System.UInt64)(global::System.UInt32)dictionary._used);
-                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18EEUL);
-            }
-
-            public KeyValuePair<TKey, TValue> Current => _current;
-            Object System.Collections.IEnumerator.Current => _current;
-
-            public Boolean MoveNext()
-            {
-                if (_version != _dictionary._version) System.Collections.CollectionThrowHelper.ThrowModified();
-                while (_index < _dictionary._used)
-                {
-                    Int32 i = _index++;
-                    if (_dictionary._entries[i].HashCode >= 0)
-                    {
-                        _current = new KeyValuePair<TKey, TValue>(_dictionary._entries[i].Key, _dictionary._entries[i].Value);
-                        return true;
-                    }
-                }
-                _current = default(KeyValuePair<TKey, TValue>);
-                return false;
-            }
-
-            public void Reset()
-            {
-                if (_version != _dictionary._version) System.Collections.CollectionThrowHelper.ThrowModified();
-                _index = 0;
-                _current = default(KeyValuePair<TKey, TValue>);
-            }
-            public void Dispose() { }
+            private readonly Dictionary<TKey,TValue> _dictionary;
+            internal ValueCollection(Dictionary<TKey,TValue> dictionary) { _dictionary = dictionary; }
+            public Int32 Count => _dictionary.Count; public Boolean IsReadOnly => true;
+            void ICollection<TValue>.Add(TValue item) { throw new NotSupportedException(); }
+            void ICollection<TValue>.Clear() { throw new NotSupportedException(); }
+            Boolean ICollection<TValue>.Remove(TValue item) { throw new NotSupportedException(); }
+            public Boolean Contains(TValue item) => _dictionary.ContainsValue(item);
+            public void CopyTo(TValue[] array, Int32 arrayIndex)
+            { if (array == null) throw new ArgumentNullException(); if (arrayIndex < 0 || arrayIndex > array.Length || array.Length-arrayIndex < Count) throw new ArgumentException(); Int32 n=0; for(Int32 i=0;i<_dictionary._used;i++) if(_dictionary._entries[i].HashCode>=0) array[arrayIndex+n++]=_dictionary._entries[i].Value; }
+            public Enumerator GetEnumerator() => new Enumerator(_dictionary);
+            IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => new Enumerator(_dictionary);
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => new Enumerator(_dictionary);
+            public sealed class Enumerator : IEnumerator<TValue>
+            { private readonly Dictionary<TKey,TValue> _d; private readonly Int32 _v; private Int32 _i; private TValue _c; private Boolean _valid;
+              internal Enumerator(Dictionary<TKey,TValue> d){_d=d;_v=d._version;_i=0;_c=default(TValue);_valid=false;}
+              public TValue Current=>_c; Object System.Collections.IEnumerator.Current { get { if(!_valid) throw new InvalidOperationException(); return _c; } }
+              public Boolean MoveNext(){ if(_v!=_d._version) System.Collections.CollectionThrowHelper.ThrowModified(); while(_i<_d._used){Int32 i=_i++; if(_d._entries[i].HashCode>=0){_c=_d._entries[i].Value;_valid=true;return true;}} _valid=false;_c=default(TValue);return false;}
+              public void Reset(){if(_v!=_d._version) System.Collections.CollectionThrowHelper.ThrowModified();_i=0;_valid=false;_c=default(TValue);} public void Dispose(){} }
         }
+        private sealed class InterfaceEnumerator : IEnumerator<KeyValuePair<TKey,TValue>>
+        { private Enumerator _e; internal InterfaceEnumerator(Dictionary<TKey,TValue> d){_e=new Enumerator(d);} public KeyValuePair<TKey,TValue> Current=>_e.Current; Object System.Collections.IEnumerator.Current=>((System.Collections.IEnumerator)_e).Current; public Boolean MoveNext()=>_e.MoveNext(); public void Reset()=>_e.Reset(); public void Dispose()=>_e.Dispose(); }
+        public struct Enumerator : IEnumerator<KeyValuePair<TKey,TValue>>
+        {
+            private readonly Dictionary<TKey,TValue> _dictionary; private readonly Int32 _version; private Int32 _index; private KeyValuePair<TKey,TValue> _current; private Boolean _valid;
+            internal Enumerator(Dictionary<TKey,TValue> dictionary){_dictionary=dictionary;_version=dictionary._version;_index=0;_current=default(KeyValuePair<TKey,TValue>);_valid=false;}
+            public KeyValuePair<TKey,TValue> Current=>_current;
+            Object System.Collections.IEnumerator.Current { get { if(!_valid) throw new InvalidOperationException(); return _current; } }
+            public Boolean MoveNext(){ if(_version!=_dictionary._version) System.Collections.CollectionThrowHelper.ThrowModified(); while(_index<_dictionary._used){Int32 i=_index++; if(_dictionary._entries[i].HashCode>=0){_current=new KeyValuePair<TKey,TValue>(_dictionary._entries[i].Key,_dictionary._entries[i].Value);_valid=true;return true;}} _valid=false;_current=default(KeyValuePair<TKey,TValue>);return false; }
+            public void Reset(){if(_version!=_dictionary._version) System.Collections.CollectionThrowHelper.ThrowModified();_index=0;_valid=false;_current=default(KeyValuePair<TKey,TValue>);} public void Dispose(){} 
+        }
+    }
+
+    /// <summary><inu.api/>Hash-based set using the same comparer/collision rules as Dictionary.</summary>
+    public class HashSet<T> : ICollection<T>, IReadOnlyCollection<T>
+    {
+        private struct Entry { public Int32 HashCode; public Int32 Next; public T Value; }
+        private Int32[] _buckets; private Entry[] _entries; private Int32 _used; private Int32 _count; private Int32 _version; private readonly IEqualityComparer<T> _comparer;
+        public HashSet() : this(0, (IEqualityComparer<T>)null) { }
+        public HashSet(Int32 capacity) : this(capacity, null) { }
+        public HashSet(IEqualityComparer<T> comparer) : this(0, comparer) { }
+        public HashSet(Int32 capacity, IEqualityComparer<T> comparer){if(capacity<0)throw new ArgumentOutOfRangeException();_comparer=comparer??EqualityComparer<T>.Default;Int32 size=capacity<4?4:capacity;_buckets=new Int32[size];_entries=new Entry[size];}
+        public HashSet(IEnumerable<T> collection) : this(collection, null) { }
+        public HashSet(IEnumerable<T> collection, IEqualityComparer<T> comparer) : this(0, comparer){ if(collection==null) throw new ArgumentNullException(); IEnumerator<T> e=collection.GetEnumerator(); try{while(e.MoveNext()) Add(e.Current);}finally{e.Dispose();} }
+        public Int32 Count=>_count; public Boolean IsReadOnly=>false; public IEqualityComparer<T> Comparer=>_comparer;
+        public Boolean Add(T item){Int32 hash=GetHash(item),bucket=hash%_buckets.Length;for(Int32 i=_buckets[bucket]-1;i>=0;i=_entries[i].Next)if(_entries[i].HashCode==hash&&_comparer.Equals(_entries[i].Value,item))return false;if(_used==_entries.Length){Resize();bucket=hash%_buckets.Length;}Int32 index=_used++;_entries[index].HashCode=hash;_entries[index].Next=_buckets[bucket]-1;_entries[index].Value=item;_buckets[bucket]=index+1;_count++;_version++;return true;}
+        void ICollection<T>.Add(T item){Add(item);}
+        public Boolean Contains(T item){Int32 hash=GetHash(item),bucket=hash%_buckets.Length;for(Int32 i=_buckets[bucket]-1;i>=0;i=_entries[i].Next)if(_entries[i].HashCode==hash&&_comparer.Equals(_entries[i].Value,item))return true;return false;}
+        public Boolean Remove(T item){Int32 hash=GetHash(item),bucket=hash%_buckets.Length,prev=-1;for(Int32 i=_buckets[bucket]-1;i>=0;prev=i,i=_entries[i].Next)if(_entries[i].HashCode==hash&&_comparer.Equals(_entries[i].Value,item)){if(prev<0)_buckets[bucket]=_entries[i].Next+1;else _entries[prev].Next=_entries[i].Next;_entries[i].HashCode=-1;_entries[i].Next=-1;_entries[i].Value=default(T);_count--;_version++;return true;}return false;}
+        public void Clear(){for(Int32 i=0;i<_buckets.Length;i++)_buckets[i]=0;for(Int32 i=0;i<_used;i++){_entries[i].HashCode=-1;_entries[i].Next=-1;_entries[i].Value=default(T);}_used=0;_count=0;_version++;}
+        public void CopyTo(T[] array,Int32 arrayIndex){CopyTo(array,arrayIndex,_count);}
+        public void CopyTo(T[] array){CopyTo(array,0,_count);}
+        public void CopyTo(T[] array,Int32 arrayIndex,Int32 count){if(array==null)throw new ArgumentNullException();if(arrayIndex<0||count<0||arrayIndex>array.Length||array.Length-arrayIndex<count||count>_count)throw new ArgumentException();Int32 n=0;for(Int32 i=0;i<_used&&n<count;i++)if(_entries[i].HashCode>=0)array[arrayIndex+n++]=_entries[i].Value;}
+        public Int32 EnsureCapacity(Int32 capacity){if(capacity<0)throw new ArgumentOutOfRangeException();if(capacity<=_entries.Length)return _entries.Length;ResizeTo(capacity);return _entries.Length;}
+        public void TrimExcess(){if(_count>=_entries.Length)return;Int32 size=_count<4?4:_count;Int32[] buckets=new Int32[size];Entry[] entries=new Entry[size];Int32 next=0;for(Int32 i=0;i<_used;i++)if(_entries[i].HashCode>=0){Entry entry=_entries[i];Int32 bucket=entry.HashCode%size;entry.Next=buckets[bucket]-1;entries[next]=entry;buckets[bucket]=next+1;next++;}_buckets=buckets;_entries=entries;_used=next;_version++;}
+        public Boolean TryGetValue(T equalValue,out T actualValue){Int32 hash=GetHash(equalValue),bucket=hash%_buckets.Length;for(Int32 i=_buckets[bucket]-1;i>=0;i=_entries[i].Next)if(_entries[i].HashCode==hash&&_comparer.Equals(_entries[i].Value,equalValue)){actualValue=_entries[i].Value;return true;}actualValue=default(T);return false;}
+        private Int32 GetHash(T item){Object boxed=item;return (Object.ReferenceEquals(boxed,null)?0:_comparer.GetHashCode(item))&0x7FFFFFFF;}
+        private void Resize(){ResizeTo(_entries.Length*2+1);}
+        private void ResizeTo(Int32 size){Int32[] buckets=new Int32[size];Entry[] entries=new Entry[size];for(Int32 i=0;i<_used;i++)entries[i]=_entries[i];for(Int32 i=0;i<_used;i++)if(entries[i].HashCode>=0){Int32 b=entries[i].HashCode%size;entries[i].Next=buckets[b]-1;buckets[b]=i+1;}_buckets=buckets;_entries=entries;}
+        public Enumerator GetEnumerator()=>new Enumerator(this); IEnumerator<T> IEnumerable<T>.GetEnumerator()=>new Enumerator(this); System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()=>new Enumerator(this);
+        public struct Enumerator:IEnumerator<T>{private readonly HashSet<T> _set;private readonly Int32 _version;private Int32 _index;private T _current;private Boolean _valid;internal Enumerator(HashSet<T> set){_set=set;_version=set._version;_index=0;_current=default(T);_valid=false;}public T Current=>_current;Object System.Collections.IEnumerator.Current{get{if(!_valid)throw new InvalidOperationException();return _current;}}public Boolean MoveNext(){if(_version!=_set._version)System.Collections.CollectionThrowHelper.ThrowModified();while(_index<_set._used){Int32 i=_index++;if(_set._entries[i].HashCode>=0){_current=_set._entries[i].Value;_valid=true;return true;}}_valid=false;_current=default(T);return false;}public void Reset(){if(_version!=_set._version)System.Collections.CollectionThrowHelper.ThrowModified();_index=0;_valid=false;_current=default(T);}public void Dispose(){}}
     }
 
     /// <summary><inu.api/>Freestanding first-in/first-out collection compatible with System.Collections.Generic.Queue&lt;T&gt;.</summary>
     public class Queue<T> : IEnumerable<T>, IReadOnlyCollection<T>
     {
-        private T[] _array = new T[4];
-        private Int32 _head;
-        private Int32 _tail;
-        private Int32 _size;
-        /// <summary><inu.api/></summary>
-        public Int32 Count => _size;
-
-        /// <summary><inu.api/></summary>
-        public void Enqueue(T item)
-        {
-            if (_size == _array.Length) Grow();
-            _array[_tail] = item;
-            _tail = (_tail + 1) % _array.Length;
-            _size++;
-        }
-        /// <summary><inu.api/></summary>
-        public T Dequeue()
-        {
-            if (_size == 0) throw new InvalidOperationException("Queue empty.");
-            T item = _array[_head];
-            _array[_head] = default(T);
-            _head = (_head + 1) % _array.Length;
-            _size--;
-            return item;
-        }
-        /// <summary><inu.api/></summary>
-        public T Peek()
-        {
-            if (_size == 0) throw new InvalidOperationException("Queue empty.");
-            return _array[_head];
-        }
-        /// <summary><inu.api/></summary>
-        public void Clear()
-        {
-            while (_size != 0) Dequeue();
-        }
-        private void Grow()
-        {
-            T[] replacement = new T[_array.Length * 2];
-            for (Int32 i = 0; i < _size; i++) replacement[i] = _array[(_head + i) % _array.Length];
-            _array = replacement;
-            _head = 0;
-            _tail = _size;
-        }
-        /// <summary><inu.api/></summary>
-        public Enumerator GetEnumerator() => new Enumerator(this);
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => new InterfaceEnumerator(this);
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => new InterfaceEnumerator(this);
-        private sealed class InterfaceEnumerator : IEnumerator<T>
-        {
-            private readonly Queue<T> _queue;
-            private Int32 _index;
-            internal InterfaceEnumerator(Queue<T> queue) { _queue = queue; _index = -1; }
-            public T Current => _queue._array[(_queue._head + _index) % _queue._array.Length];
-            Object System.Collections.IEnumerator.Current => Current;
-            public Boolean MoveNext() { if (_index + 1 >= _queue._size) return false; _index++; return true; }
-            public void Reset() { _index = -1; }
-            public void Dispose() { }
-        }
-        public struct Enumerator : IEnumerator<T>
-        {
-            private readonly Queue<T> _queue;
-            private Int32 _index;
-            internal Enumerator(Queue<T> queue) { _queue = queue; _index = -1; }
-            public T Current => _queue._array[(_queue._head + _index) % _queue._array.Length];
-            Object System.Collections.IEnumerator.Current => Current;
-            public Boolean MoveNext() { if (_index + 1 >= _queue._size) return false; _index++; return true; }
-            public void Reset() { _index = -1; }
-            public void Dispose() { }
-        }
+        private T[] _array; private Int32 _head; private Int32 _tail; private Int32 _size; private Int32 _version;
+        public Queue(){_array=new T[4];}
+        public Queue(Int32 capacity){if(capacity<0)throw new ArgumentOutOfRangeException();_array=new T[capacity<4?4:capacity];}
+        public Queue(IEnumerable<T> collection):this(){if(collection==null)throw new ArgumentNullException();IEnumerator<T> e=collection.GetEnumerator();try{while(e.MoveNext())Enqueue(e.Current);}finally{e.Dispose();}}
+        public Int32 Count=>_size;
+        public void Enqueue(T item){if(_size==_array.Length)Grow(_size+1);_array[_tail]=item;_tail=(_tail+1)%_array.Length;_size++;_version++;}
+        public T Dequeue(){if(_size==0)throw new InvalidOperationException("Queue empty.");T item=_array[_head];_array[_head]=default(T);_head=(_head+1)%_array.Length;_size--;_version++;return item;}
+        public Boolean TryDequeue(out T result){if(_size==0){result=default(T);return false;}result=Dequeue();return true;}
+        public T Peek(){if(_size==0)throw new InvalidOperationException("Queue empty.");return _array[_head];}
+        public Boolean TryPeek(out T result){if(_size==0){result=default(T);return false;}result=_array[_head];return true;}
+        public Boolean Contains(T item){EqualityComparer<T> c=EqualityComparer<T>.Default;for(Int32 i=0;i<_size;i++)if(c.Equals(_array[(_head+i)%_array.Length],item))return true;return false;}
+        public void Clear(){for(Int32 i=0;i<_size;i++)_array[(_head+i)%_array.Length]=default(T);_head=0;_tail=0;_size=0;_version++;}
+        public void CopyTo(T[] array, Int32 arrayIndex){if(array==null)throw new ArgumentNullException();if(arrayIndex<0||arrayIndex>array.Length||array.Length-arrayIndex<_size)throw new ArgumentException();for(Int32 i=0;i<_size;i++)array[arrayIndex+i]=_array[(_head+i)%_array.Length];}
+        public T[] ToArray(){T[] result=new T[_size];for(Int32 i=0;i<_size;i++)result[i]=_array[(_head+i)%_array.Length];return result;}
+        public Int32 EnsureCapacity(Int32 capacity){if(capacity<0)throw new ArgumentOutOfRangeException();if(capacity>_array.Length)Grow(capacity);return _array.Length;}
+        public void TrimExcess(){Int32 target=_size<4?4:_size;if(target>=_array.Length)return;T[] replacement=new T[target];for(Int32 i=0;i<_size;i++)replacement[i]=_array[(_head+i)%_array.Length];_array=replacement;_head=0;_tail=_size==_array.Length?0:_size;_version++;}
+        private void Grow(Int32 minimum){Int32 size=_array.Length*2;if(size<4)size=4;if(size<minimum)size=minimum;T[] replacement=new T[size];for(Int32 i=0;i<_size;i++)replacement[i]=_array[(_head+i)%_array.Length];_array=replacement;_head=0;_tail=_size;}
+        public Enumerator GetEnumerator()=>new Enumerator(this);IEnumerator<T> IEnumerable<T>.GetEnumerator()=>new Enumerator(this);System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()=>new Enumerator(this);
+        public struct Enumerator:IEnumerator<T>{private readonly Queue<T> _queue;private readonly Int32 _version;private Int32 _index;private T _current;private Boolean _valid;internal Enumerator(Queue<T> q){_queue=q;_version=q._version;_index=0;_current=default(T);_valid=false;}public T Current=>_current;Object System.Collections.IEnumerator.Current{get{if(!_valid)throw new InvalidOperationException();return _current;}}public Boolean MoveNext(){if(_version!=_queue._version)System.Collections.CollectionThrowHelper.ThrowModified();if(_index>=_queue._size){_valid=false;_current=default(T);return false;}_current=_queue._array[(_queue._head+_index)%_queue._array.Length];_index++;_valid=true;return true;}public void Reset(){if(_version!=_queue._version)System.Collections.CollectionThrowHelper.ThrowModified();_index=0;_valid=false;_current=default(T);}public void Dispose(){}}
     }
 
     /// <summary><inu.api/>Freestanding last-in/first-out collection compatible with System.Collections.Generic.Stack&lt;T&gt;.</summary>
     public class Stack<T> : IEnumerable<T>, IReadOnlyCollection<T>
     {
-        private T[] _array = new T[4];
-        private Int32 _size;
-        /// <summary><inu.api/></summary>
-        public Int32 Count => _size;
-        /// <summary><inu.api/></summary>
-        public void Push(T item)
-        {
-            if (_size == _array.Length)
-            {
-                T[] replacement = new T[_array.Length * 2];
-                for (Int32 i = 0; i < _size; i++) replacement[i] = _array[i];
-                _array = replacement;
-            }
-            _array[_size++] = item;
-        }
-        /// <summary><inu.api/></summary>
-        public T Pop()
-        {
-            if (_size == 0) throw new InvalidOperationException("Stack empty.");
-            T result = _array[--_size];
-            _array[_size] = default(T);
-            return result;
-        }
-        /// <summary><inu.api/></summary>
-        public T Peek()
-        {
-            if (_size == 0) throw new InvalidOperationException("Stack empty.");
-            return _array[_size - 1];
-        }
-        /// <summary><inu.api/></summary>
-        public void Clear() { while (_size != 0) _array[--_size] = default(T); }
-        /// <summary><inu.api/></summary>
-        public Enumerator GetEnumerator() => new Enumerator(this);
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => new InterfaceEnumerator(this);
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => new InterfaceEnumerator(this);
-        private sealed class InterfaceEnumerator : IEnumerator<T>
-        {
-            private readonly Stack<T> _stack;
-            private Int32 _index;
-            internal InterfaceEnumerator(Stack<T> stack) { _stack = stack; _index = stack._size; }
-            public T Current => _stack._array[_index];
-            Object System.Collections.IEnumerator.Current => Current;
-            public Boolean MoveNext() { if (_index <= 0) return false; _index--; return true; }
-            public void Reset() { _index = _stack._size; }
-            public void Dispose() { }
-        }
-        public struct Enumerator : IEnumerator<T>
-        {
-            private readonly Stack<T> _stack;
-            private Int32 _index;
-            internal Enumerator(Stack<T> stack) { _stack = stack; _index = stack._size; }
-            public T Current => _stack._array[_index];
-            Object System.Collections.IEnumerator.Current => Current;
-            public Boolean MoveNext() { if (_index <= 0) return false; _index--; return true; }
-            public void Reset() { _index = _stack._size; }
-            public void Dispose() { }
-        }
+        private T[] _array; private Int32 _size; private Int32 _version;
+        public Stack(){_array=new T[4];}
+        public Stack(Int32 capacity){if(capacity<0)throw new ArgumentOutOfRangeException();_array=new T[capacity<4?4:capacity];}
+        public Stack(IEnumerable<T> collection):this(){if(collection==null)throw new ArgumentNullException();IEnumerator<T> e=collection.GetEnumerator();try{while(e.MoveNext())Push(e.Current);}finally{e.Dispose();}}
+        public Int32 Count=>_size;
+        public void Push(T item){if(_size==_array.Length)Grow(_size+1);_array[_size++]=item;_version++;}
+        public T Pop(){if(_size==0)throw new InvalidOperationException("Stack empty.");T result=_array[--_size];_array[_size]=default(T);_version++;return result;}
+        public Boolean TryPop(out T result){if(_size==0){result=default(T);return false;}result=Pop();return true;}
+        public T Peek(){if(_size==0)throw new InvalidOperationException("Stack empty.");return _array[_size-1];}
+        public Boolean TryPeek(out T result){if(_size==0){result=default(T);return false;}result=_array[_size-1];return true;}
+        public Boolean Contains(T item){EqualityComparer<T> c=EqualityComparer<T>.Default;for(Int32 i=0;i<_size;i++)if(c.Equals(_array[i],item))return true;return false;}
+        public void Clear(){for(Int32 i=0;i<_size;i++)_array[i]=default(T);_size=0;_version++;}
+        public void CopyTo(T[] array, Int32 arrayIndex){if(array==null)throw new ArgumentNullException();if(arrayIndex<0||arrayIndex>array.Length||array.Length-arrayIndex<_size)throw new ArgumentException();for(Int32 i=0;i<_size;i++)array[arrayIndex+i]=_array[_size-1-i];}
+        public T[] ToArray(){T[] result=new T[_size];for(Int32 i=0;i<_size;i++)result[i]=_array[_size-1-i];return result;}
+        public Int32 EnsureCapacity(Int32 capacity){if(capacity<0)throw new ArgumentOutOfRangeException();if(capacity>_array.Length)Grow(capacity);return _array.Length;}
+        public void TrimExcess(){Int32 target=_size<4?4:_size;if(target>=_array.Length)return;T[] replacement=new T[target];for(Int32 i=0;i<_size;i++)replacement[i]=_array[i];_array=replacement;_version++;}
+        private void Grow(Int32 minimum){Int32 size=_array.Length*2;if(size<4)size=4;if(size<minimum)size=minimum;T[] replacement=new T[size];for(Int32 i=0;i<_size;i++)replacement[i]=_array[i];_array=replacement;}
+        public Enumerator GetEnumerator()=>new Enumerator(this);IEnumerator<T> IEnumerable<T>.GetEnumerator()=>new Enumerator(this);System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()=>new Enumerator(this);
+        public struct Enumerator:IEnumerator<T>{private readonly Stack<T> _stack;private readonly Int32 _version;private Int32 _index;private T _current;private Boolean _valid;internal Enumerator(Stack<T> s){_stack=s;_version=s._version;_index=s._size-1;_current=default(T);_valid=false;}public T Current=>_current;Object System.Collections.IEnumerator.Current{get{if(!_valid)throw new InvalidOperationException();return _current;}}public Boolean MoveNext(){if(_version!=_stack._version)System.Collections.CollectionThrowHelper.ThrowModified();if(_index<0){_valid=false;_current=default(T);return false;}_current=_stack._array[_index--];_valid=true;return true;}public void Reset(){if(_version!=_stack._version)System.Collections.CollectionThrowHelper.ThrowModified();_index=_stack._size-1;_valid=false;_current=default(T);}public void Dispose(){}}
     }
-}
 
+}
 
 namespace System.Text
 {

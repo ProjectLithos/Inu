@@ -22,7 +22,7 @@ The first supported standard namespaces are:
 
 - `System` — including the ring-3 `Console` surface where applicable.
 - `System.Collections` — enumeration and basic collection contracts.
-- `System.Collections.Generic` — `List<T>`, `Dictionary<TKey,TValue>`, `Queue<T>`, `Stack<T>` and their core interfaces/helpers.
+- `System.Collections.Generic` — `List<T>`, `Dictionary<TKey,TValue>`, `HashSet<T>`, `Queue<T>`, `Stack<T>` and their core interfaces/helpers.
 - `System.Text` — `StringBuilder` plus the initial `Encoding`, `ASCIIEncoding`, and `UTF8Encoding` surface.
 - `System.IO` — initial ring-3 whole-file operations through the OS-selected filesystem service.
 - `System.Threading` — initial ring-3 current-thread coordination with `Thread.Yield`, `Thread.Sleep(int)`, and `Timeout.Infinite`.

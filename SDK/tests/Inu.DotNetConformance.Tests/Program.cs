@@ -8,7 +8,7 @@ namespace Inu.DotNetConformance.Tests;
 internal static class Program
 {
     private const string TargetName = "Inu.BCL.Core.v1";
-    private const int TargetItemCount = 44;
+    private const int TargetItemCount = 45;
     private static int _passed;
     private static int _failed;
 
@@ -61,12 +61,13 @@ internal static class Program
         Check("System.String", TestString());
         Check("System.Nullable<T>", TestNullable());
         Check("System.Type", TestType());
-        Check("System.Collections.Generic.KeyValuePair<TKey,TValue>", TestKeyValuePair());
+        Check("System.Collections.Generic.KeyValuePair<TKey,TValue>", Inu.Runtime.Conformance.Shared.CoreCollectionsConformance.TestKeyValuePair());
         Check("System.Collections.Generic.EqualityComparer<T>", TestEqualityComparer());
         Check("System.Collections.Generic.List<T>", Inu.Runtime.Conformance.Shared.ListConformance.TestList());
-        Check("System.Collections.Generic.Dictionary<TKey,TValue>", TestDictionary());
-        Check("System.Collections.Generic.Queue<T>", TestQueue());
-        Check("System.Collections.Generic.Stack<T>", TestStack());
+        Check("System.Collections.Generic.Dictionary<TKey,TValue>", Inu.Runtime.Conformance.Shared.CoreCollectionsConformance.TestDictionary());
+        Check("System.Collections.Generic.HashSet<T>", Inu.Runtime.Conformance.Shared.CoreCollectionsConformance.TestHashSet());
+        Check("System.Collections.Generic.Queue<T>", Inu.Runtime.Conformance.Shared.CoreCollectionsConformance.TestQueue());
+        Check("System.Collections.Generic.Stack<T>", Inu.Runtime.Conformance.Shared.CoreCollectionsConformance.TestStack());
         Check("System.Text.StringBuilder", TestStringBuilder());
         Check("System.Text.Encoding", TestEncodingFactories());
         Check("System.Text.ASCIIEncoding", TestAsciiEncoding());
@@ -723,12 +724,6 @@ internal static class Program
             && typeof(object).IsAssignableFrom(typeof(Probe)) && typeof(Probe).IsSubclassOf(typeof(object));
     }
 
-    private static bool TestKeyValuePair()
-    {
-        var pair = new KeyValuePair<string, int>("answer", 42);
-        return pair.Key == "answer" && pair.Value == 42;
-    }
-
     private static bool TestEqualityComparer()
     {
         EqualityComparer<int> ints = EqualityComparer<int>.Default;
@@ -736,30 +731,6 @@ internal static class Program
         return ints.Equals(7, 7) && !ints.Equals(7, 8)
             && strings.Equals("same", "same") && !strings.Equals("same", "other")
             && strings.GetHashCode("same") == strings.GetHashCode("same");
-    }
-
-    private static bool TestDictionary()
-    {
-        var dictionary = new Dictionary<string, int>();
-        dictionary.Add("one", 1);
-        dictionary["two"] = 2;
-        return dictionary.Count == 2 && dictionary.ContainsKey("one")
-            && dictionary.TryGetValue("two", out int value) && value == 2
-            && !dictionary.TryAdd("one", 11) && dictionary.Remove("one") && !dictionary.ContainsKey("one");
-    }
-
-    private static bool TestQueue()
-    {
-        var queue = new Queue<int>();
-        queue.Enqueue(4); queue.Enqueue(5); queue.Enqueue(6);
-        return queue.Count == 3 && queue.Peek() == 4 && queue.Dequeue() == 4 && queue.Peek() == 5 && queue.Count == 2;
-    }
-
-    private static bool TestStack()
-    {
-        var stack = new Stack<int>();
-        stack.Push(4); stack.Push(5); stack.Push(6);
-        return stack.Count == 3 && stack.Peek() == 6 && stack.Pop() == 6 && stack.Peek() == 5 && stack.Count == 2;
     }
 
     private static bool TestStringBuilder()
