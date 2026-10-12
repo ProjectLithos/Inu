@@ -3347,6 +3347,7 @@ namespace System
         Collections.Generic.IEnumerator<Char> Collections.Generic.IEnumerable<Char>.GetEnumerator() => new CharEnumerator(this);
         Collections.IEnumerator Collections.IEnumerable.GetEnumerator() => new CharEnumerator(this);
 
+        [Runtime.CompilerServices.IndexerName("Chars")]
         public Char this[Int32 index]
         {
             [Runtime.CompilerServices.Intrinsic]
@@ -4630,6 +4631,11 @@ namespace System
         // the compiler-known source/metadata shape without referencing System.Core.
         [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
         public sealed class ExtensionAttribute : Attribute { }
+        [AttributeUsage(AttributeTargets.Property, Inherited = false)]
+        public sealed class IndexerNameAttribute : Attribute
+        {
+            public IndexerNameAttribute(String indexerName) { }
+        }
         public sealed class IsReadOnlyAttribute : Attribute { }
         public sealed class IsByRefLikeAttribute : Attribute { }
         // Required by Roslyn when the C# volatile modifier is emitted. In the

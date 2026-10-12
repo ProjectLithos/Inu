@@ -1,16 +1,15 @@
 {
-  "baseVersion": "0.1.29",
-  "version": "0.1.30",
+  "baseVersion": "0.1.30",
+  "version": "0.1.31",
   "changedFiles": [
-    "CHANGED-0.1.30.txt",
+    "CHANGED-0.1.31.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
+    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
@@ -21,5 +20,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Correct the System.String LastIndexOf reference/in-kernel conformance expectation and add granular host-side String diagnostics."
+  "summary": "Fix the freestanding System.String indexer metadata contract so Roslyn can resolve compiler-required System.String.get_Chars."
 }
