@@ -1508,6 +1508,13 @@ public static unsafe class ManagedRuntimeConformance
             && new Span<Char>(new Char[] { 'I', 'n', 'u' }).ToString() == "Inu"
             && span.ToString() == "System.Span<Int32>[5]";
 
+        ReadOnlySpan<Int32> compilerBlob = new ReadOnlySpan<Int32>(new Int32[]
+        {
+            3, 5, 8, 13, 21, 34, 55, 89,
+            144, 233, 377, 610, 987, 1597, 2584, 4181
+        });
+        Boolean compilerBlobPath = compilerBlob.Length == 16 && compilerBlob[0] == 3 && compilerBlob[15] == 4181;
+
         ReadOnlySpan<Int32> roWindow = new ReadOnlySpan<Int32>(spanValues, 1, 2);
         ReadOnlySpan<Int32> roSegment = spanSegment;
         ReadOnlySpan<Int32> roRef = new ReadOnlySpan<Int32>(in spanRefValue);
@@ -1533,7 +1540,7 @@ public static unsafe class ManagedRuntimeConformance
         try { Span<Object> invalidCovariantSpan = new Span<Object>(covariantSpanArray); _ = invalidCovariantSpan.Length; } catch (ArrayTypeMismatchException) { spanCovarianceGuard = true; }
 
         Record(spanIndexing && spanSlicing && spanFill && spanClear && spanCopy && spanEmpty && spanEquality
-            && remainingSpanSurface && readOnlySpanComplete && spanPointerGuards && spanCovarianceGuard
+            && remainingSpanSurface && readOnlySpanComplete && compilerBlobPath && spanPointerGuards && spanCovarianceGuard
             && span.Length == 5 && readOnlySpan.Length == 5
             && spanCopyValues.Length == 3 && spanCopyValues[0] == 7 && spanCopyValues[1] == 0 && spanCopyValues[2] == 0,
             ref passed, ref failed);

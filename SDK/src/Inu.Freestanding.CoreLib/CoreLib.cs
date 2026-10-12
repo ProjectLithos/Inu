@@ -4437,6 +4437,21 @@ namespace System
                 return mt != null && (!mt->IsValueType || mt->ContainsGCPointers);
             }
 
+            // CONTRACT with Roslyn and .NET 10 NativeAOT. Roslyn emits this well-known
+            // helper when it lowers constant array data. NativeAOT recognizes the exact
+            // intrinsic call sequence and replaces it with direct initialization from the
+            // RVA data. Calls outside that compiler-generated sequence are unsupported.
+            [Intrinsic]
+            public static void InitializeArray(Array array, RuntimeFieldHandle fldHandle)
+                => throw new PlatformNotSupportedException();
+
+            // CONTRACT with Roslyn and .NET 10 NativeAOT. Constant ReadOnlySpan<T> data
+            // can be represented by an RVA field and this intrinsic. NativeAOT expands the
+            // recognized compiler-generated sequence completely, matching CoreLib.
+            [Intrinsic]
+            public static ReadOnlySpan<T> CreateSpan<T>(RuntimeFieldHandle fldHandle)
+                => throw new PlatformNotSupportedException();
+
             // CONTRACT with .NET 10 NativeAOT. The compiler recognizes this helper
             // and lowers MethodTable reads for compiler-special managed references
             // (including delegates) without relying on an ordinary instance call.

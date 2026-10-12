@@ -1011,6 +1011,13 @@ internal static class Program
             && new Span<char>(new[] { 'I', 'n', 'u' }).ToString() == "Inu"
             && span.ToString() == "System.Span<Int32>[5]";
 
+        ReadOnlySpan<int> compilerBlob = new ReadOnlySpan<int>(new int[]
+        {
+            3, 5, 8, 13, 21, 34, 55, 89,
+            144, 233, 377, 610, 987, 1597, 2584, 4181
+        });
+        bool compilerBlobPath = compilerBlob.Length == 16 && compilerBlob[0] == 3 && compilerBlob[15] == 4181;
+
         ReadOnlySpan<int> roArray = values;
         ReadOnlySpan<int> roWindow = new ReadOnlySpan<int>(values, 1, 2);
         ReadOnlySpan<int> roSegment = segment;
@@ -1039,7 +1046,7 @@ internal static class Program
         try { _ = new Span<object>(covariant); } catch (ArrayTypeMismatchException) { covarianceGuard = true; }
 
         return indexing && slicing && fill && clear && copy && empty && equality && spanRemaining
-            && readOnlyComplete && pointerGuards && covarianceGuard
+            && readOnlyComplete && compilerBlobPath && pointerGuards && covarianceGuard
             && span.Length == 5 && readOnly.Length == 5
             && copied.Length == 3 && copied[0] == 7 && copied[1] == 0 && copied[2] == 0;
     }

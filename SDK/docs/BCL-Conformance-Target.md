@@ -81,3 +81,7 @@ A future incompatible expansion should receive a new target name such as `Inu.BC
 ### NativeAOT JIT helper contract
 
 The freestanding `System.Math` surface also supplies the CoreLib helper entry points that RyuJIT/NativeAOT imports for checked floating-point-to-integer conversion (`ConvertToInt32Checked`, `ConvertToUInt32Checked`, `ConvertToInt64Checked`, and `ConvertToUInt64Checked`). These are runtime/compiler ABI helpers rather than public BCL APIs, and their behaviour is covered through the public `System.Convert` conformance cases.
+
+### Compiler-known constant span helpers
+
+Profile 1 includes the Roslyn/.NET 10 CoreLib companion contracts required for constant array and `ReadOnlySpan<T>` lowering: `System.Runtime.CompilerServices.RuntimeHelpers.InitializeArray(Array, RuntimeFieldHandle)` and `RuntimeHelpers.CreateSpan<T>(RuntimeFieldHandle)`. Both are NativeAOT intrinsics and are covered by reference-side and in-kernel constant-span regression cases.

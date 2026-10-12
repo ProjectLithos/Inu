@@ -1,10 +1,9 @@
 {
-  "baseVersion": "0.1.25",
-  "version": "0.1.26",
+  "baseVersion": "0.1.26",
+  "version": "0.1.27",
   "changedFiles": [
-    "CHANGED-0.1.26.txt",
+    "CHANGED-0.1.27.txt",
     "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
-    "Inu/SDK/src/Inu.Freestanding.CoreLib/NativeAotTypeLoader.cs",
     "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
     "Inu/SDK/docs/BCL-Conformance-Target.md",
@@ -24,5 +23,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Implement System.Type.Name from NativeAOT metadata with paired host/in-kernel conformance coverage, preserving normal Span<T>/ReadOnlySpan<T> type-name formatting."
+  "summary": "Restore Roslyn/.NET 10 RuntimeHelpers InitializeArray and CreateSpan<T> NativeAOT intrinsics required by constant ReadOnlySpan<T> blob lowering, with paired regression coverage."
 }
