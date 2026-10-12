@@ -1051,7 +1051,7 @@ internal static class Program
             && copied.Length == 3 && copied[0] == 7 && copied[1] == 0 && copied[2] == 0;
     }
 
-    private static bool TestMemory()
+    private static unsafe bool TestMemory()
     {
         int[] values = { 10, 20, 30, 40 };
         Memory<int> memory = values;
@@ -1059,11 +1059,72 @@ internal static class Program
         middle.Span[0] = 25;
         ReadOnlyMemory<int> readOnly = memory;
         int[] copy = readOnly.Slice(1, 2).ToArray();
+
+        int[] destinationValues = { 0, 0, 0, 0 };
+        Memory<int> destination = destinationValues;
+        middle.CopyTo(destination.Slice(1, 2));
+        bool copySurface = destinationValues[1] == 25 && destinationValues[2] == 30
+            && middle.TryCopyTo(destination.Slice(0, 2)) && !memory.TryCopyTo(destination.Slice(0, 3));
+
+        int[] readOnlyDestinationValues = { 0, 0, 0, 0 };
+        Memory<int> readOnlyDestination = readOnlyDestinationValues;
+        ReadOnlyMemory<int> readOnlyMiddle = readOnly.Slice(1, 2);
+        readOnlyMiddle.CopyTo(readOnlyDestination.Slice(1, 2));
+        bool readOnlyCopySurface = readOnlyDestinationValues[1] == 25 && readOnlyDestinationValues[2] == 30
+            && readOnlyMiddle.TryCopyTo(readOnlyDestination.Slice(0, 2))
+            && !readOnly.TryCopyTo(readOnlyDestination.Slice(0, 3));
+
+        Memory<int> sameMiddle = new Memory<int>(values, 1, 2);
+        ReadOnlyMemory<int> sameReadOnlyMiddle = new ReadOnlyMemory<int>(values, 1, 2);
+        bool equality = middle.Equals(sameMiddle) && middle.Equals((object)sameMiddle)
+            && middle.Equals((object)sameReadOnlyMiddle) && sameReadOnlyMiddle.Equals((object)middle)
+            && middle.GetHashCode() == sameMiddle.GetHashCode()
+            && readOnlyMiddle.GetHashCode() == sameReadOnlyMiddle.GetHashCode()
+            && !middle.Equals(new Memory<int>(new[] { 25, 30 }, 0, 2))
+            && readOnlyMiddle.Equals(sameReadOnlyMiddle) && readOnlyMiddle.Equals((object)sameReadOnlyMiddle)
+            && !readOnlyMiddle.Equals(new ReadOnlyMemory<int>(new[] { 25, 30 }, 0, 2));
+
+        ArraySegment<int> segment = new ArraySegment<int>(values, 1, 2);
+        Memory<int> segmentMemory = segment;
+        ReadOnlyMemory<int> segmentReadOnlyMemory = segment;
+
+        bool pinning;
+        using (System.Buffers.MemoryHandle handle = middle.Pin())
+            pinning = handle.Pointer != null && *(int*)handle.Pointer == 25;
+        using (System.Buffers.MemoryHandle handle = readOnlyMiddle.Pin())
+            pinning = pinning && handle.Pointer != null && *(int*)handle.Pointer == 25;
+        using (System.Buffers.MemoryHandle handle = memory.Slice(2, 0).Pin())
+            pinning = pinning && handle.Pointer != null && *(int*)handle.Pointer == 30;
+        using (System.Buffers.MemoryHandle handle = readOnly.Slice(2, 0).Pin())
+            pinning = pinning && handle.Pointer != null && *(int*)handle.Pointer == 30;
+
+        bool covarianceGuard = false;
+        object[] covariant = new string[] { "safe" };
+        try { _ = new Memory<object>(covariant); } catch (ArrayTypeMismatchException) { covarianceGuard = true; }
+        ReadOnlyMemory<object> covariantReadOnly = new ReadOnlyMemory<object>(covariant);
+        covarianceGuard = covarianceGuard && covariantReadOnly.Length == 1 && (string)covariantReadOnly.Span[0] == "safe";
+
+        bool constructorGuards = false;
+        try { _ = new Memory<int>(values, -1, 1); } catch (ArgumentOutOfRangeException) { constructorGuards = true; }
+        try { _ = new ReadOnlyMemory<int>(values, 3, 2); constructorGuards = false; } catch (ArgumentOutOfRangeException) { }
+        try { _ = new Memory<int>(null, 1, 0); constructorGuards = false; } catch (ArgumentOutOfRangeException) { }
+        try { _ = new ReadOnlyMemory<int>(null, 0, 1); constructorGuards = false; } catch (ArgumentOutOfRangeException) { }
+
         int[]? nullArrayForMemory = null;
         Memory<int> nullMemory = nullArrayForMemory;
+        ReadOnlyMemory<int> nullReadOnlyMemory = nullArrayForMemory;
+
         return memory.Length == 4 && values[1] == 25 && middle.Span[1] == 30
             && readOnly.Span[1] == 25 && copy.Length == 2 && copy[0] == 25 && copy[1] == 30
-            && Memory<int>.Empty.IsEmpty && ReadOnlyMemory<int>.Empty.IsEmpty && nullMemory.IsEmpty;
+            && copySurface && readOnlyCopySurface && equality && pinning && covarianceGuard && constructorGuards
+            && segmentMemory.Length == 2 && segmentMemory.Span[0] == 25
+            && segmentReadOnlyMemory.Length == 2 && segmentReadOnlyMemory.Span[1] == 30
+            && memory.ToString() == "System.Memory<Int32>[4]"
+            && readOnly.ToString() == "System.ReadOnlyMemory<Int32>[4]"
+            && new Memory<char>(new[] { 'I', 'n', 'u' }).ToString() == "Inu"
+            && new ReadOnlyMemory<char>(new[] { 'I', 'n', 'u' }).ToString() == "Inu"
+            && Memory<int>.Empty.IsEmpty && ReadOnlyMemory<int>.Empty.IsEmpty
+            && nullMemory.IsEmpty && nullReadOnlyMemory.IsEmpty;
     }
 
     private static bool TestGenericComparisonEquality()

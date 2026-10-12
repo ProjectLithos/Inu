@@ -3799,8 +3799,8 @@ namespace System
         public static implicit operator ReadOnlySpan<T>(ArraySegment<T> segment) => new ReadOnlySpan<T>(segment.Array, segment.Offset, segment.Count);
     }
 
-    /// <summary><inu.api/>Array-backed storable memory window whose Span property provides temporary byref access.</summary>
-    public readonly struct Memory<T>
+    /// <summary><inu.api/>Storable mutable memory window matching the .NET 10 Memory&lt;T&gt; type-owned surface.</summary>
+    public readonly struct Memory<T> : IEquatable<Memory<T>>
     {
         private readonly T[] _array;
         private readonly Int32 _start;
@@ -3809,8 +3809,10 @@ namespace System
         public Memory(T[] array)
         {
             if (array == null) { _array = null; _start = 0; _length = 0; return; }
+            if (!typeof(T).IsValueType && array.GetType() != typeof(T[])) throw new ArrayTypeMismatchException();
             _array = array; _start = 0; _length = array.Length;
         }
+
         public Memory(T[] array, Int32 start, Int32 length)
         {
             if (array == null)
@@ -3818,36 +3820,77 @@ namespace System
                 if (start != 0 || length != 0) throw new ArgumentOutOfRangeException();
                 _array = null; _start = 0; _length = 0; return;
             }
+            if (!typeof(T).IsValueType && array.GetType() != typeof(T[])) throw new ArrayTypeMismatchException();
             if (start < 0 || length < 0 || start > array.Length - length) throw new ArgumentOutOfRangeException();
             _array = array; _start = start; _length = length;
         }
+
         internal Memory(T[] array, Int32 start, Int32 length, Boolean trusted) { _array = array; _start = start; _length = length; }
+
         public static Memory<T> Empty => default;
         public Int32 Length => _length;
         public Boolean IsEmpty => _length == 0;
         public Span<T> Span => new Span<T>(_array, _start, _length);
+
         public Memory<T> Slice(Int32 start) => Slice(start, _length - start);
         public Memory<T> Slice(Int32 start, Int32 length)
         {
             if (start < 0 || length < 0 || start > _length - length) throw new ArgumentOutOfRangeException();
             return new Memory<T>(_array, _start + start, length, true);
         }
+
+        public void CopyTo(Memory<T> destination) => Span.CopyTo(destination.Span);
+        public Boolean TryCopyTo(Memory<T> destination) => Span.TryCopyTo(destination.Span);
         public T[] ToArray() => Span.ToArray();
+
+        public unsafe global::System.Buffers.MemoryHandle Pin()
+        {
+            if (_array == null) return default;
+            ref T first = ref Runtime.CompilerServices.Unsafe.As<Byte, T>(ref Runtime.CompilerServices.Unsafe.As<RawArrayData>(_array).Data);
+            ref T reference = ref Runtime.CompilerServices.Unsafe.Add(ref first, _start);
+            return new global::System.Buffers.MemoryHandle(Runtime.CompilerServices.Unsafe.AsPointer(ref reference), _array);
+        }
+
+        public Boolean Equals(Memory<T> other)
+            => Object.ReferenceEquals(_array, other._array) && _start == other._start && _length == other._length;
+
+        public override Boolean Equals(Object obj)
+        {
+            if (obj is ReadOnlyMemory<T>) return ((ReadOnlyMemory<T>)obj).Equals((ReadOnlyMemory<T>)this);
+            if (obj is Memory<T>) return Equals((Memory<T>)obj);
+            return false;
+        }
+
+        public override Int32 GetHashCode()
+        {
+            Int32 hash = _array == null ? 0 : Runtime.CompilerServices.RuntimeHelpers.GetHashCode(_array);
+            return unchecked((hash * 31 + _start) * 31 + _length);
+        }
+
+        public override String ToString()
+        {
+            if (typeof(T) == typeof(Char)) return Span.ToString();
+            return String.Concat(String.Concat("System.Memory<", typeof(T).Name), String.Concat(">[", String.Concat(_length.ToString(), "]")));
+        }
+
         public static implicit operator Memory<T>(T[] array) => new Memory<T>(array);
+        public static implicit operator Memory<T>(ArraySegment<T> segment) => new Memory<T>(segment.Array, segment.Offset, segment.Count);
         public static implicit operator ReadOnlyMemory<T>(Memory<T> memory) => new ReadOnlyMemory<T>(memory._array, memory._start, memory._length, true);
     }
 
-    /// <summary><inu.api/>Array-backed storable read-only memory window.</summary>
-    public readonly struct ReadOnlyMemory<T>
+    /// <summary><inu.api/>Storable read-only memory window matching the .NET 10 ReadOnlyMemory&lt;T&gt; type-owned surface.</summary>
+    public readonly struct ReadOnlyMemory<T> : IEquatable<ReadOnlyMemory<T>>
     {
         private readonly T[] _array;
         private readonly Int32 _start;
         private readonly Int32 _length;
+
         public ReadOnlyMemory(T[] array)
         {
             if (array == null) { _array = null; _start = 0; _length = 0; return; }
             _array = array; _start = 0; _length = array.Length;
         }
+
         public ReadOnlyMemory(T[] array, Int32 start, Int32 length)
         {
             if (array == null)
@@ -3858,19 +3901,57 @@ namespace System
             if (start < 0 || length < 0 || start > array.Length - length) throw new ArgumentOutOfRangeException();
             _array = array; _start = start; _length = length;
         }
+
         internal ReadOnlyMemory(T[] array, Int32 start, Int32 length, Boolean trusted) { _array = array; _start = start; _length = length; }
+
         public static ReadOnlyMemory<T> Empty => default;
         public Int32 Length => _length;
         public Boolean IsEmpty => _length == 0;
         public ReadOnlySpan<T> Span => new ReadOnlySpan<T>(_array, _start, _length);
+
         public ReadOnlyMemory<T> Slice(Int32 start) => Slice(start, _length - start);
         public ReadOnlyMemory<T> Slice(Int32 start, Int32 length)
         {
             if (start < 0 || length < 0 || start > _length - length) throw new ArgumentOutOfRangeException();
             return new ReadOnlyMemory<T>(_array, _start + start, length, true);
         }
+
+        public void CopyTo(Memory<T> destination) => Span.CopyTo(destination.Span);
+        public Boolean TryCopyTo(Memory<T> destination) => Span.TryCopyTo(destination.Span);
         public T[] ToArray() => Span.ToArray();
+
+        public unsafe global::System.Buffers.MemoryHandle Pin()
+        {
+            if (_array == null) return default;
+            ref T first = ref Runtime.CompilerServices.Unsafe.As<Byte, T>(ref Runtime.CompilerServices.Unsafe.As<RawArrayData>(_array).Data);
+            ref T reference = ref Runtime.CompilerServices.Unsafe.Add(ref first, _start);
+            return new global::System.Buffers.MemoryHandle(Runtime.CompilerServices.Unsafe.AsPointer(ref reference), _array);
+        }
+
+        public Boolean Equals(ReadOnlyMemory<T> other)
+            => Object.ReferenceEquals(_array, other._array) && _start == other._start && _length == other._length;
+
+        public override Boolean Equals(Object obj)
+        {
+            if (obj is ReadOnlyMemory<T>) return Equals((ReadOnlyMemory<T>)obj);
+            if (obj is Memory<T>) return Equals((ReadOnlyMemory<T>)(Memory<T>)obj);
+            return false;
+        }
+
+        public override Int32 GetHashCode()
+        {
+            Int32 hash = _array == null ? 0 : Runtime.CompilerServices.RuntimeHelpers.GetHashCode(_array);
+            return unchecked((hash * 31 + _start) * 31 + _length);
+        }
+
+        public override String ToString()
+        {
+            if (typeof(T) == typeof(Char)) return Span.ToString();
+            return String.Concat(String.Concat("System.ReadOnlyMemory<", typeof(T).Name), String.Concat(">[", String.Concat(_length.ToString(), "]")));
+        }
+
         public static implicit operator ReadOnlyMemory<T>(T[] array) => new ReadOnlyMemory<T>(array);
+        public static implicit operator ReadOnlyMemory<T>(ArraySegment<T> segment) => new ReadOnlyMemory<T>(segment.Array, segment.Offset, segment.Count);
     }
 
     public class Attribute { }
@@ -6099,6 +6180,30 @@ namespace Inu.Runtime
 // non-generic method avoids making collection exception semantics depend on the
 // unfinished shared-generic value-type/unboxing ABI while preserving the public
 // InvalidOperationException contract.
+namespace System.Buffers
+{
+    /// <summary><inu.api/>Stable pointer handle returned by Memory&lt;T&gt;.Pin and ReadOnlyMemory&lt;T&gt;.Pin.</summary>
+    /// <remarks>Inu's current managed heap is non-moving, so disposal does not need to release a moving-GC pin.</remarks>
+    public unsafe struct MemoryHandle : global::System.IDisposable
+    {
+        private void* _pointer;
+        private global::System.Object _keepAlive;
+
+        internal MemoryHandle(void* pointer, global::System.Object keepAlive) { _pointer = pointer; _keepAlive = keepAlive; }
+
+        public void* Pointer => _pointer;
+
+        public void Dispose()
+        {
+            // Inu's current mark/sweep collector never relocates managed objects.
+            // Keep this as an explicit no-op contract point so a future moving collector
+            // can add pin bookkeeping without changing Memory<T>.Pin's public surface.
+            _pointer = null;
+            _keepAlive = null;
+        }
+    }
+}
+
 namespace System.Collections
 {
     // 0.0.108: diagnostic-only breadcrumbs for NativeAOT generic collection

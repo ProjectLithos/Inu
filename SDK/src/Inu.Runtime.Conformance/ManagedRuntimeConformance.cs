@@ -666,7 +666,7 @@ public static unsafe class ManagedRuntimeConformance
     /// SDK/tests/Inu.DotNetConformance.Tests/Program.cs and docs/BCL-Conformance-Target.md.
     /// One Record call equals one advertised target item; a failed item rejects boot.
     /// </summary>
-    private static void RunBclCoreV1Checks(ref UInt32 passed, ref UInt32 failed)
+    private static unsafe void RunBclCoreV1Checks(ref UInt32 passed, ref UInt32 failed)
     {
         UInt32 before = passed + failed;
         NativeAotExceptionRuntime.TraceStage(0xBC20UL);
@@ -1545,17 +1545,77 @@ public static unsafe class ManagedRuntimeConformance
             && spanCopyValues.Length == 3 && spanCopyValues[0] == 7 && spanCopyValues[1] == 0 && spanCopyValues[2] == 0,
             ref passed, ref failed);
 
-        // 37 System.Memory<T> / ReadOnlyMemory<T>: storable array-backed windows over Span.
+        // 37 System.Memory<T> / ReadOnlyMemory<T>: complete .NET 10 type-owned surface.
         Int32[] memoryValues = new Int32[] { 10, 20, 30, 40 };
         Memory<Int32> memory = memoryValues;
         Memory<Int32> memoryMiddle = memory.Slice(1, 2);
         memoryMiddle.Span[0] = 25;
         ReadOnlyMemory<Int32> readOnlyMemory = memory;
-        Int32[] memoryCopy = readOnlyMemory.Slice(1, 2).ToArray();
+        ReadOnlyMemory<Int32> readOnlyMemoryMiddle = readOnlyMemory.Slice(1, 2);
+        Int32[] memoryCopy = readOnlyMemoryMiddle.ToArray();
+
+        Int32[] memoryDestinationValues = new Int32[] { 0, 0, 0, 0 };
+        Memory<Int32> memoryDestination = memoryDestinationValues;
+        memoryMiddle.CopyTo(memoryDestination.Slice(1, 2));
+        Boolean memoryCopySurface = memoryDestinationValues[1] == 25 && memoryDestinationValues[2] == 30
+            && memoryMiddle.TryCopyTo(memoryDestination.Slice(0, 2)) && !memory.TryCopyTo(memoryDestination.Slice(0, 3));
+
+        Int32[] readOnlyMemoryDestinationValues = new Int32[] { 0, 0, 0, 0 };
+        Memory<Int32> readOnlyMemoryDestination = readOnlyMemoryDestinationValues;
+        readOnlyMemoryMiddle.CopyTo(readOnlyMemoryDestination.Slice(1, 2));
+        Boolean readOnlyMemoryCopySurface = readOnlyMemoryDestinationValues[1] == 25 && readOnlyMemoryDestinationValues[2] == 30
+            && readOnlyMemoryMiddle.TryCopyTo(readOnlyMemoryDestination.Slice(0, 2))
+            && !readOnlyMemory.TryCopyTo(readOnlyMemoryDestination.Slice(0, 3));
+
+        Memory<Int32> sameMemoryMiddle = new Memory<Int32>(memoryValues, 1, 2);
+        ReadOnlyMemory<Int32> sameReadOnlyMemoryMiddle = new ReadOnlyMemory<Int32>(memoryValues, 1, 2);
+        Boolean memoryEquality = memoryMiddle.Equals(sameMemoryMiddle) && memoryMiddle.Equals((Object)sameMemoryMiddle)
+            && memoryMiddle.Equals((Object)sameReadOnlyMemoryMiddle) && sameReadOnlyMemoryMiddle.Equals((Object)memoryMiddle)
+            && memoryMiddle.GetHashCode() == sameMemoryMiddle.GetHashCode()
+            && readOnlyMemoryMiddle.GetHashCode() == sameReadOnlyMemoryMiddle.GetHashCode()
+            && !memoryMiddle.Equals(new Memory<Int32>(new Int32[] { 25, 30 }, 0, 2))
+            && readOnlyMemoryMiddle.Equals(sameReadOnlyMemoryMiddle) && readOnlyMemoryMiddle.Equals((Object)sameReadOnlyMemoryMiddle)
+            && !readOnlyMemoryMiddle.Equals(new ReadOnlyMemory<Int32>(new Int32[] { 25, 30 }, 0, 2));
+
+        ArraySegment<Int32> memorySegment = new ArraySegment<Int32>(memoryValues, 1, 2);
+        Memory<Int32> segmentMemory = memorySegment;
+        ReadOnlyMemory<Int32> segmentReadOnlyMemory = memorySegment;
+
+        Boolean memoryPinning;
+        using (global::System.Buffers.MemoryHandle handle = memoryMiddle.Pin())
+            memoryPinning = handle.Pointer != null && *(Int32*)handle.Pointer == 25;
+        using (global::System.Buffers.MemoryHandle handle = readOnlyMemoryMiddle.Pin())
+            memoryPinning = memoryPinning && handle.Pointer != null && *(Int32*)handle.Pointer == 25;
+        using (global::System.Buffers.MemoryHandle handle = memory.Slice(2, 0).Pin())
+            memoryPinning = memoryPinning && handle.Pointer != null && *(Int32*)handle.Pointer == 30;
+        using (global::System.Buffers.MemoryHandle handle = readOnlyMemory.Slice(2, 0).Pin())
+            memoryPinning = memoryPinning && handle.Pointer != null && *(Int32*)handle.Pointer == 30;
+
+        Boolean memoryCovarianceGuard = false;
+        Object[] covariantMemoryArray = new String[] { "safe" };
+        try { Memory<Object> invalidMemory = new Memory<Object>(covariantMemoryArray); _ = invalidMemory.Length; } catch (ArrayTypeMismatchException) { memoryCovarianceGuard = true; }
+        ReadOnlyMemory<Object> covariantReadOnlyMemory = new ReadOnlyMemory<Object>(covariantMemoryArray);
+        memoryCovarianceGuard = memoryCovarianceGuard && covariantReadOnlyMemory.Length == 1 && (String)covariantReadOnlyMemory.Span[0] == "safe";
+
+        Boolean memoryConstructorGuards = false;
+        try { Memory<Int32> invalidMemoryRange = new Memory<Int32>(memoryValues, -1, 1); _ = invalidMemoryRange.Length; } catch (ArgumentOutOfRangeException) { memoryConstructorGuards = true; }
+        try { ReadOnlyMemory<Int32> invalidReadOnlyMemoryRange = new ReadOnlyMemory<Int32>(memoryValues, 3, 2); _ = invalidReadOnlyMemoryRange.Length; memoryConstructorGuards = false; } catch (ArgumentOutOfRangeException) { }
+        try { Memory<Int32> invalidNullMemory = new Memory<Int32>((Int32[])null, 1, 0); _ = invalidNullMemory.Length; memoryConstructorGuards = false; } catch (ArgumentOutOfRangeException) { }
+        try { ReadOnlyMemory<Int32> invalidNullReadOnlyMemory = new ReadOnlyMemory<Int32>((Int32[])null, 0, 1); _ = invalidNullReadOnlyMemory.Length; memoryConstructorGuards = false; } catch (ArgumentOutOfRangeException) { }
+
         Memory<Int32> nullMemory = new Memory<Int32>((Int32[])null);
+        ReadOnlyMemory<Int32> nullReadOnlyMemory = new ReadOnlyMemory<Int32>((Int32[])null);
         Record(memory.Length == 4 && memoryValues[1] == 25 && memoryMiddle.Span[1] == 30
             && readOnlyMemory.Span[1] == 25 && memoryCopy.Length == 2 && memoryCopy[0] == 25 && memoryCopy[1] == 30
-            && Memory<Int32>.Empty.IsEmpty && ReadOnlyMemory<Int32>.Empty.IsEmpty && nullMemory.IsEmpty, ref passed, ref failed);
+            && memoryCopySurface && readOnlyMemoryCopySurface && memoryEquality && memoryPinning && memoryCovarianceGuard && memoryConstructorGuards
+            && segmentMemory.Length == 2 && segmentMemory.Span[0] == 25
+            && segmentReadOnlyMemory.Length == 2 && segmentReadOnlyMemory.Span[1] == 30
+            && memory.ToString() == "System.Memory<Int32>[4]"
+            && readOnlyMemory.ToString() == "System.ReadOnlyMemory<Int32>[4]"
+            && new Memory<Char>(new Char[] { 'I', 'n', 'u' }).ToString() == "Inu"
+            && new ReadOnlyMemory<Char>(new Char[] { 'I', 'n', 'u' }).ToString() == "Inu"
+            && Memory<Int32>.Empty.IsEmpty && ReadOnlyMemory<Int32>.Empty.IsEmpty
+            && nullMemory.IsEmpty && nullReadOnlyMemory.IsEmpty, ref passed, ref failed);
 
         // 38 Generic comparison/equality consistency, including nullable and custom typed contracts.
         Comparer<Int32> intOrdering = Comparer<Int32>.Default;

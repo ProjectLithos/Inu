@@ -48,7 +48,7 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 33 | `System.IComparable / IComparable<T> / IEquatable<T>` | boxed and strongly typed ordering/equality across covered primitive families |
 | 34 | `delegate family` | managed delegate construction/invocation for `Action`/`Func` through four arguments plus `Predicate<T>`, `Comparison<T>`, and `Converter<TInput,TOutput>` |
 | 35 | `System.Span<T> / System.ReadOnlySpan<T>` | full .NET 10 type-owned `Span<T>` / `ReadOnlySpan<T>` surface: managed/native byref windows, array/ref/pointer construction, indexing, slicing, fill/clear, overlap-safe copy/try-copy, enumeration, pinning, `ToArray`, `ToString`, window identity, `ArraySegment<T>` conversion, and read-only covariance |
-| 36 | `System.Memory<T> / System.ReadOnlyMemory<T>` | storable array-backed windows, slicing, `Span`, empty/null semantics, mutation through `Memory<T>.Span`, and `ToArray` |
+| 36 | `System.Memory<T> / System.ReadOnlyMemory<T>` | complete .NET 10 type-owned array-backed surface: constructors/range/covariance rules, `Empty`/`IsEmpty`/`Length`/`Span`, slicing, copy/try-copy, equality/hash, non-moving-heap `Pin`/`MemoryHandle`, `ToArray`, `ToString`, and array/`ArraySegment<T>` conversions |
 | 37 | `System.Collections.Generic.Comparer<T> + equality consistency` | default generic ordering and equality across multiple primitive families |
 
 ## Primitive/runtime foundation status
@@ -59,7 +59,7 @@ For TODO-listed compatibility targets, completion means the **full applicable .N
 - integer and finite floating-point arithmetic/conversion paths used by Inu components;
 - consistent `IComparable<T>`/`IEquatable<T>` and default generic comparer behaviour for the covered primitive families;
 - the common managed delegate families needed by callbacks and generic helpers;
-- temporary byref windows through `Span<T>`/`ReadOnlySpan<T>` and storable array-backed windows through `Memory<T>`/`ReadOnlyMemory<T>`;
+- temporary byref windows through `Span<T>`/`ReadOnlySpan<T>` and the complete Profile-1 .NET 10 type-owned array-backed `Memory<T>`/`ReadOnlyMemory<T>` surface;
 - paired boundary behaviour for empty/null windows, slicing, copy sizing and overlapping span copies.
 
 Where one of these areas is explicitly listed in `TODO.md` (for example `System.Math`, primitive formatting/parsing, or `System.Convert`), the full applicable .NET 10 surface for that listed target is required before its checkbox may be completed. Areas not listed remain outside Profile 1 until they are deliberately added.
