@@ -114,6 +114,11 @@ internal static class Program
             && value.GetHashCode() == alias.GetHashCode()
             && value.GetType() == typeof(object)
             && alias.GetType() == value.GetType()
+            && typeof(object).Name == "Object"
+            && typeof(int).Name == "Int32"
+            && derived.GetType().Name == "Probe"
+            && generic.GetType().Name == "List`1"
+            && array.GetType().Name == "Int32[]"
             && value.ToString() == "System.Object"
             && derived.ToString() == "Inu.DotNetConformance.Tests.Program+Probe"
             && generic.ToString() == "System.Collections.Generic.List`1[System.Int32]"
@@ -939,7 +944,7 @@ internal static class Program
         return standard && identity && multicastOk;
     }
 
-    private static bool TestSpan()
+    private static unsafe bool TestSpan()
     {
         int[] values = { 1, 2, 3, 4, 5 };
         Span<int> span = values;
@@ -989,7 +994,52 @@ internal static class Program
         bool equality = span == sameWhole && sameWindowA == sameWindowB
             && sameWindowA != differentWindow && span != differentBacking;
 
-        return indexing && slicing && fill && clear && copy && empty && equality
+        int refValue = 41;
+        Span<int> refSpan = new Span<int>(ref refValue);
+        refSpan[0] = 42;
+        int* native = stackalloc int[3]; native[0] = 8; native[1] = 9; native[2] = 10;
+        Span<int> nativeSpan = new Span<int>(native, 3);
+        nativeSpan[1] = 11;
+        ArraySegment<int> segment = new ArraySegment<int>(values, 1, 2);
+        Span<int> segmentSpan = segment;
+        int enumerated = 0; foreach (ref int item in span) enumerated += item;
+        ref int pinnable = ref span.GetPinnableReference();
+        bool spanRemaining = refValue == 42 && refSpan.Length == 1 && native[1] == 11
+            && segmentSpan.Length == 2 && segmentSpan[0] == values[1]
+            && enumerated == values[0] + values[1] + values[2] + values[3] + values[4]
+            && ((pinnable = 99) == 99 && span[0] == 99)
+            && new Span<char>(new[] { 'I', 'n', 'u' }).ToString() == "Inu"
+            && span.ToString() == "System.Span<Int32>[5]";
+
+        ReadOnlySpan<int> roArray = values;
+        ReadOnlySpan<int> roWindow = new ReadOnlySpan<int>(values, 1, 2);
+        ReadOnlySpan<int> roSegment = segment;
+        ReadOnlySpan<int> roRef = new ReadOnlySpan<int>(in refValue);
+        ReadOnlySpan<int> roNative = new ReadOnlySpan<int>(native, 3);
+        int roEnumerated = 0; foreach (ref readonly int item in roWindow) roEnumerated += item;
+        Span<int> roDestination = new int[2]; roWindow.CopyTo(roDestination);
+        ReadOnlySpan<string> strings = new[] { "a", "b" };
+        ReadOnlySpan<object> objects = ReadOnlySpan<object>.CastUp(strings);
+        bool readOnlyComplete = roArray.Length == 5 && roWindow.Length == 2 && roWindow[0] == values[1]
+            && roSegment.Length == 2 && roRef[0] == 42 && roNative[1] == 11
+            && roEnumerated == roWindow[0] + roWindow[1] && roDestination[0] == roWindow[0]
+            && roWindow == new ReadOnlySpan<int>(values, 1, 2) && roWindow != new ReadOnlySpan<int>(values, 2, 2)
+            && objects.Length == 2 && (string)objects[1] == "b"
+            && new ReadOnlySpan<char>(new[] { 'I', 'n', 'u' }).ToString() == "Inu"
+            && roArray.ToString() == "System.ReadOnlySpan<Int32>[5]";
+
+        bool pointerGuards = false;
+        try { _ = new Span<string>((void*)0, 1); } catch (ArgumentException) { pointerGuards = true; }
+        try { _ = new Span<int>((void*)0, -1); pointerGuards = false; } catch (ArgumentOutOfRangeException) { }
+        try { _ = new ReadOnlySpan<string>((void*)0, 1); pointerGuards = false; } catch (ArgumentException) { }
+        try { _ = new ReadOnlySpan<int>((void*)0, -1); pointerGuards = false; } catch (ArgumentOutOfRangeException) { }
+
+        bool covarianceGuard = false;
+        object[] covariant = new string[1];
+        try { _ = new Span<object>(covariant); } catch (ArrayTypeMismatchException) { covarianceGuard = true; }
+
+        return indexing && slicing && fill && clear && copy && empty && equality && spanRemaining
+            && readOnlyComplete && pointerGuards && covarianceGuard
             && span.Length == 5 && readOnly.Length == 5
             && copied.Length == 3 && copied[0] == 7 && copied[1] == 0 && copied[2] == 0;
     }

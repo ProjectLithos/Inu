@@ -684,6 +684,11 @@ public static unsafe class ManagedRuntimeConformance
             && objectValue.GetHashCode() == objectAlias.GetHashCode()
             && objectValue.GetType() == typeof(Object)
             && objectAlias.GetType() == objectValue.GetType()
+            && String.Equals(typeof(Object).Name, "Object")
+            && String.Equals(typeof(Int32).Name, "Int32")
+            && String.Equals(derivedObject.GetType().Name, "Probe")
+            && String.Equals(genericObject.GetType().Name, "List`1")
+            && String.Equals(arrayObject.GetType().Name, "Int32[]")
             && String.Equals(objectValue.ToString(), "System.Object")
             && String.Equals(derivedObject.ToString(), "Inu.Runtime.Conformance.ManagedRuntimeConformance+Probe")
             && String.Equals(genericObject.ToString(), "System.Collections.Generic.List`1[System.Int32]")
@@ -1485,7 +1490,50 @@ public static unsafe class ManagedRuntimeConformance
         Boolean spanEquality = span == sameWhole && sameWindowA == sameWindowB
             && sameWindowA != differentWindow && span != differentBacking;
 
+        Int32 spanRefValue = 41;
+        Span<Int32> spanRef = new Span<Int32>(ref spanRefValue);
+        spanRef[0] = 42;
+        Int32* spanNative = stackalloc Int32[3]; spanNative[0] = 8; spanNative[1] = 9; spanNative[2] = 10;
+        Span<Int32> nativeSpan = new Span<Int32>(spanNative, 3);
+        nativeSpan[1] = 11;
+        ArraySegment<Int32> spanSegment = new ArraySegment<Int32>(spanValues, 1, 2);
+        Span<Int32> segmentSpan = spanSegment;
+        Int32 spanEnumerated = 0;
+        foreach (ref Int32 item in span) spanEnumerated += item;
+        ref Int32 spanPinned = ref span.GetPinnableReference();
+        Boolean remainingSpanSurface = spanRefValue == 42 && nativeSpan[1] == 11
+            && segmentSpan.Length == 2 && segmentSpan[0] == spanValues[1]
+            && spanEnumerated == spanValues[0] + spanValues[1] + spanValues[2] + spanValues[3] + spanValues[4]
+            && ((spanPinned = 99) == 99 && span[0] == 99)
+            && new Span<Char>(new Char[] { 'I', 'n', 'u' }).ToString() == "Inu"
+            && span.ToString() == "System.Span<Int32>[5]";
+
+        ReadOnlySpan<Int32> roWindow = new ReadOnlySpan<Int32>(spanValues, 1, 2);
+        ReadOnlySpan<Int32> roSegment = spanSegment;
+        ReadOnlySpan<Int32> roRef = new ReadOnlySpan<Int32>(in spanRefValue);
+        ReadOnlySpan<Int32> roNative = new ReadOnlySpan<Int32>(spanNative, 3);
+        Int32 roEnumerated = 0; foreach (ref readonly Int32 item in roWindow) roEnumerated += item;
+        Span<Int32> roDestination = new Span<Int32>(new Int32[2]); roWindow.CopyTo(roDestination);
+        ReadOnlySpan<String> roStrings = new ReadOnlySpan<String>(new String[] { "a", "b" });
+        ReadOnlySpan<Object> roObjects = ReadOnlySpan<Object>.CastUp(roStrings);
+        Boolean readOnlySpanComplete = roWindow.Length == 2 && roSegment.Length == 2 && roRef[0] == 42 && roNative[1] == 11
+            && roEnumerated == roWindow[0] + roWindow[1] && roDestination[0] == roWindow[0]
+            && roWindow == new ReadOnlySpan<Int32>(spanValues, 1, 2) && roWindow != new ReadOnlySpan<Int32>(spanValues, 2, 2)
+            && roObjects.Length == 2 && (String)roObjects[1] == "b"
+            && new ReadOnlySpan<Char>(new Char[] { 'I', 'n', 'u' }).ToString() == "Inu"
+            && readOnlySpan.ToString() == "System.ReadOnlySpan<Int32>[5]";
+
+        Boolean spanPointerGuards = false;
+        try { Span<String> invalidPointerSpan = new Span<String>((void*)0, 1); _ = invalidPointerSpan.Length; } catch (ArgumentException) { spanPointerGuards = true; }
+        try { Span<Int32> invalidLengthSpan = new Span<Int32>((void*)0, -1); _ = invalidLengthSpan.Length; spanPointerGuards = false; } catch (ArgumentOutOfRangeException) { }
+        try { ReadOnlySpan<String> invalidReadOnlyPointer = new ReadOnlySpan<String>((void*)0, 1); _ = invalidReadOnlyPointer.Length; spanPointerGuards = false; } catch (ArgumentException) { }
+        try { ReadOnlySpan<Int32> invalidReadOnlyLength = new ReadOnlySpan<Int32>((void*)0, -1); _ = invalidReadOnlyLength.Length; spanPointerGuards = false; } catch (ArgumentOutOfRangeException) { }
+        Boolean spanCovarianceGuard = false;
+        Object[] covariantSpanArray = new String[1];
+        try { Span<Object> invalidCovariantSpan = new Span<Object>(covariantSpanArray); _ = invalidCovariantSpan.Length; } catch (ArrayTypeMismatchException) { spanCovarianceGuard = true; }
+
         Record(spanIndexing && spanSlicing && spanFill && spanClear && spanCopy && spanEmpty && spanEquality
+            && remainingSpanSurface && readOnlySpanComplete && spanPointerGuards && spanCovarianceGuard
             && span.Length == 5 && readOnlySpan.Length == 5
             && spanCopyValues.Length == 3 && spanCopyValues[0] == 7 && spanCopyValues[1] == 0 && spanCopyValues[2] == 0,
             ref passed, ref failed);

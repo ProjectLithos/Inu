@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>Inu.DotNetConformance.Tests</AssemblyName>
     <RootNamespace>Inu.DotNetConformance.Tests</RootNamespace>
   </PropertyGroup>

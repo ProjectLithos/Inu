@@ -31,7 +31,7 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 16 | `System.Array` | SZ-array length/long length, element access, `Array.Empty<T>` |
 | 17 | `System.String` | empty, length/indexing, equality, ordinal comparison, search, prefix/suffix, substring, concat, null/whitespace helpers |
 | 18 | `System.Nullable<T>` | present/empty state, `Value`, `GetValueOrDefault` |
-| 19 | `System.Type` | value/primitive/array identity, element/base type, assignability and subclass checks |
+| 19 | `System.Type` | value/primitive/array identity, `Name` from NativeAOT metadata, element/base type, assignability and subclass checks |
 | 20 | `System.Collections.Generic.KeyValuePair<TKey,TValue>` | construction and key/value access |
 | 21 | `System.Collections.Generic.EqualityComparer<T>` | default integer/string equality and stable equal-value hashing |
 | 22 | `System.Collections.Generic.List<T>` | add/insert/index/search/copy/remove/count |
@@ -47,7 +47,7 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 32 | `System.Convert` | Boolean, integer and floating primitive conversions, rounding on floating-to-integer conversion, and primitive invariant string conversion |
 | 33 | `System.IComparable / IComparable<T> / IEquatable<T>` | boxed and strongly typed ordering/equality across covered primitive families |
 | 34 | `delegate family` | managed delegate construction/invocation for `Action`/`Func` through four arguments plus `Predicate<T>`, `Comparison<T>`, and `Converter<TInput,TOutput>` |
-| 35 | `System.Span<T> / System.ReadOnlySpan<T>` | null/empty semantics, array windows, indexing, mutation, slicing, fill/clear, overlap-safe copy/try-copy, read-only view, and `ToArray` |
+| 35 | `System.Span<T> / System.ReadOnlySpan<T>` | full .NET 10 type-owned `Span<T>` / `ReadOnlySpan<T>` surface: managed/native byref windows, array/ref/pointer construction, indexing, slicing, fill/clear, overlap-safe copy/try-copy, enumeration, pinning, `ToArray`, `ToString`, window identity, `ArraySegment<T>` conversion, and read-only covariance |
 | 36 | `System.Memory<T> / System.ReadOnlyMemory<T>` | storable array-backed windows, slicing, `Span`, empty/null semantics, mutation through `Memory<T>.Span`, and `ToArray` |
 | 37 | `System.Collections.Generic.Comparer<T> + equality consistency` | default generic ordering and equality across multiple primitive families |
 

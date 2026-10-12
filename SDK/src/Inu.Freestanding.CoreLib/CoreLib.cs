@@ -3518,17 +3518,47 @@ namespace System
     public delegate Int32 Comparison<in T>(T x, T y);
     public delegate TOutput Converter<in TInput, out TOutput>(TInput input);
 
-    /// <summary><inu.api/>Array-backed mutable span for the Core v1 freestanding target.</summary>
-    public ref struct Span<T>
+    /// <summary><inu.api/>Represents an array segment used by the Span conversion surface.</summary>
+    public readonly struct ArraySegment<T>
     {
-        private T[] _array;
-        private Int32 _start;
-        private Int32 _length;
+        private readonly T[] _array;
+        private readonly Int32 _offset;
+        private readonly Int32 _count;
+
+        public ArraySegment(T[] array)
+        {
+            if (array == null) throw new ArgumentNullException();
+            _array = array; _offset = 0; _count = array.Length;
+        }
+
+        public ArraySegment(T[] array, Int32 offset, Int32 count)
+        {
+            if (array == null) throw new ArgumentNullException();
+            if (offset < 0 || count < 0 || offset > array.Length - count) throw new ArgumentOutOfRangeException();
+            _array = array; _offset = offset; _count = count;
+        }
+
+        public static ArraySegment<T> Empty => new ArraySegment<T>(new T[0]);
+        public T[] Array => _array;
+        public Int32 Offset => _offset;
+        public Int32 Count => _count;
+    }
+
+    /// <summary><inu.api/>Mutable contiguous memory window matching the .NET 10 Span&lt;T&gt; type-owned surface.</summary>
+    public readonly ref struct Span<T>
+    {
+        internal readonly ref T _reference;
+        private readonly Int32 _length;
+
+        private static ref T GetArrayDataReference(T[] array)
+            => ref Runtime.CompilerServices.Unsafe.As<Byte, T>(ref Runtime.CompilerServices.Unsafe.As<RawArrayData>(array).Data);
 
         public Span(T[] array)
         {
-            if (array == null) { _array = null; _start = 0; _length = 0; return; }
-            _array = array; _start = 0; _length = array.Length;
+            if (array == null) { this = default; return; }
+            if (!typeof(T).IsValueType && array.GetType() != typeof(T[])) throw new ArrayTypeMismatchException();
+            _reference = ref GetArrayDataReference(array);
+            _length = array.Length;
         }
 
         public Span(T[] array, Int32 start, Int32 length)
@@ -3536,70 +3566,124 @@ namespace System
             if (array == null)
             {
                 if (start != 0 || length != 0) throw new ArgumentOutOfRangeException();
-                _array = null; _start = 0; _length = 0; return;
+                this = default; return;
             }
+            if (!typeof(T).IsValueType && array.GetType() != typeof(T[])) throw new ArrayTypeMismatchException();
             if (start < 0 || length < 0 || start > array.Length - length) throw new ArgumentOutOfRangeException();
-            _array = array; _start = start; _length = length;
+            _reference = ref Runtime.CompilerServices.Unsafe.Add(ref GetArrayDataReference(array), start);
+            _length = length;
         }
 
-        internal Span(T[] array, Int32 start, Int32 length, Boolean trusted)
-        { _array = array; _start = start; _length = length; }
+        public unsafe Span(void* pointer, Int32 length)
+        {
+            if (Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<T>()) throw new ArgumentException();
+            if (length < 0) throw new ArgumentOutOfRangeException();
+            _reference = ref Runtime.CompilerServices.Unsafe.AsRef<T>(pointer);
+            _length = length;
+        }
+
+        public Span(ref T reference) { _reference = ref reference; _length = 1; }
+        internal Span(ref T reference, Int32 length) { _reference = ref reference; _length = length; }
 
         public static Span<T> Empty => default;
         public Int32 Length => _length;
         public Boolean IsEmpty => _length == 0;
         public ref T this[Int32 index]
         {
-            get { if ((UInt32)index >= (UInt32)_length) throw new IndexOutOfRangeException(); return ref _array[_start + index]; }
+            get
+            {
+                if ((UInt32)index >= (UInt32)_length) throw new IndexOutOfRangeException();
+                return ref Runtime.CompilerServices.Unsafe.Add(ref _reference, index);
+            }
         }
+
         public Span<T> Slice(Int32 start) => Slice(start, _length - start);
         public Span<T> Slice(Int32 start, Int32 length)
         {
             if (start < 0 || length < 0 || start > _length - length) throw new ArgumentOutOfRangeException();
-            return new Span<T>(_array, _start + start, length, true);
+            return new Span<T>(ref Runtime.CompilerServices.Unsafe.Add(ref _reference, start), length);
         }
-        public T[] ToArray() { T[] copy = new T[_length]; for (Int32 i = 0; i < _length; i++) copy[i] = _array[_start + i]; return copy; }
-        public void Clear() { for (Int32 i = 0; i < _length; i++) _array[_start + i] = default; }
-        public void Fill(T value) { for (Int32 i = 0; i < _length; i++) _array[_start + i] = value; }
-        public void CopyTo(Span<T> destination)
+
+        public T[] ToArray()
         {
-            if (!TryCopyTo(destination)) throw new ArgumentException();
+            T[] copy = new T[_length];
+            for (Int32 i = 0; i < _length; i++) copy[i] = this[i];
+            return copy;
         }
+
+        public void Clear() { for (Int32 i = 0; i < _length; i++) this[i] = default; }
+        public void Fill(T value) { for (Int32 i = 0; i < _length; i++) this[i] = value; }
+        public void CopyTo(Span<T> destination) { if (!TryCopyTo(destination)) throw new ArgumentException(); }
         public Boolean TryCopyTo(Span<T> destination)
         {
             if (destination._length < _length) return false;
             if (_length == 0) return true;
-            if (Object.ReferenceEquals(_array, destination._array)
-                && destination._start > _start && destination._start < _start + _length)
+            unsafe
             {
-                for (Int32 i = _length - 1; i >= 0; i--) destination._array[destination._start + i] = _array[_start + i];
+                UInt64 source = (UInt64)(nuint)Runtime.CompilerServices.Unsafe.AsPointer(ref _reference);
+                UInt64 target = (UInt64)(nuint)Runtime.CompilerServices.Unsafe.AsPointer(ref destination._reference);
+                UInt64 last = (UInt64)(nuint)Runtime.CompilerServices.Unsafe.AsPointer(ref Runtime.CompilerServices.Unsafe.Add(ref _reference, _length - 1));
+                if (target > source && target <= last)
+                {
+                    for (Int32 i = _length - 1; i >= 0; i--) destination[i] = this[i];
+                    return true;
+                }
             }
-            else
-            {
-                for (Int32 i = 0; i < _length; i++) destination._array[destination._start + i] = _array[_start + i];
-            }
+            for (Int32 i = 0; i < _length; i++) destination[i] = this[i];
             return true;
         }
+
+        public Enumerator GetEnumerator() => new Enumerator(this);
+        public ref struct Enumerator
+        {
+            private readonly Span<T> _span;
+            private Int32 _index;
+            internal Enumerator(Span<T> span) { _span = span; _index = -1; }
+            public Boolean MoveNext() { Int32 next = _index + 1; if (next >= _span.Length) return false; _index = next; return true; }
+            public ref T Current => ref _span[_index];
+        }
+
+        public ref T GetPinnableReference()
+        {
+            if (_length == 0) return ref Runtime.CompilerServices.Unsafe.NullRef<T>();
+            return ref _reference;
+        }
+
+        public override String ToString()
+        {
+            if (typeof(T) == typeof(Char))
+            {
+                Char[] chars = new Char[_length];
+                for (Int32 i = 0; i < _length; i++) chars[i] = Runtime.CompilerServices.Unsafe.As<T, Char>(ref this[i]);
+                return String.CreateFromChars(chars, chars.Length);
+            }
+            return String.Concat(String.Concat("System.Span<", typeof(T).Name), String.Concat(">[", String.Concat(_length.ToString(), "]")));
+        }
+
         public override Boolean Equals(Object obj) => throw new NotSupportedException("Span<T> cannot be boxed for equality. Use the == operator for window identity.");
         public override Int32 GetHashCode() => throw new NotSupportedException("Span<T> does not support hashing.");
         public static Boolean operator ==(Span<T> left, Span<T> right)
-            => Object.ReferenceEquals(left._array, right._array) && left._start == right._start && left._length == right._length;
+            => left._length == right._length && Runtime.CompilerServices.Unsafe.AreSame(ref left._reference, ref right._reference);
         public static Boolean operator !=(Span<T> left, Span<T> right) => !(left == right);
         public static implicit operator Span<T>(T[] array) => new Span<T>(array);
-        public static implicit operator ReadOnlySpan<T>(Span<T> span) => new ReadOnlySpan<T>(span._array, span._start, span._length, true);
+        public static implicit operator Span<T>(ArraySegment<T> segment) => new Span<T>(segment.Array, segment.Offset, segment.Count);
+        public static implicit operator ReadOnlySpan<T>(Span<T> span) => new ReadOnlySpan<T>(ref span._reference, span._length);
     }
 
-    /// <summary><inu.api/>Array-backed read-only span for the Core v1 freestanding target.</summary>
+    /// <summary><inu.api/>Read-only contiguous memory window matching the .NET 10 ReadOnlySpan&lt;T&gt; type-owned surface.</summary>
     public readonly ref struct ReadOnlySpan<T>
     {
-        private readonly T[] _array;
-        private readonly Int32 _start;
+        internal readonly ref T _reference;
         private readonly Int32 _length;
+
+        private static ref T GetArrayDataReference(T[] array)
+            => ref Runtime.CompilerServices.Unsafe.As<Byte, T>(ref Runtime.CompilerServices.Unsafe.As<RawArrayData>(array).Data);
 
         public ReadOnlySpan(T[] array)
         {
-            if (array == null) { _array = null; _start = 0; _length = 0; return; }
-            _array = array; _start = 0; _length = array.Length;
+            if (array == null) { this = default; return; }
+            _reference = ref GetArrayDataReference(array);
+            _length = array.Length;
         }
 
         public ReadOnlySpan(T[] array, Int32 start, Int32 length)
@@ -3607,45 +3691,112 @@ namespace System
             if (array == null)
             {
                 if (start != 0 || length != 0) throw new ArgumentOutOfRangeException();
-                _array = null; _start = 0; _length = 0; return;
+                this = default; return;
             }
             if (start < 0 || length < 0 || start > array.Length - length) throw new ArgumentOutOfRangeException();
-            _array = array; _start = start; _length = length;
+            _reference = ref Runtime.CompilerServices.Unsafe.Add(ref GetArrayDataReference(array), start);
+            _length = length;
         }
 
-        internal ReadOnlySpan(T[] array, Int32 start, Int32 length, Boolean trusted)
-        { _array = array; _start = start; _length = length; }
+        public unsafe ReadOnlySpan(void* pointer, Int32 length)
+        {
+            if (Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<T>()) throw new ArgumentException();
+            if (length < 0) throw new ArgumentOutOfRangeException();
+            _reference = ref Runtime.CompilerServices.Unsafe.AsRef<T>(pointer);
+            _length = length;
+        }
+
+        public ReadOnlySpan(ref readonly T reference)
+        {
+            _reference = ref Runtime.CompilerServices.Unsafe.AsRef(in reference);
+            _length = 1;
+        }
+        internal ReadOnlySpan(ref T reference, Int32 length) { _reference = ref reference; _length = length; }
 
         public static ReadOnlySpan<T> Empty => default;
         public Int32 Length => _length;
         public Boolean IsEmpty => _length == 0;
         public ref readonly T this[Int32 index]
         {
-            get { if ((UInt32)index >= (UInt32)_length) throw new IndexOutOfRangeException(); return ref _array[_start + index]; }
+            get
+            {
+                if ((UInt32)index >= (UInt32)_length) throw new IndexOutOfRangeException();
+                return ref Runtime.CompilerServices.Unsafe.Add(ref _reference, index);
+            }
         }
+
         public ReadOnlySpan<T> Slice(Int32 start) => Slice(start, _length - start);
         public ReadOnlySpan<T> Slice(Int32 start, Int32 length)
         {
             if (start < 0 || length < 0 || start > _length - length) throw new ArgumentOutOfRangeException();
-            return new ReadOnlySpan<T>(_array, _start + start, length, true);
+            return new ReadOnlySpan<T>(ref Runtime.CompilerServices.Unsafe.Add(ref _reference, start), length);
         }
-        public T[] ToArray() { T[] copy = new T[_length]; for (Int32 i = 0; i < _length; i++) copy[i] = _array[_start + i]; return copy; }
-        public void CopyTo(Span<T> destination)
+
+        public T[] ToArray()
         {
-            if (!TryCopyTo(destination)) throw new ArgumentException();
+            T[] copy = new T[_length];
+            for (Int32 i = 0; i < _length; i++) copy[i] = this[i];
+            return copy;
         }
+
+        public void CopyTo(Span<T> destination) { if (!TryCopyTo(destination)) throw new ArgumentException(); }
         public Boolean TryCopyTo(Span<T> destination)
         {
             if (destination.Length < _length) return false;
-            for (Int32 i = 0; i < _length; i++) destination[i] = _array[_start + i];
+            if (_length == 0) return true;
+            unsafe
+            {
+                UInt64 source = (UInt64)(nuint)Runtime.CompilerServices.Unsafe.AsPointer(ref _reference);
+                ref T destinationReference = ref destination.GetPinnableReference();
+                UInt64 target = (UInt64)(nuint)Runtime.CompilerServices.Unsafe.AsPointer(ref destinationReference);
+                UInt64 last = (UInt64)(nuint)Runtime.CompilerServices.Unsafe.AsPointer(ref Runtime.CompilerServices.Unsafe.Add(ref _reference, _length - 1));
+                if (target > source && target <= last)
+                {
+                    for (Int32 i = _length - 1; i >= 0; i--) destination[i] = this[i];
+                    return true;
+                }
+            }
+            for (Int32 i = 0; i < _length; i++) destination[i] = this[i];
             return true;
         }
+
+        public static ReadOnlySpan<T> CastUp<TDerived>(ReadOnlySpan<TDerived> items) where TDerived : class, T
+            => new ReadOnlySpan<T>(ref Runtime.CompilerServices.Unsafe.As<TDerived, T>(ref items._reference), items.Length);
+
+        public Enumerator GetEnumerator() => new Enumerator(this);
+        public ref struct Enumerator
+        {
+            private readonly ReadOnlySpan<T> _span;
+            private Int32 _index;
+            internal Enumerator(ReadOnlySpan<T> span) { _span = span; _index = -1; }
+            public Boolean MoveNext() { Int32 next = _index + 1; if (next >= _span.Length) return false; _index = next; return true; }
+            public ref readonly T Current => ref _span[_index];
+        }
+
+        public ref readonly T GetPinnableReference()
+        {
+            if (_length == 0) return ref Runtime.CompilerServices.Unsafe.NullRef<T>();
+            return ref _reference;
+        }
+
+        public override String ToString()
+        {
+            if (typeof(T) == typeof(Char))
+            {
+                Char[] chars = new Char[_length];
+                for (Int32 i = 0; i < _length; i++) { T value = this[i]; chars[i] = Runtime.CompilerServices.Unsafe.As<T, Char>(ref value); }
+                return String.CreateFromChars(chars, chars.Length);
+            }
+            return String.Concat(String.Concat("System.ReadOnlySpan<", typeof(T).Name), String.Concat(">[", String.Concat(_length.ToString(), "]")));
+        }
+
         public override Boolean Equals(Object obj) => throw new NotSupportedException("ReadOnlySpan<T> cannot be boxed for equality. Use the == operator for window identity.");
         public override Int32 GetHashCode() => throw new NotSupportedException("ReadOnlySpan<T> does not support hashing.");
         public static Boolean operator ==(ReadOnlySpan<T> left, ReadOnlySpan<T> right)
-            => Object.ReferenceEquals(left._array, right._array) && left._start == right._start && left._length == right._length;
+            => left._length == right._length && Runtime.CompilerServices.Unsafe.AreSame(ref left._reference, ref right._reference);
         public static Boolean operator !=(ReadOnlySpan<T> left, ReadOnlySpan<T> right) => !(left == right);
         public static implicit operator ReadOnlySpan<T>(T[] array) => new ReadOnlySpan<T>(array);
+        public static implicit operator ReadOnlySpan<T>(ArraySegment<T> segment) => new ReadOnlySpan<T>(segment.Array, segment.Offset, segment.Count);
     }
 
     /// <summary><inu.api/>Array-backed storable memory window whose Span property provides temporary byref access.</summary>
@@ -3674,7 +3825,7 @@ namespace System
         public static Memory<T> Empty => default;
         public Int32 Length => _length;
         public Boolean IsEmpty => _length == 0;
-        public Span<T> Span => new Span<T>(_array, _start, _length, true);
+        public Span<T> Span => new Span<T>(_array, _start, _length);
         public Memory<T> Slice(Int32 start) => Slice(start, _length - start);
         public Memory<T> Slice(Int32 start, Int32 length)
         {
@@ -3711,7 +3862,7 @@ namespace System
         public static ReadOnlyMemory<T> Empty => default;
         public Int32 Length => _length;
         public Boolean IsEmpty => _length == 0;
-        public ReadOnlySpan<T> Span => new ReadOnlySpan<T>(_array, _start, _length, true);
+        public ReadOnlySpan<T> Span => new ReadOnlySpan<T>(_array, _start, _length);
         public ReadOnlyMemory<T> Slice(Int32 start) => Slice(start, _length - start);
         public ReadOnlyMemory<T> Slice(Int32 start, Int32 length)
         {
@@ -3829,6 +3980,10 @@ namespace System
         public Boolean IsByRef => EEType != null && EEType->IsByRef;
         public Boolean IsGenericType => EEType != null && EEType->IsGeneric;
         public Boolean IsGenericTypeDefinition => EEType != null && EEType->IsGenericTypeDefinition;
+
+        /// <summary>Gets the simple metadata name of the current runtime type.</summary>
+        public String Name
+            => global::Internal.Runtime.TypeLoader.TypeLoaderEnvironment.GetRuntimeTypeName(_typeHandle);
 
         public Type BaseType
         {
@@ -4200,6 +4355,39 @@ namespace System
                 // NativeAOT replaces this method body with a managed-byref to raw-pointer conversion.
                 while (true) { }
             }
+
+            [Intrinsic]
+            [Runtime.Versioning.NonVersionable]
+            public static ref T Add<T>(ref T source, Int32 elementOffset)
+            {
+                // NativeAOT replaces this method body with scaled managed-byref arithmetic.
+                while (true) { }
+            }
+
+            [Intrinsic]
+            [Runtime.Versioning.NonVersionable]
+            public static ref T AsRef<T>(in T source)
+            {
+                // NativeAOT removes readonly from the managed byref; callers must preserve readonly semantics.
+                while (true) { }
+            }
+
+            [Intrinsic]
+            [Runtime.Versioning.NonVersionable]
+            public static unsafe ref T AsRef<T>(void* source)
+            {
+                // NativeAOT converts the unmanaged address to a byref of T.
+                while (true) { }
+            }
+
+            [Intrinsic]
+            [Runtime.Versioning.NonVersionable]
+            public static unsafe ref T NullRef<T>()
+                => ref As<Byte, T>(ref *(Byte*)0);
+
+            [Runtime.Versioning.NonVersionable]
+            public static unsafe Boolean AreSame<T>(ref T left, ref T right)
+                => AsPointer(ref left) == AsPointer(ref right);
         }
 
         [AttributeUsage(AttributeTargets.Class, Inherited = false)]
