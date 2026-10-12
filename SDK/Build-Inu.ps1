@@ -139,9 +139,9 @@ function Invoke-InuCapturedStage {
         $stderrTask = $process.StandardError.ReadToEndAsync()
 
         $clock = [Diagnostics.Stopwatch]::StartNew()
-        # Keep long-running stages visibly alive on one updating line. Once a second is
-        # frequent enough to show progress without growing Kath's Output pane by one line
-        # per heartbeat. Carriage return deliberately rewrites the current status line.
+        # Keep long-running stages visibly alive on one horizontal line. Once a second is
+        # frequent enough to show progress without growing Kath's Output pane vertically.
+        # Successive elapsed values are appended because Output views do not reliably honour carriage-return repainting.
         $heartbeatIntervalSeconds = 1
         $nextHeartbeatSeconds = $heartbeatIntervalSeconds
         $heartbeatActive = $false
@@ -160,7 +160,7 @@ function Invoke-InuCapturedStage {
                 } else {
                     $heartbeatText = "[INFO] ${Stage}: ${elapsedSeconds}s elapsed..."
                 }
-                [Console]::Write("`r" + $heartbeatText)
+                if (-not $heartbeatActive) { [Console]::Write($heartbeatText) } else { [Console]::Write((" {0}s" -f $elapsedSeconds)) }
                 $heartbeatActive = $true
                 $nextHeartbeatSeconds = $elapsedSeconds + $heartbeatIntervalSeconds
             }
@@ -747,6 +747,19 @@ $outputDirectory = if ([IO.Path]::IsPathRooted([string]$projectData.OutputDirect
 }
 $imagePath = Join-Path $outputDirectory (([string]$projectData.Name) + ".img")
 
+$guiEnabled = $true
+$kathConfigurationPath = Join-Path $projectDirectory 'Inu.json'
+if (Test-Path -LiteralPath $kathConfigurationPath -PathType Leaf) {
+    $kathConfiguration = Get-Content -LiteralPath $kathConfigurationPath -Raw | ConvertFrom-Json
+    $startupModel = [string]$kathConfiguration.startupModel
+    if (-not [string]::IsNullOrWhiteSpace($startupModel)) {
+        $guiEnabled = $startupModel -in @('gui','cli-gui')
+    } elseif ($null -ne $kathConfiguration.gui) {
+        $guiEnabled = -not [string]::Equals([string]$kathConfiguration.gui, 'none', [StringComparison]::OrdinalIgnoreCase)
+    }
+}
+Write-Host ("[ OK ] Graphical userland selected: {0}" -f $guiEnabled)
+
 $dry = @()
 if ($DryRun) { $dry = @("--dry-run") }
 
@@ -795,7 +808,7 @@ if ($Configuration -eq 'Debug') { $linkOutputs += @((Join-Path $outputDirectory 
     if ($ForceRebuild) { $userlandArgs += '--force-rebuild' }
     Invoke-InuBuildStage -Stage "Ring-3 userland executables" -FilePath $dotnet -Arguments $userlandArgs -Inputs $userlandInputs -Outputs $userlandOutputs
 
-    if (-not $DryRun) {
+    if (-not $DryRun -and $guiEnabled) {
         $userlandApps = Join-Path $outputDirectory "UserlandApps"
         New-Item -ItemType Directory -Path $userlandApps -Force | Out-Null
         $desktopDir = Join-Path $projectDirectory "Userland\Provided\Desktop"
@@ -820,6 +833,13 @@ if ($Configuration -eq 'Debug') { $linkOutputs += @((Join-Path $outputDirectory 
             Invoke-InuBuildStage -Stage ("GUI link " + $gui.Name) -FilePath $lldLink -Arguments @('/nologo','/subsystem:native','/machine:x64','/nodefaultlib',('/entry:' + $gui.Entry),'/base:0x0000400000100000','/fixed',('/out:' + $gui.Exe),$gui.Object) -Inputs @($gui.Object) -Outputs @($gui.Exe)
         }
         Write-Host "[ OK ] Ring-3 GUI applications: $desktopExe, $loginExe"
+    } elseif (-not $DryRun) {
+        $userlandApps = Join-Path $outputDirectory "UserlandApps"
+        foreach ($staleGuiArtifact in @('INU-DESKTOP.obj','INU-DESKTOP.EXE','INU-LOGIN.obj','INU-LOGIN.EXE')) {
+            $staleGuiPath = Join-Path $userlandApps $staleGuiArtifact
+            if (Test-Path -LiteralPath $staleGuiPath -PathType Leaf) { Remove-Item -LiteralPath $staleGuiPath -Force }
+        }
+        Write-Host "[ OK ] CLI-only startup selected; graphical userland applications were not built."
     }
 
     $imageArgs = @($imageBuilder, "create", $projectManifest, "--output", $imagePath, "--sdk-root", $root, "--ide-root", $ideRoot) + $dry

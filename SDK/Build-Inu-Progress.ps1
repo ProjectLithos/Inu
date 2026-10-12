@@ -99,7 +99,7 @@ $lastActualOutputUtc = [DateTime]::UtcNow
 $stageStartUtc = $lastActualOutputUtc
 $stageName = 'Inu build'
 # Fallback heartbeat for periods where the redirected child output has no complete line.
-# Keep this on one updating line so long stages do not flood Kath's Output pane.
+# Keep this on one horizontal line so long stages do not flood Kath's Output pane vertically.
 $heartbeatIntervalSeconds = 1
 $heartbeatDueUtc = $lastActualOutputUtc.AddSeconds($heartbeatIntervalSeconds)
 $heartbeatActive = $false
@@ -136,7 +136,7 @@ try {
         elseif ([DateTime]::UtcNow -ge $heartbeatDueUtc) {
             $elapsedSeconds = [int][Math]::Floor(([DateTime]::UtcNow - $stageStartUtc).TotalSeconds)
             if ($elapsedSeconds -lt $heartbeatIntervalSeconds) { $elapsedSeconds = $heartbeatIntervalSeconds }
-            [Console]::Write(("`r[INFO] {0}: {1}s elapsed..." -f $stageName, $elapsedSeconds))
+            if (-not $heartbeatActive) { [Console]::Write(("[INFO] {0}: {1}s elapsed..." -f $stageName, $elapsedSeconds)) } else { [Console]::Write((" {0}s" -f $elapsedSeconds)) }
             $heartbeatActive = $true
             $heartbeatDueUtc = [DateTime]::UtcNow.AddSeconds($heartbeatIntervalSeconds)
         }

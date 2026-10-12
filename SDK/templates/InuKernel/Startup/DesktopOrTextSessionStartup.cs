@@ -19,26 +19,30 @@ public static class DesktopOrTextSessionStartup
             sessionReady = false;
         }
 
-        Boolean consoleFramebufferReleased = !sessionReady || !KernelConsole.HasFramebuffer() || KernelConsole.SetFramebufferPresentationEnabled(false);
-        KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART");
-        if (sessionReady && consoleFramebufferReleased && KernelProcesses.BeginGraphicalSessionAsync())
+        Boolean graphicalSessionSelected = !String.Equals(GeneratedConfiguration.Gui, "none", StringComparison.OrdinalIgnoreCase);
+        Boolean consoleFramebufferReleased = !graphicalSessionSelected || !sessionReady || !KernelConsole.HasFramebuffer() || KernelConsole.SetFramebufferPresentationEnabled(false);
+        if (graphicalSessionSelected)
         {
-            KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:QUEUED");
-            while (KernelProcesses.IsGraphicalSessionStarting())
-                if (!Native.WaitForInterrupt()) return false;
-
-            if (KernelProcesses.IsGraphicalSessionActive())
+            KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART");
+            if (sessionReady && consoleFramebufferReleased && KernelProcesses.BeginGraphicalSessionAsync())
             {
-                KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:OK");
-                for (;;) if (!Native.WaitForInterrupt()) return false;
+                KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:QUEUED");
+                while (KernelProcesses.IsGraphicalSessionStarting())
+                    if (!Native.WaitForInterrupt()) return false;
+
+                if (KernelProcesses.IsGraphicalSessionActive())
+                {
+                    KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:OK");
+                    for (;;) if (!Native.WaitForInterrupt()) return false;
+                }
+                KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:FAILED");
             }
-            KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:FAILED");
+
+            if (consoleFramebufferReleased && KernelConsole.HasFramebuffer() && !KernelConsole.SetFramebufferPresentationEnabled(true))
+                return false;
+
+            KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:FALLBACK");
         }
-
-        if (consoleFramebufferReleased && KernelConsole.HasFramebuffer() && !KernelConsole.SetFramebufferPresentationEnabled(true))
-            return false;
-
-        KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:FALLBACK");
         return UserlandRuntimeStartup.RunShellSession();
     }
 }

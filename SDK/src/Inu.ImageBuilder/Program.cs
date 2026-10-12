@@ -24,7 +24,10 @@ static int MainEntry(string[] args)
     string userlandAppsSource = Path.Combine(outputDirectory, "UserlandApps");
     string shellSource = Path.Combine(userlandAppsSource, "Shell", "SHELL.EXE");
     string commandsSource = Path.Combine(userlandAppsSource, "Commands");
-    if (!TryReadGuiApplicationPaths(project.ConfigurationFile, out string desktopVfsPath, out string loginVfsPath, out error)) return Fail(error);
+    string kathConfigurationPath = Path.Combine(projectRoot, "Inu.json");
+    string configuredGuiPath = Path.IsPathRooted(project.ConfigurationFile) ? project.ConfigurationFile : Path.Combine(projectRoot, project.ConfigurationFile);
+    string guiConfigurationPath = File.Exists(kathConfigurationPath) ? kathConfigurationPath : configuredGuiPath;
+    if (!TryReadGuiApplicationConfiguration(guiConfigurationPath, out bool guiEnabled, out string desktopVfsPath, out string loginVfsPath, out error)) return Fail(error);
     string? fontSource = ResolveConsoleTrueTypeFont(projectRoot, ideRoot);
     string stagingRoot = Path.Combine(outputDirectory, "BootFiles");
     string stagedLoader = Path.Combine(stagingRoot, "EFI", "BOOT", "BOOTX64.EFI");
@@ -42,7 +45,9 @@ static int MainEntry(string[] args)
 
     Console.WriteLine($"[INFO] UEFI loader  : {bootLoaderPath}");
     Console.WriteLine($"[INFO] Kernel input : {kernelPath} (PE32+ native subsystem, not EFI)");
-    Console.WriteLine($"[INFO] System volume: FAT32 /INU (GUI app paths are OS policy: desktop={desktopVfsPath}, login={loginVfsPath})");
+    Console.WriteLine(guiEnabled
+        ? $"[INFO] System volume: FAT32 /INU (GUI app paths are OS policy: desktop={desktopVfsPath}, login={loginVfsPath})"
+        : "[INFO] System volume: FAT32 /INU (CLI-only startup; no GUI applications will be staged)");
     Console.WriteLine($"[INFO] FAT32 image  : {imagePath}");
     if (HasOption(args, "--dry-run")) return 0;
 
@@ -85,8 +90,11 @@ static int MainEntry(string[] args)
             File.Copy(shellSource, Path.Combine(novaRoot, "SYSTEM", "SHELL", "SHELL.EXE"), true);
         if (!StageCommandsWithHelp(commandsSource, helpSource, Path.Combine(novaRoot, "SYSTEM", "COMMANDS"), Path.Combine(novaRoot, "SYSTEM", "HELP"), out error)) return Fail(error);
         CopyDirectoryFiles(wallpapersSource, Path.Combine(novaRoot, "SYSTEM", "WALLPAPERS"));
-        if (!StageGuiApplication(userlandAppsSource, "INU-DESKTOP.EXE", stagingRoot, desktopVfsPath, out error)) return Fail(error);
-        if (!StageGuiApplication(userlandAppsSource, "INU-LOGIN.EXE", stagingRoot, loginVfsPath, out error)) return Fail(error);
+        if (guiEnabled)
+        {
+            if (!StageGuiApplication(userlandAppsSource, "INU-DESKTOP.EXE", stagingRoot, desktopVfsPath, out error)) return Fail(error);
+            if (!StageGuiApplication(userlandAppsSource, "INU-LOGIN.EXE", stagingRoot, loginVfsPath, out error)) return Fail(error);
+        }
         if (string.IsNullOrWhiteSpace(fontSource) || !File.Exists(fontSource))
             return Fail("The generated OS is missing its project-local TrueType console font.");
         File.Copy(fontSource, Path.Combine(novaRoot, "SYSTEM", "FONTS", "CONSOLE.TTF"), true);
@@ -103,7 +111,7 @@ static int MainEntry(string[] args)
         int helpCount = Directory.GetFiles(Path.Combine(novaRoot, "SYSTEM", "HELP")).Length;
         int fontCount = Directory.GetFiles(Path.Combine(novaRoot, "SYSTEM", "FONTS")).Length;
         int wallpaperCount = Directory.GetFiles(Path.Combine(novaRoot, "SYSTEM", "WALLPAPERS")).Length;
-        int applicationCount = 2;
+        int applicationCount = guiEnabled ? 2 : 0;
         File.WriteAllText(manifestPath, JsonSerializer.Serialize(new
         {
             schemaVersion = 3,
@@ -210,8 +218,9 @@ static string? GetOption(ReadOnlySpan<string> args, string name)
     for (int index = 0; index + 1 < args.Length; index++) if (string.Equals(args[index], name, StringComparison.OrdinalIgnoreCase)) return args[index + 1];
     return null;
 }
-static bool TryReadGuiApplicationPaths(string configurationPath, out string desktopPath, out string loginPath, out string error)
+static bool TryReadGuiApplicationConfiguration(string configurationPath, out bool guiEnabled, out string desktopPath, out string loginPath, out string error)
 {
+    guiEnabled = true;
     desktopPath = "/BIN/INU-DESKTOP.EXE";
     loginPath = "/BIN/INU-LOGIN.EXE";
     error = string.Empty;
@@ -220,6 +229,14 @@ static bool TryReadGuiApplicationPaths(string configurationPath, out string desk
     {
         using JsonDocument document = JsonDocument.Parse(File.ReadAllText(configurationPath));
         JsonElement root = document.RootElement;
+        if (root.TryGetProperty("startupModel", out JsonElement startup) && startup.ValueKind == JsonValueKind.String)
+        {
+            string model = startup.GetString() ?? string.Empty;
+            guiEnabled = string.Equals(model, "gui", StringComparison.OrdinalIgnoreCase) || string.Equals(model, "cli-gui", StringComparison.OrdinalIgnoreCase);
+        }
+        else if (root.TryGetProperty("gui", out JsonElement gui) && gui.ValueKind == JsonValueKind.String)
+            guiEnabled = !string.Equals(gui.GetString(), "none", StringComparison.OrdinalIgnoreCase);
+        if (!guiEnabled) { desktopPath = string.Empty; loginPath = string.Empty; return true; }
         if (root.TryGetProperty("guiDesktopPath", out JsonElement desktop) && !string.IsNullOrWhiteSpace(desktop.GetString())) desktopPath = desktop.GetString()!;
         if (root.TryGetProperty("guiLoginPath", out JsonElement login) && !string.IsNullOrWhiteSpace(login.GetString())) loginPath = login.GetString()!;
         if (!IsSafeVfsApplicationPath(desktopPath) || !IsSafeVfsApplicationPath(loginPath))

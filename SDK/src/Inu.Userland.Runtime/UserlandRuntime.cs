@@ -208,19 +208,51 @@ public static unsafe class UserlandConsole
 
     private static Boolean TryCompleteCommand(StringBuilder line,ref UInt32 cursor,ref String prefix,ref String[] matches,ref Int32 index)
     {
-        Int32 tokenEnd=0;while(tokenEnd<line.Length&&line[tokenEnd]!=' ')tokenEnd++;
-        if((Int32)cursor>tokenEnd)return false;
-        String current=line.ToString().Substring(0,tokenEnd);
+        Int32 cursorIndex=(Int32)cursor;if(cursorIndex<0||cursorIndex>line.Length)return false;
+        Int32 tokenStart=cursorIndex;while(tokenStart>0&&line[tokenStart-1]!=' ')tokenStart--;
+        Int32 tokenEnd=cursorIndex;while(tokenEnd<line.Length&&line[tokenEnd]!=' ')tokenEnd++;
+        String current=line.ToString().Substring(tokenStart,tokenEnd-tokenStart);
+        String completionKey=tokenStart==0?"command:"+current:"path:"+current;
         Boolean currentIsSelection=index>=0&&index<matches.Length&&String.Equals(matches[index],current);
-        if(matches.Length==0||(!currentIsSelection&&!String.Equals(prefix,current)))
+        if(matches.Length==0||(!currentIsSelection&&!String.Equals(prefix,completionKey)))
         {
-            prefix=current;matches=FindCommandMatches(current);index=-1;
+            prefix=completionKey;matches=tokenStart==0?FindCommandMatches(current):FindPathMatches(current);index=-1;
         }
         if(matches.Length==0)return false;
         index=(index+1)%matches.Length;String replacement=matches[index];
+        String before=tokenStart>0?line.ToString().Substring(0,tokenStart):String.Empty;
         String tail=tokenEnd<line.Length?line.ToString().Substring(tokenEnd):String.Empty;
-        line.Clear();line.Append(replacement);line.Append(tail);cursor=(UInt32)replacement.Length;
+        line.Clear();line.Append(before);line.Append(replacement);line.Append(tail);cursor=(UInt32)(tokenStart+replacement.Length);
         return true;
+    }
+
+    private static String[] FindPathMatches(String token)
+    {
+        Char separator=FileSystemPaths.GetPathSeparator();
+        Int32 split=token.Length-1;while(split>=0&&token[split]!=separator)split--;
+        String typedDirectory=split>=0?token.Substring(0,split+1):String.Empty;
+        String leafPrefix=split>=0?token.Substring(split+1):token;
+        String searchDirectory;
+        if(split>=0)
+        {
+            String withoutTrailing=typedDirectory.Length>1?typedDirectory.Substring(0,typedDirectory.Length-1):typedDirectory;
+            searchDirectory=String.IsNullOrEmpty(withoutTrailing)?separator.ToString():withoutTrailing;
+        }
+        else searchDirectory=System.IO.Directory.GetCurrentDirectory();
+        String[] entries;try{entries=System.IO.Directory.GetFileSystemEntries(searchDirectory);}catch(Exception){return Array.Empty<String>();}
+        System.Collections.Generic.List<String> found=new System.Collections.Generic.List<String>();
+        for(Int32 i=0;i<entries.Length;i++)
+        {
+            String name=GetPathName(entries[i],separator);if(String.IsNullOrEmpty(name)||!StartsWithAsciiIgnoreCase(name,leafPrefix))continue;
+            String candidate=typedDirectory+name;Boolean duplicate=false;for(Int32 m=0;m<found.Count;m++)if(CompareAsciiIgnoreCase(found[m],candidate)==0){duplicate=true;break;}
+            if(!duplicate)found.Add(candidate);
+        }
+        SortAsciiIgnoreCase(found);return found.ToArray();
+    }
+
+    private static String GetPathName(String path,Char separator)
+    {
+        if(String.IsNullOrEmpty(path))return String.Empty;Int32 end=path.Length;while(end>1&&path[end-1]==separator)end--;Int32 start=end-1;while(start>=0&&path[start]!=separator)start--;return path.Substring(start+1,end-start-1);
     }
 
     private static String[] FindCommandMatches(String prefix)
@@ -276,7 +308,7 @@ public static unsafe class UserlandConsole
         if(buffer==null||capacity<2U)return -1;String line=ReadEditedLine(false);UInt32 length=(UInt32)line.Length;if(length+1U>capacity)length=capacity-1U;for(UInt32 i=0U;i<length;i++){Char c=line[(Int32)i];buffer[i]=(Byte)(c<=255?c:'?');}return (Int32)length;
     }
 
-    /// <summary>Reads one shell command line with command-name Tab search/completion enabled.</summary>
+    /// <summary>Reads one shell command line with command and filesystem-path Tab search/completion enabled.</summary>
     public static Int32 ReadCommandLineAscii(Byte* buffer,UInt32 capacity)
     {
         if(buffer==null||capacity<2U)return -1;String line=ReadEditedLine(true);UInt32 length=(UInt32)line.Length;if(length+1U>capacity)length=capacity-1U;for(UInt32 i=0U;i<length;i++){Char c=line[(Int32)i];buffer[i]=(Byte)(c<=255?c:'?');}return (Int32)length;

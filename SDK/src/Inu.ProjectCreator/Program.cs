@@ -401,6 +401,16 @@ static bool MaterializeCanonicalUserlandWorkspace(string sdkRoot, string output)
     }
 
     string destinationRoot = Path.Combine(output, "Userland", "Provided");
+    bool? graphicalStartup = ReadKathGraphicalStartup(output);
+    if (graphicalStartup == false)
+    {
+        foreach (string guiTree in new[] { Path.Combine(destinationRoot, "Desktop"), Path.Combine(destinationRoot, "Login") })
+        {
+            if (!Directory.Exists(guiTree)) continue;
+            Directory.Delete(guiTree, true);
+            Console.WriteLine($"[ OK ] Removed unselected graphical userland source tree: {guiTree}");
+        }
+    }
 
     // Stock command implementations have one SDK source of reference:
     // SDK/src/Userland/Commands/*.cs. They are materialised only into the coder-owned
@@ -421,7 +431,9 @@ static bool MaterializeCanonicalUserlandWorkspace(string sdkRoot, string output)
     {
         string relative = Path.GetRelativePath(sourceRoot, source);
         if (relative.StartsWith("Commands" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
-            relative.StartsWith("SysInfo" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            relative.StartsWith("SysInfo" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
+            (graphicalStartup == false && (relative.StartsWith("Desktop" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
+                                           relative.StartsWith("Login" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))))
         {
             continue;
         }
@@ -433,6 +445,30 @@ static bool MaterializeCanonicalUserlandWorkspace(string sdkRoot, string output)
         Console.WriteLine($"[ OK ] Materialized userland workspace file from canonical SDK source: {relative}");
     }
     return true;
+}
+
+
+static bool? ReadKathGraphicalStartup(string output)
+{
+    string path = Path.Combine(output, "Inu.json");
+    if (!File.Exists(path)) return null;
+    try
+    {
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));
+        JsonElement root = document.RootElement;
+        if (root.TryGetProperty("startupModel", out JsonElement startup) && startup.ValueKind == JsonValueKind.String)
+        {
+            string value = startup.GetString() ?? string.Empty;
+            return string.Equals(value, "gui", StringComparison.OrdinalIgnoreCase) || string.Equals(value, "cli-gui", StringComparison.OrdinalIgnoreCase);
+        }
+        if (root.TryGetProperty("gui", out JsonElement gui) && gui.ValueKind == JsonValueKind.String)
+            return !string.Equals(gui.GetString(), "none", StringComparison.OrdinalIgnoreCase);
+        return false;
+    }
+    catch (JsonException)
+    {
+        return null;
+    }
 }
 
 static string SafeProjectSegment(string value)

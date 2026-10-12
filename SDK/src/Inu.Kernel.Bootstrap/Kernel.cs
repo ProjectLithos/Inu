@@ -908,12 +908,11 @@ public static unsafe partial class Kernel
         // Select the graphical or text session only after the ordinary user-session
         // environment has reached the same point used by the interactive CLI.
         Boolean sessionReady=true;
-        // At the user-session boundary the text console relinquishes only framebuffer presentation.
-        // Its selected single/double/triple buffer policy and retained state remain untouched, and serial
-        // diagnostics continue normally. This prevents stale console back buffers/caret updates from
-        // racing the compositor after GUI takeover.
-        Boolean consoleFramebufferReleased=!sessionReady||!KernelConsole.HasFramebuffer()||KernelConsole.SetFramebufferPresentationEnabled(false);
-        if(sessionReady&&consoleFramebufferReleased&&KernelProcesses.BeginGraphicalSessionAsync())
+        Boolean graphicalSessionSelected=!String.Equals(GeneratedConfiguration.Gui,"none",StringComparison.OrdinalIgnoreCase);
+        // Only a selected GUI session may take framebuffer presentation away from the text console.
+        // CLI-only startup leaves the console fully active and enters the shell directly.
+        Boolean consoleFramebufferReleased=!graphicalSessionSelected||!sessionReady||!KernelConsole.HasFramebuffer()||KernelConsole.SetFramebufferPresentationEnabled(false);
+        if(graphicalSessionSelected&&sessionReady&&consoleFramebufferReleased&&KernelProcesses.BeginGraphicalSessionAsync())
         {
             if (!KernelStructuredLogging.InfoLine("gui","Kernel.KMain","Graphical session startup queued asynchronously on the OS-selected GUI CPU set.")) return false;
             while(KernelProcesses.IsGraphicalSessionStarting()) if (!Native.WaitForInterrupt()) return false;
@@ -923,8 +922,11 @@ public static unsafe partial class Kernel
                 for (;;) if (!Native.WaitForInterrupt()) return false;
             }
         }
-        if(consoleFramebufferReleased&&KernelConsole.HasFramebuffer()&&!KernelConsole.SetFramebufferPresentationEnabled(true))return false;
-        if (!KernelStructuredLogging.WarningLine("gui","Kernel.KMain",sessionReady?"Graphical session autostart was unavailable; retaining the text recovery login.":"User-session filesystem preparation timed out; retaining the text recovery login.")) return false;
+        if(graphicalSessionSelected)
+        {
+            if(consoleFramebufferReleased&&KernelConsole.HasFramebuffer()&&!KernelConsole.SetFramebufferPresentationEnabled(true))return false;
+            if (!KernelStructuredLogging.WarningLine("gui","Kernel.KMain",sessionReady?"Graphical session autostart was unavailable; retaining the text recovery login.":"User-session filesystem preparation timed out; retaining the text recovery login.")) return false;
+        }
         return Startup.UserlandRuntimeStartup.RunShellSession();
     }
     
