@@ -110,3 +110,14 @@ SDK\Run-InuDotNetConformance.bat
 
 Each of these should be added to the executable conformance suite before it is advertised as supported.
 - `System.String` constructor support includes the NativeAOT compiler companion contract: each supported public `String(...)` constructor has a matching private static `Ctor(...)` implementation for ILC string allocation lowering.
+
+
+## StringBuilder Profile 1
+
+`System.Text.StringBuilder` supports append/line append, insertion, removal, character and string replacement, clear, length/capacity management, indexing and materialisation through `ToString()`. Reference-side and in-kernel conformance cover mutation, growth and invalid argument paths.
+## Encoding Profile 1
+
+Profile 1 completes the requested `System.Text` encoding substrate for ASCII and UTF-8. The freestanding `Encoding`, `ASCIIEncoding`, and `UTF8Encoding` implementations provide property/name/code-page factories for ASCII (20127) and UTF-8 (65001), byte and UTF-16-character counts, allocating conversions, array-range conversions, caller-provided array buffers, and span-based encode/decode. ASCII uses `?` replacement outside 7-bit ASCII; UTF-8 uses replacement-character fallback for malformed scalar sequences.
+
+UTF-16 is **not** a Profile 1 encoding API. Inu strings are still stored as UTF-16, but `UnicodeEncoding`, `Encoding.Unicode`, and `Encoding.BigEndianUnicode` are deferred together with BOM/endian policy, streaming `Encoder`/`Decoder`, configurable fallback objects, UTF-32 and broader code-page support.
+

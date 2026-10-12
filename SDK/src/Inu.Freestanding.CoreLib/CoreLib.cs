@@ -7788,6 +7788,83 @@ namespace System.Text
         /// <summary><inu.api/>Appends an unsigned 64-bit integer in decimal form.</summary>
         public StringBuilder Append(UInt64 value) => AppendUnsigned(value);
 
+        /// <summary><inu.api/>Appends an object by using its normal string representation.</summary>
+        public StringBuilder Append(Object value)
+            => value == null ? this : Append(value.ToString());
+
+        /// <summary><inu.api/>Inserts a string at the requested character index.</summary>
+        public StringBuilder Insert(Int32 index, String value)
+        {
+            if ((UInt32)index > (UInt32)_length) throw new ArgumentOutOfRangeException();
+            if (value == null || value.Length == 0) return this;
+            Int32 valueLength = value.Length;
+            EnsureCapacity(_length + valueLength);
+            for (Int32 source = _length - 1; source >= index; source--)
+                _buffer[source + valueLength] = _buffer[source];
+            for (Int32 offset = 0; offset < valueLength; offset++)
+                _buffer[index + offset] = value[offset];
+            _length += valueLength;
+            return this;
+        }
+
+        /// <summary><inu.api/>Removes a contiguous range of characters.</summary>
+        public StringBuilder Remove(Int32 startIndex, Int32 length)
+        {
+            if (startIndex < 0 || length < 0 || startIndex > _length - length) throw new ArgumentOutOfRangeException();
+            if (length == 0) return this;
+            Int32 source = startIndex + length;
+            Int32 destination = startIndex;
+            while (source < _length) _buffer[destination++] = _buffer[source++];
+            _length -= length;
+            return this;
+        }
+
+        /// <summary><inu.api/>Replaces every matching character in the current contents.</summary>
+        public StringBuilder Replace(Char oldChar, Char newChar)
+        {
+            for (Int32 index = 0; index < _length; index++)
+                if (_buffer[index] == oldChar) _buffer[index] = newChar;
+            return this;
+        }
+
+        /// <summary><inu.api/>Replaces every ordinal occurrence of one string with another.</summary>
+        public StringBuilder Replace(String oldValue, String newValue)
+        {
+            if (oldValue == null) throw new ArgumentNullException();
+            if (oldValue.Length == 0) throw new ArgumentException();
+            if (newValue == null) newValue = String.Empty;
+
+            Int32 searchIndex = 0;
+            while (searchIndex <= _length - oldValue.Length)
+            {
+                Boolean match = true;
+                for (Int32 offset = 0; offset < oldValue.Length; offset++)
+                {
+                    if (_buffer[searchIndex + offset] != oldValue[offset]) { match = false; break; }
+                }
+                if (!match) { searchIndex++; continue; }
+
+                Int32 delta = newValue.Length - oldValue.Length;
+                if (delta > 0)
+                {
+                    EnsureCapacity(_length + delta);
+                    for (Int32 source = _length - 1; source >= searchIndex + oldValue.Length; source--)
+                        _buffer[source + delta] = _buffer[source];
+                }
+                else if (delta < 0)
+                {
+                    for (Int32 source = searchIndex + oldValue.Length; source < _length; source++)
+                        _buffer[source + delta] = _buffer[source];
+                }
+
+                for (Int32 offset = 0; offset < newValue.Length; offset++)
+                    _buffer[searchIndex + offset] = newValue[offset];
+                _length += delta;
+                searchIndex += newValue.Length;
+            }
+            return this;
+        }
+
         /// <summary><inu.api/>Appends a CR/LF line terminator.</summary>
         public StringBuilder AppendLine()
         {
@@ -7834,23 +7911,236 @@ namespace System.Text
         }
     }
 
-    /// <summary><inu.api/>Freestanding text encoding base for the initial ASCII and UTF-8 SDK surface.</summary>
+    /// <summary><inu.api/>Freestanding text encoding base for the Profile 1 ASCII and UTF-8 surface.</summary>
     public abstract class Encoding
     {
+        private const Int32 AsciiCodePage = 20127;
+        private const Int32 Utf8CodePage = 65001;
+
         /// <summary><inu.api/>Returns an Inu-owned ASCII encoding instance.</summary>
         public static Encoding ASCII => new ASCIIEncoding();
 
         /// <summary><inu.api/>Returns an Inu-owned UTF-8 encoding instance.</summary>
         public static Encoding UTF8 => new UTF8Encoding();
 
+        /// <summary><inu.api/>Returns a Profile 1 encoding by its supported code page.</summary>
+        public static Encoding GetEncoding(Int32 codePage)
+        {
+            if (codePage == AsciiCodePage) return ASCII;
+            if (codePage == Utf8CodePage) return UTF8;
+            throw new ArgumentException("Encoding code page is not part of Inu Profile 1.");
+        }
+
+        /// <summary><inu.api/>Returns a Profile 1 encoding by its supported invariant name.</summary>
+        public static Encoding GetEncoding(String name)
+        {
+            if (name == null) throw new ArgumentNullException();
+            if (EqualsAsciiIgnoreCase(name, "ascii") || EqualsAsciiIgnoreCase(name, "us-ascii")) return ASCII;
+            if (EqualsAsciiIgnoreCase(name, "utf8") || EqualsAsciiIgnoreCase(name, "utf-8")) return UTF8;
+            throw new ArgumentException("Encoding name is not part of Inu Profile 1.");
+        }
+
         /// <summary><inu.api/>Returns the number of bytes required to encode the supplied string.</summary>
         public abstract Int32 GetByteCount(String value);
+
+        /// <summary><inu.api/>Returns the number of bytes required to encode a string range.</summary>
+        public virtual Int32 GetByteCount(String value, Int32 index, Int32 count)
+        {
+            if (value == null) throw new ArgumentNullException();
+            ValidateRange(value.Length, index, count);
+            return GetByteCount(value.Substring(index, count));
+        }
+
+        /// <summary><inu.api/>Returns the number of bytes required to encode an entire character array.</summary>
+        public virtual Int32 GetByteCount(Char[] chars)
+        {
+            if (chars == null) throw new ArgumentNullException();
+            return GetByteCount(chars, 0, chars.Length);
+        }
+
+        /// <summary><inu.api/>Returns the number of bytes required to encode a character-array range.</summary>
+        public virtual Int32 GetByteCount(Char[] chars, Int32 index, Int32 count)
+        {
+            if (chars == null) throw new ArgumentNullException();
+            ValidateRange(chars.Length, index, count);
+            return GetByteCount(new String(chars, index, count));
+        }
+
+        /// <summary><inu.api/>Returns the number of bytes required to encode a character span.</summary>
+        public virtual Int32 GetByteCount(ReadOnlySpan<Char> chars)
+        {
+            return GetByteCount(new String(chars.ToArray()));
+        }
 
         /// <summary><inu.api/>Encodes the supplied string into a newly allocated byte array.</summary>
         public abstract Byte[] GetBytes(String value);
 
+        /// <summary><inu.api/>Encodes a string range into a newly allocated byte array.</summary>
+        public virtual Byte[] GetBytes(String value, Int32 index, Int32 count)
+        {
+            if (value == null) throw new ArgumentNullException();
+            ValidateRange(value.Length, index, count);
+            return GetBytes(value.Substring(index, count));
+        }
+
+        /// <summary><inu.api/>Encodes an entire character array into a newly allocated byte array.</summary>
+        public virtual Byte[] GetBytes(Char[] chars)
+        {
+            if (chars == null) throw new ArgumentNullException();
+            return GetBytes(chars, 0, chars.Length);
+        }
+
+        /// <summary><inu.api/>Encodes a character-array range into a newly allocated byte array.</summary>
+        public virtual Byte[] GetBytes(Char[] chars, Int32 index, Int32 count)
+        {
+            if (chars == null) throw new ArgumentNullException();
+            ValidateRange(chars.Length, index, count);
+            return GetBytes(new String(chars, index, count));
+        }
+
+        /// <summary><inu.api/>Encodes a character span into a newly allocated byte array.</summary>
+        public virtual Byte[] GetBytes(ReadOnlySpan<Char> chars)
+        {
+            return GetBytes(new String(chars.ToArray()));
+        }
+
+        /// <summary><inu.api/>Encodes a string range into caller-provided byte storage.</summary>
+        public virtual Int32 GetBytes(String value, Int32 charIndex, Int32 charCount, Byte[] bytes, Int32 byteIndex)
+        {
+            if (value == null || bytes == null) throw new ArgumentNullException();
+            ValidateRange(value.Length, charIndex, charCount);
+            ValidateDestinationIndex(bytes.Length, byteIndex);
+            Byte[] encoded = GetBytes(value.Substring(charIndex, charCount));
+            EnsureDestination(bytes.Length - byteIndex, encoded.Length);
+            for (Int32 index = 0; index < encoded.Length; index++) bytes[byteIndex + index] = encoded[index];
+            return encoded.Length;
+        }
+
+        /// <summary><inu.api/>Encodes a character-array range into caller-provided byte storage.</summary>
+        public virtual Int32 GetBytes(Char[] chars, Int32 charIndex, Int32 charCount, Byte[] bytes, Int32 byteIndex)
+        {
+            if (chars == null || bytes == null) throw new ArgumentNullException();
+            ValidateRange(chars.Length, charIndex, charCount);
+            return GetBytes(new String(chars, charIndex, charCount), 0, charCount, bytes, byteIndex);
+        }
+
+        /// <summary><inu.api/>Encodes a character span into caller-provided byte storage.</summary>
+        public virtual Int32 GetBytes(ReadOnlySpan<Char> chars, Span<Byte> bytes)
+        {
+            Byte[] encoded = GetBytes(chars);
+            EnsureDestination(bytes.Length, encoded.Length);
+            for (Int32 index = 0; index < encoded.Length; index++) bytes[index] = encoded[index];
+            return encoded.Length;
+        }
+
+        /// <summary><inu.api/>Returns the number of UTF-16 characters produced by decoding an entire byte array.</summary>
+        public virtual Int32 GetCharCount(Byte[] bytes)
+        {
+            if (bytes == null) throw new ArgumentNullException();
+            return GetCharCount(bytes, 0, bytes.Length);
+        }
+
+        /// <summary><inu.api/>Returns the number of UTF-16 characters produced by decoding a byte-array range.</summary>
+        public virtual Int32 GetCharCount(Byte[] bytes, Int32 index, Int32 count)
+        {
+            if (bytes == null) throw new ArgumentNullException();
+            ValidateRange(bytes.Length, index, count);
+            return GetString(bytes, index, count).Length;
+        }
+
+        /// <summary><inu.api/>Returns the number of UTF-16 characters produced by decoding a byte span.</summary>
+        public virtual Int32 GetCharCount(ReadOnlySpan<Byte> bytes)
+        {
+            return GetChars(bytes).Length;
+        }
+
+        /// <summary><inu.api/>Decodes an entire byte array into a newly allocated character array.</summary>
+        public virtual Char[] GetChars(Byte[] bytes)
+        {
+            if (bytes == null) throw new ArgumentNullException();
+            return GetChars(bytes, 0, bytes.Length);
+        }
+
+        /// <summary><inu.api/>Decodes a byte-array range into a newly allocated character array.</summary>
+        public virtual Char[] GetChars(Byte[] bytes, Int32 index, Int32 count)
+        {
+            if (bytes == null) throw new ArgumentNullException();
+            ValidateRange(bytes.Length, index, count);
+            String decoded = GetString(bytes, index, count);
+            Char[] chars = new Char[decoded.Length];
+            for (Int32 charIndex = 0; charIndex < decoded.Length; charIndex++) chars[charIndex] = decoded[charIndex];
+            return chars;
+        }
+
+        /// <summary><inu.api/>Decodes a byte span into a newly allocated character array.</summary>
+        public virtual Char[] GetChars(ReadOnlySpan<Byte> bytes)
+        {
+            Byte[] copy = bytes.ToArray();
+            return GetChars(copy, 0, copy.Length);
+        }
+
+        /// <summary><inu.api/>Decodes a byte-array range into caller-provided character storage.</summary>
+        public virtual Int32 GetChars(Byte[] bytes, Int32 byteIndex, Int32 byteCount, Char[] chars, Int32 charIndex)
+        {
+            if (bytes == null || chars == null) throw new ArgumentNullException();
+            ValidateRange(bytes.Length, byteIndex, byteCount);
+            ValidateDestinationIndex(chars.Length, charIndex);
+            Char[] decoded = GetChars(bytes, byteIndex, byteCount);
+            EnsureDestination(chars.Length - charIndex, decoded.Length);
+            for (Int32 index = 0; index < decoded.Length; index++) chars[charIndex + index] = decoded[index];
+            return decoded.Length;
+        }
+
+        /// <summary><inu.api/>Decodes a byte span into caller-provided character storage.</summary>
+        public virtual Int32 GetChars(ReadOnlySpan<Byte> bytes, Span<Char> chars)
+        {
+            Char[] decoded = GetChars(bytes);
+            EnsureDestination(chars.Length, decoded.Length);
+            for (Int32 index = 0; index < decoded.Length; index++) chars[index] = decoded[index];
+            return decoded.Length;
+        }
+
         /// <summary><inu.api/>Decodes a complete byte array into a newly allocated managed string.</summary>
         public abstract String GetString(Byte[] bytes);
+
+        /// <summary><inu.api/>Decodes a byte-array range into a newly allocated managed string.</summary>
+        public virtual String GetString(Byte[] bytes, Int32 index, Int32 count)
+        {
+            if (bytes == null) throw new ArgumentNullException();
+            ValidateRange(bytes.Length, index, count);
+            Byte[] range = new Byte[count];
+            for (Int32 offset = 0; offset < count; offset++) range[offset] = bytes[index + offset];
+            return GetString(range);
+        }
+
+        private static Boolean EqualsAsciiIgnoreCase(String left, String right)
+        {
+            if (left.Length != right.Length) return false;
+            for (Int32 index = 0; index < left.Length; index++)
+            {
+                Char a = left[index];
+                Char b = right[index];
+                if (a >= 'A' && a <= 'Z') a = (Char)(a + ('a' - 'A'));
+                if (b >= 'A' && b <= 'Z') b = (Char)(b + ('a' - 'A'));
+                if (a != b) return false;
+            }
+            return true;
+        }
+
+        protected static void ValidateRange(Int32 length, Int32 index, Int32 count)
+        {
+            if (index < 0 || count < 0 || index > length - count) throw new ArgumentOutOfRangeException();
+        }
+
+        protected static void ValidateDestinationIndex(Int32 length, Int32 index)
+        {
+            if (index < 0 || index > length) throw new ArgumentOutOfRangeException();
+        }
+
+        protected static void EnsureDestination(Int32 available, Int32 required)
+        {
+            if (available < required) throw new ArgumentException("Destination buffer is too small.");
+        }
     }
 
     /// <summary><inu.api/>Freestanding 7-bit ASCII encoding with '?' replacement for characters outside ASCII.</summary>
@@ -7880,6 +8170,14 @@ namespace System.Text
         }
 
         /// <summary><inu.api/></summary>
+        public override Int32 GetCharCount(Byte[] bytes, Int32 index, Int32 count)
+        {
+            if (bytes == null) throw new ArgumentNullException();
+            ValidateRange(bytes.Length, index, count);
+            return count;
+        }
+
+        /// <summary><inu.api/></summary>
         public override String GetString(Byte[] bytes)
         {
             if (bytes == null) throw new ArgumentNullException();
@@ -7890,7 +8188,7 @@ namespace System.Text
         }
     }
 
-    /// <summary><inu.api/>Freestanding UTF-8 encoder/decoder for ordinary Unicode scalar values represented by UTF-16 strings.</summary>
+    /// <summary><inu.api/>Freestanding UTF-8 encoder/decoder with replacement fallback for malformed scalar sequences.</summary>
     public sealed class UTF8Encoding : Encoding
     {
         /// <summary><inu.api/>Creates a UTF-8 encoding instance.</summary>
@@ -7910,7 +8208,7 @@ namespace System.Text
                 {
                     UInt32 low = value[index + 1];
                     if (low >= 0xDC00U && low <= 0xDFFFU) { count += 4; index++; }
-                    else count += 3; // replacement character
+                    else count += 3;
                 }
                 else count += 3;
             }
@@ -8009,4 +8307,5 @@ namespace System.Text
             return String.CreateFromChars(characters, output);
         }
     }
+
 }

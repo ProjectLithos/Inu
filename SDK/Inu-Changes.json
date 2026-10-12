@@ -1,16 +1,20 @@
 {
-  "baseVersion": "0.1.35",
-  "version": "0.1.36",
+  "baseVersion": "0.1.36",
+  "version": "0.1.37",
   "changedFiles": [
-    "Build.bat",
     "Build.ps1",
-    "CHANGED-0.1.36.txt",
+    "CHANGED-0.1.37.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
+    "Inu/SDK/docs/BCL-Conformance-Target.md",
     "Inu/SDK/docs/Inu.Documentation.json",
+    "Inu/SDK/docs/Managed-Runtime.md",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
+    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
+    "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
+    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
@@ -21,5 +25,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Refresh stale root bootstrap logic before source/version selection and enforce ChangedFiles base-version compatibility so releases cannot be skipped."
+  "summary": "Complete Profile 1 ASCII/UTF-8 factories, byte/character counts and allocating/range/span/buffer encode/decode, and explicitly defer UTF-16 encoding APIs."
 }

@@ -1278,29 +1278,98 @@ public static unsafe class ManagedRuntimeConformance
         Record(stack.Count == 3 && stack.Peek() == 6 && stack.Pop() == 6 && stack.Peek() == 5 && stack.Count == 2, ref passed, ref failed);
 
         // 26 System.Text.StringBuilder
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder(2);
+        Int32 builderInitialCapacity = builder.Capacity;
         builder.Append("Inu").Append(' ').Append(95).AppendLine();
-        Record(builder.Length == 8 && builder[0] == 'I' && String.Equals(builder.ToString(), "Inu 95\r\n")
-            && builder.Clear().Append(true).EnsureCapacity(32) >= 32 && String.Equals(builder.ToString(), "True"), ref passed, ref failed);
+        Boolean builderAppend = builder.Length == 8 && builder[0] == 'I' && String.Equals(builder.ToString(), "Inu 95\r\n")
+            && builder.Capacity >= builder.Length && builder.Capacity >= builderInitialCapacity;
+        builder.Clear().Append("ace").Insert(1, "br");
+        Boolean builderInsert = String.Equals(builder.ToString(), "abrce") && builder.Length == 5;
+        builder.Remove(2, 2);
+        Boolean builderRemove = String.Equals(builder.ToString(), "abe") && builder.Length == 3;
+        builder.Clear().Append("banana").Replace('a', 'o');
+        Boolean builderReplaceChar = String.Equals(builder.ToString(), "bonono");
+        builder.Replace("ono", "ANA");
+        Boolean builderReplaceString = String.Equals(builder.ToString(), "bANAno");
+        builder.Replace("ANA", "");
+        Boolean builderReplaceRemove = String.Equals(builder.ToString(), "bno");
+        Int32 builderEnsured = builder.EnsureCapacity(32);
+        builder.Capacity = builderEnsured + 8;
+        Boolean builderCapacity = builder.Capacity == builderEnsured + 8 && builder.Length == 3;
+        builder.Clear().Append(true).Append(' ').Append((Object)"OK");
+        Boolean builderClearAndToString = builder.Length == 7 && String.Equals(builder.ToString(), "True OK");
+        Boolean builderInsertError = false;
+        try { builder.Insert(builder.Length + 1, "x"); } catch (ArgumentOutOfRangeException) { builderInsertError = true; }
+        Boolean builderRemoveError = false;
+        try { builder.Remove(0, builder.Length + 1); } catch (ArgumentOutOfRangeException) { builderRemoveError = true; }
+        Boolean builderReplaceError = false;
+        try { builder.Replace("", "x"); } catch (ArgumentException) { builderReplaceError = true; }
+        Record(builderAppend && builderInsert && builderRemove && builderReplaceChar && builderReplaceString && builderReplaceRemove
+            && builderCapacity && builderClearAndToString && builderInsertError && builderRemoveError && builderReplaceError, ref passed, ref failed);
 
-        // 27 System.Text.Encoding (factory contract)
+        // 27 System.Text.Encoding (Profile 1 factories: ASCII and UTF-8 only)
         Encoding asciiFactory = Encoding.ASCII;
         Encoding utf8Factory = Encoding.UTF8;
+        Encoding asciiByCodePage = Encoding.GetEncoding(20127);
+        Encoding utf8ByCodePage = Encoding.GetEncoding(65001);
+        Encoding asciiByName = Encoding.GetEncoding("ASCII");
+        Encoding utf8ByName = Encoding.GetEncoding("utf-8");
+        Boolean unsupportedEncoding = false;
+        try { Encoding.GetEncoding(1200); } catch (ArgumentException) { unsupportedEncoding = true; }
         Record(asciiFactory != null && utf8Factory != null
-            && asciiFactory.GetByteCount("Inu") == 3 && utf8Factory.GetByteCount("Inu") == 3, ref passed, ref failed);
+            && asciiByCodePage is ASCIIEncoding && utf8ByCodePage is UTF8Encoding
+            && asciiByName is ASCIIEncoding && utf8ByName is UTF8Encoding
+            && asciiFactory.GetByteCount("Inu") == 3 && utf8Factory.GetByteCount("Inu") == 3
+            && unsupportedEncoding, ref passed, ref failed);
 
-        // 28 System.Text.ASCIIEncoding
+        // 28 System.Text.ASCIIEncoding: counts, allocating/buffer/span encoding and decoding.
         ASCIIEncoding ascii = new ASCIIEncoding();
-        Byte[] asciiBytes = ascii.GetBytes("Inu");
-        Record(asciiBytes.Length == 3 && asciiBytes[0] == (Byte)'I' && asciiBytes[2] == (Byte)'u'
-            && String.Equals(ascii.GetString(asciiBytes), "Inu"), ref passed, ref failed);
+        String asciiSource = "Inu\u00A3";
+        Byte[] asciiBytes = ascii.GetBytes(asciiSource);
+        Char[] asciiSourceChars = new Char[] { 'I', 'n', 'u', '\u00A3' };
+        Byte[] asciiRangeBytes = new Byte[5];
+        Int32 asciiRangeWritten = ascii.GetBytes(asciiSourceChars, 1, 2, asciiRangeBytes, 2);
+        Byte[] asciiSpanBuffer = new Byte[4];
+        Int32 asciiSpanWritten = ascii.GetBytes(new ReadOnlySpan<Char>(asciiSourceChars), new Span<Byte>(asciiSpanBuffer));
+        Char[] asciiDecoded = new Char[4];
+        Int32 asciiDecodedWritten = ascii.GetChars(asciiBytes, 0, asciiBytes.Length, asciiDecoded, 0);
+        Char[] asciiSpanChars = new Char[4];
+        Int32 asciiSpanDecoded = ascii.GetChars(new ReadOnlySpan<Byte>(asciiBytes), new Span<Char>(asciiSpanChars));
+        Record(ascii.GetByteCount(asciiSource) == 4
+            && ascii.GetByteCount(asciiSourceChars, 1, 2) == 2
+            && ascii.GetByteCount(new ReadOnlySpan<Char>(asciiSourceChars)) == 4
+            && asciiBytes.Length == 4 && asciiBytes[0] == (Byte)'I' && asciiBytes[3] == (Byte)'?'
+            && asciiRangeWritten == 2 && asciiRangeBytes[2] == (Byte)'n' && asciiRangeBytes[3] == (Byte)'u'
+            && asciiSpanWritten == 4 && asciiSpanBuffer[3] == (Byte)'?'
+            && ascii.GetCharCount(asciiBytes) == 4 && ascii.GetCharCount(asciiBytes, 1, 2) == 2
+            && ascii.GetCharCount(new ReadOnlySpan<Byte>(asciiBytes)) == 4
+            && asciiDecodedWritten == 4 && asciiDecoded[0] == 'I' && asciiDecoded[3] == '?'
+            && asciiSpanDecoded == 4 && asciiSpanChars[3] == '?'
+            && String.Equals(ascii.GetString(asciiBytes), "Inu?")
+            && String.Equals(ascii.GetString(asciiBytes, 1, 2), "nu"), ref passed, ref failed);
 
-        // 29 System.Text.UTF8Encoding
+        // 29 System.Text.UTF8Encoding: BMP + supplementary scalar counts and encode/decode paths.
         UTF8Encoding utf8 = new UTF8Encoding();
-        String unicode = "\u00A3\u20AC";
+        String unicode = "\u00A3\u20AC\uD83D\uDE00";
         Byte[] utf8Bytes = utf8.GetBytes(unicode);
-        Record(utf8Bytes.Length == 5 && utf8Bytes[0] == 0xC2 && utf8Bytes[1] == 0xA3
+        Char[] unicodeChars = new Char[] { '\u00A3', '\u20AC', '\uD83D', '\uDE00' };
+        Byte[] utf8SpanBuffer = new Byte[9];
+        Int32 utf8SpanWritten = utf8.GetBytes(new ReadOnlySpan<Char>(unicodeChars), new Span<Byte>(utf8SpanBuffer));
+        Char[] utf8SpanChars = new Char[4];
+        Int32 utf8SpanDecoded = utf8.GetChars(new ReadOnlySpan<Byte>(utf8Bytes), new Span<Char>(utf8SpanChars));
+        Char[] utf8ArrayChars = new Char[4];
+        Int32 utf8ArrayDecoded = utf8.GetChars(utf8Bytes, 0, utf8Bytes.Length, utf8ArrayChars, 0);
+        Record(utf8.GetByteCount(unicode) == 9
+            && utf8.GetByteCount(new ReadOnlySpan<Char>(unicodeChars)) == 9
+            && utf8Bytes.Length == 9 && utf8Bytes[0] == 0xC2 && utf8Bytes[1] == 0xA3
             && utf8Bytes[2] == 0xE2 && utf8Bytes[3] == 0x82 && utf8Bytes[4] == 0xAC
+            && utf8Bytes[5] == 0xF0 && utf8Bytes[6] == 0x9F && utf8Bytes[7] == 0x98 && utf8Bytes[8] == 0x80
+            && utf8SpanWritten == 9 && utf8SpanBuffer[8] == 0x80
+            && utf8.GetCharCount(utf8Bytes) == 4
+            && utf8.GetCharCount(new ReadOnlySpan<Byte>(utf8Bytes)) == 4
+            && utf8SpanDecoded == 4 && utf8ArrayDecoded == 4
+            && utf8SpanChars[0] == '\u00A3' && utf8SpanChars[1] == '\u20AC'
+            && utf8SpanChars[2] == '\uD83D' && utf8SpanChars[3] == '\uDE00'
             && String.Equals(utf8.GetString(utf8Bytes), unicode), ref passed, ref failed);
 
         // 30 Primitive formatting: integer G/D/X plus invariant floating G/F/E.

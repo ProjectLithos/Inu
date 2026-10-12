@@ -778,34 +778,104 @@ internal static class Program
 
     private static bool TestStringBuilder()
     {
-        var builder = new StringBuilder();
+        var builder = new StringBuilder(2);
+        int initialCapacity = builder.Capacity;
         builder.Append("Inu").Append(' ').Append(95).AppendLine();
-        bool first = builder.Length == 8 && builder[0] == 'I' && builder.ToString() == "Inu 95\r\n";
-        builder.Clear().Append(true);
-        return first && builder.EnsureCapacity(32) >= 32 && builder.ToString() == "True";
+        bool append = builder.Length == 8 && builder[0] == 'I' && builder.ToString() == "Inu 95\r\n"
+            && builder.Capacity >= builder.Length && builder.Capacity >= initialCapacity;
+
+        builder.Clear().Append("ace").Insert(1, "br");
+        bool insert = builder.ToString() == "abrce" && builder.Length == 5;
+        builder.Remove(2, 2);
+        bool remove = builder.ToString() == "abe" && builder.Length == 3;
+
+        builder.Clear().Append("banana").Replace('a', 'o');
+        bool replaceChar = builder.ToString() == "bonono";
+        builder.Replace("ono", "ANA");
+        bool replaceString = builder.ToString() == "bANAno";
+        builder.Replace("ANA", "");
+        bool replaceRemove = builder.ToString() == "bno";
+
+        int ensured = builder.EnsureCapacity(32);
+        builder.Capacity = ensured + 8;
+        bool capacity = builder.Capacity == ensured + 8 && builder.Length == 3;
+        builder.Clear().Append(true).Append(' ').Append((object)"OK");
+        bool clearAndToString = builder.Length == 7 && builder.ToString() == "True OK";
+
+        bool errors = false;
+        try { builder.Insert(builder.Length + 1, "x"); } catch (ArgumentOutOfRangeException) { errors = true; }
+        bool removeError = false;
+        try { builder.Remove(0, builder.Length + 1); } catch (ArgumentOutOfRangeException) { removeError = true; }
+        bool replaceError = false;
+        try { builder.Replace("", "x"); } catch (ArgumentException) { replaceError = true; }
+
+        return append && insert && remove && replaceChar && replaceString && replaceRemove
+            && capacity && clearAndToString && errors && removeError && replaceError;
     }
 
     private static bool TestEncodingFactories()
     {
         Encoding ascii = Encoding.ASCII;
         Encoding utf8 = Encoding.UTF8;
-        return ascii is not null && utf8 is not null && ascii.GetByteCount("Inu") == 3 && utf8.GetByteCount("Inu") == 3;
+        Encoding asciiByCodePage = Encoding.GetEncoding(20127);
+        Encoding utf8ByCodePage = Encoding.GetEncoding(65001);
+        Encoding asciiByName = Encoding.GetEncoding("ASCII");
+        Encoding utf8ByName = Encoding.GetEncoding("utf-8");
+        return ascii is not null && utf8 is not null
+            && asciiByCodePage is ASCIIEncoding && utf8ByCodePage is UTF8Encoding
+            && asciiByName is ASCIIEncoding && utf8ByName is UTF8Encoding
+            && ascii.GetByteCount("Inu") == 3 && utf8.GetByteCount("Inu") == 3;
     }
 
     private static bool TestAsciiEncoding()
     {
         var ascii = new ASCIIEncoding();
-        byte[] bytes = ascii.GetBytes("Inu");
-        return bytes.Length == 3 && bytes[0] == (byte)'I' && bytes[2] == (byte)'u' && ascii.GetString(bytes) == "Inu";
+        const string source = "Inu\u00A3";
+        byte[] bytes = ascii.GetBytes(source);
+        char[] sourceChars = source.ToCharArray();
+        byte[] ranged = new byte[5];
+        int rangedWritten = ascii.GetBytes(sourceChars, 1, 2, ranged, 2);
+        Span<byte> spanBytes = stackalloc byte[4];
+        int spanWritten = ascii.GetBytes(source.AsSpan(), spanBytes);
+        char[] decoded = new char[4];
+        int decodedWritten = ascii.GetChars(bytes, 0, bytes.Length, decoded, 0);
+        Span<char> spanChars = stackalloc char[4];
+        int spanDecoded = ascii.GetChars(bytes.AsSpan(), spanChars);
+        return ascii.GetByteCount(source) == 4
+            && ascii.GetByteCount(sourceChars, 1, 2) == 2
+            && ascii.GetByteCount(source.AsSpan()) == 4
+            && bytes.Length == 4 && bytes[0] == (byte)'I' && bytes[3] == (byte)'?'
+            && rangedWritten == 2 && ranged[2] == (byte)'n' && ranged[3] == (byte)'u'
+            && spanWritten == 4 && spanBytes[3] == (byte)'?'
+            && ascii.GetCharCount(bytes) == 4 && ascii.GetCharCount(bytes, 1, 2) == 2
+            && ascii.GetCharCount(bytes.AsSpan()) == 4
+            && decodedWritten == 4 && decoded[0] == 'I' && decoded[3] == '?'
+            && spanDecoded == 4 && spanChars[3] == '?'
+            && ascii.GetString(bytes) == "Inu?"
+            && ascii.GetString(bytes, 1, 2) == "nu";
     }
 
     private static bool TestUtf8Encoding()
     {
         var utf8 = new UTF8Encoding();
-        const string unicode = "\u00A3\u20AC";
+        const string unicode = "\u00A3\u20AC\uD83D\uDE00";
         byte[] bytes = utf8.GetBytes(unicode);
-        return bytes.Length == 5 && bytes[0] == 0xC2 && bytes[1] == 0xA3
+        Span<byte> spanBytes = stackalloc byte[9];
+        int spanWritten = utf8.GetBytes(unicode.AsSpan(), spanBytes);
+        Span<char> spanChars = stackalloc char[4];
+        int spanDecoded = utf8.GetChars(bytes.AsSpan(), spanChars);
+        char[] arrayChars = new char[4];
+        int arrayDecoded = utf8.GetChars(bytes, 0, bytes.Length, arrayChars, 0);
+        return utf8.GetByteCount(unicode) == 9
+            && utf8.GetByteCount(unicode.AsSpan()) == 9
+            && bytes.Length == 9 && bytes[0] == 0xC2 && bytes[1] == 0xA3
             && bytes[2] == 0xE2 && bytes[3] == 0x82 && bytes[4] == 0xAC
+            && bytes[5] == 0xF0 && bytes[6] == 0x9F && bytes[7] == 0x98 && bytes[8] == 0x80
+            && spanWritten == 9 && spanBytes[8] == 0x80
+            && utf8.GetCharCount(bytes) == 4 && utf8.GetCharCount(bytes.AsSpan()) == 4
+            && spanDecoded == 4 && arrayDecoded == 4
+            && spanChars[0] == '\u00A3' && spanChars[1] == '\u20AC'
+            && spanChars[2] == '\uD83D' && spanChars[3] == '\uDE00'
             && utf8.GetString(bytes) == unicode;
     }
     private static bool TestPrimitiveFormatting()

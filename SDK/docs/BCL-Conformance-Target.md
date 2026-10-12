@@ -38,10 +38,10 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 23 | `System.Collections.Generic.Dictionary<TKey,TValue>` | add/indexer/count/lookup/`TryAdd`/remove |
 | 24 | `System.Collections.Generic.Queue<T>` | enqueue/peek/dequeue/count and FIFO ordering |
 | 25 | `System.Collections.Generic.Stack<T>` | push/peek/pop/count and LIFO ordering |
-| 26 | `System.Text.StringBuilder` | append, line append, index/length, clear, capacity, materialisation |
-| 27 | `System.Text.Encoding` | ASCII/UTF-8 factories and byte-count contract |
-| 28 | `System.Text.ASCIIEncoding` | string-to-byte and byte-to-string round-trip |
-| 29 | `System.Text.UTF8Encoding` | multi-byte UTF-8 encode/decode round-trip |
+| 26 | `System.Text.StringBuilder` | append/object append, line append, insert, remove, character/string replace, index/length, clear, capacity growth/set, materialisation, and argument-error paths |
+| 27 | `System.Text.Encoding` | Profile 1 ASCII/UTF-8 factories by property/name/code page plus byte/character counts and allocating/range/span/buffer conversion contracts |
+| 28 | `System.Text.ASCIIEncoding` | 7-bit replacement semantics plus byte/character counts and allocating/range/span/buffer encode/decode |
+| 29 | `System.Text.UTF8Encoding` | UTF-8 BMP/supplementary-scalar byte/character counts and allocating/range/span/buffer encode/decode with replacement fallback |
 | 30 | `primitive numeric formatting / System.IFormattable` | signed/unsigned `G`/`D`/`X` plus invariant floating `G`/`F`/`E` formatting |
 | 31 | `string interpolation runtime support` | compiler-known `DefaultInterpolatedStringHandler`, literal/formatted segments, strings/chars/spans, alignment, basic format strings, numeric formats, `Text`, `Clear`, `ToString` and `ToStringAndClear` |
 | 32 | `System.String` composite formatting | indexed placeholders such as `{0}`, escaped braces, positive/negative alignment, null arguments, basic item format strings, malformed-format exceptions, and the Profile 1 primitive numeric format subset |
@@ -53,6 +53,11 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 38 | `System.Span<T> / System.ReadOnlySpan<T>` | full .NET 10 type-owned `Span<T>` / `ReadOnlySpan<T>` surface: managed/native byref windows, array/ref/pointer construction, indexing, slicing, fill/clear, overlap-safe copy/try-copy, enumeration, pinning, `ToArray`, `ToString`, window identity, `ArraySegment<T>` conversion, and read-only covariance |
 | 39 | `System.Memory<T> / System.ReadOnlyMemory<T>` | complete .NET 10 type-owned array-backed surface: constructors/range/covariance rules, `Empty`/`IsEmpty`/`Length`/`Span`, slicing, copy/try-copy, equality/hash, non-moving-heap `Pin`/`MemoryHandle`, `ToArray`, `ToString`, and array/`ArraySegment<T>` conversions |
 | 40 | `System.Collections.Generic.Comparer<T> + equality consistency` | default generic ordering and equality across multiple primitive families |
+
+
+### Profile 1 encoding boundary
+
+Profile 1 deliberately includes only ASCII and UTF-8 conversion support: `Encoding.ASCII`, `Encoding.UTF8`, `Encoding.GetEncoding` for ASCII/20127 and UTF-8/65001, byte/character counting, and allocating or caller-buffer/span encode/decode paths. `System.String` remains UTF-16 internally, but UTF-16 *encoding APIs* (`UnicodeEncoding`, `Encoding.Unicode`, and `Encoding.BigEndianUnicode`) are not part of Profile 1. Streaming `Encoder`/`Decoder`, configurable fallback objects, BOM/preamble policy APIs, UTF-16/UTF-32 and additional code pages are later-profile work.
 
 ## Primitive/runtime foundation status
 
