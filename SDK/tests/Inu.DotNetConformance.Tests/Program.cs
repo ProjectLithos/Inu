@@ -649,13 +649,45 @@ internal static class Program
 
     private static bool TestString()
     {
-        string text = "Inu kernel";
+        string text = "  Inu kernel  ";
         string concatenated = string.Concat("Inu", " ", "kernel");
-        return string.Empty.Length == 0 && text.Length == 10 && text[0] == 'I'
-            && string.Equals(text, concatenated) && string.CompareOrdinal("abc", "abd") < 0
-            && text.IndexOf('k') == 4 && text.Contains('u') && text.StartsWith("Inu") && text.EndsWith("kernel")
-            && text.Substring(4, 6) == "kernel"
-            && string.IsNullOrEmpty("") && string.IsNullOrWhiteSpace(" \t\r\n");
+        string fromChars = new string(new[] { 'I', 'n', 'u' });
+        string repeated = new string('*', 3);
+        string[] split = "one,two,,three".Split(',');
+        int enumerated = 0;
+        int charSum = 0;
+        foreach (char c in "Inu")
+        {
+            enumerated++;
+            charSum += c;
+        }
+
+        bool indexThrows = false;
+        try { _ = "x"[1]; } catch (IndexOutOfRangeException) { indexThrows = true; }
+
+        return string.Empty.Length == 0
+            && fromChars == "Inu" && repeated == "***"
+            && text.Length == 14 && text[2] == 'I' && indexThrows
+            && string.Equals("Inu kernel", concatenated)
+            && string.Compare("abc", "abd") < 0
+            && string.Compare("ABC", "abc", true) == 0
+            && string.CompareOrdinal("abc", "abd") < 0
+            && "Inu kernel".StartsWith("Inu") && "Inu kernel".EndsWith("kernel")
+            && "Inu kernel".Contains("kernel") && "Inu kernel".Contains('u')
+            && "bananas".IndexOf("ana") == 1 && "bananas".IndexOf('n') == 2
+            && "bananas".LastIndexOf("ana") == 3 && "bananas".LastIndexOf('a') == 6
+            && "Inu kernel".Substring(4, 6) == "kernel"
+            && "abcdef".Remove(2, 2) == "abef" && "abcdef".Remove(3) == "abc"
+            && "abcdef".Insert(3, "XYZ") == "abcXYZdef"
+            && "banana".Replace('a', 'o') == "bonono"
+            && "one two two".Replace("two", "2") == "one 2 2"
+            && text.Trim() == "Inu kernel" && text.TrimStart() == "Inu kernel  " && text.TrimEnd() == "  Inu kernel"
+            && "AbC123".ToUpper() == "ABC123" && "AbC123".ToLower() == "abc123"
+            && split.Length == 4 && split[0] == "one" && split[1] == "two" && split[2] == "" && split[3] == "three"
+            && string.Join("/", new[] { "System", "Commands", "Dir" }) == "System/Commands/Dir"
+            && string.Concat(new[] { "I", "n", "u" }) == "Inu"
+            && string.IsNullOrEmpty("") && string.IsNullOrWhiteSpace(" \t\r\n")
+            && enumerated == 3 && charSum == ('I' + 'n' + 'u');
     }
 
     private static bool TestNullable()

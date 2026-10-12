@@ -2936,7 +2936,7 @@ namespace System
     #pragma warning disable CS0660, CS0661 // Freestanding String supplies ordinal operators; Object equality/hash expansion is staged separately.
     [Serializable]
     [Runtime.Versioning.NonVersionable] // Matches System.Private.CoreLib: this contract applies to String field layout.
-    public sealed unsafe class String
+    public sealed unsafe class String : IEquatable<String>, Collections.Generic.IEnumerable<Char>, Collections.IEnumerable
     {
         // NativeAOT/CLR x64 string ABI is fixed: [EEType*][Int32 length][UTF-16 data...].
         // Inu links no Microsoft NativeAOT runtime library, so CoreLib must own this
@@ -2971,6 +2971,17 @@ namespace System
         [NonSerialized]
         private Char _firstChar;
 #pragma warning restore CS0649
+
+        // These are the constructor shapes Inu source actually uses. String construction is
+        // compiler/runtime-special in NativeAOT, just as it is in System.Private.CoreLib.
+        [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        public extern String(Char value, Int32 count);
+
+        [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        public extern String(Char[] value);
+
+        [Runtime.CompilerServices.MethodImpl(Runtime.CompilerServices.MethodImplOptions.InternalCall)]
+        public extern String(Char[] value, Int32 startIndex, Int32 length);
 
         /// <summary>Represents the empty string. This is the canonical zero-length string literal and requires no managed allocation.</summary>
         public static String Empty => "";
@@ -3124,13 +3135,225 @@ namespace System
         public static String Concat(String first, String second, String third, String fourth)
             => Concat(Concat(first, second, third), fourth);
 
+        public static String Concat(String[] values)
+        {
+            if (values == null) throw new ArgumentNullException();
+            String result = Empty;
+            for (Int32 index = 0; index < values.Length; index++) result = Concat(result, values[index]);
+            return result;
+        }
+
+        public static Int32 Compare(String first, String second) => CompareOrdinal(first, second);
+
+        public static Int32 Compare(String first, String second, Boolean ignoreCase)
+        {
+            if (!ignoreCase) return CompareOrdinal(first, second);
+            if (Object.ReferenceEquals(first, second)) return 0;
+            if (Object.ReferenceEquals(first, null)) return -1;
+            if (Object.ReferenceEquals(second, null)) return 1;
+            Int32 length = first.Length < second.Length ? first.Length : second.Length;
+            for (Int32 index = 0; index < length; index++)
+            {
+                Char a = ToUpperAscii(first[index]);
+                Char b = ToUpperAscii(second[index]);
+                if (a != b) return (Int32)a - (Int32)b;
+            }
+            return first.Length - second.Length;
+        }
+
+        public override Boolean Equals(Object value) => value is String text && Equals(this, text);
+
+        public override Int32 GetHashCode()
+        {
+            UInt32 hash = 2166136261U;
+            for (Int32 index = 0; index < Length; index++) hash = (hash ^ this[index]) * 16777619U;
+            return (Int32)hash;
+        }
+
+        public Boolean Contains(String value) => IndexOf(value) >= 0;
+
+        public Int32 IndexOf(String value)
+        {
+            if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException();
+            if (value.Length == 0) return 0;
+            if (value.Length > Length) return -1;
+            Int32 last = Length - value.Length;
+            for (Int32 index = 0; index <= last; index++)
+            {
+                Int32 inner = 0;
+                while (inner < value.Length && this[index + inner] == value[inner]) inner++;
+                if (inner == value.Length) return index;
+            }
+            return -1;
+        }
+
+        public Int32 LastIndexOf(Char value)
+        {
+            for (Int32 index = Length - 1; index >= 0; index--)
+                if (this[index] == value) return index;
+            return -1;
+        }
+
+        public Int32 LastIndexOf(String value)
+        {
+            if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException();
+            if (value.Length == 0) return Length;
+            if (value.Length > Length) return -1;
+            for (Int32 index = Length - value.Length; index >= 0; index--)
+            {
+                Int32 inner = 0;
+                while (inner < value.Length && this[index + inner] == value[inner]) inner++;
+                if (inner == value.Length) return index;
+            }
+            return -1;
+        }
+
+        public String Remove(Int32 startIndex) => Remove(startIndex, Length - startIndex);
+
+        public String Remove(Int32 startIndex, Int32 count)
+        {
+            if ((UInt32)startIndex > (UInt32)Length) throw new ArgumentOutOfRangeException();
+            if (count < 0 || count > Length - startIndex) throw new ArgumentOutOfRangeException();
+            if (count == 0) return this;
+            if (count == Length) return Empty;
+            return Concat(Substring(0, startIndex), Substring(startIndex + count));
+        }
+
+        public String Insert(Int32 startIndex, String value)
+        {
+            if ((UInt32)startIndex > (UInt32)Length) throw new ArgumentOutOfRangeException();
+            if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException();
+            if (value.Length == 0) return this;
+            return Concat(Concat(Substring(0, startIndex), value), Substring(startIndex));
+        }
+
+        public String Replace(Char oldChar, Char newChar)
+        {
+            Char[] chars = new Char[Length];
+            Boolean changed = false;
+            for (Int32 index = 0; index < Length; index++)
+            {
+                Char c = this[index];
+                if (c == oldChar) { c = newChar; changed = true; }
+                chars[index] = c;
+            }
+            return changed ? CreateFromChars(chars, chars.Length) : this;
+        }
+
+        public String Replace(String oldValue, String newValue)
+        {
+            if (Object.ReferenceEquals(oldValue, null)) throw new ArgumentNullException();
+            if (oldValue.Length == 0) throw new ArgumentException();
+            if (Object.ReferenceEquals(newValue, null)) newValue = Empty;
+            Int32 first = IndexOf(oldValue);
+            if (first < 0) return this;
+
+            Text.StringBuilder builder = new Text.StringBuilder();
+            Int32 position = 0;
+            while (first >= 0)
+            {
+                builder.Append(Substring(position, first - position));
+                builder.Append(newValue);
+                position = first + oldValue.Length;
+                Int32 relative = position <= Length ? Substring(position).IndexOf(oldValue) : -1;
+                first = relative < 0 ? -1 : position + relative;
+            }
+            if (position < Length) builder.Append(Substring(position));
+            return builder.ToString();
+        }
+
+        private static Boolean IsTrimChar(Char value) => Char.IsWhiteSpace(value);
+
+        public String Trim() => TrimCore(true, true);
+        public String TrimStart() => TrimCore(true, false);
+        public String TrimEnd() => TrimCore(false, true);
+
+        private String TrimCore(Boolean trimStart, Boolean trimEnd)
+        {
+            Int32 start = 0;
+            Int32 end = Length - 1;
+            if (trimStart) while (start < Length && IsTrimChar(this[start])) start++;
+            if (trimEnd) while (end >= start && IsTrimChar(this[end])) end--;
+            Int32 length = end - start + 1;
+            if (length <= 0) return Empty;
+            if (start == 0 && length == Length) return this;
+            return Substring(start, length);
+        }
+
+        private static Char ToUpperAscii(Char value)
+            => value >= 'a' && value <= 'z' ? (Char)(value - ('a' - 'A')) : value;
+        private static Char ToLowerAscii(Char value)
+            => value >= 'A' && value <= 'Z' ? (Char)(value + ('a' - 'A')) : value;
+
+        public String ToUpper() => ToUpperInvariant();
+        public String ToLower() => ToLowerInvariant();
+
+        public String ToUpperInvariant()
+        {
+            Char[] chars = new Char[Length];
+            Boolean changed = false;
+            for (Int32 index = 0; index < Length; index++)
+            {
+                Char c = ToUpperAscii(this[index]);
+                chars[index] = c;
+                if (c != this[index]) changed = true;
+            }
+            return changed ? CreateFromChars(chars, chars.Length) : this;
+        }
+
+        public String ToLowerInvariant()
+        {
+            Char[] chars = new Char[Length];
+            Boolean changed = false;
+            for (Int32 index = 0; index < Length; index++)
+            {
+                Char c = ToLowerAscii(this[index]);
+                chars[index] = c;
+                if (c != this[index]) changed = true;
+            }
+            return changed ? CreateFromChars(chars, chars.Length) : this;
+        }
+
+        public String[] Split(Char separator)
+        {
+            Int32 count = 1;
+            for (Int32 index = 0; index < Length; index++) if (this[index] == separator) count++;
+            String[] result = new String[count];
+            Int32 start = 0;
+            Int32 output = 0;
+            for (Int32 index = 0; index <= Length; index++)
+            {
+                if (index == Length || this[index] == separator)
+                {
+                    result[output++] = Substring(start, index - start);
+                    start = index + 1;
+                }
+            }
+            return result;
+        }
+
+        public static String Join(String separator, String[] values)
+        {
+            if (values == null) throw new ArgumentNullException();
+            if (Object.ReferenceEquals(separator, null)) separator = Empty;
+            if (values.Length == 0) return Empty;
+            String result = Object.ReferenceEquals(values[0], null) ? Empty : values[0];
+            for (Int32 index = 1; index < values.Length; index++)
+                result = Concat(Concat(result, separator), values[index]);
+            return result;
+        }
+
+        public CharEnumerator GetEnumerator() => new CharEnumerator(this);
+        Collections.Generic.IEnumerator<Char> Collections.Generic.IEnumerable<Char>.GetEnumerator() => new CharEnumerator(this);
+        Collections.IEnumerator Collections.IEnumerable.GetEnumerator() => new CharEnumerator(this);
+
         public Char this[Int32 index]
         {
             [Runtime.CompilerServices.Intrinsic]
             get
             {
                 Int32 length = ReadRuntimeLength(this);
-                if ((UInt32)index >= (UInt32)length) return (Char)0;
+                if ((UInt32)index >= (UInt32)length) throw new IndexOutOfRangeException();
                 return ReadRuntimeChar(this, index);
             }
         }
@@ -3157,6 +3380,43 @@ namespace System
             for (Int32 index = 0; index < length; index++) pointer[index] = characters[index];
             return value;
         }
+    }
+
+    public sealed class CharEnumerator : Collections.Generic.IEnumerator<Char>, Collections.IEnumerator, IDisposable
+    {
+        private readonly String _text;
+        private Int32 _index;
+
+        internal CharEnumerator(String text)
+        {
+            _text = text;
+            _index = -1;
+        }
+
+        public Char Current
+        {
+            get
+            {
+                if (_index < 0 || _index >= _text.Length) throw new InvalidOperationException();
+                return _text[_index];
+            }
+        }
+
+        Object Collections.IEnumerator.Current => Current;
+
+        public Boolean MoveNext()
+        {
+            if (_index + 1 >= _text.Length)
+            {
+                _index = _text.Length;
+                return false;
+            }
+            _index++;
+            return true;
+        }
+
+        public void Reset() => _index = -1;
+        public void Dispose() { }
     }
     #pragma warning restore CS0660, CS0661
     // CONTRACT with .NET 10 NativeAOT System.Private.CoreLib. ILC recognizes

@@ -1184,13 +1184,46 @@ public static unsafe class ManagedRuntimeConformance
             && emptyArray != null && emptyArray.Length == 0, ref passed, ref failed);
 
         // 17 System.String
-        String text = "Inu kernel";
+        String text = "  Inu kernel  ";
         String concatenated = String.Concat("Inu", " ", "kernel");
-        Record(String.Empty.Length == 0 && text.Length == 10 && text[0] == 'I'
-            && String.Equals(text, concatenated) && String.CompareOrdinal("abc", "abd") < 0
-            && text.IndexOf('k') == 4 && text.Contains('u') && text.StartsWith("Inu") && text.EndsWith("kernel")
-            && String.Equals(text.Substring(4, 6), "kernel")
-            && String.IsNullOrEmpty("") && String.IsNullOrWhiteSpace(" \t\r\n"), ref passed, ref failed);
+        String fromChars = new String(new Char[] { 'I', 'n', 'u' });
+        String repeated = new String('*', 3);
+        String[] splitStrings = "one,two,,three".Split(',');
+        Int32 enumeratedChars = 0;
+        Int32 enumeratedSum = 0;
+        foreach (Char c in "Inu")
+        {
+            enumeratedChars++;
+            enumeratedSum += c;
+        }
+        Boolean stringIndexThrows = false;
+        try { Char ignored = "x"[1]; } catch (IndexOutOfRangeException) { stringIndexThrows = true; }
+
+        Record(String.Empty.Length == 0
+            && String.Equals(fromChars, "Inu") && String.Equals(repeated, "***")
+            && text.Length == 14 && text[2] == 'I' && stringIndexThrows
+            && String.Equals("Inu kernel", concatenated)
+            && String.Compare("abc", "abd") < 0 && String.Compare("ABC", "abc", true) == 0
+            && String.CompareOrdinal("abc", "abd") < 0
+            && "Inu kernel".StartsWith("Inu") && "Inu kernel".EndsWith("kernel")
+            && "Inu kernel".Contains("kernel") && "Inu kernel".Contains('u')
+            && "bananas".IndexOf("ana") == 1 && "bananas".IndexOf('n') == 2
+            && "bananas".LastIndexOf("ana") == 3 && "bananas".LastIndexOf('a') == 6
+            && String.Equals("Inu kernel".Substring(4, 6), "kernel")
+            && String.Equals("abcdef".Remove(2, 2), "abef") && String.Equals("abcdef".Remove(3), "abc")
+            && String.Equals("abcdef".Insert(3, "XYZ"), "abcXYZdef")
+            && String.Equals("banana".Replace('a', 'o'), "bonono")
+            && String.Equals("one two two".Replace("two", "2"), "one 2 2")
+            && String.Equals(text.Trim(), "Inu kernel")
+            && String.Equals(text.TrimStart(), "Inu kernel  ")
+            && String.Equals(text.TrimEnd(), "  Inu kernel")
+            && String.Equals("AbC123".ToUpper(), "ABC123") && String.Equals("AbC123".ToLower(), "abc123")
+            && splitStrings.Length == 4 && String.Equals(splitStrings[0], "one") && String.Equals(splitStrings[1], "two")
+            && String.Equals(splitStrings[2], "") && String.Equals(splitStrings[3], "three")
+            && String.Equals(String.Join("/", new String[] { "System", "Commands", "Dir" }), "System/Commands/Dir")
+            && String.Equals(String.Concat(new String[] { "I", "n", "u" }), "Inu")
+            && String.IsNullOrEmpty("") && String.IsNullOrWhiteSpace(" \t\r\n")
+            && enumeratedChars == 3 && enumeratedSum == ('I' + 'n' + 'u'), ref passed, ref failed);
 
         // 18 System.Nullable<T>
         Nullable<Int32> present = new Nullable<Int32>(55);

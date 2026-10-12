@@ -29,7 +29,7 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 14 | `System.IntPtr` | pointer-size contract, min/max/zero, arithmetic, comparison/equality, conversion and invariant formatting |
 | 15 | `System.UIntPtr` | pointer-size contract, min/max/zero, arithmetic, comparison/equality, conversion and invariant formatting |
 | 16 | `System.Array` | SZ-array length/long length, element access, `Array.Empty<T>` |
-| 17 | `System.String` | empty, length/indexing, equality, ordinal comparison, search, prefix/suffix, substring, concat, null/whitespace helpers |
+| 17 | `System.String` | Inu-required constructors; empty; length/indexing; equality/hash; ordinal compare; prefix/suffix; char/string contains/index/last-index; substring/remove/insert/replace; trim; ASCII/invariant upper/lower subset; split/join/concat; null/whitespace helpers; character enumeration |
 | 18 | `System.Nullable<T>` | present/empty state, `Value`, `GetValueOrDefault` |
 | 19 | `System.Type` | value/primitive/array identity, `Name` from NativeAOT metadata, element/base type, assignability and subclass checks |
 | 20 | `System.Collections.Generic.KeyValuePair<TKey,TValue>` | construction and key/value access |

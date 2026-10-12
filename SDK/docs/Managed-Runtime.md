@@ -35,6 +35,7 @@ The 0.42.0 x64 runtime exports:
 - `RhpNewFast`, `RhpNewFinalizable`, and `RhpNewObject` for fixed-size managed objects;
 - `RhpNewArray`, `RhpNewArrayFast`, `RhpNewPtrArrayFast`, and `RhpNewVariableSizeObject` for variable-sized managed objects;
 - `RhNewString` for the NativeAOT string allocation ABI;
+- Profile 1 `System.String` now includes Inu-required constructors, ordinal comparison/search/manipulation, trim, ASCII/invariant casing, split/join/concat, null helpers, and character enumeration;
 - `RhpGcAlloc` as the common slow-path allocation ABI;
 - `RhpAssignRef`, `RhpCheckedAssignRef`, and `RhpByRefAssignRef` for managed-reference writes.
 
