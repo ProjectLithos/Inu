@@ -53,11 +53,11 @@ internal static class Program
         Check("System.Double", TestDouble());
         Check("System.IntPtr", TestIntPtr());
         Check("System.UIntPtr", TestUIntPtr());
-        Check("System.Array", TestArray());
-        Check("System.Collections.IEnumerable", TestIEnumerable());
-        Check("System.Collections.IEnumerator", TestIEnumerator());
-        Check("System.Collections.Generic.IEnumerable<T>", TestGenericIEnumerable());
-        Check("System.Collections.Generic.IEnumerator<T>", TestGenericIEnumerator());
+        Check("System.Array", Inu.Runtime.Conformance.Shared.ArrayEnumerationConformance.TestArray());
+        Check("System.Collections.IEnumerable", Inu.Runtime.Conformance.Shared.ArrayEnumerationConformance.TestIEnumerable());
+        Check("System.Collections.IEnumerator", Inu.Runtime.Conformance.Shared.ArrayEnumerationConformance.TestIEnumerator());
+        Check("System.Collections.Generic.IEnumerable<T>", Inu.Runtime.Conformance.Shared.ArrayEnumerationConformance.TestGenericIEnumerable());
+        Check("System.Collections.Generic.IEnumerator<T>", Inu.Runtime.Conformance.Shared.ArrayEnumerationConformance.TestGenericIEnumerator());
         Check("System.String", TestString());
         Check("System.Nullable<T>", TestNullable());
         Check("System.Type", TestType());
@@ -643,79 +643,6 @@ internal static class Program
             && converted == 55UL && narrowOverflow
             && new UIntPtr(123UL).ToString() == "123" && new UIntPtr(12UL).ToString("D4", null) == "0012"
             && formatted && written == 5 && destination.SequenceEqual("00123");
-    }
-
-    private static bool TestArray()
-    {
-        int[] values = new[] { 1, 2, 3, 4 };
-        bool lowBounds = false;
-        bool highBounds = false;
-        try { _ = values[-1]; } catch (IndexOutOfRangeException) { lowBounds = true; }
-        try { _ = values[values.Length]; } catch (IndexOutOfRangeException) { highBounds = true; }
-
-        int[] clone = (int[])values.Clone();
-        Array.Clear(clone, 1, 2);
-        int[] copied = new int[4];
-        Array.Copy(values, copied, values.Length);
-        Array.Copy(copied, 0, copied, 1, 3);
-
-        string[] strings = new[] { "a", "b" };
-        object[] covariant = strings;
-        bool covarianceGuard = false;
-        try { covariant[0] = new object(); } catch (ArrayTypeMismatchException) { covarianceGuard = true; }
-
-        int sum = 0;
-        foreach (int value in values) sum += value;
-        int[] empty = Array.Empty<int>();
-        return values.Length == 4 && values.LongLength == 4L && values.Rank == 1
-            && lowBounds && highBounds && covarianceGuard
-            && clone[0] == 1 && clone[1] == 0 && clone[2] == 0 && clone[3] == 4
-            && copied[0] == 1 && copied[1] == 1 && copied[2] == 2 && copied[3] == 3
-            && sum == 10 && empty.Length == 0;
-    }
-
-    private static bool TestIEnumerable()
-    {
-        System.Collections.IEnumerable enumerable = new int[] { 3, 4, 5 };
-        System.Collections.IEnumerator iterator = enumerable.GetEnumerator();
-        int sum = 0;
-        while (iterator.MoveNext()) sum += (int)iterator.Current;
-        iterator.Reset();
-        return sum == 12 && iterator.MoveNext() && (int)iterator.Current == 3;
-    }
-
-    private static bool TestIEnumerator()
-    {
-        System.Collections.IEnumerator iterator = ((System.Collections.IEnumerable)new string[] { "a", "b" }).GetEnumerator();
-        bool beforeThrows = false;
-        bool afterThrows = false;
-        try { _ = iterator.Current; } catch (InvalidOperationException) { beforeThrows = true; }
-        bool moved = iterator.MoveNext() && (string)iterator.Current == "a" && iterator.MoveNext() && (string)iterator.Current == "b" && !iterator.MoveNext();
-        try { _ = iterator.Current; } catch (InvalidOperationException) { afterThrows = true; }
-        return beforeThrows && moved && afterThrows;
-    }
-
-    private static bool TestGenericIEnumerable()
-    {
-        IEnumerable<int> enumerable = new int[] { 7, 8 };
-        int sum = 0;
-        foreach (int value in enumerable) sum += value;
-        IEnumerable<object> covariant = new string[] { "x", "y" };
-        int count = 0;
-        foreach (object value in covariant) if (value is string) count++;
-        return sum == 15 && count == 2;
-    }
-
-    private static bool TestGenericIEnumerator()
-    {
-        IEnumerator<int> iterator = ((IEnumerable<int>)new int[] { 9, 10 }).GetEnumerator();
-        bool beforeThrows = false;
-        try { _ = iterator.Current; } catch (InvalidOperationException) { beforeThrows = true; }
-        bool ok = iterator.MoveNext() && iterator.Current == 9 && iterator.MoveNext() && iterator.Current == 10 && !iterator.MoveNext();
-        iterator.Reset();
-        bool reset = iterator.MoveNext() && iterator.Current == 9;
-        iterator.Dispose();
-        return beforeThrows && ok && reset;
     }
 
     private static bool TestString()

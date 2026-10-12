@@ -125,3 +125,7 @@ UTF-16 is **not** a Profile 1 encoding API. Inu strings are still stored as UTF-
 ## Profile 1 SZ-array and enumeration completion (0.1.38)
 
 Profile 1 one-dimensional managed arrays now include compiler-enforced bounds checks, NativeAOT covariance/store checks, `Clone`, `Array.Clear`, overlap-safe `Array.Copy`, `Array.Empty<T>`, direct `foreach`, and both generic and non-generic interface enumeration. NativeAOT generic SZ-array interface dispatch is supplied through the compiler/runtime-known `SZArrayHelper` companion and a typed `SZGenericArrayEnumerator<T>`. Non-generic enumeration boxes value-type elements and enforces `IEnumerator.Current` state rules before the first element and after the end. `IEnumerable`, `IEnumerator`, `IEnumerable<T>`, and `IEnumerator<T>` are explicit Profile 1 conformance targets.
+
+### Shared conformance definitions
+
+Starting with 0.1.39, the completed `System.Array`, `System.Collections.IEnumerable`, `System.Collections.IEnumerator`, `System.Collections.Generic.IEnumerable<T>`, and `System.Collections.Generic.IEnumerator<T>` contract logic lives in one shared source file compiled into both conformance environments. The host runner remains the Microsoft .NET reference oracle; the in-kernel runner remains the Inu freestanding implementation check. Sharing the expectation body prevents duplicated constants and edge-case logic from drifting between the two suites.

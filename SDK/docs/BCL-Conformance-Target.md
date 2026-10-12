@@ -97,3 +97,7 @@ The freestanding `System.Math` surface also supplies the CoreLib helper entry po
 ### Compiler-known constant span helpers
 
 Profile 1 includes the Roslyn/.NET 10 CoreLib companion contracts required for constant array and `ReadOnlySpan<T>` lowering: `System.Runtime.CompilerServices.RuntimeHelpers.InitializeArray(Array, RuntimeFieldHandle)` and `RuntimeHelpers.CreateSpan<T>(RuntimeFieldHandle)`. Both are NativeAOT intrinsics and are covered by reference-side and in-kernel constant-span regression cases.
+
+### Shared conformance definitions
+
+Starting with 0.1.39, the completed `System.Array`, `System.Collections.IEnumerable`, `System.Collections.IEnumerator`, `System.Collections.Generic.IEnumerable<T>`, and `System.Collections.Generic.IEnumerator<T>` contract logic lives in one shared source file compiled into both conformance environments. The host runner remains the Microsoft .NET reference oracle; the in-kernel runner remains the Inu freestanding implementation check. Sharing the expectation body prevents duplicated constants and edge-case logic from drifting between the two suites.

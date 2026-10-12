@@ -1,8 +1,8 @@
 {
-  "baseVersion": "0.1.37",
-  "version": "0.1.38",
+  "baseVersion": "0.1.38",
+  "version": "0.1.39",
   "changedFiles": [
-    "CHANGED-0.1.38.txt",
+    "CHANGED-0.1.39.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -11,8 +11,9 @@
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/docs/Managed-Runtime.md",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
     "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
+    "Inu/SDK/src/Inu.Runtime.Conformance/Shared/ArrayEnumerationConformance.cs",
+    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Inu.DotNetConformance.Tests.csproj",
     "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
@@ -24,5 +25,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Complete Profile 1 one-dimensional arrays and generic/non-generic enumeration contracts, including NativeAOT SZArrayHelper dispatch, covariance, clone, clear, overlap-safe copy and enumerator state semantics."
+  "summary": "Fix array bounds conformance and share the completed array/enumeration expectation logic between the host reference runner and the in-kernel runtime gate."
 }

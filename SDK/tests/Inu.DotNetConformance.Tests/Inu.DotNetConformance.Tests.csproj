@@ -9,4 +9,7 @@
     <AssemblyName>Inu.DotNetConformance.Tests</AssemblyName>
     <RootNamespace>Inu.DotNetConformance.Tests</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\Inu.Runtime.Conformance\Shared\ArrayEnumerationConformance.cs" Link="Shared\ArrayEnumerationConformance.cs" />
+  </ItemGroup>
 </Project>
