@@ -139,27 +139,34 @@ function Invoke-InuCapturedStage {
         $stderrTask = $process.StandardError.ReadToEndAsync()
 
         $clock = [Diagnostics.Stopwatch]::StartNew()
-        # Keep long-running stages visibly alive without flooding Kath's Output pane.
-        $heartbeatIntervalSeconds = 20
+        # Keep long-running stages visibly alive on one updating line. Once a second is
+        # frequent enough to show progress without growing Kath's Output pane by one line
+        # per heartbeat. Carriage return deliberately rewrites the current status line.
+        $heartbeatIntervalSeconds = 1
         $nextHeartbeatSeconds = $heartbeatIntervalSeconds
+        $heartbeatActive = $false
         while (-not $process.HasExited) {
             Start-Sleep -Milliseconds 250
             $process.Refresh()
             $elapsedSeconds = [int][Math]::Floor($clock.Elapsed.TotalSeconds)
             if ($TimeoutSeconds -gt 0 -and $clock.Elapsed.TotalSeconds -ge $TimeoutSeconds) {
                 try { $process.Kill($true) } catch { try { $process.Kill() } catch {} }
+                if ($heartbeatActive) { [Console]::WriteLine() }
                 throw ("{0} exceeded its hard stage timeout of {1} seconds." -f $Stage, $TimeoutSeconds)
             }
             if ($elapsedSeconds -ge $nextHeartbeatSeconds) {
                 if ($Stage -eq 'Ring-3 userland executables') {
-                    Write-Host ("[INFO] Ring-3 userland compilation is still running ({0}s elapsed); Shell/command executables are being built on the host, not executed in the guest." -f $elapsedSeconds)
+                    $heartbeatText = "[INFO] Ring-3 userland compilation: ${elapsedSeconds}s elapsed - building Shell/commands on host..."
                 } else {
-                    Write-Host ("[INFO] {0} still running ({1}s elapsed)." -f $Stage, $elapsedSeconds)
+                    $heartbeatText = "[INFO] ${Stage}: ${elapsedSeconds}s elapsed..."
                 }
-                $nextHeartbeatSeconds += $heartbeatIntervalSeconds
+                [Console]::Write("`r" + $heartbeatText)
+                $heartbeatActive = $true
+                $nextHeartbeatSeconds = $elapsedSeconds + $heartbeatIntervalSeconds
             }
         }
 
+        if ($heartbeatActive) { [Console]::WriteLine() }
         $process.WaitForExit()
         $stdout = $stdoutTask.GetAwaiter().GetResult()
         $stderr = $stderrTask.GetAwaiter().GetResult()

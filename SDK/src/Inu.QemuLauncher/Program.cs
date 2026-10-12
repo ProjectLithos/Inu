@@ -108,7 +108,7 @@ static int MainEntry(string[] args)
     }
 
     int hostLogicalProcessorCount = Environment.ProcessorCount;
-    string[] qemuArguments = BuildArguments(ovmfCode, variableStore, runImage, serialLog, qemuPidFile, qemuProcessorCount, memoryMiB, acceleratorTarget, storageTarget, networkTarget, graphicsTarget, usbTarget, qemuDebugLog, qemuDebugConLog, qmpPort);
+    string[] qemuArguments = BuildArguments(ovmfCode, variableStore, runImage, serialLog, qemuProcessorCount, memoryMiB, acceleratorTarget, storageTarget, networkTarget, graphicsTarget, usbTarget, qemuDebugLog, qemuDebugConLog, qmpPort);
     Console.WriteLine($"[INFO] QEMU executable: {qemu}");
     Console.WriteLine($"[INFO] OVMF code     : {ovmfCode}");
     Console.WriteLine($"[INFO] OVMF variables: {ovmfVars}");
@@ -169,7 +169,7 @@ static int MainEntry(string[] args)
         // quotation/errorlevel semantics. QEMU's stdout and stderr are ordinary files and
         // therefore cannot keep Kath's build-capture pipes open after acceptance succeeds.
         string powerShell = ResolvePowerShell();
-        File.WriteAllText(qemuStarterScript, BuildDetachedQemuScript(qemu, qemuArguments, qemuStdoutLog, qemuStderrLog));
+        File.WriteAllText(qemuStarterScript, BuildDetachedQemuScript(qemu, qemuArguments, qemuStdoutLog, qemuStderrLog, qemuPidFile));
         using (Process starter = new())
         {
             // The short-lived PowerShell starter must not inherit this launcher's captured
@@ -197,12 +197,17 @@ static int MainEntry(string[] args)
                 try { starter.Kill(true); } catch { }
                 return Fail($"QEMU detached starter did not return within 5 seconds. Starter: {qemuStarterScript}");
             }
+            if (starter.ExitCode != 0)
+                return Fail($"QEMU detached starter failed with exit code {starter.ExitCode}. Starter: {qemuStarterScript}; diagnostics: {qemuStderrLog}");
         }
 
-        // The starter process exit code is deliberately not treated as QEMU's status.
-        // The authoritative proof is QEMU's own -pidfile followed by a live-process lookup.
+        // Launch-Qemu.ps1 owns qemu.pid and writes the PID returned by Start-Process
+        // immediately after QEMU is created. Do not depend on QEMU's optional -pidfile
+        // behaviour: on Windows a live VM can reach the shell before that file is ever
+        // observed, which previously produced the contradictory 'QEMU did not publish
+        // its PID' failure after a successful launch.
         qemuPid = WaitForQemuPid(qemuPidFile, 5000);
-        if (qemuPid <= 0) return Fail($"QEMU did not publish its PID. PID file: {qemuPidFile}; diagnostics: {qemuStderrLog}");
+        if (qemuPid <= 0) return Fail($"QEMU starter did not publish its PID. PID file: {qemuPidFile}; diagnostics: {qemuStderrLog}");
         if (!IsProcessAlive(qemuPid))
         {
             return Fail($"QEMU exited before runtime acceptance started. PID: {qemuPid}; diagnostics: {qemuStderrLog}");
@@ -852,7 +857,7 @@ static string DescribeAccelerator(string acceleratorTarget)
     return "auto (TCG)";
 }
 
-static string[] BuildArguments(string ovmfCode, string variableStore, string runImage, string serialLog, string qemuPidFile, int qemuProcessorCount, int memoryMiB, string acceleratorTarget, string storageTarget, string networkTarget, string graphicsTarget, string usbTarget, string qemuDebugLog, string qemuDebugConLog, int qmpPort)
+static string[] BuildArguments(string ovmfCode, string variableStore, string runImage, string serialLog, int qemuProcessorCount, int memoryMiB, string acceleratorTarget, string storageTarget, string networkTarget, string graphicsTarget, string usbTarget, string qemuDebugLog, string qemuDebugConLog, int qmpPort)
 {
     List<string> arguments = new();
     if(string.Equals(acceleratorTarget,"auto",StringComparison.OrdinalIgnoreCase))
@@ -909,7 +914,6 @@ static string[] BuildArguments(string ovmfCode, string variableStore, string run
 
     arguments.AddRange([
         "-boot", "order=c,menu=off,strict=on",
-        "-pidfile", qemuPidFile,
         "-serial", $"file:{serialLog}",
         "-D", qemuDebugLog,
         "-d", "int,guest_errors,cpu_reset",
@@ -923,7 +927,7 @@ static string[] BuildArguments(string ovmfCode, string variableStore, string run
     return arguments.ToArray();
 }
 
-static string BuildDetachedQemuScript(string qemu, string[] qemuArguments, string stdoutLog, string stderrLog)
+static string BuildDetachedQemuScript(string qemu, string[] qemuArguments, string stdoutLog, string stderrLog, string pidFile)
 {
     // Windows PowerShell 5.1 joins Start-Process -ArgumentList array elements back
     // into a single C# / NativeAOTommand line without preserving the element quoting.
@@ -935,7 +939,12 @@ static string BuildDetachedQemuScript(string qemu, string[] qemuArguments, strin
            $"$qemuArgumentLine = {QuoteForPowerShell(argumentLine)}\r\n" +
            $"$stdout = {QuoteForPowerShell(stdoutLog)}\r\n" +
            $"$stderr = {QuoteForPowerShell(stderrLog)}\r\n" +
-           "Start-Process -FilePath $qemu -ArgumentList $qemuArgumentLine -RedirectStandardOutput $stdout -RedirectStandardError $stderr | Out-Null\r\n";
+           $"$pidFile = {QuoteForPowerShell(pidFile)}\r\n" +
+           "$pidTemp = $pidFile + '.tmp'\r\n" +
+           "$process = Start-Process -FilePath $qemu -ArgumentList $qemuArgumentLine -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru\r\n" +
+           "if ($null -eq $process -or $process.Id -le 0) { throw 'QEMU process did not return a valid process ID.' }\r\n" +
+           "[IO.File]::WriteAllText($pidTemp, $process.Id.ToString([Globalization.CultureInfo]::InvariantCulture), [Text.Encoding]::ASCII)\r\n" +
+           "Move-Item -LiteralPath $pidTemp -Destination $pidFile -Force\r\n";
 }
 
 

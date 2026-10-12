@@ -98,10 +98,11 @@ $stderrRead = 0
 $lastActualOutputUtc = [DateTime]::UtcNow
 $stageStartUtc = $lastActualOutputUtc
 $stageName = 'Inu build'
-# This is a fallback only. Build-Inu.ps1 emits its own 20-second stage heartbeat.
-# Keep the relay interval longer so it does not duplicate those messages.
-$heartbeatIntervalSeconds = 30
+# Fallback heartbeat for periods where the redirected child output has no complete line.
+# Keep this on one updating line so long stages do not flood Kath's Output pane.
+$heartbeatIntervalSeconds = 1
 $heartbeatDueUtc = $lastActualOutputUtc.AddSeconds($heartbeatIntervalSeconds)
+$heartbeatActive = $false
 
 try {
     $process = Start-Process -FilePath $powershellHost -ArgumentList $argumentLine `
@@ -112,6 +113,7 @@ try {
         $hadActualOutput = $false
 
         foreach ($line in @(Get-NewLines -Path $stdoutPath -ReadCount ([ref]$stdoutRead))) {
+            if ($heartbeatActive) { [Console]::WriteLine(); $heartbeatActive = $false }
             Write-Host $line
             $hadActualOutput = $true
             $lastActualOutputUtc = [DateTime]::UtcNow
@@ -122,6 +124,7 @@ try {
         }
 
         foreach ($line in @(Get-NewLines -Path $stderrPath -ReadCount ([ref]$stderrRead))) {
+            if ($heartbeatActive) { [Console]::WriteLine(); $heartbeatActive = $false }
             Write-Host $line
             $hadActualOutput = $true
             $lastActualOutputUtc = [DateTime]::UtcNow
@@ -133,12 +136,14 @@ try {
         elseif ([DateTime]::UtcNow -ge $heartbeatDueUtc) {
             $elapsedSeconds = [int][Math]::Floor(([DateTime]::UtcNow - $stageStartUtc).TotalSeconds)
             if ($elapsedSeconds -lt $heartbeatIntervalSeconds) { $elapsedSeconds = $heartbeatIntervalSeconds }
-            Write-Host ("[INFO] {0} still running ({1}s elapsed)." -f $stageName, $elapsedSeconds)
+            [Console]::Write(("`r[INFO] {0}: {1}s elapsed..." -f $stageName, $elapsedSeconds))
+            $heartbeatActive = $true
             $heartbeatDueUtc = [DateTime]::UtcNow.AddSeconds($heartbeatIntervalSeconds)
         }
     }
 
     $process.WaitForExit()
+    if ($heartbeatActive) { [Console]::WriteLine(); $heartbeatActive = $false }
 
     foreach ($line in @(Get-NewLines -Path $stdoutPath -ReadCount ([ref]$stdoutRead))) {
         Write-Host $line
