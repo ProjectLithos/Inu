@@ -1,3 +1,4 @@
+- 0.1.40 completes Profile 1 `List<T>` mutation, capacity/indexing, self-`AddRange`, enumeration state/version and `ToArray` behaviour, with one shared conformance definition compiled by both reference and freestanding runners.
 # Inu managed NativeAOT runtime
 
 Inu SDK 0.42.0 introduces an explicit two-phase managed runtime for x64 kernels.

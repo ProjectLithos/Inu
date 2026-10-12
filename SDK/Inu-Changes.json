@@ -1,8 +1,8 @@
 {
-  "baseVersion": "0.1.38",
-  "version": "0.1.39",
+  "baseVersion": "0.1.39",
+  "version": "0.1.40",
   "changedFiles": [
-    "CHANGED-0.1.39.txt",
+    "CHANGED-0.1.40.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -11,8 +11,9 @@
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/docs/Managed-Runtime.md",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
+    "Inu/SDK/src/Inu.Freestanding.CoreLib/CoreLib.cs",
     "Inu/SDK/src/Inu.Runtime.Conformance/ManagedRuntimeConformance.cs",
-    "Inu/SDK/src/Inu.Runtime.Conformance/Shared/ArrayEnumerationConformance.cs",
+    "Inu/SDK/src/Inu.Runtime.Conformance/Shared/ListConformance.cs",
     "Inu/SDK/tests/Inu.DotNetConformance.Tests/Inu.DotNetConformance.Tests.csproj",
     "Inu/SDK/tests/Inu.DotNetConformance.Tests/Program.cs",
     "Inu/VERSION",
@@ -25,5 +26,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Fix array bounds conformance and share the completed array/enumeration expectation logic between the host reference runner and the in-kernel runtime gate."
+  "summary": "Complete the requested List<T> Profile 1 surface and share its conformance expectations between the host reference runner and freestanding in-kernel gate."
 }

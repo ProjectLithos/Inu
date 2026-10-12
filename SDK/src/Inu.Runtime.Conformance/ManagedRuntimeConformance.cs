@@ -1253,11 +1253,8 @@ public static unsafe class ManagedRuntimeConformance
             && stringComparer.GetHashCode("same") == stringComparer.GetHashCode("same"), ref passed, ref failed);
 
         // 22 System.Collections.Generic.List<T>
-        List<Int32> list = new List<Int32>();
-        list.Add(1); list.Add(3); list.Insert(1, 2);
-        Int32[] listCopy = list.ToArray();
-        Record(list.Count == 3 && list[1] == 2 && list.Contains(3) && list.IndexOf(2) == 1
-            && listCopy.Length == 3 && listCopy[2] == 3 && list.Remove(2) && list.Count == 2, ref passed, ref failed);
+        // Shared with the host reference runner so the List<T> expectations are authored once.
+        Record(Shared.ListConformance.TestList(), ref passed, ref failed);
 
         // 23 System.Collections.Generic.Dictionary<TKey,TValue>
         Dictionary<String, Int32> dictionary = new Dictionary<String, Int32>();

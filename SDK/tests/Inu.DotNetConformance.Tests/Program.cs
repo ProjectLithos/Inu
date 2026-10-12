@@ -63,7 +63,7 @@ internal static class Program
         Check("System.Type", TestType());
         Check("System.Collections.Generic.KeyValuePair<TKey,TValue>", TestKeyValuePair());
         Check("System.Collections.Generic.EqualityComparer<T>", TestEqualityComparer());
-        Check("System.Collections.Generic.List<T>", TestList());
+        Check("System.Collections.Generic.List<T>", Inu.Runtime.Conformance.Shared.ListConformance.TestList());
         Check("System.Collections.Generic.Dictionary<TKey,TValue>", TestDictionary());
         Check("System.Collections.Generic.Queue<T>", TestQueue());
         Check("System.Collections.Generic.Stack<T>", TestStack());
@@ -736,15 +736,6 @@ internal static class Program
         return ints.Equals(7, 7) && !ints.Equals(7, 8)
             && strings.Equals("same", "same") && !strings.Equals("same", "other")
             && strings.GetHashCode("same") == strings.GetHashCode("same");
-    }
-
-    private static bool TestList()
-    {
-        var list = new List<int>();
-        list.Add(1); list.Add(3); list.Insert(1, 2);
-        int[] copy = list.ToArray();
-        return list.Count == 3 && list[1] == 2 && list.Contains(3) && list.IndexOf(2) == 1
-            && copy.Length == 3 && copy[2] == 3 && list.Remove(2) && list.Count == 2;
     }
 
     private static bool TestDictionary()

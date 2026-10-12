@@ -7180,6 +7180,21 @@ namespace System.Collections.Generic
         public void AddRange(IEnumerable<T> collection)
         {
             if (collection == null) throw new ArgumentNullException();
+
+            // A list can be added to itself. Snapshot first so the append does not
+            // invalidate the source enumeration after its first element.
+            if (Object.ReferenceEquals(collection, this))
+            {
+                T[] snapshot = ToArray();
+                if (snapshot.Length == 0) return;
+                EnsureCapacity(_size + snapshot.Length);
+                for (Int32 i = 0; i < snapshot.Length; i++)
+                    _items[_size + i] = snapshot[i];
+                _size += snapshot.Length;
+                _version++;
+                return;
+            }
+
             IEnumerator<T> iterator = collection.GetEnumerator();
             try
             {
@@ -7301,7 +7316,15 @@ namespace System.Collections.Generic
             }
 
             public T Current => _current;
-            Object System.Collections.IEnumerator.Current => _current;
+            Object System.Collections.IEnumerator.Current
+            {
+                get
+                {
+                    if (_index == 0 || _index == _list._size + 1)
+                        throw new InvalidOperationException();
+                    return _current;
+                }
+            }
             public Boolean MoveNext()
             {
                 if (_version != _list._version) System.Collections.CollectionThrowHelper.ThrowModified();
@@ -7351,7 +7374,15 @@ namespace System.Collections.Generic
             }
 
             public T Current => _current;
-            Object System.Collections.IEnumerator.Current => _current;
+            Object System.Collections.IEnumerator.Current
+            {
+                get
+                {
+                    if (_index == 0 || _index == _list._size + 1)
+                        throw new InvalidOperationException();
+                    return _current;
+                }
+            }
 
             public Boolean MoveNext()
             {

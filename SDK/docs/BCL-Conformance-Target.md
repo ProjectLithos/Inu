@@ -38,7 +38,7 @@ The target is intentionally type-level rather than a claim that every API on a l
 | 23 | `System.Type` | value/primitive/array identity, `Name` from NativeAOT metadata, element/base type, assignability and subclass checks |
 | 24 | `System.Collections.Generic.KeyValuePair<TKey,TValue>` | construction and key/value access |
 | 25 | `System.Collections.Generic.EqualityComparer<T>` | default integer/string equality and stable equal-value hashing |
-| 26 | `System.Collections.Generic.List<T>` | add/insert/index/search/copy/remove/count |
+| 26 | `System.Collections.Generic.List<T>` | add/add-range (including self-add), insert, indexer get/set and bounds, contains/index lookup, remove/remove-at, clear, count/capacity, generic/non-generic enumeration state/version semantics, and independent `ToArray` |
 | 27 | `System.Collections.Generic.Dictionary<TKey,TValue>` | add/indexer/count/lookup/`TryAdd`/remove |
 | 28 | `System.Collections.Generic.Queue<T>` | enqueue/peek/dequeue/count and FIFO ordering |
 | 29 | `System.Collections.Generic.Stack<T>` | push/peek/pop/count and LIFO ordering |

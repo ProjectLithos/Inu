@@ -11,5 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\src\Inu.Runtime.Conformance\Shared\ArrayEnumerationConformance.cs" Link="Shared\ArrayEnumerationConformance.cs" />
+    <Compile Include="..\..\src\Inu.Runtime.Conformance\Shared\ListConformance.cs" Link="Shared\ListConformance.cs" />
   </ItemGroup>
 </Project>
