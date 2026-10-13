@@ -195,6 +195,7 @@ static int MainEntry(string[] args)
         }
     }
 
+    if (!RepairTestOsKernelStorageImport(output, projectName, testOs)) return 1;
     if (!MaterializeCoderCommands(sdkRoot, output, projectName)) return 1;
     MigrateGeneratedShellSurface(output, projectName);
     RepairMalformedGeneratedStockShellSurface(output, projectName);
@@ -226,6 +227,49 @@ static int MainEntry(string[] args)
     Console.WriteLine($"[ OK ] Kernel project  : {mainProjectPath}");
     Console.WriteLine($"[ OK ] Project manifest: {manifestPath}");
     return 0;
+}
+
+
+static bool RepairTestOsKernelStorageImport(string output, string projectName, bool testOs)
+{
+    if (!testOs) return true;
+
+    string kernelPath = Path.Combine(output, "Kernel", projectName, "Kernel.cs");
+    if (!File.Exists(kernelPath)) return true;
+
+    try
+    {
+        string source = File.ReadAllText(kernelPath);
+        if (source.Contains("using Inu.Kernel.Storage;", StringComparison.Ordinal)) return true;
+
+        bool usesStorageFacade = source.Contains("FileSystem.", StringComparison.Ordinal) ||
+            source.Contains("FileSystemPathPolicy", StringComparison.Ordinal) ||
+            source.Contains("FileSystemLogicalPath", StringComparison.Ordinal);
+        if (!usesStorageFacade) return true;
+
+        // Test OS projects intentionally exercise every selected SDK facade. Older Test OS
+        // kernels were generated before the storage import was part of that profile and are
+        // coder-owned, so normal template refresh deliberately preserves them. Repair only
+        // this missing import; do not replace or regenerate any kernel policy source.
+        string marker = "using Inu.Kernel.Power;";
+        if (source.Contains(marker, StringComparison.Ordinal))
+            source = source.Replace(marker, marker + Environment.NewLine + "using Inu.Kernel.Storage;", StringComparison.Ordinal);
+        else
+        {
+            int namespaceIndex = source.IndexOf("namespace ", StringComparison.Ordinal);
+            if (namespaceIndex < 0) return Fail($"Test OS kernel uses filesystem APIs but has no namespace declaration to anchor the Inu.Kernel.Storage import: {kernelPath}") == 0;
+            source = source.Insert(namespaceIndex, "using Inu.Kernel.Storage;" + Environment.NewLine + Environment.NewLine);
+        }
+
+        File.WriteAllText(kernelPath, source);
+        Console.WriteLine($"[ OK ] Repaired Test OS storage/filesystem SDK import: {kernelPath}");
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"[FAIL] Unable to repair Test OS storage/filesystem import: {ex.Message}");
+        return false;
+    }
 }
 
 static bool RefreshCentralKernelConsoleSourcePlan(string sdkRoot, string output)
