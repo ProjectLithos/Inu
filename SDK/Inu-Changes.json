@@ -1,8 +1,8 @@
 {
-  "baseVersion": "0.1.49",
-  "version": "0.1.50",
+  "baseVersion": "0.1.50",
+  "version": "0.1.51",
   "changedFiles": [
-    "CHANGED-0.1.50.txt",
+    "CHANGED-0.1.51.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
@@ -10,6 +10,7 @@
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
     "Inu/SDK/src/Inu.ProjectCreator/Program.cs",
+    "Inu/SDK/src/Userland/Commands/Dir.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
@@ -20,5 +21,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Fix existing SDK Test OS build-time refresh so coder-owned kernels using filesystem validation receive the required Inu.Kernel.Storage import without regeneration."
+  "summary": "Fix the stock Dir command FileSystemPaths dependency and safely refresh untouched broken generated Dir.cs copies during existing-project refresh."
 }

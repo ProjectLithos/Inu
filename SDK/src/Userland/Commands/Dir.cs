@@ -2,71 +2,156 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Inu.Userland.Runtime;
+
 namespace Inu.Userland.Commands;
+
 public static class Dir
 {
     public static int Main(string[] args)
     {
-        if(args.Length>1){Console.WriteLine("Usage: dir [path]");return 1;}
-        String path=args.Length==0?Directory.GetCurrentDirectory():args[0];
+        if (args.Length > 1)
+        {
+            Console.WriteLine("Usage: dir [path]");
+            return 1;
+        }
+
+        string path = args.Length == 0 ? Directory.GetCurrentDirectory() : args[0];
+
         try
         {
-            String[] entries=Directory.GetFileSystemEntries(path);
-            List<String> directories=new List<String>();
-            List<String> files=new List<String>();
-            for(Int32 i=0;i<entries.Length;i++)
+            string[] entries = Directory.GetFileSystemEntries(path);
+            List<string> directories = new();
+            List<string> files = new();
+
+            for (int index = 0; index < entries.Length; index++)
             {
-                String entry=entries[i];
-                if(Directory.Exists(entry))directories.Add(GetName(entry));
-                else files.Add(GetName(entry));
+                string entry = entries[index];
+                if (Directory.Exists(entry))
+                {
+                    directories.Add(GetName(entry));
+                }
+                else
+                {
+                    files.Add(GetName(entry));
+                }
             }
-            Sort(directories);Sort(files);
-            StringBuilder output=new StringBuilder();
-            output.Append("Directory of ");output.Append(path);output.Append('\n');output.Append('\n');
-            for(Int32 i=0;i<directories.Count;i++){output.Append("<DIR>  ");output.Append(directories[i]);output.Append('\n');}
-            for(Int32 i=0;i<files.Count;i++){output.Append("       ");output.Append(files[i]);output.Append('\n');}
+
+            Sort(directories);
+            Sort(files);
+
+            StringBuilder output = new();
+            output.Append("Directory of ");
+            output.Append(path);
+            output.Append('\n');
+            output.Append('\n');
+
+            for (int index = 0; index < directories.Count; index++)
+            {
+                output.Append("<DIR>  ");
+                output.Append(directories[index]);
+                output.Append('\n');
+            }
+
+            for (int index = 0; index < files.Count; index++)
+            {
+                output.Append("       ");
+                output.Append(files[index]);
+                output.Append('\n');
+            }
+
             Console.Write(output.ToString());
             return 0;
         }
-        catch(Exception)
+        catch (Exception)
         {
-            Console.WriteLine("Directory not found or could not be read: "+path);
+            Console.WriteLine("Directory not found or could not be read: " + path);
             return 1;
         }
     }
 
-    private static String GetName(String path)
+    private static string GetName(string path)
     {
-        if(String.IsNullOrEmpty(path))return String.Empty;
-        Char separator=FileSystemPaths.GetPathSeparator();
-        Int32 end=path.Length;
-        while(end>1&&path[end-1]==separator)end--;
-        Int32 start=end-1;
-        while(start>=0&&path[start]!=separator)start--;
+        if (String.IsNullOrEmpty(path))
+        {
+            return String.Empty;
+        }
+
+        char separator = FileSystemPaths.GetPathSeparator();
+        int end = path.Length;
+
+        while (end > 1 && path[end - 1] == separator)
+        {
+            end--;
+        }
+
+        int start = end - 1;
+        while (start >= 0 && path[start] != separator)
+        {
+            start--;
+        }
+
         start++;
-        return path.Substring(start,end-start);
+        return path.Substring(start, end - start);
     }
 
-    private static void Sort(List<String> values)
+    private static void Sort(List<string> values)
     {
-        for(Int32 i=1;i<values.Count;i++)
+        for (int index = 1; index < values.Count; index++)
         {
-            String value=values[i];Int32 j=i-1;
-            while(j>=0&&Compare(values[j],value)>0){values[j+1]=values[j];j--;}
-            values[j+1]=value;
+            string value = values[index];
+            int insertAt = index - 1;
+
+            while (insertAt >= 0 && Compare(values[insertAt], value) > 0)
+            {
+                values[insertAt + 1] = values[insertAt];
+                insertAt--;
+            }
+
+            values[insertAt + 1] = value;
         }
     }
 
-    private static Int32 Compare(String left,String right)
+    private static int Compare(string left, string right)
     {
-        Int32 length=left.Length<right.Length?left.Length:right.Length;
-        for(Int32 i=0;i<length;i++)
+        int length = left.Length < right.Length ? left.Length : right.Length;
+
+        for (int index = 0; index < length; index++)
         {
-            Char a=left[i],b=right[i];
-            if(a>='a'&&a<='z')a=(Char)(a-('a'-'A'));
-            if(b>='a'&&b<='z')b=(Char)(b-('a'-'A'));
-            if(a<b)return -1;if(a>b)return 1;
+            char leftCharacter = left[index];
+            char rightCharacter = right[index];
+
+            if (leftCharacter >= 'a' && leftCharacter <= 'z')
+            {
+                leftCharacter = (char)(leftCharacter - ('a' - 'A'));
+            }
+
+            if (rightCharacter >= 'a' && rightCharacter <= 'z')
+            {
+                rightCharacter = (char)(rightCharacter - ('a' - 'A'));
+            }
+
+            if (leftCharacter < rightCharacter)
+            {
+                return -1;
+            }
+
+            if (leftCharacter > rightCharacter)
+            {
+                return 1;
+            }
         }
-        if(left.Length<right.Length)return -1;if(left.Length>right.Length)return 1;return 0;
+
+        if (left.Length < right.Length)
+        {
+            return -1;
+        }
+
+        if (left.Length > right.Length)
+        {
+            return 1;
+        }
+
+        return 0;
     }
 }

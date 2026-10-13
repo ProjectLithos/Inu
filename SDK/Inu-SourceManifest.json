@@ -1,5 +1,5 @@
 {
-  "version": "0.1.50",
+  "version": "0.1.51",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -411,7 +411,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "7bd1e4c46080622455aed66eed9f7042d0ae32734cce5b2b0dff6cebf4f7fbbf"
+      "sha256": "1014a5d51818eb021f3329f41a01e83b5ffb01eb83f9de6c593364a3c53ab767"
     },
     {
       "path": "Directory.Build.targets",
@@ -443,7 +443,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "c7a4ec4ee9b017af962ad8b790c2708da8e92787dcd8e926891ec2be6c007386"
+      "sha256": "ff4b38bf7af0ae0bb34094d7cbb81869482aba178cc4c5f33f7ed16df34f7cdc"
     },
     {
       "path": "Inu-Package.bat",
@@ -475,7 +475,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "5a0f7b25eb5654abd2dcedea5aeedd6cd4c24682df7c1ad764d1049ba97c2ee7"
+      "sha256": "f1a62dfd53b1995f990e23fba23a87999863d94a111d51dee4ef2ce5a863f29f"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -1019,7 +1019,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "522bcd4a26e13693a7cd7031e567d29f12efe511dd0754c2c8792409b2fd7448"
+      "sha256": "b5463fdb04b85569b4db12218f09cb0bd87d130069def8e53be082fd8707f85b"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -3543,7 +3543,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "34fe98a49dc636e7489c590096554df739659f1124198e6c93df767cdc5a73f9"
+      "sha256": "39e736e9c0d30ad492bd5d0b80001c4ebb586f0b2acad3d7e8f6359f2da4f08a"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5591,7 +5591,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "8fbad9a43809a35ce85c801afc19b1cd46aaeb2258eea975250d416af5a3c9b1"
+      "sha256": "38c46c7524118414de7623c02354c8fb666b52e81e2d621b122ff2045550689e"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",
@@ -5831,7 +5831,7 @@
     },
     {
       "path": "src/Userland/Commands/Dir.cs",
-      "sha256": "180e5634a08d7c06850846c3dd6f986f0991f9c8c7b60c2cd775b5fed46f80d5"
+      "sha256": "f05515852a3a2f55646b3c29f8334cb63ef64b66301155c52bd6aee3084b60ab"
     },
     {
       "path": "src/Userland/Commands/Echo.cs",

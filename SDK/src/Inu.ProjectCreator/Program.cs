@@ -764,8 +764,12 @@ static bool MaterializeCoderCommands(string sdkRoot, string output, string proje
 
         if (File.Exists(destination))
         {
-            if (legacyStockHashes.TryGetValue(fileName, out string? legacyHash) &&
-                string.Equals(Sha256File(destination), legacyHash, StringComparison.OrdinalIgnoreCase))
+            string destinationHash = Sha256File(destination);
+            bool isLegacyStock = legacyStockHashes.TryGetValue(fileName, out string? legacyHash) &&
+                                 string.Equals(destinationHash, legacyHash, StringComparison.OrdinalIgnoreCase);
+            bool isBrokenDirStock = string.Equals(fileName, "Dir.cs", StringComparison.OrdinalIgnoreCase) &&
+                                    string.Equals(destinationHash, "180E5634A08D7C06850846C3DD6F986F0991F9C8C7B60C2CD775B5FED46F80D5", StringComparison.OrdinalIgnoreCase);
+            if (isLegacyStock || isBrokenDirStock)
             {
                 File.Copy(source, destination, true);
                 Console.WriteLine($"[ OK ] Refreshed unmodified stock command from canonical source: {destination}");
