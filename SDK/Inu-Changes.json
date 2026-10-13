@@ -1,24 +1,25 @@
 {
-  "baseVersion": "0.1.47",
-  "version": "0.1.48",
+  "baseVersion": "0.1.48",
+  "version": "0.1.49",
   "changedFiles": [
-    "CHANGED-0.1.48.txt",
+    "CHANGED-0.1.49.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Runtime.Conformance/Shared/TupleConformance.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
+    "Kath/packages/kath/src/browser/inu-widget.tsx",
+    "Kath/packages/kath/src/node/inu-project-generation.ts",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Repair shared tuple conformance nullable analysis and test C# ValueTuple deconstruction through language syntax."
+  "summary": "Fix SDK Test OS filesystem/storage validation composition so Microkernel Test OS projects compile filesystem validation and new Test OS presets select FAT32."
 }
