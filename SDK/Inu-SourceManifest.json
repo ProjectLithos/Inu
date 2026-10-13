@@ -1,5 +1,5 @@
 {
-  "version": "0.1.47",
+  "version": "0.1.48",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -411,7 +411,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "ee9d77d1e3bde65dbced0cc3a2aa68104b50ea8cf1f3aecf8c9b03a2a472b948"
+      "sha256": "752bf33f7e6097bf9f9f13feb4e71e2cb6f5b998fa48e3222a2549bb2885e32a"
     },
     {
       "path": "Directory.Build.targets",
@@ -443,7 +443,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "57402fba6a7757f46c15656de1e6d563b08cbcadde4fdd809a52f0dd3d19a574"
+      "sha256": "fcd02c34a05ab91e60d4d66617e7690bd5f1ceb9d6239aa2700ffdc9fe74596a"
     },
     {
       "path": "Inu-Package.bat",
@@ -475,7 +475,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "67dd86c27c5bf19b892cccbd301490f342e61c5e008f5df241aa6f744391ed8b"
+      "sha256": "a3a5cac02314d6200c6b5d4ae726535aeb325323015d8d0318575210492e631f"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -1019,7 +1019,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "df1b2ad086194111a7d25f1cf7a618502bbb3eae0a63c4c0ffb783b98b0731ea"
+      "sha256": "c5d9dfc474ee5f5efc4284a65f6ef038e2e1901168fc1071835a2eaccea239d7"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -3543,7 +3543,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "b2c4988e5d46124c2a265e4807d08396f06ac8552299c6c70604223a35a1e13a"
+      "sha256": "35300d596f74b92377e3a223ee9a1fff5873d8044b4f51e049c33565276f4664"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5635,7 +5635,7 @@
     },
     {
       "path": "src/Inu.Runtime.Conformance/Shared/TupleConformance.cs",
-      "sha256": "e1c34675dc5a3fde3392562547eb862a7d569494d367c368cc3b96c6004c4fbc"
+      "sha256": "6b4440fb82bab85eb2ce374522851f432e0accfef17280a0c3d913d72af81f7b"
     },
     {
       "path": "src/Inu.Runtime.Contracts/Inu.Runtime.Contracts.csproj",

@@ -1,24 +1,17 @@
 {
-  "baseVersion": "0.1.46",
-  "version": "0.1.47",
+  "baseVersion": "0.1.47",
+  "version": "0.1.48",
   "changedFiles": [
-    "CHANGED-0.1.47.txt",
+    "CHANGED-0.1.48.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/docs/Inu.Documentation.json",
-    "Inu/SDK/scripts/Build-References.ps1",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Runtime.Conformance/Shared/ArrayEnumerationConformance.cs",
-    "Inu/SDK/src/Inu.Runtime.Conformance/Shared/CoreCollectionsConformance.cs",
-    "Inu/SDK/src/Inu.Runtime.Conformance/Shared/LinqConformance.cs",
-    "Inu/SDK/src/Inu.Runtime.Conformance/Shared/ListConformance.cs",
     "Inu/SDK/src/Inu.Runtime.Conformance/Shared/TupleConformance.cs",
-    "Inu/SDK/tests/Inu.DotNetConformance.Tests/Inu.DotNetConformance.Tests.csproj",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
-    "Inu/tools/Install-Source.ps1",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
@@ -27,5 +20,5 @@
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Repair shared conformance incremental packaging: refresh every linked Shared contract source and validate source-manifest/shared-project dependencies before SDK reference compilation."
+  "summary": "Repair shared tuple conformance nullable analysis and test C# ValueTuple deconstruction through language syntax."
 }

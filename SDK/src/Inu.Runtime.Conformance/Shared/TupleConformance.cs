@@ -1,4 +1,4 @@
-// 0.1.47 companion source: kept in ChangedFiles whenever the host conformance project references this shared contract.
+// 0.1.48 shared host/in-kernel tuple contract.
 using System;
 using System.Runtime.CompilerServices;
 
@@ -29,10 +29,10 @@ namespace Inu.Runtime.Conformance.Shared
                 && pair.GetHashCode() == same.GetHashCode()
                 && String.Equals(pair.ToString(), "(7, Inu)")
                 && runtimePair.Length == 2
-                && (Int32)runtimePair[0] == 7
-                && String.Equals((String)runtimePair[1], "Inu")
+                && (Int32)runtimePair[0]! == 7
+                && String.Equals((String)runtimePair[1]!, "Inu")
                 && runtimeEight.Length == 8
-                && (Int32)runtimeEight[7] == 8;
+                && (Int32)runtimeEight[7]! == 8;
         }
 
         public static Boolean TestValueTuple()
@@ -40,7 +40,7 @@ namespace Inu.Runtime.Conformance.Shared
             ValueTuple<Int32, String> pair = ValueTuple.Create(11, "value");
             ValueTuple<Int32, String> same = ValueTuple.Create(11, "value");
             ValueTuple<Int32, String> different = ValueTuple.Create(12, "value");
-            pair.Deconstruct(out Int32 number, out String text);
+            (Int32 number, String text) = pair;
 
             ITuple runtimePair = (ITuple)(Object)pair;
             ValueTuple empty = ValueTuple.Create();
@@ -56,8 +56,8 @@ namespace Inu.Runtime.Conformance.Shared
                 && empty.Equals(default(ValueTuple))
                 && String.Equals(empty.ToString(), "()")
                 && runtimePair.Length == 2
-                && (Int32)runtimePair[0] == 11
-                && String.Equals((String)runtimePair[1], "value");
+                && (Int32)runtimePair[0]! == 11
+                && String.Equals((String)runtimePair[1]!, "value");
         }
 
         public static Boolean TestLanguageTuples()
@@ -82,7 +82,7 @@ namespace Inu.Runtime.Conformance.Shared
                 && nine.Item8 == 8
                 && nine.Item9 == 9
                 && runtimeNine.Length == 9
-                && (Int32)runtimeNine[8] == 9
+                && (Int32)runtimeNine[8]! == 9
                 && equality;
         }
 
