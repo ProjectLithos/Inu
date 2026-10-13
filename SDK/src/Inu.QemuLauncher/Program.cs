@@ -442,6 +442,15 @@ static int MainEntry(string[] args)
         {
             return Fail($"Timed out during managed collection conformance after interface-GVM success. Base boot window: {timeoutSeconds}s; bounded post-GVM progress allowance: {managedProgressGraceSeconds}s. See the managed-conformance last-stage diagnostic above. Serial log: {serialLog}");
         }
+        if (serialText.Contains("NOKERN:ENTRY", StringComparison.Ordinal) &&
+            !serialText.Contains("NOKERN:GOP", StringComparison.Ordinal) &&
+            !serialText.Contains("NOKERN:WARN:GOP", StringComparison.Ordinal) &&
+            !serialText.Contains("NOKERN:MEMMAP", StringComparison.Ordinal) &&
+            !serialText.Contains("NOKERN:RUNTIME", StringComparison.Ordinal) &&
+            !serialText.Contains("NOKERN:MANAGED", StringComparison.Ordinal))
+        {
+            return Fail($"Inu entered the native kernel but made no progress beyond the entry checkpoint. A Debug image may be parked at the source-debugger rendezvous without a debugger resume. Serial log: {serialLog}");
+        }
         if (!serialText.Contains("[[INU:TTF_READY]]", StringComparison.Ordinal))
         {
             return Fail($"Timed out before Inu confirmed the TrueType graphics console after the bounded boot/progress windows. Serial log: {serialLog}");

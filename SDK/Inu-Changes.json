@@ -1,25 +1,26 @@
 {
-  "baseVersion": "0.1.53",
-  "version": "0.1.54",
+  "baseVersion": "0.1.54",
+  "version": "0.1.55",
   "changedFiles": [
-    "CHANGED-0.1.54.txt",
+    "CHANGED-0.1.55.txt",
+    "Inu/SDK/Build-Inu.ps1",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
+    "Inu/SDK/src/Inu.QemuLauncher/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
-    "Kath/docs/Release-0.1.54.md",
+    "Kath/docs/Release-0.1.55.md",
     "Kath/packages/kath/package.json",
-    "Kath/packages/kath/src/browser/inu-editor-environment.ts",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Fix Kath missing-namespace Add using quick fix for the shipped Monaco/Theia code-action API."
+  "summary": "Fix Test OS Debug validation boot so ordinary Run does not park at the source-debugger rendezvous."
 }

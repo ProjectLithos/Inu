@@ -43,6 +43,12 @@ function Get-InuSdkCodeFingerprint {
     try { return ([BitConverter]::ToString($sha.ComputeHash($payload))).Replace('-','').ToLowerInvariant() } finally { $sha.Dispose() }
 }
 
+# Keep "Debug configuration" separate from "debugger rendezvous". A Test OS
+# is forced to Debug so Debug-only validation is compiled and executed, but a
+# normal Test OS Run must not stop at InuDebugImageAnchor waiting for a debugger.
+# Only an explicitly requested Debug build gets the source-debugger rendezvous.
+$debugRendezvousRequested = ($Configuration -eq 'Debug')
+
 $requestedTestOs = $false
 if (-not [string]::IsNullOrWhiteSpace($Project)) {
     try {
@@ -547,9 +553,11 @@ function Invoke-InuBuildStage {
 if ($ForceRebuild) { Write-Host '[INFO] Force Rebuild: every stage cache is bypassed.' }
 Write-Host "Building x64 native kernel entry objects and the minimal UEFI FAT32 loader."
 $entryNasmArguments = @("-f", "win64")
-if ($Configuration -eq "Debug") {
+if ($debugRendezvousRequested) {
     $entryNasmArguments += "-dINU_DEBUG=1"
     Write-Host "Debug kernel image rendezvous enabled for source-breakpoint relocation."
+} elseif ($requestedTestOs -and $Configuration -eq "Debug") {
+    Write-Host "[INFO] TEST OS Debug validation build: source-debugger rendezvous is disabled for ordinary Run."
 }
 $entryNasmArguments += (Join-Path $root "native\x64\Entry.asm")
 $entryNasmArguments += "-o"
