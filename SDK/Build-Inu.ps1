@@ -43,12 +43,27 @@ function Get-InuSdkCodeFingerprint {
     try { return ([BitConverter]::ToString($sha.ComputeHash($payload))).Replace('-','').ToLowerInvariant() } finally { $sha.Dispose() }
 }
 
+$requestedTestOs = $false
+if (-not [string]::IsNullOrWhiteSpace($Project)) {
+    try {
+        $requestedManifest = if ([IO.Path]::IsPathRooted($Project)) { [IO.Path]::GetFullPath($Project) } else { [IO.Path]::GetFullPath((Join-Path $root $Project)) }
+        if (Test-Path -LiteralPath $requestedManifest -PathType Leaf) {
+            $requestedProjectData = Get-Content -LiteralPath $requestedManifest -Raw | ConvertFrom-Json
+            $requestedTestOs = ($requestedProjectData.TestOs -eq $true) -or [string]::Equals([string]$requestedProjectData.ProjectKind, 'test-os', [StringComparison]::OrdinalIgnoreCase)
+        }
+    } catch { $requestedTestOs = $false }
+}
+if ($requestedTestOs) {
+    if ($Configuration -ne 'Debug') { Write-Host '[INFO] TEST OS selected: forcing Debug configuration so Debug-only hardware/driver validation is eligible to run.'; $Configuration = 'Debug' }
+    Write-Host '[INFO] TEST OS selected: host reference and in-kernel SDK conformance will run on every Run.'
+}
+
 $runtimeValidationDirectory = Join-Path $root 'Artifacts\Validation'
 $runtimeValidationStamp = Join-Path $runtimeValidationDirectory 'runtime-conformance-source.sha256'
 $currentSdkCodeFingerprint = Get-InuSdkCodeFingerprint -SdkRoot $root
 $lastValidatedSdkCodeFingerprint = if (Test-Path -LiteralPath $runtimeValidationStamp -PathType Leaf) { (Get-Content -LiteralPath $runtimeValidationStamp -TotalCount 1).Trim().ToLowerInvariant() } else { '' }
-$runtimeConformanceRequired = $currentSdkCodeFingerprint -ne $lastValidatedSdkCodeFingerprint
-$runtimeConformanceEnabled = $RuntimeConformance -and $Run -and -not $NoRun
+$runtimeConformanceRequired = ($currentSdkCodeFingerprint -ne $lastValidatedSdkCodeFingerprint) -or $requestedTestOs
+$runtimeConformanceEnabled = ($RuntimeConformance -or $requestedTestOs) -and $Run -and -not $NoRun
 if ($runtimeConformanceRequired) {
     Write-Host '[INFO] SDK implementation code changed since the last successful conformance validation.'
     Write-Host '[INFO] The host-side Inu .NET conformance suite will run once before this build continues.'
@@ -783,6 +798,7 @@ $linkOutputs = @($kernelBin,$loaderBin,(Join-Path $outputDirectory (([string]$pr
 if ($Configuration -eq 'Debug') { $linkOutputs += @((Join-Path $outputDirectory 'Inu.DebugSymbols.json'), (Join-Path $outputDirectory (([string]$projectData.Name) + '.pdb'))) }
     $compileArgs = @($compiler, "compile", $projectManifest, "--dotnet", $dotnet, "--ilc", $ilc, "--configuration", $Configuration, "--sdk-root", $root) + $dry
     if ($runtimeConformanceEnabled) { $compileArgs += '--runtime-conformance' }
+    if ($requestedTestOs) { $compileArgs += '--test-os' }
     Invoke-InuBuildStage -Stage "Managed IL + NativeAOT ILC" -FilePath $dotnet -Arguments $compileArgs -Inputs ($kernelInputs + $dotnetStageInputs + $ilcStageInputs + @((Get-InuStageFiles -Paths @((Split-Path -Parent $compiler)) -Outputs).FullName)) -Outputs $compileOutputs -CleanDirectories @((Join-Path $outputDirectory 'ManagedIL'),(Join-Path $outputDirectory 'NativeAot'))
 
     $linkArgs = @($linker, "link", $projectManifest, "--lld-link", $lldLink, "--llvm-nm", $llvmNm, "--nasm", $nasm, "--native-root", $nativeOutput) + $dry

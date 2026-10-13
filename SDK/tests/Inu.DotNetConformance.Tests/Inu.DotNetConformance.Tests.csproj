@@ -13,5 +13,7 @@
     <Compile Include="..\..\src\Inu.Runtime.Conformance\Shared\ArrayEnumerationConformance.cs" Link="Shared\ArrayEnumerationConformance.cs" />
     <Compile Include="..\..\src\Inu.Runtime.Conformance\Shared\ListConformance.cs" Link="Shared\ListConformance.cs" />
     <Compile Include="..\..\src\Inu.Runtime.Conformance\Shared\CoreCollectionsConformance.cs" Link="Shared\CoreCollectionsConformance.cs" />
+    <Compile Include="..\..\src\Inu.Runtime.Conformance\Shared\TupleConformance.cs" Link="Shared\TupleConformance.cs" />
+    <Compile Include="..\..\src\Inu.Runtime.Conformance\Shared\LinqConformance.cs" Link="Shared\LinqConformance.cs" />
   </ItemGroup>
 </Project>

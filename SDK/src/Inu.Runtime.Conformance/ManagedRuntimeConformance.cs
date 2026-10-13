@@ -659,7 +659,7 @@ public static unsafe class ManagedRuntimeConformance
     public const String BclTargetName = "Inu.BCL.Core.v1";
 
     /// <summary>Number of type-level BCL items in <see cref="BclTargetName"/>.</summary>
-    public const Int32 BclTargetItemCount = 45;
+    public const Int32 BclTargetItemCount = 49;
 
     /// <summary>
     /// Hard in-kernel gate for the named BCL subset. Keep this list in lock-step with
@@ -1241,26 +1241,32 @@ public static unsafe class ManagedRuntimeConformance
             && arrayType.BaseType == typeof(Array)
             && typeof(Object).IsAssignableFrom(typeof(Probe)) && typeof(Probe).IsSubclassOf(typeof(Object)), ref passed, ref failed);
 
-        // 20 System.Collections.Generic.KeyValuePair<TKey,TValue>
+        // 20-22 tuples. This shared source uses ordinary C# tuple syntax so both
+        // the desktop reference build and freestanding NativeAOT gate exercise the same compiler contracts.
+        Record(Shared.TupleConformance.TestTuple(), ref passed, ref failed);
+        Record(Shared.TupleConformance.TestValueTuple(), ref passed, ref failed);
+        Record(Shared.TupleConformance.TestLanguageTuples(), ref passed, ref failed);
+
+        // 23 System.Collections.Generic.KeyValuePair<TKey,TValue>
         Record(Shared.CoreCollectionsConformance.TestKeyValuePair(), ref passed, ref failed);
 
-        // 21 System.Collections.Generic.EqualityComparer<T>
+        // 24 System.Collections.Generic.EqualityComparer<T>
         EqualityComparer<Int32> intComparer = EqualityComparer<Int32>.Default;
         EqualityComparer<String> stringComparer = EqualityComparer<String>.Default;
         Record(intComparer.Equals(7, 7) && !intComparer.Equals(7, 8)
             && stringComparer.Equals("same", "same") && !stringComparer.Equals("same", "other")
             && stringComparer.GetHashCode("same") == stringComparer.GetHashCode("same"), ref passed, ref failed);
 
-        // 22 System.Collections.Generic.List<T>
+        // 25 System.Collections.Generic.List<T>
         Record(Shared.ListConformance.TestList(), ref passed, ref failed);
 
-        // 23-27 core generic collections share the exact host reference expectations.
+        // 26-30 core generic collections share the exact host reference expectations.
         Record(Shared.CoreCollectionsConformance.TestDictionary(), ref passed, ref failed);
         Record(Shared.CoreCollectionsConformance.TestHashSet(), ref passed, ref failed);
         Record(Shared.CoreCollectionsConformance.TestQueue(), ref passed, ref failed);
         Record(Shared.CoreCollectionsConformance.TestStack(), ref passed, ref failed);
 
-        // 28 System.Text.StringBuilder
+        // 31 System.Text.StringBuilder
         StringBuilder builder = new StringBuilder(2);
         Int32 builderInitialCapacity = builder.Capacity;
         builder.Append("Inu").Append(' ').Append(95).AppendLine();
@@ -1774,6 +1780,9 @@ public static unsafe class ManagedRuntimeConformance
             && nullableEquality.Equals(absentInt, default) && nullableEquality.Equals(fiveInt, fiveAgainInt) && !nullableEquality.Equals(fiveInt, sixInt)
             && Nullable.Compare(absentInt, fiveInt) < 0 && Nullable.Compare(fiveInt, absentInt) > 0 && Nullable.Compare(fiveInt, fiveAgainInt) == 0
             && Nullable.Equals(absentInt, default) && Nullable.Equals(fiveInt, fiveAgainInt) && !Nullable.Equals(fiveInt, sixInt), ref passed, ref failed);
+
+        // 49 Practical LINQ subset. Shared with the host reference runner.
+        Record(Shared.LinqConformance.TestLinq(), ref passed, ref failed);
 
         UInt32 exercised = (passed + failed) - before;
         Record(exercised == (UInt32)BclTargetItemCount, ref passed, ref failed);

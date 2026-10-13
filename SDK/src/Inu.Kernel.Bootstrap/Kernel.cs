@@ -113,6 +113,10 @@ public static unsafe partial class Kernel
         EmitKMainStageBoot();
         if (!KernelStructuredLogging.TraceLine("console","Kernel.KMain","Kernel console initialized; structured diagnostic routing begins.")) return false;
         if (!KernelStructuredLogging.InfoLine("bootstrap","Kernel.KMain","Inu KMain started.")) return false;
+#if INU_TEST_OS
+        if (!KernelConsole.WriteLine("INU:TEST-OS:START")) return false;
+        if (!KernelStructuredLogging.WarningLine("validation","Kernel.KMain","TEST OS: full SDK validation profile is active.")) return false;
+#endif
         if (!boot.HasFinalMemoryMapBuffer() && boot.HasMemoryDescriptorLayout()) { KernelStructuredLogging.CriticalLine("boot","Kernel.KMain","Final UEFI memory-map capability is invalid; kernel startup cannot continue."); return false; }
         if (!KernelStructuredLogging.InfoLine("boot","Kernel.KMain","Final UEFI memory-map capability accepted.")) return false;
         if (!KernelPlatform.InitializeDescriptors()) return false;
@@ -903,6 +907,10 @@ public static unsafe partial class Kernel
         if (!KernelStructuredLogging.InfoLine("kernel","Kernel.KMain","Interactive console ready. Defaults: font 3, buffering auto (double for text).")) return false;
         KernelTelemetry.KernelBootEvent("Interactive console", 16UL, KernelBootPhase.End);
         KernelTelemetry.KernelProfile("boot", "KMain-postheap", 1UL, KernelTime.GetMonotonicNanoseconds());
+#if INU_TEST_OS
+        if (!KernelConsole.WriteLine("INU:TEST-OS:SDK-SUBSYSTEMS:PASS")) return false;
+        if (!KernelStructuredLogging.InfoLine("validation","Kernel.KMain","TEST OS selected SDK subsystem startup/contract validation passed.")) return false;
+#endif
         if (!Startup.UserlandRuntimeStartup.Initialize(boot)) return false;
         if (!global::Inu.Kernel.InterruptDispatch.Interrupts.Run()) return false;
         // Select the graphical or text session only after the ordinary user-session

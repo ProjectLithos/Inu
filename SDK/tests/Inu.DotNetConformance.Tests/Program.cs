@@ -8,7 +8,7 @@ namespace Inu.DotNetConformance.Tests;
 internal static class Program
 {
     private const string TargetName = "Inu.BCL.Core.v1";
-    private const int TargetItemCount = 45;
+    private const int TargetItemCount = 49;
     private static int _passed;
     private static int _failed;
 
@@ -61,6 +61,9 @@ internal static class Program
         Check("System.String", TestString());
         Check("System.Nullable<T>", TestNullable());
         Check("System.Type", TestType());
+        Check("System.Tuple", Inu.Runtime.Conformance.Shared.TupleConformance.TestTuple());
+        Check("System.ValueTuple", Inu.Runtime.Conformance.Shared.TupleConformance.TestValueTuple());
+        Check("C# language tuple support", Inu.Runtime.Conformance.Shared.TupleConformance.TestLanguageTuples());
         Check("System.Collections.Generic.KeyValuePair<TKey,TValue>", Inu.Runtime.Conformance.Shared.CoreCollectionsConformance.TestKeyValuePair());
         Check("System.Collections.Generic.EqualityComparer<T>", TestEqualityComparer());
         Check("System.Collections.Generic.List<T>", Inu.Runtime.Conformance.Shared.ListConformance.TestList());
@@ -83,6 +86,7 @@ internal static class Program
         Check("System.Span<T> / ReadOnlySpan<T>", TestSpan());
         Check("System.Memory<T> / ReadOnlyMemory<T>", TestMemory());
         Check("Generic comparison/equality consistency", TestGenericComparisonEquality());
+        Check("System.Linq practical subset", Inu.Runtime.Conformance.Shared.LinqConformance.TestLinq());
 
         int total = _passed + _failed;
         if (total != TargetItemCount)

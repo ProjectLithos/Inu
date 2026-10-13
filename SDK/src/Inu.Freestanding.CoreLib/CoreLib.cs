@@ -4951,6 +4951,29 @@ namespace System
         {
             public IndexerNameAttribute(String indexerName) { }
         }
+
+        /// <summary>Stores C# tuple element names in metadata for named tuple signatures.</summary>
+        [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Property | AttributeTargets.Field |
+            AttributeTargets.Event | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false, Inherited = false)]
+        public sealed class TupleElementNamesAttribute : Attribute
+        {
+            private readonly String[] _transformNames;
+
+            public TupleElementNamesAttribute(String[] transformNames)
+            {
+                if (Object.ReferenceEquals(transformNames, null)) throw new ArgumentNullException(nameof(transformNames));
+                _transformNames = transformNames;
+            }
+
+            public Collections.Generic.IList<String> TransformNames => _transformNames;
+        }
+
+        /// <summary>Runtime tuple indexing contract used by C# tuple-pattern infrastructure.</summary>
+        public interface ITuple
+        {
+            Int32 Length { get; }
+            Object this[Int32 index] { get; }
+        }
         public sealed class IsReadOnlyAttribute : Attribute { }
         public sealed class IsByRefLikeAttribute : Attribute { }
         // Required by Roslyn when the C# volatile modifier is emitted. In the
@@ -6972,6 +6995,885 @@ namespace System.Collections
     }
 }
 
+
+namespace System
+{
+    internal static class TupleHelpers
+    {
+        internal static Boolean Equals<T>(T left, T right)
+            => Collections.Generic.EqualityComparer<T>.Default.Equals(left, right);
+
+        internal static Int32 Hash<T>(T value)
+            => Collections.Generic.EqualityComparer<T>.Default.GetHashCode(value);
+
+        internal static Int32 Combine(Int32 current, Int32 next)
+            => unchecked((current * 31) + next);
+
+        internal static void Append<T>(Text.StringBuilder builder, T value)
+        {
+            Object boxed = value;
+            if (!Object.ReferenceEquals(boxed, null)) builder.Append(boxed);
+        }
+
+        internal static void AppendObject(Text.StringBuilder builder, Object value)
+        {
+            if (!Object.ReferenceEquals(value, null)) builder.Append(value);
+        }
+    }
+
+    /// <summary><inu.api/>Reference-tuple factory helpers compatible with ordinary System.Tuple use.</summary>
+    public static class Tuple
+    {
+
+        public static Tuple<T1> Create<T1>(T1 item1) => new Tuple<T1>(item1);
+        public static Tuple<T1, T2> Create<T1, T2>(T1 item1, T2 item2) => new Tuple<T1, T2>(item1, item2);
+        public static Tuple<T1, T2, T3> Create<T1, T2, T3>(T1 item1, T2 item2, T3 item3) => new Tuple<T1, T2, T3>(item1, item2, item3);
+        public static Tuple<T1, T2, T3, T4> Create<T1, T2, T3, T4>(T1 item1, T2 item2, T3 item3, T4 item4) => new Tuple<T1, T2, T3, T4>(item1, item2, item3, item4);
+        public static Tuple<T1, T2, T3, T4, T5> Create<T1, T2, T3, T4, T5>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5) => new Tuple<T1, T2, T3, T4, T5>(item1, item2, item3, item4, item5);
+        public static Tuple<T1, T2, T3, T4, T5, T6> Create<T1, T2, T3, T4, T5, T6>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6) => new Tuple<T1, T2, T3, T4, T5, T6>(item1, item2, item3, item4, item5, item6);
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7> Create<T1, T2, T3, T4, T5, T6, T7>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7) => new Tuple<T1, T2, T3, T4, T5, T6, T7>(item1, item2, item3, item4, item5, item6, item7);
+        public static Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8>> Create<T1, T2, T3, T4, T5, T6, T7, T8>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8) => new Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8>>(item1, item2, item3, item4, item5, item6, item7, new Tuple<T8>(item8));
+    }
+
+    public sealed class Tuple<T1> : Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1 { get; }
+        public Tuple(T1 item1) { Item1 = item1; }
+        public override Boolean Equals(Object obj) => obj is Tuple<T1> && EqualsCore((Tuple<T1>)obj);
+        private Boolean EqualsCore(Tuple<T1> other) => TupleHelpers.Equals(Item1, other.Item1);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(0, TupleHelpers.Hash(Item1));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(')');
+            return builder.ToString();
+        }
+        Int32 Runtime.CompilerServices.ITuple.Length => 1;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public sealed class Tuple<T1, T2> : Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1 { get; }
+        public T2 Item2 { get; }
+        public Tuple(T1 item1, T2 item2) { Item1 = item1; Item2 = item2; }
+        public override Boolean Equals(Object obj) => obj is Tuple<T1, T2> && EqualsCore((Tuple<T1, T2>)obj);
+        private Boolean EqualsCore(Tuple<T1, T2> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(')');
+            return builder.ToString();
+        }
+        Int32 Runtime.CompilerServices.ITuple.Length => 2;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public sealed class Tuple<T1, T2, T3> : Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1 { get; }
+        public T2 Item2 { get; }
+        public T3 Item3 { get; }
+        public Tuple(T1 item1, T2 item2, T3 item3) { Item1 = item1; Item2 = item2; Item3 = item3; }
+        public override Boolean Equals(Object obj) => obj is Tuple<T1, T2, T3> && EqualsCore((Tuple<T1, T2, T3>)obj);
+        private Boolean EqualsCore(Tuple<T1, T2, T3> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2) && TupleHelpers.Equals(Item3, other.Item3);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(')');
+            return builder.ToString();
+        }
+        Int32 Runtime.CompilerServices.ITuple.Length => 3;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public sealed class Tuple<T1, T2, T3, T4> : Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1 { get; }
+        public T2 Item2 { get; }
+        public T3 Item3 { get; }
+        public T4 Item4 { get; }
+        public Tuple(T1 item1, T2 item2, T3 item3, T4 item4) { Item1 = item1; Item2 = item2; Item3 = item3; Item4 = item4; }
+        public override Boolean Equals(Object obj) => obj is Tuple<T1, T2, T3, T4> && EqualsCore((Tuple<T1, T2, T3, T4>)obj);
+        private Boolean EqualsCore(Tuple<T1, T2, T3, T4> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2) && TupleHelpers.Equals(Item3, other.Item3) && TupleHelpers.Equals(Item4, other.Item4);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3)), TupleHelpers.Hash(Item4));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item4);
+            builder.Append(')');
+            return builder.ToString();
+        }
+        Int32 Runtime.CompilerServices.ITuple.Length => 4;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    case 3: return Item4;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public sealed class Tuple<T1, T2, T3, T4, T5> : Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1 { get; }
+        public T2 Item2 { get; }
+        public T3 Item3 { get; }
+        public T4 Item4 { get; }
+        public T5 Item5 { get; }
+        public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5) { Item1 = item1; Item2 = item2; Item3 = item3; Item4 = item4; Item5 = item5; }
+        public override Boolean Equals(Object obj) => obj is Tuple<T1, T2, T3, T4, T5> && EqualsCore((Tuple<T1, T2, T3, T4, T5>)obj);
+        private Boolean EqualsCore(Tuple<T1, T2, T3, T4, T5> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2) && TupleHelpers.Equals(Item3, other.Item3) && TupleHelpers.Equals(Item4, other.Item4) && TupleHelpers.Equals(Item5, other.Item5);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3)), TupleHelpers.Hash(Item4)), TupleHelpers.Hash(Item5));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item4);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item5);
+            builder.Append(')');
+            return builder.ToString();
+        }
+        Int32 Runtime.CompilerServices.ITuple.Length => 5;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    case 3: return Item4;
+                    case 4: return Item5;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public sealed class Tuple<T1, T2, T3, T4, T5, T6> : Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1 { get; }
+        public T2 Item2 { get; }
+        public T3 Item3 { get; }
+        public T4 Item4 { get; }
+        public T5 Item5 { get; }
+        public T6 Item6 { get; }
+        public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6) { Item1 = item1; Item2 = item2; Item3 = item3; Item4 = item4; Item5 = item5; Item6 = item6; }
+        public override Boolean Equals(Object obj) => obj is Tuple<T1, T2, T3, T4, T5, T6> && EqualsCore((Tuple<T1, T2, T3, T4, T5, T6>)obj);
+        private Boolean EqualsCore(Tuple<T1, T2, T3, T4, T5, T6> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2) && TupleHelpers.Equals(Item3, other.Item3) && TupleHelpers.Equals(Item4, other.Item4) && TupleHelpers.Equals(Item5, other.Item5) && TupleHelpers.Equals(Item6, other.Item6);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3)), TupleHelpers.Hash(Item4)), TupleHelpers.Hash(Item5)), TupleHelpers.Hash(Item6));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item4);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item5);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item6);
+            builder.Append(')');
+            return builder.ToString();
+        }
+        Int32 Runtime.CompilerServices.ITuple.Length => 6;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    case 3: return Item4;
+                    case 4: return Item5;
+                    case 5: return Item6;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public sealed class Tuple<T1, T2, T3, T4, T5, T6, T7> : Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1 { get; }
+        public T2 Item2 { get; }
+        public T3 Item3 { get; }
+        public T4 Item4 { get; }
+        public T5 Item5 { get; }
+        public T6 Item6 { get; }
+        public T7 Item7 { get; }
+        public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7) { Item1 = item1; Item2 = item2; Item3 = item3; Item4 = item4; Item5 = item5; Item6 = item6; Item7 = item7; }
+        public override Boolean Equals(Object obj) => obj is Tuple<T1, T2, T3, T4, T5, T6, T7> && EqualsCore((Tuple<T1, T2, T3, T4, T5, T6, T7>)obj);
+        private Boolean EqualsCore(Tuple<T1, T2, T3, T4, T5, T6, T7> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2) && TupleHelpers.Equals(Item3, other.Item3) && TupleHelpers.Equals(Item4, other.Item4) && TupleHelpers.Equals(Item5, other.Item5) && TupleHelpers.Equals(Item6, other.Item6) && TupleHelpers.Equals(Item7, other.Item7);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3)), TupleHelpers.Hash(Item4)), TupleHelpers.Hash(Item5)), TupleHelpers.Hash(Item6)), TupleHelpers.Hash(Item7));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item4);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item5);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item6);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item7);
+            builder.Append(')');
+            return builder.ToString();
+        }
+        Int32 Runtime.CompilerServices.ITuple.Length => 7;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    case 3: return Item4;
+                    case 4: return Item5;
+                    case 5: return Item6;
+                    case 6: return Item7;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public sealed class Tuple<T1, T2, T3, T4, T5, T6, T7, TRest> : Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1 { get; }
+        public T2 Item2 { get; }
+        public T3 Item3 { get; }
+        public T4 Item4 { get; }
+        public T5 Item5 { get; }
+        public T6 Item6 { get; }
+        public T7 Item7 { get; }
+        public TRest Rest { get; }
+        public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest)
+        {
+            Item1 = item1; Item2 = item2; Item3 = item3; Item4 = item4; Item5 = item5; Item6 = item6; Item7 = item7; Rest = rest;
+        }
+        public override Boolean Equals(Object obj)
+        {
+            if (!(obj is Tuple<T1, T2, T3, T4, T5, T6, T7, TRest>)) return false;
+            Tuple<T1, T2, T3, T4, T5, T6, T7, TRest> other = (Tuple<T1, T2, T3, T4, T5, T6, T7, TRest>)obj;
+            return TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2)
+                && TupleHelpers.Equals(Item3, other.Item3) && TupleHelpers.Equals(Item4, other.Item4)
+                && TupleHelpers.Equals(Item5, other.Item5) && TupleHelpers.Equals(Item6, other.Item6)
+                && TupleHelpers.Equals(Item7, other.Item7) && TupleHelpers.Equals(Rest, other.Rest);
+        }
+        public override Int32 GetHashCode()
+            => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(
+                TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Hash(Item1), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3)),
+                TupleHelpers.Hash(Item4)), TupleHelpers.Hash(Item5)), TupleHelpers.Hash(Item6)), TupleHelpers.Hash(Item7)), TupleHelpers.Hash(Rest));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item4);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item5);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item6);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item7);
+            Object boxedRest = Rest;
+            if (boxedRest is Runtime.CompilerServices.ITuple)
+            {
+                Runtime.CompilerServices.ITuple tupleRest = (Runtime.CompilerServices.ITuple)boxedRest;
+                for (Int32 i = 0; i < tupleRest.Length; i++)
+                {
+                    builder.Append(", ");
+                    TupleHelpers.AppendObject(builder, tupleRest[i]);
+                }
+            }
+            else
+            {
+                builder.Append(", ");
+                TupleHelpers.Append(builder, Rest);
+            }
+            builder.Append(')');
+            return builder.ToString();
+        }
+        private Runtime.CompilerServices.ITuple RestTuple
+        {
+            get
+            {
+                Object boxed = Rest;
+                return boxed is Runtime.CompilerServices.ITuple ? (Runtime.CompilerServices.ITuple)boxed : null;
+            }
+        }
+        Int32 Runtime.CompilerServices.ITuple.Length
+        {
+            get
+            {
+                Runtime.CompilerServices.ITuple rest = RestTuple;
+                return 7 + (Object.ReferenceEquals(rest, null) ? 1 : rest.Length);
+            }
+        }
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    case 3: return Item4;
+                    case 4: return Item5;
+                    case 5: return Item6;
+                    case 6: return Item7;
+                }
+                Runtime.CompilerServices.ITuple rest = RestTuple;
+                if (!Object.ReferenceEquals(rest, null)) return rest[index - 7];
+                if (index == 7) return Rest;
+                throw new IndexOutOfRangeException();
+            }
+        }
+    }
+
+    /// <summary><inu.api/>Zero-element value tuple plus factory helpers for ordinary C# tuple values.</summary>
+    public struct ValueTuple : IEquatable<ValueTuple>, Runtime.CompilerServices.ITuple
+    {
+        public static ValueTuple Create() => default;
+
+        public static ValueTuple<T1> Create<T1>(T1 item1) => new ValueTuple<T1>(item1);
+        public static ValueTuple<T1, T2> Create<T1, T2>(T1 item1, T2 item2) => new ValueTuple<T1, T2>(item1, item2);
+        public static ValueTuple<T1, T2, T3> Create<T1, T2, T3>(T1 item1, T2 item2, T3 item3) => new ValueTuple<T1, T2, T3>(item1, item2, item3);
+        public static ValueTuple<T1, T2, T3, T4> Create<T1, T2, T3, T4>(T1 item1, T2 item2, T3 item3, T4 item4) => new ValueTuple<T1, T2, T3, T4>(item1, item2, item3, item4);
+        public static ValueTuple<T1, T2, T3, T4, T5> Create<T1, T2, T3, T4, T5>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5) => new ValueTuple<T1, T2, T3, T4, T5>(item1, item2, item3, item4, item5);
+        public static ValueTuple<T1, T2, T3, T4, T5, T6> Create<T1, T2, T3, T4, T5, T6>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6) => new ValueTuple<T1, T2, T3, T4, T5, T6>(item1, item2, item3, item4, item5, item6);
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7> Create<T1, T2, T3, T4, T5, T6, T7>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7) => new ValueTuple<T1, T2, T3, T4, T5, T6, T7>(item1, item2, item3, item4, item5, item6, item7);
+        public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8>> Create<T1, T2, T3, T4, T5, T6, T7, T8>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8) => new ValueTuple<T1, T2, T3, T4, T5, T6, T7, ValueTuple<T8>>(item1, item2, item3, item4, item5, item6, item7, new ValueTuple<T8>(item8));
+        public Boolean Equals(ValueTuple other) => true;
+        public override Boolean Equals(Object obj) => obj is ValueTuple;
+        public override Int32 GetHashCode() => 0;
+        public override String ToString() => "()";
+        Int32 Runtime.CompilerServices.ITuple.Length => 0;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index] => throw new IndexOutOfRangeException();
+    }
+
+    public struct ValueTuple<T1> : IEquatable<ValueTuple<T1>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public ValueTuple(T1 item1) { Item1 = item1; }
+        public Boolean Equals(ValueTuple<T1> other) => TupleHelpers.Equals(Item1, other.Item1);
+        public override Boolean Equals(Object obj) => obj is ValueTuple<T1> && Equals((ValueTuple<T1>)obj);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(0, TupleHelpers.Hash(Item1));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(')');
+            return builder.ToString();
+        }
+
+        Int32 Runtime.CompilerServices.ITuple.Length => 1;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public struct ValueTuple<T1, T2> : IEquatable<ValueTuple<T1, T2>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public ValueTuple(T1 item1, T2 item2) { Item1 = item1; Item2 = item2; }
+        public Boolean Equals(ValueTuple<T1, T2> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2);
+        public override Boolean Equals(Object obj) => obj is ValueTuple<T1, T2> && Equals((ValueTuple<T1, T2>)obj);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(')');
+            return builder.ToString();
+        }
+
+        public void Deconstruct(out T1 item1, out T2 item2) { item1 = Item1; item2 = Item2; }
+
+        Int32 Runtime.CompilerServices.ITuple.Length => 2;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public struct ValueTuple<T1, T2, T3> : IEquatable<ValueTuple<T1, T2, T3>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public ValueTuple(T1 item1, T2 item2, T3 item3) { Item1 = item1; Item2 = item2; Item3 = item3; }
+        public Boolean Equals(ValueTuple<T1, T2, T3> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2) && TupleHelpers.Equals(Item3, other.Item3);
+        public override Boolean Equals(Object obj) => obj is ValueTuple<T1, T2, T3> && Equals((ValueTuple<T1, T2, T3>)obj);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(')');
+            return builder.ToString();
+        }
+
+        public void Deconstruct(out T1 item1, out T2 item2, out T3 item3) { item1 = Item1; item2 = Item2; item3 = Item3; }
+
+        Int32 Runtime.CompilerServices.ITuple.Length => 3;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public struct ValueTuple<T1, T2, T3, T4> : IEquatable<ValueTuple<T1, T2, T3, T4>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4) { Item1 = item1; Item2 = item2; Item3 = item3; Item4 = item4; }
+        public Boolean Equals(ValueTuple<T1, T2, T3, T4> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2) && TupleHelpers.Equals(Item3, other.Item3) && TupleHelpers.Equals(Item4, other.Item4);
+        public override Boolean Equals(Object obj) => obj is ValueTuple<T1, T2, T3, T4> && Equals((ValueTuple<T1, T2, T3, T4>)obj);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3)), TupleHelpers.Hash(Item4));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item4);
+            builder.Append(')');
+            return builder.ToString();
+        }
+
+        public void Deconstruct(out T1 item1, out T2 item2, out T3 item3, out T4 item4) { item1 = Item1; item2 = Item2; item3 = Item3; item4 = Item4; }
+
+        Int32 Runtime.CompilerServices.ITuple.Length => 4;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    case 3: return Item4;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public struct ValueTuple<T1, T2, T3, T4, T5> : IEquatable<ValueTuple<T1, T2, T3, T4, T5>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5) { Item1 = item1; Item2 = item2; Item3 = item3; Item4 = item4; Item5 = item5; }
+        public Boolean Equals(ValueTuple<T1, T2, T3, T4, T5> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2) && TupleHelpers.Equals(Item3, other.Item3) && TupleHelpers.Equals(Item4, other.Item4) && TupleHelpers.Equals(Item5, other.Item5);
+        public override Boolean Equals(Object obj) => obj is ValueTuple<T1, T2, T3, T4, T5> && Equals((ValueTuple<T1, T2, T3, T4, T5>)obj);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3)), TupleHelpers.Hash(Item4)), TupleHelpers.Hash(Item5));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item4);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item5);
+            builder.Append(')');
+            return builder.ToString();
+        }
+
+        public void Deconstruct(out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5) { item1 = Item1; item2 = Item2; item3 = Item3; item4 = Item4; item5 = Item5; }
+
+        Int32 Runtime.CompilerServices.ITuple.Length => 5;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    case 3: return Item4;
+                    case 4: return Item5;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public struct ValueTuple<T1, T2, T3, T4, T5, T6> : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public T6 Item6;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6) { Item1 = item1; Item2 = item2; Item3 = item3; Item4 = item4; Item5 = item5; Item6 = item6; }
+        public Boolean Equals(ValueTuple<T1, T2, T3, T4, T5, T6> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2) && TupleHelpers.Equals(Item3, other.Item3) && TupleHelpers.Equals(Item4, other.Item4) && TupleHelpers.Equals(Item5, other.Item5) && TupleHelpers.Equals(Item6, other.Item6);
+        public override Boolean Equals(Object obj) => obj is ValueTuple<T1, T2, T3, T4, T5, T6> && Equals((ValueTuple<T1, T2, T3, T4, T5, T6>)obj);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3)), TupleHelpers.Hash(Item4)), TupleHelpers.Hash(Item5)), TupleHelpers.Hash(Item6));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item4);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item5);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item6);
+            builder.Append(')');
+            return builder.ToString();
+        }
+
+        public void Deconstruct(out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6) { item1 = Item1; item2 = Item2; item3 = Item3; item4 = Item4; item5 = Item5; item6 = Item6; }
+
+        Int32 Runtime.CompilerServices.ITuple.Length => 6;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    case 3: return Item4;
+                    case 4: return Item5;
+                    case 5: return Item6;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public struct ValueTuple<T1, T2, T3, T4, T5, T6, T7> : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, Runtime.CompilerServices.ITuple
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public T6 Item6;
+        public T7 Item7;
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7) { Item1 = item1; Item2 = item2; Item3 = item3; Item4 = item4; Item5 = item5; Item6 = item6; Item7 = item7; }
+        public Boolean Equals(ValueTuple<T1, T2, T3, T4, T5, T6, T7> other) => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2) && TupleHelpers.Equals(Item3, other.Item3) && TupleHelpers.Equals(Item4, other.Item4) && TupleHelpers.Equals(Item5, other.Item5) && TupleHelpers.Equals(Item6, other.Item6) && TupleHelpers.Equals(Item7, other.Item7);
+        public override Boolean Equals(Object obj) => obj is ValueTuple<T1, T2, T3, T4, T5, T6, T7> && Equals((ValueTuple<T1, T2, T3, T4, T5, T6, T7>)obj);
+        public override Int32 GetHashCode() => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(0, TupleHelpers.Hash(Item1)), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3)), TupleHelpers.Hash(Item4)), TupleHelpers.Hash(Item5)), TupleHelpers.Hash(Item6)), TupleHelpers.Hash(Item7));
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item4);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item5);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item6);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item7);
+            builder.Append(')');
+            return builder.ToString();
+        }
+
+        public void Deconstruct(out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7) { item1 = Item1; item2 = Item2; item3 = Item3; item4 = Item4; item5 = Item5; item6 = Item6; item7 = Item7; }
+
+        Int32 Runtime.CompilerServices.ITuple.Length => 7;
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    case 3: return Item4;
+                    case 4: return Item5;
+                    case 5: return Item6;
+                    case 6: return Item7;
+                    default: throw new IndexOutOfRangeException();
+                }
+            }
+        }
+    }
+
+    public struct ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> :
+        IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, Runtime.CompilerServices.ITuple
+        where TRest : struct
+    {
+        public T1 Item1;
+        public T2 Item2;
+        public T3 Item3;
+        public T4 Item4;
+        public T5 Item5;
+        public T6 Item6;
+        public T7 Item7;
+        public TRest Rest;
+
+        public ValueTuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest)
+        {
+            Item1 = item1; Item2 = item2; Item3 = item3; Item4 = item4; Item5 = item5; Item6 = item6; Item7 = item7; Rest = rest;
+        }
+
+        public Boolean Equals(ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> other)
+            => TupleHelpers.Equals(Item1, other.Item1) && TupleHelpers.Equals(Item2, other.Item2)
+            && TupleHelpers.Equals(Item3, other.Item3) && TupleHelpers.Equals(Item4, other.Item4)
+            && TupleHelpers.Equals(Item5, other.Item5) && TupleHelpers.Equals(Item6, other.Item6)
+            && TupleHelpers.Equals(Item7, other.Item7) && TupleHelpers.Equals(Rest, other.Rest);
+
+        public override Boolean Equals(Object obj)
+            => obj is ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>
+                && Equals((ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>)obj);
+
+        public override Int32 GetHashCode()
+            => TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(
+                TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Combine(TupleHelpers.Hash(Item1), TupleHelpers.Hash(Item2)), TupleHelpers.Hash(Item3)),
+                TupleHelpers.Hash(Item4)), TupleHelpers.Hash(Item5)), TupleHelpers.Hash(Item6)), TupleHelpers.Hash(Item7)), TupleHelpers.Hash(Rest));
+
+        public override String ToString()
+        {
+            Text.StringBuilder builder = new Text.StringBuilder();
+            builder.Append('(');
+            TupleHelpers.Append(builder, Item1);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item2);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item3);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item4);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item5);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item6);
+            builder.Append(", ");
+            TupleHelpers.Append(builder, Item7);
+            Object boxedRest = Rest;
+            if (boxedRest is Runtime.CompilerServices.ITuple)
+            {
+                Runtime.CompilerServices.ITuple tupleRest = (Runtime.CompilerServices.ITuple)boxedRest;
+                for (Int32 i = 0; i < tupleRest.Length; i++)
+                {
+                    builder.Append(", ");
+                    TupleHelpers.AppendObject(builder, tupleRest[i]);
+                }
+            }
+            else
+            {
+                builder.Append(", ");
+                TupleHelpers.Append(builder, Rest);
+            }
+            builder.Append(')');
+            return builder.ToString();
+        }
+
+        private Runtime.CompilerServices.ITuple RestTuple
+        {
+            get
+            {
+                Object boxed = Rest;
+                return boxed is Runtime.CompilerServices.ITuple ? (Runtime.CompilerServices.ITuple)boxed : null;
+            }
+        }
+
+        Int32 Runtime.CompilerServices.ITuple.Length
+        {
+            get
+            {
+                Runtime.CompilerServices.ITuple rest = RestTuple;
+                return 7 + (Object.ReferenceEquals(rest, null) ? 1 : rest.Length);
+            }
+        }
+
+        Object Runtime.CompilerServices.ITuple.this[Int32 index]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0: return Item1;
+                    case 1: return Item2;
+                    case 2: return Item3;
+                    case 3: return Item4;
+                    case 4: return Item5;
+                    case 5: return Item6;
+                    case 6: return Item7;
+                }
+                Runtime.CompilerServices.ITuple rest = RestTuple;
+                if (!Object.ReferenceEquals(rest, null)) return rest[index - 7];
+                if (index == 7) return Rest;
+                throw new IndexOutOfRangeException();
+            }
+        }
+    }
+}
+
+
 namespace System.Collections.Generic
 {
     /// <summary><inu.api/>Generic enumerator contract compatible with ordinary C# foreach.</summary>
@@ -7060,8 +7962,14 @@ namespace System.Collections.Generic
         public static KeyValuePair<TKey, TValue> Create<TKey, TValue>(TKey key, TValue value) => new KeyValuePair<TKey, TValue>(key, value);
     }
 
+    /// <summary><inu.api/>Defines strongly typed ordering for generic algorithms.</summary>
+    public interface IComparer<in T>
+    {
+        Int32 Compare(T x, T y);
+    }
+
     /// <summary><inu.api/>Provides the default strongly typed ordering used by freestanding generic code.</summary>
-    public abstract class Comparer<T>
+    public abstract class Comparer<T> : IComparer<T>
     {
         private sealed class DefaultComparer : Comparer<T>
         {
@@ -7678,6 +8586,427 @@ namespace System.Collections.Generic
         public struct Enumerator:IEnumerator<T>{private readonly Stack<T> _stack;private readonly Int32 _version;private Int32 _index;private T _current;private Boolean _valid;internal Enumerator(Stack<T> s){_stack=s;_version=s._version;_index=s._size-1;_current=default(T);_valid=false;}public T Current=>_current;Object System.Collections.IEnumerator.Current{get{if(!_valid)throw new InvalidOperationException();return _current;}}public Boolean MoveNext(){if(_version!=_stack._version)System.Collections.CollectionThrowHelper.ThrowModified();if(_index<0){_valid=false;_current=default(T);return false;}_current=_stack._array[_index--];_valid=true;return true;}public void Reset(){if(_version!=_stack._version)System.Collections.CollectionThrowHelper.ThrowModified();_index=_stack._size-1;_valid=false;_current=default(T);}public void Dispose(){}}
     }
 
+}
+
+
+namespace System.Linq
+{
+    using System.Collections;
+    using System.Collections.Generic;
+
+    /// <summary><inu.api/>Ordered enumerable contract used by Profile 1 OrderBy.</summary>
+    public interface IOrderedEnumerable<out TElement> : IEnumerable<TElement> { }
+
+    /// <summary><inu.api/>Practical Profile 1 LINQ operators for freestanding managed code.</summary>
+    public static class Enumerable
+    {
+        public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (selector == null) throw new ArgumentNullException();
+            return new SelectEnumerable<TSource, TResult>(source, selector);
+        }
+
+        public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, Int32, TResult> selector)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (selector == null) throw new ArgumentNullException();
+            return new SelectIndexedEnumerable<TSource, TResult>(source, selector);
+        }
+
+        public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, Boolean> predicate)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            return new WhereEnumerable<TSource>(source, predicate);
+        }
+
+        public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, Int32, Boolean> predicate)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            return new WhereIndexedEnumerable<TSource>(source, predicate);
+        }
+
+        public static TSource First<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { if (e.MoveNext()) return e.Current; }
+            finally { e.Dispose(); }
+            throw new InvalidOperationException();
+        }
+
+        public static TSource First<TSource>(this IEnumerable<TSource> source, Func<TSource, Boolean> predicate)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try
+            {
+                while (e.MoveNext()) if (predicate(e.Current)) return e.Current;
+            }
+            finally { e.Dispose(); }
+            throw new InvalidOperationException();
+        }
+
+        public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { return e.MoveNext() ? e.Current : default(TSource); }
+            finally { e.Dispose(); }
+        }
+
+        public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, Boolean> predicate)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try
+            {
+                while (e.MoveNext()) if (predicate(e.Current)) return e.Current;
+                return default(TSource);
+            }
+            finally { e.Dispose(); }
+        }
+
+        public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source, TSource defaultValue)
+        {
+            if (source == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { return e.MoveNext() ? e.Current : defaultValue; }
+            finally { e.Dispose(); }
+        }
+
+        public static TSource FirstOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, Boolean> predicate, TSource defaultValue)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try
+            {
+                while (e.MoveNext()) if (predicate(e.Current)) return e.Current;
+                return defaultValue;
+            }
+            finally { e.Dispose(); }
+        }
+
+        public static TSource Single<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try
+            {
+                if (!e.MoveNext()) throw new InvalidOperationException();
+                TSource value = e.Current;
+                if (e.MoveNext()) throw new InvalidOperationException();
+                return value;
+            }
+            finally { e.Dispose(); }
+        }
+
+        public static TSource Single<TSource>(this IEnumerable<TSource> source, Func<TSource, Boolean> predicate)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            Boolean found = false;
+            TSource value = default(TSource);
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try
+            {
+                while (e.MoveNext())
+                {
+                    TSource current = e.Current;
+                    if (!predicate(current)) continue;
+                    if (found) throw new InvalidOperationException();
+                    found = true;
+                    value = current;
+                }
+            }
+            finally { e.Dispose(); }
+            if (!found) throw new InvalidOperationException();
+            return value;
+        }
+
+        public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try
+            {
+                if (!e.MoveNext()) return default(TSource);
+                TSource value = e.Current;
+                if (e.MoveNext()) throw new InvalidOperationException();
+                return value;
+            }
+            finally { e.Dispose(); }
+        }
+
+        public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, Boolean> predicate)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            Boolean found = false;
+            TSource value = default(TSource);
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try
+            {
+                while (e.MoveNext())
+                {
+                    TSource current = e.Current;
+                    if (!predicate(current)) continue;
+                    if (found) throw new InvalidOperationException();
+                    found = true;
+                    value = current;
+                }
+            }
+            finally { e.Dispose(); }
+            return found ? value : default(TSource);
+        }
+
+        public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source, TSource defaultValue)
+        {
+            if (source == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try
+            {
+                if (!e.MoveNext()) return defaultValue;
+                TSource value = e.Current;
+                if (e.MoveNext()) throw new InvalidOperationException();
+                return value;
+            }
+            finally { e.Dispose(); }
+        }
+
+        public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, Boolean> predicate, TSource defaultValue)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            Boolean found = false;
+            TSource value = defaultValue;
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try
+            {
+                while (e.MoveNext())
+                {
+                    TSource current = e.Current;
+                    if (!predicate(current)) continue;
+                    if (found) throw new InvalidOperationException();
+                    found = true; value = current;
+                }
+            }
+            finally { e.Dispose(); }
+            return value;
+        }
+
+        public static Boolean Any<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { return e.MoveNext(); }
+            finally { e.Dispose(); }
+        }
+
+        public static Boolean Any<TSource>(this IEnumerable<TSource> source, Func<TSource, Boolean> predicate)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { while (e.MoveNext()) if (predicate(e.Current)) return true; return false; }
+            finally { e.Dispose(); }
+        }
+
+        public static Boolean All<TSource>(this IEnumerable<TSource> source, Func<TSource, Boolean> predicate)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { while (e.MoveNext()) if (!predicate(e.Current)) return false; return true; }
+            finally { e.Dispose(); }
+        }
+
+        public static Int32 Count<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException();
+            ICollection<TSource> collection = source as ICollection<TSource>;
+            if (collection != null) return collection.Count;
+            Int32 count = 0;
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { while (e.MoveNext()) checked { count++; } }
+            finally { e.Dispose(); }
+            return count;
+        }
+
+        public static Int32 Count<TSource>(this IEnumerable<TSource> source, Func<TSource, Boolean> predicate)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (predicate == null) throw new ArgumentNullException();
+            Int32 count = 0;
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { while (e.MoveNext()) if (predicate(e.Current)) checked { count++; } }
+            finally { e.Dispose(); }
+            return count;
+        }
+
+        public static Boolean Contains<TSource>(this IEnumerable<TSource> source, TSource value)
+            => Contains(source, value, null);
+
+        public static Boolean Contains<TSource>(this IEnumerable<TSource> source, TSource value, IEqualityComparer<TSource> comparer)
+        {
+            if (source == null) throw new ArgumentNullException();
+            IEqualityComparer<TSource> actual = comparer ?? EqualityComparer<TSource>.Default;
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { while (e.MoveNext()) if (actual.Equals(e.Current, value)) return true; return false; }
+            finally { e.Dispose(); }
+        }
+
+        public static TSource[] ToArray<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException();
+            List<TSource> list = new List<TSource>();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { while (e.MoveNext()) list.Add(e.Current); }
+            finally { e.Dispose(); }
+            return list.ToArray();
+        }
+
+        public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException();
+            List<TSource> list = new List<TSource>();
+            IEnumerator<TSource> e = source.GetEnumerator();
+            try { while (e.MoveNext()) list.Add(e.Current); }
+            finally { e.Dispose(); }
+            return list;
+        }
+
+        public static IOrderedEnumerable<TSource> OrderBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
+            => OrderBy(source, keySelector, Comparer<TKey>.Default);
+
+        public static IOrderedEnumerable<TSource> OrderBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IComparer<TKey> comparer)
+        {
+            if (source == null) throw new ArgumentNullException();
+            if (keySelector == null) throw new ArgumentNullException();
+            if (comparer == null) comparer = Comparer<TKey>.Default;
+            return new OrderedEnumerable<TSource, TKey>(source, keySelector, comparer);
+        }
+
+        private sealed class SelectEnumerable<TSource, TResult> : IEnumerable<TResult>
+        {
+            private readonly IEnumerable<TSource> _source; private readonly Func<TSource, TResult> _selector;
+            internal SelectEnumerable(IEnumerable<TSource> source, Func<TSource, TResult> selector) { _source = source; _selector = selector; }
+            public IEnumerator<TResult> GetEnumerator() => new SelectEnumerator<TSource, TResult>(_source.GetEnumerator(), _selector);
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        private sealed class SelectEnumerator<TSource, TResult> : IEnumerator<TResult>
+        {
+            private readonly IEnumerator<TSource> _source; private readonly Func<TSource, TResult> _selector; private TResult _current;
+            internal SelectEnumerator(IEnumerator<TSource> source, Func<TSource, TResult> selector) { _source = source; _selector = selector; _current = default(TResult); }
+            public TResult Current => _current;
+            Object IEnumerator.Current => (Object)_current;
+            public Boolean MoveNext() { if (!_source.MoveNext()) return false; _current = _selector(_source.Current); return true; }
+            public void Reset() { _source.Reset(); _current = default(TResult); }
+            public void Dispose() => _source.Dispose();
+        }
+
+        private sealed class SelectIndexedEnumerable<TSource, TResult> : IEnumerable<TResult>
+        {
+            private readonly IEnumerable<TSource> _source; private readonly Func<TSource, Int32, TResult> _selector;
+            internal SelectIndexedEnumerable(IEnumerable<TSource> source, Func<TSource, Int32, TResult> selector) { _source = source; _selector = selector; }
+            public IEnumerator<TResult> GetEnumerator() => new SelectIndexedEnumerator<TSource, TResult>(_source.GetEnumerator(), _selector);
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        private sealed class SelectIndexedEnumerator<TSource, TResult> : IEnumerator<TResult>
+        {
+            private readonly IEnumerator<TSource> _source; private readonly Func<TSource, Int32, TResult> _selector; private TResult _current; private Int32 _index;
+            internal SelectIndexedEnumerator(IEnumerator<TSource> source, Func<TSource, Int32, TResult> selector) { _source = source; _selector = selector; _current = default(TResult); _index = -1; }
+            public TResult Current => _current;
+            Object IEnumerator.Current => (Object)_current;
+            public Boolean MoveNext() { if (!_source.MoveNext()) return false; checked { _index++; } _current = _selector(_source.Current, _index); return true; }
+            public void Reset() { _source.Reset(); _current = default(TResult); _index = -1; }
+            public void Dispose() => _source.Dispose();
+        }
+
+        private sealed class WhereEnumerable<TSource> : IEnumerable<TSource>
+        {
+            private readonly IEnumerable<TSource> _source; private readonly Func<TSource, Boolean> _predicate;
+            internal WhereEnumerable(IEnumerable<TSource> source, Func<TSource, Boolean> predicate) { _source = source; _predicate = predicate; }
+            public IEnumerator<TSource> GetEnumerator() => new WhereEnumerator<TSource>(_source.GetEnumerator(), _predicate);
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        private sealed class WhereEnumerator<TSource> : IEnumerator<TSource>
+        {
+            private readonly IEnumerator<TSource> _source; private readonly Func<TSource, Boolean> _predicate; private TSource _current;
+            internal WhereEnumerator(IEnumerator<TSource> source, Func<TSource, Boolean> predicate) { _source = source; _predicate = predicate; _current = default(TSource); }
+            public TSource Current => _current;
+            Object IEnumerator.Current => (Object)_current;
+            public Boolean MoveNext() { while (_source.MoveNext()) { TSource value = _source.Current; if (_predicate(value)) { _current = value; return true; } } return false; }
+            public void Reset() { _source.Reset(); _current = default(TSource); }
+            public void Dispose() => _source.Dispose();
+        }
+
+        private sealed class WhereIndexedEnumerable<TSource> : IEnumerable<TSource>
+        {
+            private readonly IEnumerable<TSource> _source; private readonly Func<TSource, Int32, Boolean> _predicate;
+            internal WhereIndexedEnumerable(IEnumerable<TSource> source, Func<TSource, Int32, Boolean> predicate) { _source = source; _predicate = predicate; }
+            public IEnumerator<TSource> GetEnumerator() => new WhereIndexedEnumerator<TSource>(_source.GetEnumerator(), _predicate);
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        private sealed class WhereIndexedEnumerator<TSource> : IEnumerator<TSource>
+        {
+            private readonly IEnumerator<TSource> _source; private readonly Func<TSource, Int32, Boolean> _predicate; private TSource _current; private Int32 _index;
+            internal WhereIndexedEnumerator(IEnumerator<TSource> source, Func<TSource, Int32, Boolean> predicate) { _source = source; _predicate = predicate; _current = default(TSource); _index = -1; }
+            public TSource Current => _current;
+            Object IEnumerator.Current => (Object)_current;
+            public Boolean MoveNext() { while (_source.MoveNext()) { checked { _index++; } TSource value = _source.Current; if (_predicate(value, _index)) { _current = value; return true; } } return false; }
+            public void Reset() { _source.Reset(); _current = default(TSource); _index = -1; }
+            public void Dispose() => _source.Dispose();
+        }
+
+        private sealed class OrderedEnumerable<TSource, TKey> : IOrderedEnumerable<TSource>
+        {
+            private readonly IEnumerable<TSource> _source; private readonly Func<TSource, TKey> _selector; private readonly IComparer<TKey> _comparer;
+            internal OrderedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> selector, IComparer<TKey> comparer) { _source = source; _selector = selector; _comparer = comparer; }
+            public IEnumerator<TSource> GetEnumerator()
+            {
+                TSource[] values = Enumerable.ToArray(_source);
+                if (values.Length > 1)
+                {
+                    TSource[] temp = new TSource[values.Length];
+                    TKey[] keys = new TKey[values.Length];
+                    TKey[] tempKeys = new TKey[values.Length];
+                    for (Int32 i = 0; i < values.Length; i++) keys[i] = _selector(values[i]);
+                    StableMergeSort(values, keys, temp, tempKeys, 0, values.Length, _comparer);
+                }
+                return ((IEnumerable<TSource>)values).GetEnumerator();
+            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+            private static void StableMergeSort(TSource[] values, TKey[] keys, TSource[] temp, TKey[] tempKeys, Int32 start, Int32 length, IComparer<TKey> comparer)
+            {
+                if (length <= 1) return;
+                Int32 leftLength = length / 2;
+                Int32 rightLength = length - leftLength;
+                Int32 mid = start + leftLength;
+                StableMergeSort(values, keys, temp, tempKeys, start, leftLength, comparer);
+                StableMergeSort(values, keys, temp, tempKeys, mid, rightLength, comparer);
+                Int32 i = start, j = mid, end = start + length, k = start;
+                while (i < mid && j < end)
+                {
+                    if (comparer.Compare(keys[i], keys[j]) <= 0) { temp[k] = values[i]; tempKeys[k++] = keys[i++]; }
+                    else { temp[k] = values[j]; tempKeys[k++] = keys[j++]; }
+                }
+                while (i < mid) { temp[k] = values[i]; tempKeys[k++] = keys[i++]; }
+                while (j < end) { temp[k] = values[j]; tempKeys[k++] = keys[j++]; }
+                for (Int32 n = start; n < end; n++) { values[n] = temp[n]; keys[n] = tempKeys[n]; }
+            }
+        }
+    }
 }
 
 namespace System.Text

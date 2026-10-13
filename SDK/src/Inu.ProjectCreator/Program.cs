@@ -83,6 +83,8 @@ static int MainEntry(string[] args)
     string bootProtocol = "Uefi";
     string runtimePack = "Inu.RuntimePack.X64.NativeAot";
     string projectFile = "InuKernel.csproj";
+    string projectKind = "operating-system";
+    bool testOs = false;
     string[] workAreas = new[] { "HAL", "Drivers", "Storage", "Filesystems", "Networking", "USB", "Input", "Processes", "Scheduler", "System Calls", "Security", "Diagnostics" };
 
     if (File.Exists(manifestPath))
@@ -95,6 +97,10 @@ static int MainEntry(string[] args)
                 projectName = nameElement.GetString()!;
             if (root.TryGetProperty("Author", out JsonElement authorElement) && !string.IsNullOrWhiteSpace(authorElement.GetString()))
                 author = authorElement.GetString()!;
+            if (root.TryGetProperty("ProjectKind", out JsonElement projectKindElement) && !string.IsNullOrWhiteSpace(projectKindElement.GetString()))
+                projectKind = projectKindElement.GetString()!;
+            if (root.TryGetProperty("TestOs", out JsonElement testOsElement) && (testOsElement.ValueKind == JsonValueKind.True || testOsElement.ValueKind == JsonValueKind.False))
+                testOs = testOsElement.GetBoolean();
             if (root.TryGetProperty("TargetArchitecture", out JsonElement architectureElement) && !string.IsNullOrWhiteSpace(architectureElement.GetString()))
                 targetArchitecture = architectureElement.GetString()!;
             if (root.TryGetProperty("KernelModel", out JsonElement modelElement) && !string.IsNullOrWhiteSpace(modelElement.GetString()))
@@ -158,6 +164,11 @@ static int MainEntry(string[] args)
         {
             using JsonDocument ideConfigurationDocument = JsonDocument.Parse(File.ReadAllText(ideConfigurationPath));
             JsonElement ideRoot = ideConfigurationDocument.RootElement;
+            if (ideRoot.TryGetProperty("projectKind", out JsonElement projectKindElement) && !string.IsNullOrWhiteSpace(projectKindElement.GetString()))
+            {
+                projectKind = projectKindElement.GetString()!;
+                testOs = string.Equals(projectKind, "test-os", StringComparison.OrdinalIgnoreCase);
+            }
             if (ideRoot.TryGetProperty("targetArchitecture", out JsonElement architectureElement) && !string.IsNullOrWhiteSpace(architectureElement.GetString()))
             {
                 string configured = architectureElement.GetString()!;
@@ -195,6 +206,8 @@ static int MainEntry(string[] args)
     File.WriteAllText(manifestPath, JsonSerializer.Serialize(new
     {
         Name = projectName,
+        ProjectKind = projectKind,
+        TestOs = testOs,
         Author = author,
         ProjectFile = projectFile,
         TargetArchitecture = targetArchitecture,
