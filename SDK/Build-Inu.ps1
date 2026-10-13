@@ -803,10 +803,12 @@ $kernelBin = Join-Path $outputDirectory (([string]$projectData.Name) + '.bin')
 $loaderBin = Join-Path $outputDirectory (([string]$projectData.Name) + '.bootx64.efi')
 $compileOutputs = @($nativeAotObject,$compileManifestPath,(Join-Path $outputDirectory 'ManagedIL'),(Join-Path $outputDirectory 'NativeAot'))
 $linkOutputs = @($kernelBin,$loaderBin,(Join-Path $outputDirectory (([string]$projectData.Name) + '.map')))
-if ($Configuration -eq 'Debug') { $linkOutputs += @((Join-Path $outputDirectory 'Inu.DebugSymbols.json'), (Join-Path $outputDirectory (([string]$projectData.Name) + '.pdb'))) }
+if ($Configuration -eq 'Debug') { $linkOutputs += @((Join-Path $outputDirectory (([string]$projectData.Name) + '.pdb'))) }
+if ($debugRendezvousRequested) { $linkOutputs += @((Join-Path $outputDirectory 'Inu.DebugSymbols.json')) }
     $compileArgs = @($compiler, "compile", $projectManifest, "--dotnet", $dotnet, "--ilc", $ilc, "--configuration", $Configuration, "--sdk-root", $root) + $dry
     if ($runtimeConformanceEnabled) { $compileArgs += '--runtime-conformance' }
     if ($requestedTestOs) { $compileArgs += '--test-os' }
+    if ($debugRendezvousRequested) { $compileArgs += '--source-debug-rendezvous' }
     Invoke-InuBuildStage -Stage "Managed IL + NativeAOT ILC" -FilePath $dotnet -Arguments $compileArgs -Inputs ($kernelInputs + $dotnetStageInputs + $ilcStageInputs + @((Get-InuStageFiles -Paths @((Split-Path -Parent $compiler)) -Outputs).FullName)) -Outputs $compileOutputs -CleanDirectories @((Join-Path $outputDirectory 'ManagedIL'),(Join-Path $outputDirectory 'NativeAot'))
 
     $linkArgs = @($linker, "link", $projectManifest, "--lld-link", $lldLink, "--llvm-nm", $llvmNm, "--nasm", $nasm, "--native-root", $nativeOutput) + $dry

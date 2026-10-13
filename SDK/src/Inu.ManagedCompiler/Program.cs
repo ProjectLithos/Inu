@@ -9,7 +9,7 @@ static int MainEntry(string[] args)
 {
     if (args.Length < 2 || !string.Equals(args[0], "compile", StringComparison.OrdinalIgnoreCase))
     {
-        return Fail("Usage: Inu.ManagedCompiler compile <InuProject.json> [--dotnet <path>] [--ilc <path>] [--configuration Debug|Release] [--sdk-root <path>] [--runtime-conformance] [--test-os] [--dry-run]");
+        return Fail("Usage: Inu.ManagedCompiler compile <InuProject.json> [--dotnet <path>] [--ilc <path>] [--configuration Debug|Release] [--sdk-root <path>] [--runtime-conformance] [--test-os] [--source-debug-rendezvous] [--dry-run]");
     }
 
     if (!InuProject.TryLoad(args[1], out InuProject? project, out string error) || project is null)
@@ -22,6 +22,11 @@ static int MainEntry(string[] args)
     bool debugBuild = string.Equals(configuration, "Debug", StringComparison.OrdinalIgnoreCase);
     bool runtimeConformance = HasOption(args, "--runtime-conformance");
     bool testOs = HasOption(args, "--test-os");
+    bool sourceDebugRendezvous = HasOption(args, "--source-debug-rendezvous");
+    if (sourceDebugRendezvous && !debugBuild)
+    {
+        return Fail("--source-debug-rendezvous requires --configuration Debug.");
+    }
     bool dryRun = HasOption(args, "--dry-run");
     string repositoryRoot = Path.GetFullPath(GetOption(args, "--sdk-root") ?? FindRepositoryRoot(Path.GetDirectoryName(project.ProjectFile)!));
     string ilc = GetOption(args, "--ilc") ?? FindIlc(repositoryRoot);
@@ -165,6 +170,7 @@ static int MainEntry(string[] args)
         optimization = "BootstrapThenManagedRuntime",
         configuration,
         nativeDebugSymbols = debugBuild,
+        sourceDebugRendezvous,
         managedAssembly,
         managedPdbs,
         systemModule,

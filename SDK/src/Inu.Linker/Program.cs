@@ -58,6 +58,11 @@ static int MainEntry(string[] args)
         return Fail("The freestanding Inu runtime must not link Windows runtime libraries.");
     }
     bool nativeDebugSymbols = root.TryGetProperty("nativeDebugSymbols", out JsonElement debugElement) && debugElement.GetBoolean();
+    bool sourceDebugRendezvous = root.TryGetProperty("sourceDebugRendezvous", out JsonElement rendezvousElement) && rendezvousElement.GetBoolean();
+    if (sourceDebugRendezvous && !nativeDebugSymbols)
+    {
+        return Fail("Compilation manifest requests a source-debug rendezvous without native Debug symbols.");
+    }
 
     ProcessResult symbols = Capture(llvmNm, ["--defined-only", nativeObject]);
     if (symbols.ExitCode != 0 || !symbols.Output.Contains("InuManagedEntry", StringComparison.Ordinal))
@@ -184,20 +189,24 @@ static int MainEntry(string[] args)
     Console.WriteLine($"[ OK ] UEFI FAT32 kernel loader: {bootOutput}");
     Console.WriteLine($"[ OK ] UEFI loader relocation directory: RVA 0x{bootRelocationRva:x}, {bootRelocationSize} byte(s); preferred base 0x{bootImageBase:x}");
 
+    if (nativeDebugSymbols && !File.Exists(pdb))
+    {
+        return Fail($"Debug link did not produce the expected native PDB: {pdb}");
+    }
     if (nativeDebugSymbols)
     {
-        if (!File.Exists(pdb))
-        {
-            return Fail($"Debug link did not produce the expected native PDB: {pdb}");
-        }
+        Console.WriteLine($"[ OK ] Native debug PDB: {pdb}");
+    }
 
+    if (sourceDebugRendezvous)
+    {
         string toolDirectory = Path.GetDirectoryName(Path.GetFullPath(llvmNm)) ?? string.Empty;
         string llvmObjdump = Path.Combine(toolDirectory, "llvm-objdump.exe");
         string llvmSymbolizer = Path.Combine(toolDirectory, "llvm-symbolizer.exe");
         string llvmPdbUtil = Path.Combine(toolDirectory, "llvm-pdbutil.exe");
         if (!File.Exists(llvmObjdump) || !File.Exists(llvmSymbolizer) || !File.Exists(llvmPdbUtil))
         {
-            return Fail($"LLVM source-debug tools are required for Debug builds. Expected: {llvmObjdump}, {llvmSymbolizer}, and {llvmPdbUtil}");
+            return Fail($"LLVM source-debug tools are required for source-debug rendezvous builds. Expected: {llvmObjdump}, {llvmSymbolizer}, and {llvmPdbUtil}");
         }
 
         string entryObject = Path.Combine(nativeRoot, "Entry.obj");
@@ -267,7 +276,6 @@ static int MainEntry(string[] args)
             producedUtc = DateTimeOffset.UtcNow
         }, new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
 
-        Console.WriteLine($"[ OK ] Native debug PDB: {pdb}");
         Console.WriteLine($"[ OK ] Source-line debug map: {sourceMap} ({entries.Length} line mapping(s))");
         Console.WriteLine($"[ OK ] Debug relocation rendezvous: anchor 0x{anchorAddress:x}, resume 0x{resumeAddress:x}");
     }

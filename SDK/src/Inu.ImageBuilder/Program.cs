@@ -37,10 +37,12 @@ static int MainEntry(string[] args)
     string bundlePath = Path.Combine(novaRoot, "SYSTEM", "ASSETS.BIN");
     string compileManifestPath = Path.Combine(outputDirectory, "Inu.Compile.json");
     bool nativeDebugSymbols = false;
+    bool sourceDebugRendezvous = false;
     if (File.Exists(compileManifestPath))
     {
         using JsonDocument compileDocument = JsonDocument.Parse(File.ReadAllText(compileManifestPath));
         nativeDebugSymbols = compileDocument.RootElement.TryGetProperty("nativeDebugSymbols", out JsonElement debugElement) && debugElement.GetBoolean();
+        sourceDebugRendezvous = compileDocument.RootElement.TryGetProperty("sourceDebugRendezvous", out JsonElement rendezvousElement) && rendezvousElement.GetBoolean();
     }
 
     Console.WriteLine($"[INFO] UEFI loader  : {bootLoaderPath}");
@@ -74,7 +76,7 @@ static int MainEntry(string[] args)
         string kernelSha256;
         using (FileStream kernel = File.OpenRead(stagedKernel))
             kernelSha256 = Convert.ToHexString(SHA256.HashData(kernel)).ToLowerInvariant();
-        if (nativeDebugSymbols)
+        if (sourceDebugRendezvous)
         {
             string debugMapPath = Path.Combine(outputDirectory, "Inu.DebugSymbols.json");
             if (!File.Exists(debugMapPath)) return Fail($"Debug image creation requires the native debug map produced by the same link: {debugMapPath}");
@@ -120,6 +122,7 @@ static int MainEntry(string[] args)
             architecture = project.TargetArchitecture,
             configuration = nativeDebugSymbols ? "Debug" : "Release",
             nativeDebugSymbols,
+            sourceDebugRendezvous,
             bootProtocol = project.BootProtocol,
             format = "GPT/FAT32 system partition",
             imagePath,
