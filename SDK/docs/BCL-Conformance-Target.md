@@ -1,5 +1,5 @@
 
-> **Test OS profile (0.1.57):** Kath can generate an explicitly marked Test OS that contains the complete validation harness. A Test OS built/run without Debug boots normally and does not execute the in-kernel managed/BCL/GC/ABI conformance gate. Selecting Debug (or explicitly requesting runtime conformance) activates the in-kernel validation. Host-side .NET reference conformance remains an SDK-build fingerprint check when SDK implementation code changes.
+> **Test OS profile (0.1.58):** Kath can generate an explicitly marked Test OS that contains the complete validation harness. A Test OS built/run without Debug boots normally and does not execute the in-kernel managed/BCL/GC/ABI conformance gate. Selecting Debug (or explicitly requesting runtime conformance) activates the in-kernel validation. Host-side .NET reference conformance remains an SDK-build fingerprint check when SDK implementation code changes.
 # Inu BCL conformance target
 
 Inu does not claim support for the whole .NET Base Class Library. The fixed compatibility target for this release is the named subset **`Inu.BCL.Core.v1`**.

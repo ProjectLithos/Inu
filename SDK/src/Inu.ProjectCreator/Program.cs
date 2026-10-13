@@ -197,11 +197,9 @@ static int MainEntry(string[] args)
 
     if (!RepairTestOsKernelStorageImport(output, projectName, testOs)) return 1;
     if (!MaterializeCoderCommands(sdkRoot, output, projectName)) return 1;
-    MigrateGeneratedShellSurface(output, projectName);
-    RepairMalformedGeneratedStockShellSurface(output, projectName);
-    MigrateCurrentWorkingDirectoryPrompt(output, projectName);
-    RepairInvalidPromptExpressionStatement(output, projectName, testOs);
-    MigrateStockShellCommandLineInput(output, projectName);
+    // Shell.cs is coder-owned. Never rewrite it during compile/run preparation, even when it
+    // still contains markers from an older generated template. Existing shell source is preserved
+    // byte-for-byte; new projects receive the current template only when the file is absent.
     MigrateGeneratedCommandSurface(output, projectName, sdkRoot);
     HideProvidedWorkspaceFolders(output);
     if (!RefreshCentralKernelConsoleSourcePlan(sdkRoot, output)) return 1;

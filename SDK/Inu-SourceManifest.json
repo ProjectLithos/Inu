@@ -1,5 +1,5 @@
 {
-  "version": "0.1.57",
+  "version": "0.1.58",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -411,7 +411,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "22806a5b2d798bd775026dbb7875ba5b0f646e8d2c840723fb35c2f624bc37c9"
+      "sha256": "0ba4ae0ca106e8f7fff2765757bcd4148995950742646b41374ebd90a0ee690f"
     },
     {
       "path": "Directory.Build.targets",
@@ -443,7 +443,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "7418caa5efed5a6f6f622e5c6d1bef7ff8353f331d2ff21818370a4ccd702534"
+      "sha256": "037698f4594ba8c13f6a6241b98ebfbd6ff914ad92f1b77ec4ddefe2bc77bb5e"
     },
     {
       "path": "Inu-Package.bat",
@@ -475,7 +475,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "d39dd679aa7462c7452588639a15d1bfdc9a0ca97cf55bcb2e48a44e1b9650e2"
+      "sha256": "3c6cdcc714232aa140cdef062056818d68c7e5d51d1f97e6a7523dfa773293d6"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -943,7 +943,7 @@
     },
     {
       "path": "docs/BCL-Conformance-Target.md",
-      "sha256": "a9a29ab4c77a5b00af37339caa61828052183ff8b58d40f720704a9a6afd4530"
+      "sha256": "0e1aea53de562ee36003678986616b0818a23e5d4b37f45496cdefbddeb42eba"
     },
     {
       "path": "docs/Boot-Capability-Interfaces.md",
@@ -1019,7 +1019,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "718d6dc9d1935b0f65420f1190ebb39f9bd8307faff0bb5c6fe0c5777aa72bf2"
+      "sha256": "da2a634c54a24a10743761892c4685010462335950c38f20b5810f27ff21dc5b"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1059,7 +1059,7 @@
     },
     {
       "path": "docs/Managed-Runtime.md",
-      "sha256": "12299994edffa6d2dd900bc18862fcd68770debf410aa49dfab6427393e622f8"
+      "sha256": "c7ee56ae48d263449bb74fe389da60c8cff9a213cc9017b048aae63e500b98a4"
     },
     {
       "path": "docs/Memory-Diagnostics.md",
@@ -3543,7 +3543,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "96f04916e7258eff680af7475b151503c661160fc9707a09d7984bf6c620fca4"
+      "sha256": "2065f8e31e91516fad1a52b8edec9be13df381436ca800763782d0e9c1d7c8e0"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5591,7 +5591,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "72ea5dbd8f88935b54999c4578ab82b112ca8826d46c4e6908fa2a2830b0bdb6"
+      "sha256": "cbebed7db062c7e7e1d3bb8c35636db2214423714968f2096cc8a409a39bbb4a"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",
