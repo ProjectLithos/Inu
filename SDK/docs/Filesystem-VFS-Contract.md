@@ -73,7 +73,7 @@ The supplied shell now obtains `FileSystemLogicalPath.Commands` through Get(`fil
 
 ## 0.0.81 path and command-search SDK surface
 
-Userland code no longer needs to send `filesystem.*` Get/Set messages directly. `Inu.Userland.Runtime.FileSystemPaths` exposes `GetPathSeparator`, `SetPathSeparator`, `GetCommandsPath`, `GetCommandsPaths`, `SetCommandsPath`, `SetCommandsPaths`, and `BuildCommandsPath`.
+Userland code no longer needs to send `filesystem.*` Get/Set messages directly. `Inu.Userland.Runtime.FileSystemPaths` exposes `GetCurrentWorkingDirectory`, `GetPathSeparator`, `SetPathSeparator`, `GetCommandsPath`, `GetCommandsPaths`, `SetCommandsPath`, `SetCommandsPaths`, and `BuildCommandsPath`. `GetCurrentWorkingDirectory()` reads the calling process CWD through the existing Get(`process.current-directory`) transport and is suitable for dynamic shell prompts.
 
 Command directories are now an ordered search list rather than one fixed location. `BuildCommandsPath(command)` returns executable candidates for each configured directory in search order, including `.EXE` and extensionless forms. The compatibility default remains `/System/Commands` until OS policy changes it.
 

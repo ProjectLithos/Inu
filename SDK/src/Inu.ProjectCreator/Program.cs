@@ -199,6 +199,7 @@ static int MainEntry(string[] args)
     if (!MaterializeCoderCommands(sdkRoot, output, projectName)) return 1;
     MigrateGeneratedShellSurface(output, projectName);
     RepairMalformedGeneratedStockShellSurface(output, projectName);
+    MigrateCurrentWorkingDirectoryPrompt(output, projectName);
     MigrateStockShellCommandLineInput(output, projectName);
     MigrateGeneratedCommandSurface(output, projectName, sdkRoot);
     HideProvidedWorkspaceFolders(output);
@@ -552,14 +553,6 @@ static void MigrateGeneratedShellSurface(string output, string projectName)
         if (t.StartsWith("namespace ", StringComparison.Ordinal) && t.EndsWith(";", StringComparison.Ordinal))
         { ns = t[10..^1].Trim(); break; }
     }
-    string prompt = "> ";
-    const string promptNeedle = "public const string Prompt = \"";
-    int promptStart = source.IndexOf(promptNeedle, StringComparison.Ordinal);
-    if (promptStart >= 0)
-    {
-        promptStart += promptNeedle.Length; int promptEnd = source.IndexOf("\";", promptStart, StringComparison.Ordinal);
-        if (promptEnd > promptStart) prompt = source[promptStart..promptEnd];
-    }
     string configureBody = "        // Console.Clear();\n        // Console.WriteLine(\"Howdy\");\n        // ConsolePresentation.SetForegroundRgb(232,240,248);\n        // ConsolePresentation.SetBackgroundRgb(9,16,24);\n        // ConsolePresentation.SetCaretMode(ConsoleCaretMode.Blinking);\n        // ConsolePresentation.SetCaretHeightPercent(8);";
     int configure = source.IndexOf("public static void Configure()", StringComparison.Ordinal);
     if (configure >= 0)
@@ -572,11 +565,10 @@ static void MigrateGeneratedShellSurface(string output, string projectName)
         }
     }
     configureBody = configureBody.Replace("'\\'", "'\\\\'", StringComparison.Ordinal);
-    string escapedPrompt = prompt.Replace("\\", "\\\\").Replace("\"", "\\\"");
     string migrated = $"using System;\nusing Inu.Userland.Runtime;\n\nnamespace {ns};\n\n" +
         "/// <summary>Coder-owned shell behaviour. Configure runs once for the lifetime of the shell; Run owns the visible command loop.</summary>\n" +
         "public static class Shell\n{\n" +
-        $"    public const string Prompt = \"{escapedPrompt}\";\n\n" +
+        "    public static string Prompt => \"[\" + FileSystemPaths.GetCurrentWorkingDirectory() + \"] > \";\n\n" +
         "    public static void Configure()\n    {\n" + configureBody + "\n    }\n\n" +
         "    public static void Run()\n    {\n        while (true)\n        {\n" +
         "            Console.Write(Prompt);\n            String input = Console.ReadCommandLine();\n            if (String.IsNullOrWhiteSpace(input)) continue;\n" +
@@ -607,16 +599,6 @@ static void RepairMalformedGeneratedStockShellSurface(string output, string proj
         { ns = t[10..^1].Trim(); break; }
     }
 
-    string prompt = "> ";
-    const string promptNeedle = "public const string Prompt = \"";
-    int promptStart = source.IndexOf(promptNeedle, StringComparison.Ordinal);
-    if (promptStart >= 0)
-    {
-        promptStart += promptNeedle.Length;
-        int promptEnd = source.IndexOf("\";", promptStart, StringComparison.Ordinal);
-        if (promptEnd > promptStart) prompt = source[promptStart..promptEnd];
-    }
-
     string configureBody = "        // Console.Clear();\n        // Console.WriteLine(\"Howdy\");\n        // ConsolePresentation.SetForegroundRgb(232,240,248);\n        // ConsolePresentation.SetBackgroundRgb(9,16,24);\n        // ConsolePresentation.SetCaretMode(ConsoleCaretMode.Blinking);\n        // ConsolePresentation.SetCaretHeightPercent(8);";
     int configure = source.IndexOf("public static void Configure()", StringComparison.Ordinal);
     if (configure >= 0)
@@ -638,11 +620,10 @@ static void RepairMalformedGeneratedStockShellSurface(string output, string proj
     }
 
     configureBody = configureBody.Replace("'\\'", "'\\\\'", StringComparison.Ordinal);
-    string escapedPrompt = prompt.Replace("\\", "\\\\").Replace("\"", "\\\"");
     string repaired = $"using System;\nusing Inu.Userland.Runtime;\n\nnamespace {ns};\n\n" +
         "/// <summary>Coder-owned shell behaviour. Configure runs once for the lifetime of the shell; Run owns the visible command loop.</summary>\n" +
         "public static class Shell\n{\n" +
-        $"    public const string Prompt = \"{escapedPrompt}\";\n\n" +
+        "    public static string Prompt => \"[\" + FileSystemPaths.GetCurrentWorkingDirectory() + \"] > \";\n\n" +
         "    public static void Configure()\n    {\n" + configureBody + "\n    }\n\n" +
         "    public static void Run()\n    {\n        while (true)\n        {\n" +
         "            Console.Write(Prompt);\n            String input = Console.ReadCommandLine();\n            if (String.IsNullOrWhiteSpace(input)) continue;\n" +
@@ -692,6 +673,39 @@ static bool HasUnterminatedCSharpLiteral(string source)
         if (inString||inChar) return true;
     }
     return false;
+}
+
+
+static void MigrateCurrentWorkingDirectoryPrompt(string output, string projectName)
+{
+    string file = Path.Combine(output, "Userland", SafeProjectSegment(projectName), "Shell.cs");
+    if (!File.Exists(file)) return;
+    string source = File.ReadAllText(file);
+    if (!source.Contains("Coder-owned shell behaviour. Configure runs once", StringComparison.Ordinal)) return;
+
+    const string desiredPrompt = "public static string Prompt => \"[\" + FileSystemPaths.GetCurrentWorkingDirectory() + \"] > \";";
+    if (source.Contains(desiredPrompt, StringComparison.Ordinal)) return;
+    bool stockPrompt = source.Contains("public const string Prompt = \"> \";", StringComparison.Ordinal);
+    bool attemptedWorkingDirectoryPrompt = source.Contains("FileSystem.FileSystemLogicalPath()", StringComparison.Ordinal);
+    if (!stockPrompt && !attemptedWorkingDirectoryPrompt) return;
+
+    string[] lines = source.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
+    bool changed = false;
+    for (int i = 0; i < lines.Length; i++)
+    {
+        string trimmed = lines[i].Trim();
+        if (!trimmed.Contains("Prompt", StringComparison.Ordinal) ||
+            (!trimmed.StartsWith("public const string Prompt", StringComparison.Ordinal) &&
+             !trimmed.StartsWith("public static string Prompt", StringComparison.Ordinal) &&
+             !trimmed.StartsWith("public static String Prompt", StringComparison.Ordinal))) continue;
+
+        lines[i] = "    public static string Prompt => \"[\" + FileSystemPaths.GetCurrentWorkingDirectory() + \"] > \";";
+        changed = true;
+        break;
+    }
+    if (!changed) return;
+    File.WriteAllText(file, string.Join(Environment.NewLine, lines));
+    Console.WriteLine($"[ OK ] Migrated shell prompt to the process current working directory: {file}");
 }
 
 

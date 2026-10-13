@@ -17,6 +17,9 @@ public static unsafe class FileSystemPaths
     }
 
 
+    /// <summary><inu.api>Gets the current working directory of the calling process through the standard Inu Get syscall path.</inu.api></summary>
+    public static String GetCurrentWorkingDirectory()=>System.IO.Directory.GetCurrentDirectory();
+
     /// <summary><inu.api>Gets the OS root path using the separator selected by the OS author.</inu.api></summary>
     public static String GetRootPath()=>GetPathSeparator().ToString();
 

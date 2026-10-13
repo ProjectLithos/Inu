@@ -1,5 +1,5 @@
 {
-  "version": "0.1.51",
+  "version": "0.1.52",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -411,7 +411,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "1014a5d51818eb021f3329f41a01e83b5ffb01eb83f9de6c593364a3c53ab767"
+      "sha256": "b6eea834625f0ad0b4e7fab438c164f961a0d18aa9609e8b2ce21684e7a93ede"
     },
     {
       "path": "Directory.Build.targets",
@@ -443,7 +443,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "ff4b38bf7af0ae0bb34094d7cbb81869482aba178cc4c5f33f7ed16df34f7cdc"
+      "sha256": "99810afeb912cf9f16f8c852c2a94e7f5d0df532dac7808cb42179909a841a26"
     },
     {
       "path": "Inu-Package.bat",
@@ -475,7 +475,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "f1a62dfd53b1995f990e23fba23a87999863d94a111d51dee4ef2ce5a863f29f"
+      "sha256": "41a59d75ec75d786dc16d5bb3db7ef6e5360d51257f11263b0ca799fc959b5a3"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -999,7 +999,7 @@
     },
     {
       "path": "docs/Filesystem-VFS-Contract.md",
-      "sha256": "3ec5c631de2741ac2a1e1f1f3920c6cc8b0c4fa6b9126eec7eeec6f980978187"
+      "sha256": "918e7dc797ba13954f971d76a34d0930341fddb2216e4c32f5c26abbf379e8d0"
     },
     {
       "path": "docs/Formal-SMP-PerCPU-API.md",
@@ -1019,7 +1019,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "b5463fdb04b85569b4db12218f09cb0bd87d130069def8e53be082fd8707f85b"
+      "sha256": "fc7f63770a48104fbd477ff2580396de52dd137549ee34d4ded1bb7108381aea"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -3543,7 +3543,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "39e736e9c0d30ad492bd5d0b80001c4ebb586f0b2acad3d7e8f6359f2da4f08a"
+      "sha256": "3efa07310fbb879daa5125d4206e06eb55e1fcaa0615d043481a86364508f156"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5591,7 +5591,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "38c46c7524118414de7623c02354c8fb666b52e81e2d621b122ff2045550689e"
+      "sha256": "e85fb56375e410a1b3827a726218db60cab4256b41ec061f5ba915ccf30c937d"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",
@@ -5763,7 +5763,7 @@
     },
     {
       "path": "src/Inu.Userland.Runtime/FileSystemPaths.cs",
-      "sha256": "dcf88b7648b4335744461c643ce77f74f6258bbe9f1eeb1be169838f1176368e"
+      "sha256": "a17d80081c109ffe4ccb023052d50b66d3de8a40f316b361cbb5de906416ab5a"
     },
     {
       "path": "src/Inu.Userland.Runtime/IO.cs",

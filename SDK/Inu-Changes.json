@@ -1,25 +1,27 @@
 {
-  "baseVersion": "0.1.50",
-  "version": "0.1.51",
+  "baseVersion": "0.1.51",
+  "version": "0.1.52",
   "changedFiles": [
-    "CHANGED-0.1.51.txt",
+    "CHANGED-0.1.52.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
+    "Inu/SDK/docs/Filesystem-VFS-Contract.md",
     "Inu/SDK/docs/Inu.Documentation.json",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
     "Inu/SDK/src/Inu.ProjectCreator/Program.cs",
-    "Inu/SDK/src/Userland/Commands/Dir.cs",
+    "Inu/SDK/src/Inu.Userland.Runtime/FileSystemPaths.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
+    "Kath/packages/kath/src/node/inu-project-generation.ts",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Fix the stock Dir command FileSystemPaths dependency and safely refresh untouched broken generated Dir.cs copies during existing-project refresh."
+  "summary": "Add FileSystemPaths.GetCurrentWorkingDirectory() and a dynamic shell prompt that follows the calling process current working directory."
 }
