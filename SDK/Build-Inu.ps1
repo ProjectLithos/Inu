@@ -44,9 +44,9 @@ function Get-InuSdkCodeFingerprint {
 }
 
 # Keep "Debug configuration" separate from "debugger rendezvous". A Test OS
-# is forced to Debug so Debug-only validation is compiled and executed, but a
-# normal Test OS Run must not stop at InuDebugImageAnchor waiting for a debugger.
-# Only an explicitly requested Debug build gets the source-debugger rendezvous.
+# does not imply Debug. Debug-only validation and the source-debugger rendezvous
+# are enabled only when Debug was explicitly selected. Test OS Release/No-Debug runs boot
+# normally while retaining the validation harness in the project.
 $debugRendezvousRequested = ($Configuration -eq 'Debug')
 
 $requestedTestOs = $false
@@ -60,22 +60,27 @@ if (-not [string]::IsNullOrWhiteSpace($Project)) {
     } catch { $requestedTestOs = $false }
 }
 if ($requestedTestOs) {
-    if ($Configuration -ne 'Debug') { Write-Host '[INFO] TEST OS selected: forcing Debug configuration so Debug-only hardware/driver validation is eligible to run.'; $Configuration = 'Debug' }
-    Write-Host '[INFO] TEST OS selected: host reference and in-kernel SDK conformance will run on every Run.'
+    if ($Configuration -eq 'Debug') {
+        Write-Host '[INFO] TEST OS selected with Debug enabled: in-kernel SDK conformance will run for this Run.'
+    } else {
+        Write-Host '[INFO] TEST OS selected without Debug: validation harness is present, but in-kernel conformance is skipped.'
+    }
 }
 
 $runtimeValidationDirectory = Join-Path $root 'Artifacts\Validation'
 $runtimeValidationStamp = Join-Path $runtimeValidationDirectory 'runtime-conformance-source.sha256'
 $currentSdkCodeFingerprint = Get-InuSdkCodeFingerprint -SdkRoot $root
 $lastValidatedSdkCodeFingerprint = if (Test-Path -LiteralPath $runtimeValidationStamp -PathType Leaf) { (Get-Content -LiteralPath $runtimeValidationStamp -TotalCount 1).Trim().ToLowerInvariant() } else { '' }
-$runtimeConformanceRequired = ($currentSdkCodeFingerprint -ne $lastValidatedSdkCodeFingerprint) -or $requestedTestOs
-$runtimeConformanceEnabled = ($RuntimeConformance -or $requestedTestOs) -and $Run -and -not $NoRun
+$runtimeConformanceRequired = ($currentSdkCodeFingerprint -ne $lastValidatedSdkCodeFingerprint)
+$runtimeConformanceEnabled = ($RuntimeConformance -or ($requestedTestOs -and $Configuration -eq 'Debug')) -and $Run -and -not $NoRun
 if ($runtimeConformanceRequired) {
     Write-Host '[INFO] SDK implementation code changed since the last successful conformance validation.'
-    Write-Host '[INFO] The host-side Inu .NET conformance suite will run once before this build continues.'
-    if ($runtimeConformanceEnabled) { Write-Host '[INFO] Explicit -RuntimeConformance also enables the in-kernel managed/BCL/GC validation gate.' }
+    Write-Host '[INFO] The host-side Inu .NET reference conformance suite will run once before this build continues.'
+    if ($runtimeConformanceEnabled) { Write-Host '[INFO] In-kernel managed/BCL/GC validation is enabled for this Run.' }
 } elseif ($runtimeConformanceEnabled) {
-    Write-Host '[INFO] Explicit -RuntimeConformance requested; the in-kernel managed/BCL/GC validation gate will run.'
+    Write-Host '[INFO] In-kernel managed/BCL/GC validation is enabled for this Run.'
+} elseif ($requestedTestOs) {
+    Write-Host '[ OK ] TEST OS in-kernel conformance is disabled because Debug was not selected.'
 } else {
     Write-Host '[ OK ] SDK code fingerprint already passed conformance; validation is skipped.'
 }

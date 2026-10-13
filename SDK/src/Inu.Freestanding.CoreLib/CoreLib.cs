@@ -8449,7 +8449,16 @@ namespace System.Collections.Generic
             _buckets = newBuckets; _entries = newEntries;
         }
 
-        public Enumerator GetEnumerator() => new Enumerator(this);
+        public Enumerator GetEnumerator()
+        {
+            global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18E0UL);
+            global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E1UL, (global::System.UInt64)(global::System.UInt32)_count);
+            global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E2UL, (global::System.UInt64)(global::System.UInt32)_used);
+            global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E3UL, (global::System.UInt64)(global::System.UInt32)_version);
+            global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E4UL, (global::System.UInt64)(global::System.UInt32)_entries.Length);
+            global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E5UL, (global::System.UInt64)(global::System.UInt32)_buckets.Length);
+            return new Enumerator(this);
+        }
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => new InterfaceEnumerator(this);
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => new InterfaceEnumerator(this);
 
@@ -8499,12 +8508,54 @@ namespace System.Collections.Generic
         { private Enumerator _e; internal InterfaceEnumerator(Dictionary<TKey,TValue> d){_e=new Enumerator(d);} public KeyValuePair<TKey,TValue> Current=>_e.Current; Object System.Collections.IEnumerator.Current=>((System.Collections.IEnumerator)_e).Current; public Boolean MoveNext()=>_e.MoveNext(); public void Reset()=>_e.Reset(); public void Dispose()=>_e.Dispose(); }
         public struct Enumerator : IEnumerator<KeyValuePair<TKey,TValue>>
         {
-            private readonly Dictionary<TKey,TValue> _dictionary; private readonly Int32 _version; private Int32 _index; private KeyValuePair<TKey,TValue> _current; private Boolean _valid;
-            internal Enumerator(Dictionary<TKey,TValue> dictionary){_dictionary=dictionary;_version=dictionary._version;_index=0;_current=default(KeyValuePair<TKey,TValue>);_valid=false;}
-            public KeyValuePair<TKey,TValue> Current=>_current;
-            Object System.Collections.IEnumerator.Current { get { if(!_valid) throw new InvalidOperationException(); return _current; } }
-            public Boolean MoveNext(){ if(_version!=_dictionary._version) System.Collections.CollectionThrowHelper.ThrowModified(); while(_index<_dictionary._used){Int32 i=_index++; if(_dictionary._entries[i].HashCode>=0){_current=new KeyValuePair<TKey,TValue>(_dictionary._entries[i].Key,_dictionary._entries[i].Value);_valid=true;return true;}} _valid=false;_current=default(KeyValuePair<TKey,TValue>);return false; }
-            public void Reset(){if(_version!=_dictionary._version) System.Collections.CollectionThrowHelper.ThrowModified();_index=0;_valid=false;_current=default(KeyValuePair<TKey,TValue>);} public void Dispose(){} 
+            // Keep the enumerator return value free of a nested generic KeyValuePair field.
+            // NativeAOT 10.0.10 can otherwise stall while materialising the hidden return
+            // storage for Dictionary<TKey,TValue>.GetEnumerator(). The public API remains
+            // a value-type Enumerator; Current materialises the pair from the live entry.
+            private readonly Dictionary<TKey,TValue> _dictionary;
+            private readonly Int32 _version;
+            private Int32 _index;
+            private Int32 _currentIndex;
+            private Boolean _valid;
+            internal Enumerator(Dictionary<TKey,TValue> dictionary)
+            {
+                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18E6UL);
+                _dictionary=dictionary;
+                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18E7UL);
+                _version=dictionary._version;
+                global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18E8UL, (global::System.UInt64)(global::System.UInt32)_version);
+                _index=0;
+                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18E9UL);
+                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18EAUL);
+                _currentIndex=-1;
+                _valid=false;
+                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18EBUL);
+                global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18ECUL, (global::System.UInt64)(global::System.UInt32)dictionary._count);
+                global::System.Collections.CollectionRuntimeDiagnostics.TraceValue(0x18EDUL, (global::System.UInt64)(global::System.UInt32)dictionary._used);
+                global::System.Collections.CollectionRuntimeDiagnostics.TraceStage(0x18EEUL);
+            }
+            public KeyValuePair<TKey,TValue> Current
+            {
+                get
+                {
+                    if(!_valid) return default(KeyValuePair<TKey,TValue>);
+                    Entry entry=_dictionary._entries[_currentIndex];
+                    return new KeyValuePair<TKey,TValue>(entry.Key,entry.Value);
+                }
+            }
+            Object System.Collections.IEnumerator.Current { get { if(!_valid) throw new InvalidOperationException(); return Current; } }
+            public Boolean MoveNext()
+            {
+                if(_version!=_dictionary._version) System.Collections.CollectionThrowHelper.ThrowModified();
+                while(_index<_dictionary._used)
+                {
+                    Int32 i=_index++;
+                    if(_dictionary._entries[i].HashCode>=0){_currentIndex=i;_valid=true;return true;}
+                }
+                _valid=false;_currentIndex=-1;return false;
+            }
+            public void Reset(){if(_version!=_dictionary._version) System.Collections.CollectionThrowHelper.ThrowModified();_index=0;_currentIndex=-1;_valid=false;}
+            public void Dispose(){} 
         }
     }
 

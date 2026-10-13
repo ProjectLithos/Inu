@@ -1,5 +1,5 @@
 
-> **Test OS profile (0.1.46):** Kath can generate an explicitly marked Test OS. Test OS runs force host reference conformance plus the in-kernel managed/BCL/GC/ABI gate on every Run, then validate the selected SDK subsystem startup/contracts. Normal OS Release boots remain unaffected.
+> **Test OS profile (0.1.57):** Kath can generate an explicitly marked Test OS that contains the complete validation harness. A Test OS built/run without Debug boots normally and does not execute the in-kernel managed/BCL/GC/ABI conformance gate. Selecting Debug (or explicitly requesting runtime conformance) activates the in-kernel validation. Host-side .NET reference conformance remains an SDK-build fingerprint check when SDK implementation code changes.
 - 0.1.40 completes Profile 1 `List<T>` mutation, capacity/indexing, self-`AddRange`, enumeration state/version and `ToArray` behaviour, with one shared conformance definition compiled by both reference and freestanding runners.
 # Inu managed NativeAOT runtime
 

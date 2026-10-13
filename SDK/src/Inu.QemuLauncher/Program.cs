@@ -223,6 +223,7 @@ static int MainEntry(string[] args)
         bool gcStressGraceActivated = false;
         bool gcStressCompleted = false;
         bool managedProgressGraceActivated = false;
+        string? lastManagedProgressMessage = null;
         string serialText = string.Empty;
         while (true)
         {
@@ -259,6 +260,12 @@ static int MainEntry(string[] args)
             }
 
             serialText = ReadSharedText(serialLog);
+            string? managedProgressMessage = GetLiveManagedConformanceStage(serialText);
+            if (managedProgressMessage is not null && !string.Equals(managedProgressMessage, lastManagedProgressMessage, StringComparison.Ordinal))
+            {
+                lastManagedProgressMessage = managedProgressMessage;
+                Console.WriteLine($"[TEST] {managedProgressMessage}");
+            }
             if (serialText.Contains("[INU:CRASHDUMP]", StringComparison.Ordinal) || serialText.Contains("[INU:PANIC]", StringComparison.Ordinal))
             {
                 string? crashDumpPath = TryMaterializeSerialCrashDump(serialText, runDirectory, project.Name, project.TargetArchitecture);
@@ -1530,6 +1537,41 @@ static void PrintManagedConformanceDiagnosticInterpretation(string serialText)
 
     if (furthestPosition >= 0)
         Console.Error.WriteLine($"[INFO] Managed conformance last stage: {furthestMarker} - {furthestDescription}.");
+}
+
+static string? GetLiveManagedConformanceStage(string serialText)
+{
+    (string Marker, string Description)[] stages =
+    [
+        ("NOBT:CONF:RUN", "In-kernel SDK conformance started"),
+        ("EH:B2", "Generic runtime / GVM checks"),
+        ("EH:1890", "Class-GVM checks completed"),
+        ("EH:1896", "Interface-GVM / dynamic-dictionary checks completed"),
+        ("EH:B4", "Collections runtime checks"),
+        ("EH:1840", "Collections - Dictionary<TKey,TValue>"),
+        ("EH:184A", "Collections - Dictionary enumeration acquisition"),
+        ("EH:18E0", "Dictionary.GetEnumerator entered"),
+        ("EH:18E6", "Dictionary.Enumerator constructor entered"),
+        ("EH:18EE", "Dictionary.Enumerator constructor completed"),
+        ("EH:184B", "Dictionary enumerator acquired by caller"),
+        ("EH:1860", "Collections - Queue<T>"),
+        ("EH:1870", "Collections - Stack<T>"),
+        ("EH:B5", "Collections runtime checks completed"),
+        ("EH:BC10", "BCL Profile 1 checks"),
+        ("NOBT:GC:RUN", "Garbage-collector conformance"),
+        ("NOBT:GC:OK", "Garbage-collector conformance completed")
+    ];
+
+    int furthestPosition = -1;
+    string? description = null;
+    foreach ((string marker, string candidate) in stages)
+    {
+        int position = serialText.LastIndexOf(marker, StringComparison.Ordinal);
+        if (position <= furthestPosition) continue;
+        furthestPosition = position;
+        description = candidate;
+    }
+    return description;
 }
 
 static void PrintSerialTail(string serialText)

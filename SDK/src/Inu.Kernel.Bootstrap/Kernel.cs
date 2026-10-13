@@ -58,6 +58,12 @@ namespace Inu.Kernel.Bootstrap;
 /// <summary>Defines the authoritative freestanding Inu bootstrap kernel.</summary>
 public static unsafe partial class Kernel
 {
+    private static void ReportManagedConformanceProgress(String stage)
+    {
+        KernelConsole.Write("[TEST] ");
+        KernelConsole.WriteLine(stage);
+    }
+
     private const UInt64 KeyboardRepeatInitialDelayNanoseconds=500000000UL;
     private const UInt64 KeyboardRepeatIntervalNanoseconds=40000000UL;
     private static Boolean _ps2RepeatActive,_usbRepeatActive;
@@ -451,9 +457,12 @@ public static unsafe partial class Kernel
 #if INU_RUNTIME_CONFORMANCE
         KernelConsole.WriteLine("NOBT:CONF:BASE");
         KernelConsole.WriteLine("NOBT:CONF:RUN");
+        KernelConsole.WriteLine("[TEST] In-kernel SDK conformance started");
+        ManagedRuntimeConformance.SetProgressReporter(ReportManagedConformanceProgress);
 
         if (!ManagedRuntimeConformance.Run(out UInt32 runtimePassed, out UInt32 runtimeFailed, out UInt32 abiPassed, out UInt32 abiFailed))
         {
+            ManagedRuntimeConformance.SetProgressReporter(null);
             if (!KernelConsole.Write(".NET conformance passed/failed: ")) return false;
             if (!KernelConsole.WriteUInt64(runtimePassed)) return false;
             if (!KernelConsole.Write("/")) return false;
@@ -467,6 +476,8 @@ public static unsafe partial class Kernel
             KernelStructuredLogging.CriticalLine("runtime","Kernel.KMain",runtimeFailed!=0U?"Managed runtime semantic conformance rejected startup.":"System.Object NativeAOT ABI gate rejected startup.");
             return false;
         }
+        ManagedRuntimeConformance.SetProgressReporter(null);
+        KernelConsole.WriteLine("[TEST] In-kernel SDK conformance completed");
         if (!KernelConsole.Write(".NET conformance passed/failed: ")) return false;
         if (!KernelConsole.WriteUInt64(runtimePassed)) return false;
         if (!KernelConsole.Write("/")) return false;
@@ -538,6 +549,7 @@ public static unsafe partial class Kernel
         // checked on every boot; the expensive GC stress/assertion pass is Debug/opt-in.
 #if INU_RUNTIME_CONFORMANCE
         KernelConsole.WriteLine("NOBT:GC:RUN");
+        KernelConsole.WriteLine("[TEST] Garbage-collector conformance started");
         if (!ManagedRuntimeConformance.RunGarbageCollectorChecks(out UInt32 gcPassed, out UInt32 gcFailed))
         {
             if (!KernelConsole.Write("GC conformance passed/failed: ")) return false;
@@ -554,6 +566,7 @@ public static unsafe partial class Kernel
         if (!KernelConsole.WriteUInt64(gcFailed)) return false;
         if (!KernelConsole.WriteLine("")) return false;
         KernelConsole.WriteLine("NOBT:GC:OK");
+        KernelConsole.WriteLine("[TEST] Garbage-collector conformance completed");
 #endif
 
         if (!KernelConsole.Write("Scheduler threads active: ")) return false;

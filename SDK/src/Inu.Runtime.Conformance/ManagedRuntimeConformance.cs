@@ -445,6 +445,19 @@ public static unsafe class ManagedRuntimeConformance
     private static Boolean _gcConformanceActive;
     private static UInt32 _gcAssertionOrdinal;
     private static UInt64 _stressCancellationProbe;
+    private static Action<String> _progressReporter;
+
+    /// <summary>Registers an optional validation progress reporter. Test kernels use this to surface named conformance stages on the active console.</summary>
+    public static void SetProgressReporter(Action<String> reporter)
+    {
+        _progressReporter = reporter;
+    }
+
+    private static void ReportProgress(String message)
+    {
+        Action<String> reporter = _progressReporter;
+        if (reporter != null) reporter(message);
+    }
 
     /// <summary>Registers the foreground stress-command cancellation probe without coupling runtime conformance to the shell.</summary>
     public static Boolean RegisterStressCancellationProbe(delegate*<Boolean> probe)
@@ -473,6 +486,7 @@ public static unsafe class ManagedRuntimeConformance
         abiPassed = 0U;
         abiFailed = 0U;
 
+        ReportProgress("Managed runtime basics");
         NativeAotExceptionRuntime.TraceStage(0xC0UL);
         Record(NativeAotRuntime.IsManaged(), ref passed, ref failed);
 
@@ -497,6 +511,7 @@ public static unsafe class ManagedRuntimeConformance
         values[3] = 44;
         Record(values[0] == 11 && values[3] == 44, ref passed, ref failed);
 
+        ReportProgress("Dispatch, generics and collection ABI");
         RunDispatchCastAndGenericChecks(first, ref passed, ref failed);
 
         NativeAotExceptionRuntime.TraceStage(0xC1UL);
@@ -573,6 +588,7 @@ public static unsafe class ManagedRuntimeConformance
         // 0.0.95: BCL compatibility now has a fixed, named target instead of an
         // open-ended "CoreLib works" claim. Every item in Inu.BCL.Core.v1 is also
         // exercised by SDK/tests/Inu.DotNetConformance.Tests against the reference BCL.
+        ReportProgress("BCL Profile 1 - 49 named targets");
         NativeAotExceptionRuntime.TraceStage(0xBC10UL);
         RunBclCoreV1Checks(ref passed, ref failed);
         NativeAotExceptionRuntime.TraceStage(0xBC11UL);
@@ -584,6 +600,7 @@ public static unsafe class ManagedRuntimeConformance
         Record(statistics.AllocatedBytes != 0UL && statistics.ReservedBytes >= statistics.AllocatedBytes, ref passed, ref failed);
         NativeAotExceptionRuntime.TraceStage(0xCEUL);
 
+        ReportProgress("NativeAOT ABI checks");
         Boolean objectAbiOk = RunAbiLayoutChecks(values, "Nova", ref abiPassed, ref abiFailed);
         NativeAotExceptionRuntime.TraceStage(0xCFUL);
         Boolean boxingAbiOk = RunBoxingChecks(ref abiPassed, ref abiFailed);
@@ -614,6 +631,7 @@ public static unsafe class ManagedRuntimeConformance
         _ = primitiveAbiOk;
         _ = methodTableAbiOk;
         _ = runtimeTypeHandleAbiOk;
+        ReportProgress(failed == 0U ? "Managed conformance complete" : "Managed conformance FAILED");
         return failed == 0U;
     }
 
@@ -2409,6 +2427,7 @@ public static unsafe class ManagedRuntimeConformance
         // dispatch, variance, generic delegates and both class/interface generic virtual methods.
         // This intentionally exercises NativeAOT generic dictionaries/GVM machinery where ILC
         // decides it is required; any missing ABI helper must fail the build or this gate.
+        ReportProgress("Generic runtime / GVM checks");
         NativeAotExceptionRuntime.TraceStage(0xB2UL);
         RunGenericRuntimeChecks(probe, ref passed, ref failed);
 
@@ -2418,6 +2437,7 @@ public static unsafe class ManagedRuntimeConformance
         // 0.0.85: core generic collections are a mandatory managed-runtime contract.
         // This covers mutation, resizing, generic interface enumeration, reference retention,
         // hashing/equality, removal, queue/stack ordering and collection exception semantics.
+        ReportProgress("Collections runtime checks");
         NativeAotExceptionRuntime.TraceStage(0xB4UL);
         RunCollectionRuntimeChecks(probe, ref passed, ref failed);
         NativeAotExceptionRuntime.TraceStage(0xB5UL);
@@ -2641,6 +2661,7 @@ public static unsafe class ManagedRuntimeConformance
         Record(invalidationThrew, ref passed, ref failed);
         NativeAotExceptionRuntime.TraceStage(0x1703UL);
 
+        ReportProgress("Collections - Dictionary<TKey,TValue>");
         NativeAotExceptionRuntime.TraceStage(0x1840UL);
         Dictionary<Int32, Int32> map = new Dictionary<Int32, Int32>();
         NativeAotExceptionRuntime.TraceStage(0x1841UL);
@@ -2666,6 +2687,7 @@ public static unsafe class ManagedRuntimeConformance
 
         // 0.0.98: directly invoke Dictionary<TKey,TValue>.Enumerator so the
         // value-type generic method/unboxing ABI is tested instead of bypassed.
+        ReportProgress("Collections - Dictionary enumeration");
         NativeAotExceptionRuntime.TraceStage(0x184AUL);
         Dictionary<Int32, Int32>.Enumerator mapEnumerator = map.GetEnumerator();
         NativeAotExceptionRuntime.TraceStage(0x184BUL);
@@ -2709,6 +2731,7 @@ public static unsafe class ManagedRuntimeConformance
         Record(missingThrew, ref passed, ref failed);
         NativeAotExceptionRuntime.TraceStage(0x1705UL);
 
+        ReportProgress("Collections - Queue<T>");
         NativeAotExceptionRuntime.TraceStage(0x1860UL);
         Queue<Int32> queue = new Queue<Int32>();
         for (Int32 i = 1; i <= 7; i++) queue.Enqueue(i);
@@ -2720,6 +2743,7 @@ public static unsafe class ManagedRuntimeConformance
         NativeAotExceptionRuntime.TraceValue(0x1862UL, (UInt64)(UInt32)queue.Peek());
         NativeAotExceptionRuntime.TraceStage(0x1706UL);
 
+        ReportProgress("Collections - Stack<T>");
         NativeAotExceptionRuntime.TraceStage(0x1870UL);
         Stack<Probe> stack = new Stack<Probe>();
         stack.Push(probe);
