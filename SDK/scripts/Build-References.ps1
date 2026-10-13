@@ -4,6 +4,16 @@ param(
     [string]$Configuration = 'Release'
 )
 $ErrorActionPreference = 'Stop'
+
+# Shared conformance files are linked into the host-side reference project. Validate them
+# explicitly so an incomplete incremental tree fails with a direct packaging diagnostic.
+$sharedConformanceRoot = Join-Path $SdkRoot 'src\Inu.Runtime.Conformance\Shared'
+foreach ($sharedName in @('ArrayEnumerationConformance.cs','ListConformance.cs','CoreCollectionsConformance.cs','TupleConformance.cs','LinqConformance.cs')) {
+    $sharedPath = Join-Path $sharedConformanceRoot $sharedName
+    if (-not (Test-Path -LiteralPath $sharedPath -PathType Leaf)) {
+        throw "[FAIL] SDK shared conformance source is missing: $sharedPath. Apply the matching FullSource or self-contained ChangedFiles release."
+    }
+}
 Set-StrictMode -Version Latest
 $SdkRoot = [IO.Path]::GetFullPath($SdkRoot)
 $DotNet = [IO.Path]::GetFullPath($DotNet)

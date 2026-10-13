@@ -1,3 +1,4 @@
+// 0.1.47 companion source: kept in ChangedFiles whenever the host conformance project references this shared contract.
 #nullable disable
 using System;
 using System.Collections;

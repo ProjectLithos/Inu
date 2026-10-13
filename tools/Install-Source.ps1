@@ -129,6 +129,18 @@ function Remove-KnownObsolete([string]$root) {
                     Remove-Item -LiteralPath $_.FullName -Force
                 }
         }
+        # 0.0.142: stock executable command implementations have one SDK source of
+        # reference under SDK\src\Userland\Commands. ChangedFiles overlays cannot remove
+        # the old duplicate SysInfo source by omission, so clean it explicitly.
+        $duplicateSysInfo = Join-Path $sdkRoot 'src\Userland\SysInfo\SysInfo.cs'
+        if (Test-Path -LiteralPath $duplicateSysInfo -PathType Leaf) {
+            Remove-Item -LiteralPath $duplicateSysInfo -Force
+        }
+        $duplicateSysInfoDirectory = Split-Path -Parent $duplicateSysInfo
+        if ((Test-Path -LiteralPath $duplicateSysInfoDirectory -PathType Container) -and
+            -not (Get-ChildItem -LiteralPath $duplicateSysInfoDirectory -Force -ErrorAction SilentlyContinue | Select-Object -First 1)) {
+            Remove-Item -LiteralPath $duplicateSysInfoDirectory -Force
+        }
         foreach ($p in @(
             (Join-Path $destKath 'packages\kath\scripts')
         )) { if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p -Recurse -Force } }
@@ -198,4 +210,17 @@ if ($SourceRoot -ine $DestinationRoot) {
 
 Remove-KnownObsolete $DestinationRoot
 Remove-FilesOutsideSdkSourceManifest (Join-Path $sourceInu 'SDK') (Join-Path $destInu 'SDK')
+
+# Validate that the clean/install pass preserved every source-manifest file. This catches
+# incomplete incremental overlays (especially linked Shared conformance sources) before
+# the SDK reference/compiler stages turn them into opaque CS2001 failures.
+$installedManifestPath = Join-Path $destInu 'SDK\Inu-SourceManifest.json'
+$installedManifest = Get-Content -LiteralPath $installedManifestPath -Raw | ConvertFrom-Json
+foreach ($entry in @($installedManifest.files)) {
+    $relative = ([string]$entry.path).Replace('/','\')
+    $installedPath = Join-Path (Join-Path $destInu 'SDK') $relative
+    if (-not (Test-Path -LiteralPath $installedPath -PathType Leaf)) {
+        Fail "Clean SDK source is incomplete after install: $relative. Apply the matching FullSource or a self-contained ChangedFiles release."
+    }
+}
 Ok "Clean Kath and Inu source layout prepared for $release."
