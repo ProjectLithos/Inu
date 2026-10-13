@@ -200,6 +200,7 @@ static int MainEntry(string[] args)
     MigrateGeneratedShellSurface(output, projectName);
     RepairMalformedGeneratedStockShellSurface(output, projectName);
     MigrateCurrentWorkingDirectoryPrompt(output, projectName);
+    RepairInvalidPromptExpressionStatement(output, projectName, testOs);
     MigrateStockShellCommandLineInput(output, projectName);
     MigrateGeneratedCommandSurface(output, projectName, sdkRoot);
     HideProvidedWorkspaceFolders(output);
@@ -708,6 +709,29 @@ static void MigrateCurrentWorkingDirectoryPrompt(string output, string projectNa
     Console.WriteLine($"[ OK ] Migrated shell prompt to the process current working directory: {file}");
 }
 
+
+
+static void RepairInvalidPromptExpressionStatement(string output, string projectName, bool testOs)
+{
+    if (!testOs) return;
+    string file = Path.Combine(output, "Userland", SafeProjectSegment(projectName), "Shell.cs");
+    if (!File.Exists(file)) return;
+    string source = File.ReadAllText(file);
+    string[] lines = source.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
+    bool changed = false;
+    for (int i = 0; i < lines.Length; i++)
+    {
+        string trimmed = lines[i].Trim();
+        if (trimmed.StartsWith("Prompt =>", StringComparison.Ordinal) && trimmed.EndsWith(";", StringComparison.Ordinal))
+        {
+            lines[i] = string.Empty;
+            changed = true;
+        }
+    }
+    if (!changed) return;
+    File.WriteAllText(file, string.Join(Environment.NewLine, lines));
+    Console.WriteLine($"[ OK ] Removed invalid duplicate Test OS prompt expression statement: {file}");
+}
 
 static void MigrateStockShellCommandLineInput(string output, string projectName)
 {
