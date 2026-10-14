@@ -220,7 +220,14 @@ namespace System
     public class IndexOutOfRangeException : SystemException { public IndexOutOfRangeException() { } }
     public class InvalidCastException : SystemException { public InvalidCastException() { } }
     public class ArrayTypeMismatchException : SystemException { public ArrayTypeMismatchException() { } }
-    public class ArgumentException : SystemException { public ArgumentException() { } public ArgumentException(String message) : base(message) { } }
+    public class ArgumentException : SystemException
+    {
+        private readonly String _paramName;
+        public ArgumentException() { }
+        public ArgumentException(String message) : base(message) { }
+        public ArgumentException(String message, String paramName) : base(message) { _paramName = paramName; }
+        public String ParamName => _paramName;
+    }
     public class ArgumentNullException : ArgumentException { public ArgumentNullException() { } public ArgumentNullException(String message) : base(message) { } }
     public class ArgumentOutOfRangeException : ArgumentException { public ArgumentOutOfRangeException() { } }
     public class NotSupportedException : SystemException { public NotSupportedException() { } public NotSupportedException(String message) : base(message) { } }
