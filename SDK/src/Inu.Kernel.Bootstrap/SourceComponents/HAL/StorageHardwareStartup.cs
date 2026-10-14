@@ -22,6 +22,9 @@ public static class StorageHardwareStartup
     {
 #if INU_KERNELAREA_STORAGE
         if (!KernelStorage.Initialize()) return false;
+#if INU_COMPONENT_STORAGE_PARTITION_DISCOVERY
+        if (!KernelPartitionDiscovery.Initialize()) return false;
+#endif
 #if INU_COMPONENT_STORAGE_VIRTIO_BLOCK_DRIVER
         if (!KernelVirtio.Initialize()) return false;
 #endif

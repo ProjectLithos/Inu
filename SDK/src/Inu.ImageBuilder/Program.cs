@@ -106,6 +106,19 @@ static int MainEntry(string[] args)
         if (!EfiDiskImage.TryCreate(stagingRoot, imagePath, out bool preservedUserState, out error)) throw Fail(error);
         if (preservedUserState) Console.WriteLine("[ OK ] Existing /USERS account, Home and personal settings preserved from the previous image.");
 
+        string dataDiskDirectory = Path.Combine(outputDirectory, "DataDisks", project.Name);
+        string[] selectedStorageControllers = ReadSelectedStorageControllers(kathConfigurationPath);
+        List<object> dataDisks = new();
+        foreach (string controller in selectedStorageControllers.Where(value => value is "nvme" or "ahci").Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            string diskPath = Path.Combine(dataDiskDirectory, controller.ToLowerInvariant() + "-0.img");
+            if (!DataDiskImage.TryEnsure(diskPath, controller, out bool created, out error)) throw Fail(error);
+            Console.WriteLine(created
+                ? $"[ OK ] Created persistent {controller.ToUpperInvariant()} data disk: {diskPath} (GPT, 2 x FAT32 partitions)"
+                : $"[ OK ] Preserved persistent {controller.ToUpperInvariant()} data disk: {diskPath}");
+            dataDisks.Add(new { controller, imagePath = diskPath, partitions = 2, filesystem = "FAT32", writable = true });
+        }
+
         string manifestPath = Path.Combine(outputDirectory, "Inu.Image.json");
         using FileStream image = File.OpenRead(imagePath);
         string imageSha256 = Convert.ToHexString(SHA256.HashData(image)).ToLowerInvariant();
@@ -126,6 +139,7 @@ static int MainEntry(string[] args)
             bootProtocol = project.BootProtocol,
             format = "GPT/FAT32 system partition",
             imagePath,
+            dataDisks,
             bootloaderPath = "EFI/BOOT/BOOTX64.EFI",
             shellRecoveryPath = "STARTUP.NSH",
             kernelPath = "INU/KERNEL/KERNEL.BIN",
@@ -208,6 +222,21 @@ static void BuildAssetBundle(string novaRoot, string bundlePath)
     {
         byte[] path=Encoding.ASCII.GetBytes(entry.Path);byte[] data=File.ReadAllBytes(entry.File);
         writer.Write((uint)path.Length);writer.Write((uint)data.Length);writer.Write(entry.Flags);writer.Write(0U);writer.Write(path);writer.Write(data);
+    }
+}
+
+static string[] ReadSelectedStorageControllers(string configurationPath)
+{
+    if (!File.Exists(configurationPath)) return Array.Empty<string>();
+    try
+    {
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(configurationPath));
+        if (!document.RootElement.TryGetProperty("storageControllers", out JsonElement controllers) || controllers.ValueKind != JsonValueKind.Array) return Array.Empty<string>();
+        return controllers.EnumerateArray().Where(value => value.ValueKind == JsonValueKind.String).Select(value => value.GetString() ?? string.Empty).Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
+    }
+    catch (JsonException)
+    {
+        return Array.Empty<string>();
     }
 }
 

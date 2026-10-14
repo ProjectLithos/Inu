@@ -60,7 +60,8 @@ static int MainEntry(string[] args)
         qemuProcessorCount = ResolveQemuProcessorCount(project, GetOption(args, "--cpus"));
         acceleratorTarget = ParseChoice(GetOption(args, "--accelerator"), "auto", ["auto", "whpx", "kvm", "hvf", "tcg"], "--accelerator");
         memoryMiB = ParseBoundedInt(GetOption(args, "--memory-mib"), 512, 128, 65536, "--memory-mib");
-        storageTarget = ParseChoice(GetOption(args, "--storage"), "virtio-block", ["virtio-block", "ahci", "nvme"], "--storage");
+        string? storageOption = GetOption(args, "--storage");
+        storageTarget = storageOption is null ? "project" : ParseChoice(storageOption, "virtio-block", ["virtio-block", "ahci", "nvme"], "--storage");
         networkTarget = ParseChoice(GetOption(args, "--network"), "none", ["none", "virtio-net", "e1000"], "--network");
         graphicsTarget = ParseChoice(GetOption(args, "--graphics"), "virtio-gpu", ["virtio-gpu", "gop"], "--graphics");
         usbTarget = ParseChoice(GetOption(args, "--usb"), "none", ["none", "xhci"], "--usb");
@@ -77,12 +78,13 @@ static int MainEntry(string[] args)
     string[] requiredMarkers = GetOptions(args, "--require-marker").ToArray();
 
     string outputDirectory = Path.GetFullPath(project.OutputDirectory);
+    List<DataDiskAttachment> projectDataDisks = storageTarget == "project" ? ResolveProjectDataDisks(args[1], outputDirectory, project.Name) : new();
     string runId = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff", CultureInfo.InvariantCulture);
     string? runDirectoryOption = GetOption(args, "--run-directory");
     string runDirectory = string.IsNullOrWhiteSpace(runDirectoryOption) ? Path.Combine(outputDirectory, "Runs", runId) : Path.GetFullPath(runDirectoryOption);
-    // The project image is the persistent writable system/user disk. QEMU must use it directly
-    // so /USERS survives a normal rerun. Keep a pre-run snapshot in the run directory for
-    // diagnostics instead of booting a disposable copy that would lose account changes.
+    // The project image is the persistent boot/system disk. Selected writable data disks are
+    // separate persistent images and are attached below according to Inu.json. Keep a pre-run
+    // system-image snapshot for diagnostics instead of booting a disposable copy.
     string runImage = imagePath;
     string preRunImageSnapshot = Path.Combine(runDirectory, "boot-image-before-run.img");
     string variableStore = Path.Combine(runDirectory, "OVMF_VARS.fd");
@@ -108,7 +110,7 @@ static int MainEntry(string[] args)
     }
 
     int hostLogicalProcessorCount = Environment.ProcessorCount;
-    string[] qemuArguments = BuildArguments(ovmfCode, variableStore, runImage, serialLog, qemuProcessorCount, memoryMiB, acceleratorTarget, storageTarget, networkTarget, graphicsTarget, usbTarget, qemuDebugLog, qemuDebugConLog, qmpPort);
+    string[] qemuArguments = BuildArguments(ovmfCode, variableStore, runImage, serialLog, qemuProcessorCount, memoryMiB, acceleratorTarget, storageTarget, projectDataDisks, networkTarget, graphicsTarget, usbTarget, qemuDebugLog, qemuDebugConLog, qmpPort);
     Console.WriteLine($"[INFO] QEMU executable: {qemu}");
     Console.WriteLine($"[INFO] OVMF code     : {ovmfCode}");
     Console.WriteLine($"[INFO] OVMF variables: {ovmfVars}");
@@ -122,7 +124,9 @@ static int MainEntry(string[] args)
     Console.WriteLine($"[INFO] QEMU CPUs     : {qemuProcessorCount} logical processor(s)");
     Console.WriteLine($"[INFO] QEMU RAM      : {memoryMiB} MiB");
     Console.WriteLine($"[INFO] QEMU accel    : {DescribeAccelerator(acceleratorTarget)}");
-    Console.WriteLine($"[INFO] QEMU storage  : {storageTarget}");
+    Console.WriteLine(storageTarget == "project"
+        ? $"[INFO] QEMU storage  : boot=virtio-block; selected data disks={(projectDataDisks.Count == 0 ? "none" : string.Join(", ", projectDataDisks.Select(d => d.Controller)))}"
+        : $"[INFO] QEMU storage  : {storageTarget}");
     Console.WriteLine($"[INFO] QEMU network  : {networkTarget}");
     Console.WriteLine($"[INFO] QEMU graphics : {graphicsTarget}");
     Console.WriteLine($"[INFO] QEMU USB      : {usbTarget}");
@@ -134,6 +138,7 @@ static int MainEntry(string[] args)
 
     if (!File.Exists(qemu)) throw Fail($"QEMU executable not found: {qemu}");
     if (!File.Exists(imagePath)) throw Fail($"Boot image not found: {imagePath}");
+    foreach (DataDiskAttachment disk in projectDataDisks) if (!File.Exists(disk.Path)) throw Fail($"Selected {disk.Controller} data disk was not created by Inu.ImageBuilder: {disk.Path}");
     if (!File.Exists(ovmfCode)) throw Fail($"OVMF code firmware not found: {ovmfCode}");
     if (!File.Exists(ovmfVars)) throw Fail($"OVMF variable-store template not found: {ovmfVars}");
 
@@ -368,6 +373,7 @@ static int MainEntry(string[] args)
                     qemuProcessorCount,
                     memoryMiB,
                     storageTarget,
+                    dataDisks = projectDataDisks.Select(d => new { d.Controller, d.Path }).ToArray(),
                     networkTarget,
                     graphicsTarget,
                     usbTarget,
@@ -873,7 +879,34 @@ static string DescribeAccelerator(string acceleratorTarget)
     return "auto (TCG)";
 }
 
-static string[] BuildArguments(string ovmfCode, string variableStore, string runImage, string serialLog, int qemuProcessorCount, int memoryMiB, string acceleratorTarget, string storageTarget, string networkTarget, string graphicsTarget, string usbTarget, string qemuDebugLog, string qemuDebugConLog, int qmpPort)
+static List<DataDiskAttachment> ResolveProjectDataDisks(string projectManifestPath, string outputDirectory, string projectName)
+{
+    List<DataDiskAttachment> result = new();
+    string projectRoot = Path.GetDirectoryName(Path.GetFullPath(projectManifestPath)) ?? Environment.CurrentDirectory;
+    string configurationPath = Path.Combine(projectRoot, "Inu.json");
+    if (!File.Exists(configurationPath)) return result;
+    try
+    {
+        using JsonDocument document = JsonDocument.Parse(File.ReadAllText(configurationPath));
+        if (!document.RootElement.TryGetProperty("storageControllers", out JsonElement controllers) || controllers.ValueKind != JsonValueKind.Array) return result;
+        HashSet<string> seen = new(StringComparer.OrdinalIgnoreCase);
+        foreach (JsonElement value in controllers.EnumerateArray())
+        {
+            string? controller = value.GetString();
+            if (controller is not ("nvme" or "ahci") || !seen.Add(controller)) continue;
+            result.Add(new DataDiskAttachment(controller, Path.Combine(outputDirectory, "DataDisks", projectName, controller + "-0.img")));
+        }
+    }
+    catch (JsonException exception)
+    {
+        throw Fail($"Could not read selected QEMU storage controllers from {configurationPath}: {exception.Message}");
+    }
+    return result;
+}
+
+readonly record struct DataDiskAttachment(string Controller, string Path);
+
+static string[] BuildArguments(string ovmfCode, string variableStore, string runImage, string serialLog, int qemuProcessorCount, int memoryMiB, string acceleratorTarget, string storageTarget, IReadOnlyList<DataDiskAttachment> projectDataDisks, string networkTarget, string graphicsTarget, string usbTarget, string qemuDebugLog, string qemuDebugConLog, int qmpPort)
 {
     List<string> arguments = new();
     if(string.Equals(acceleratorTarget,"auto",StringComparison.OrdinalIgnoreCase))
@@ -905,15 +938,37 @@ static string[] BuildArguments(string ovmfCode, string variableStore, string run
         "-drive", $"if=none,format=raw,file={EscapeDriveValue(runImage)},id=boot"
     ]);
 
-    switch (storageTarget)
+    if (storageTarget == "project")
     {
-        case "virtio-block": arguments.AddRange(["-device", "virtio-blk-pci,disable-legacy=on,drive=boot,bootindex=0"]); break;
-        case "ahci":
-            arguments.AddRange(["-device", "ich9-ahci,id=inu-ahci"]);
-            arguments.AddRange(["-device", "ide-hd,drive=boot,bus=inu-ahci.0,bootindex=0"]);
-            break;
-        case "nvme": arguments.AddRange(["-device", "nvme,drive=boot,serial=INU0001,bootindex=0"]); break;
-        default: throw new ArgumentException("Unsupported storage target: " + storageTarget);
+        // Keep the boot/system image independent from the OS author's selected data controller.
+        // UEFI can boot it through VirtIO while each selected NVMe/AHCI controller gets its own
+        // persistent writable disk, so selecting a driver means the hardware really exists.
+        arguments.AddRange(["-device", "virtio-blk-pci,disable-legacy=on,drive=boot,bootindex=0"]);
+        bool ahciControllerAdded = false; int nvmeIndex = 0; int ahciIndex = 0;
+        foreach (DataDiskAttachment disk in projectDataDisks)
+        {
+            string driveId = "inu-data-" + disk.Controller + "-" + (disk.Controller == "nvme" ? nvmeIndex : ahciIndex);
+            arguments.AddRange(["-drive", $"if=none,format=raw,file={EscapeDriveValue(disk.Path)},id={driveId}"]);
+            if (disk.Controller == "nvme")
+            {
+                arguments.AddRange(["-device", $"nvme,drive={driveId},serial=INUNVME{++nvmeIndex:0000}"]);
+            }
+            else if (disk.Controller == "ahci")
+            {
+                if (!ahciControllerAdded) { arguments.AddRange(["-device", "ich9-ahci,id=inu-ahci-data"]); ahciControllerAdded = true; }
+                arguments.AddRange(["-device", $"ide-hd,drive={driveId},bus=inu-ahci-data.{ahciIndex++}"]);
+            }
+        }
+    }
+    else
+    {
+        switch (storageTarget)
+        {
+            case "virtio-block": arguments.AddRange(["-device", "virtio-blk-pci,disable-legacy=on,drive=boot,bootindex=0"]); break;
+            case "ahci": arguments.AddRange(["-device", "ich9-ahci,id=inu-ahci", "-device", "ide-hd,drive=boot,bus=inu-ahci.0,bootindex=0"]); break;
+            case "nvme": arguments.AddRange(["-device", "nvme,drive=boot,serial=INU0001,bootindex=0"]); break;
+            default: throw new ArgumentException("Unsupported storage target: " + storageTarget);
+        }
     }
 
     switch (networkTarget)

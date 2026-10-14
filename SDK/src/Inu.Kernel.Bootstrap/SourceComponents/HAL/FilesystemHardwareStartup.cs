@@ -41,16 +41,52 @@ public static class FilesystemHardwareStartup
     }
 
 #if INU_KERNELAREA_FILESYSTEMS
+    private const UInt64 BasicDataGuidLow = 0x4433B9E5EBD0A0A2UL;
+    private const UInt64 BasicDataGuidHigh = 0xC79926B7B668C087UL;
+
     private static Boolean TryMountRoot()
     {
+        // Prefer an ordinary GPT data partition over the UEFI system/boot partition.
+        // QEMU data disks produced by Inu.ImageBuilder use the Microsoft Basic Data GUID.
         for (UInt32 ordinal = 0U; KernelStorage.TryGetVolumeByOrdinal(ordinal, out KernelStorageVolumeHandle volume); ordinal++)
         {
-#if INU_COMPONENT_FILESYSTEM_FATFS
-            if (KernelVfs.Mount(KernelVfs.DefaultNamespace, volume, KernelFileSystemType.Fat32, "/", out _)) return true;
-            if (KernelVfs.Mount(KernelVfs.DefaultNamespace, volume, KernelFileSystemType.Fat16, "/", out _)) return true;
-            if (KernelVfs.Mount(KernelVfs.DefaultNamespace, volume, KernelFileSystemType.Fat12, "/", out _)) return true;
-#endif
+            if (!KernelStorage.TryGetVolume(volume, out _, out KernelPartitionInfo partition) ||
+                partition.Scheme != KernelPartitionScheme.Gpt ||
+                partition.TypeGuidLow != BasicDataGuidLow || partition.TypeGuidHigh != BasicDataGuidHigh) continue;
+            if (TryMount(volume, "/"))
+            {
+                MountAdditionalDataVolumes(ordinal + 1U);
+                return true;
+            }
         }
+
+        // Compatibility fallback: a monolithic OS with no separate data drive may still
+        // mount its FAT boot/system partition writable.
+        for (UInt32 ordinal = 0U; KernelStorage.TryGetVolumeByOrdinal(ordinal, out KernelStorageVolumeHandle volume); ordinal++)
+            if (TryMount(volume, "/")) return true;
+        return false;
+    }
+
+    private static void MountAdditionalDataVolumes(UInt32 startOrdinal)
+    {
+        UInt32 mountNumber = 2U;
+        for (UInt32 ordinal = startOrdinal; KernelStorage.TryGetVolumeByOrdinal(ordinal, out KernelStorageVolumeHandle volume); ordinal++)
+        {
+            if (!KernelStorage.TryGetVolume(volume, out _, out KernelPartitionInfo partition) ||
+                partition.Scheme != KernelPartitionScheme.Gpt ||
+                partition.TypeGuidLow != BasicDataGuidLow || partition.TypeGuidHigh != BasicDataGuidHigh) continue;
+            String path = mountNumber == 2U ? "/Partition2" : "/Partition" + mountNumber.ToString();
+            if (TryMount(volume, path)) mountNumber++;
+        }
+    }
+
+    private static Boolean TryMount(KernelStorageVolumeHandle volume, String path)
+    {
+#if INU_COMPONENT_FILESYSTEM_FATFS
+        if (KernelVfs.Mount(KernelVfs.DefaultNamespace, volume, KernelFileSystemType.Fat32, path, out _)) return true;
+        if (KernelVfs.Mount(KernelVfs.DefaultNamespace, volume, KernelFileSystemType.Fat16, path, out _)) return true;
+        if (KernelVfs.Mount(KernelVfs.DefaultNamespace, volume, KernelFileSystemType.Fat12, path, out _)) return true;
+#endif
         return false;
     }
 #endif
