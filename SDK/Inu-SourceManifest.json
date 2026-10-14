@@ -1,5 +1,5 @@
 {
-  "version": "0.1.64",
+  "version": "0.1.65",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -411,7 +411,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "6fb55d70b70114559c1376d6aa8de0c7735919fa03c465a0f78f68da8b9fa33b"
+      "sha256": "ad56e606322dbc2364079f20a99861c4a657f873ecc99c9c2129513150f56ba3"
     },
     {
       "path": "Directory.Build.targets",
@@ -443,7 +443,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "3cb5af67b3603e8076c06af7b46028af15adf5d573efa5553e33c818ff815920"
+      "sha256": "32808f81a4c7f24b47f287e65ac1e818dbfabc483e0c1c4b715820050f8feb7f"
     },
     {
       "path": "Inu-Package.bat",
@@ -475,7 +475,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "5143501493cef3eb5d78c99345e7dd63c9505404c370c6f77413434e9fd1f116"
+      "sha256": "40b7c7825e4bce1324fa6675c578a61c60e5b83aac69c651b9d9b39550351ddb"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -1019,7 +1019,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "147672f15978eb7be97addad5788b384a6b68e20879ebc283bc3585cd2ddec7e"
+      "sha256": "23872dc1c96e5a001b5119f8bd1599be447f220418711582a75025c1120d836d"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -3543,7 +3543,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "2cf7af2df473d0db2b0647846adb670fab2b08fbd43b08f37246166f3d208bb5"
+      "sha256": "67b10e46b0870aec1c696d0df89b0aa842677205bb271b2b4739026daec3a97b"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5803,7 +5803,7 @@
     },
     {
       "path": "src/Inu.UserlandCompiler/Program.cs",
-      "sha256": "565b13a1be712e7b3d77fca2a0364ec9ed87047ef9530d38d3c0c06ba7812087"
+      "sha256": "d7173e099ca76413891b103099dcc66d72c4c5ef870a1920939b1d6d467d7017"
     },
     {
       "path": "src/Inu.UserlandCompiler/UserlandStageCache.cs",
@@ -5959,7 +5959,7 @@
     },
     {
       "path": "src/Userland/Shell/InuShell.cs",
-      "sha256": "b55c686d2b95a742ee6f15aa34dd0e26901abfab5dafb2b05830019fb1ec6539"
+      "sha256": "c9983c4014e0cc2f27216e39f3eb5508cbdbc6dcdf0fda9820634eb632f27eae"
     },
     {
       "path": "templates/InuKernel/Boot/AcpiStartup.cs",

@@ -62,7 +62,7 @@ static int MainEntry(string[] args)
         if(runType is null||!string.Equals(runType,shellType,StringComparison.Ordinal))throw Fail($"Coder-owned shell source must define public static Run() on the same type as Configure(): {shellSource}");
         string shellRuntime=Path.Combine(projectRoot,"Userland","Provided","Shell","InuShell.cs");
         if(!File.Exists(shellRuntime))shellRuntime=Path.Combine(sdkRoot,"src","Userland","Shell","InuShell.cs");
-        CompileApp("Shell",[shellRuntime,shellSource],$"global::Inu.Userland.Shell.InuShell.Run(global::{shellType}.Configure, global::{shellType}.Run); return 0;",true,Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
+        CompileApp("Shell",[shellRuntime,shellSource],$"global::Inu.Userland.Shell.InuShell.Run(&global::{shellType}.Configure, &global::{shellType}.Run); return 0;",true,Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
     }
 
     if(Directory.Exists(commands))
@@ -187,7 +187,7 @@ using Inu.Userland.Runtime;
 
 internal static class InuUserApplicationBinding
 {
-    internal static Int32 Invoke()
+    internal static unsafe Int32 Invoke()
     {
         {{callBody}}
     }
