@@ -1,26 +1,24 @@
 {
-  "baseVersion": "0.1.57",
-  "version": "0.1.58",
+  "baseVersion": "0.1.60",
+  "version": "0.1.61",
   "changedFiles": [
-    "CHANGED-0.1.58.txt",
+    "CHANGED-0.1.61.txt",
     "Inu/SDK/Directory.Build.props",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
-    "Inu/SDK/docs/BCL-Conformance-Target.md",
     "Inu/SDK/docs/Inu.Documentation.json",
-    "Inu/SDK/docs/Managed-Runtime.md",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.ProjectCreator/Program.cs",
     "Inu/VERSION",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
     "Kath/VERSION",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
+    "Kath/packages/kath/src/browser/inu-dashboard-widget.tsx",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Preserve coder-owned Shell.cs during compile/run preparation."
+  "summary": "Fix JSX parsing in Kath dashboard so the extension build succeeds; update release metadata and SDK source hashes."
 }

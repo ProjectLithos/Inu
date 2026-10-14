@@ -44,6 +44,8 @@
     <!-- Absolute source-ownership barriers. These remain effective even if an old generated
          project or another SDK target tries to add these trees to Compile. -->
     <Compile Remove="Kernel\Kernel.cs" />
+    <!-- SDK source opened from an external diagnostic is copied into the visible OS tree for inspection/editing. It is a snapshot, not automatically part of the kernel build. -->
+    <Compile Remove="Kernel\*\SDKSource\**\*.cs" />
     <Compile Remove="Boot\*.cs" />
     <Compile Remove="HAL\**\*.cs" />
     <Compile Remove="Startup\**\*.cs" />
