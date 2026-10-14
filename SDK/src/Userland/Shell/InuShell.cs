@@ -8,6 +8,8 @@ namespace Inu.Userland.Shell;
 /// </summary>
 public static unsafe class InuShell
 {
+    private static Boolean _configured;
+
     /// <summary>
     /// Configures the coder-owned shell once, then repeatedly asks Shell.Run to perform
     /// one shell iteration for the lifetime of the ring-3 shell process.
@@ -17,7 +19,12 @@ public static unsafe class InuShell
         if (configure == null) throw new ArgumentNullException("configure");
         if (run == null) throw new ArgumentNullException("run");
 
-        configure();
+        if (!_configured)
+        {
+            configure();
+            _configured = true;
+        }
+
         while (true)
             run();
     }
