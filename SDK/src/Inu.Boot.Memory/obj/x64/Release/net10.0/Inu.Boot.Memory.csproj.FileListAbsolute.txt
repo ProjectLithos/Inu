@@ -1,6 +1,0 @@
-C:\KandI\Inu\SDK\src\Inu.Boot.Memory\obj\x64\Release\net10.0\Inu.Boot.Memory.csproj.AssemblyReference.cache
-C:\KandI\Inu\SDK\src\Inu.Boot.Memory\obj\x64\Release\net10.0\Inu.Boot.Memory.GeneratedMSBuildEditorConfig.editorconfig
-C:\KandI\Inu\SDK\src\Inu.Boot.Memory\obj\x64\Release\net10.0\Inu.Boot.Memory.AssemblyInfoInputs.cache
-C:\KandI\Inu\SDK\src\Inu.Boot.Memory\obj\x64\Release\net10.0\Inu.Boot.Memory.AssemblyInfo.cs
-C:\KandI\Inu\SDK\src\Inu.Boot.Memory\obj\x64\Release\net10.0\Inu.Boot.Memory.csproj.CoreCompileInputs.cache
-C:\KandI\Inu\SDK\src\Inu.Boot.Memory\obj\x64\Release\net10.0\Inu.Boot.Memory.sourcelink.json
