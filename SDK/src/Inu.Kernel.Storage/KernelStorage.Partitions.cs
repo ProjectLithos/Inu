@@ -15,6 +15,17 @@ public static unsafe partial class KernelStorage
         for(UInt32 i=0U;i<_volumeCapacity;i++){VolumeRecord* r=_volumes+i;if(r->Used==0)continue;if(seen++!=ordinal)continue;handle=new KernelStorageVolumeHandle(i+1U);return true;}
         return false;
     }
+    /// <summary>Discards unmounted volume records for a device and re-runs partition discovery after an on-disk layout change.</summary>
+    public static Boolean RefreshPartitions(KernelStorageDeviceHandle device)
+    {
+        if(!TryDevice(device,out DeviceRecord* owner)||!KernelStoragePartitionServices.IsAvailable)return false;
+        for(UInt32 i=0U;i<_volumeCapacity;i++){VolumeRecord* v=_volumes+i;if(v->Used==0||v->Device!=device.Value)continue;if(KernelVfs.IsVolumeMounted(new KernelStorageVolumeHandle(i+1U)))return false;}
+        for(UInt32 i=0U;i<_volumeCapacity;i++){VolumeRecord* v=_volumes+i;if(v->Used==0||v->Device!=device.Value)continue;Clear((Byte*)v,sizeof(VolumeRecord));if(_volumeCount>0U)_volumeCount--;}
+        UInt64 scratchBytes=owner->LogicalBlockSize<4096U?4096UL:owner->LogicalBlockSize;
+        if(!KernelHeap.TryAllocate(scratchBytes,16UL,true,out KernelHeapAllocation scratch))return false;
+        Boolean ok=DiscoverPartitions(device,(Byte*)(nuint)scratch.Address,(UInt32)scratchBytes,out UInt32 discovered)&&discovered>0U;
+        KernelHeap.TryRelease(scratch);return ok;
+    }
     public static Boolean ReadVolumeBlocks(KernelStorageVolumeHandle volume,UInt64 relativeBlock,UInt32 count,Byte* buffer,UInt32 bufferBytes){if(!TryVolume(volume,out VolumeRecord* r)||relativeBlock>=r->BlockCount||count==0||count>r->BlockCount-relativeBlock)return false;return ReadBlocks(new KernelStorageDeviceHandle(r->Device),r->FirstBlock+relativeBlock,count,buffer,bufferBytes);}
     public static Boolean WriteVolumeBlocks(KernelStorageVolumeHandle volume,UInt64 relativeBlock,UInt32 count,Byte* buffer,UInt32 bufferBytes){if(!TryVolume(volume,out VolumeRecord* r)||relativeBlock>=r->BlockCount||count==0||count>r->BlockCount-relativeBlock)return false;return WriteBlocks(new KernelStorageDeviceHandle(r->Device),r->FirstBlock+relativeBlock,count,buffer,bufferBytes);}
     private static Boolean RegisterVolumeContract(KernelStorageDeviceHandle device,KernelPartitionInfo partition,KernelStorageVolumeHandle* handle){if(handle==null)return false;KernelStorageVolumeHandle value=default;if(!RegisterVolume(device,partition,out value))return false;*handle=value;return true;}

@@ -114,9 +114,9 @@ static int MainEntry(string[] args)
             string diskPath = Path.Combine(dataDiskDirectory, controller.ToLowerInvariant() + "-0.img");
             if (!DataDiskImage.TryEnsure(diskPath, controller, out bool created, out error)) throw Fail(error);
             Console.WriteLine(created
-                ? $"[ OK ] Created persistent {controller.ToUpperInvariant()} data disk: {diskPath} (GPT, 2 x FAT32 partitions)"
+                ? $"[ OK ] Created persistent raw {controller.ToUpperInvariant()} data disk: {diskPath} (kernel will create 2 GPT partitions and format them)"
                 : $"[ OK ] Preserved persistent {controller.ToUpperInvariant()} data disk: {diskPath}");
-            dataDisks.Add(new { controller, imagePath = diskPath, partitions = 2, filesystem = "FAT32", writable = true });
+            dataDisks.Add(new { controller, imagePath = diskPath, partitions = 2, filesystem = "FAT32", writable = true, partitionedBy = "kernel", formattedBy = "kernel" });
         }
 
         string manifestPath = Path.Combine(outputDirectory, "Inu.Image.json");

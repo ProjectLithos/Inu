@@ -28,6 +28,12 @@ public static class FilesystemHardwareStartup
             KernelStructuredLogging.ErrorLine("filesystem","FilesystemHardwareStartup.Initialize","The selected FAT filesystem provider could not be installed.");
             return false;
         }
+        if (!FormatNewlyProvisionedDataVolumes())
+        {
+            KernelConsole.WriteHostControl("FILESYSTEM_FORMAT_FAIL");
+            KernelStructuredLogging.ErrorLine("filesystem","FilesystemHardwareStartup.Initialize","A data partition created by the kernel could not be formatted with the selected FAT32 filesystem.");
+            return false;
+        }
 #endif
         if (KernelVfs.MountCount == 0U && !TryMountRoot())
         {
@@ -43,6 +49,24 @@ public static class FilesystemHardwareStartup
 #if INU_KERNELAREA_FILESYSTEMS
     private const UInt64 BasicDataGuidLow = 0x4433B9E5EBD0A0A2UL;
     private const UInt64 BasicDataGuidHigh = 0xC79926B7B668C087UL;
+
+#if INU_COMPONENT_FILESYSTEM_FATFS
+    private static Boolean FormatNewlyProvisionedDataVolumes()
+    {
+        for (UInt32 ordinal=0U; KernelStorage.TryGetVolumeByOrdinal(ordinal,out KernelStorageVolumeHandle volume); ordinal++)
+        {
+            if (!KernelStorage.TryGetVolume(volume,out KernelStorageDeviceHandle device,out KernelPartitionInfo partition) ||
+                partition.Scheme!=KernelPartitionScheme.Gpt || partition.TypeGuidLow!=BasicDataGuidLow || partition.TypeGuidHigh!=BasicDataGuidHigh ||
+                !KernelDiskProvisioning.WasProvisionedThisBoot(device)) continue;
+            Boolean seedDirectories=partition.Index==0U;
+            if (!FatFs.EnsureFat32Formatted(volume,seedDirectories,out Boolean formatted)) return false;
+            if (formatted && !KernelStructuredLogging.InfoLine("filesystem","FilesystemHardwareStartup.Initialize",seedDirectories
+                ? "Kernel formatted data partition 1 as FAT32 and created USERS, WORK and TEMP directories."
+                : "Kernel formatted data partition 2 as FAT32.")) return false;
+        }
+        return true;
+    }
+#endif
 
     private static Boolean TryMountRoot()
     {

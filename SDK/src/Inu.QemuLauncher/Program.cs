@@ -904,8 +904,6 @@ static List<DataDiskAttachment> ResolveProjectDataDisks(string projectManifestPa
     return result;
 }
 
-readonly record struct DataDiskAttachment(string Controller, string Path);
-
 static string[] BuildArguments(string ovmfCode, string variableStore, string runImage, string serialLog, int qemuProcessorCount, int memoryMiB, string acceleratorTarget, string storageTarget, IReadOnlyList<DataDiskAttachment> projectDataDisks, string networkTarget, string graphicsTarget, string usbTarget, string qemuDebugLog, string qemuDebugConLog, int qmpPort)
 {
     List<string> arguments = new();
@@ -1728,3 +1726,5 @@ static string? GetOption(ReadOnlySpan<string> args, string name)
 }
 
 static Exception Fail(string message) => new InvalidOperationException(message);
+
+readonly record struct DataDiskAttachment(string Controller, string Path);
