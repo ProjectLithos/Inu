@@ -28,7 +28,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/Boot/AcpiStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/Boot/AcpiStartup.cs"
       ]
     }
   }

@@ -28,7 +28,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/Startup/UserlandCommandStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/Startup/UserlandCommandStartup.cs"
       ]
     }
   }

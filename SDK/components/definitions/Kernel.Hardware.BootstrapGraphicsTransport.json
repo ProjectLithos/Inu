@@ -30,7 +30,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/HAL/BootstrapGraphicsTransportStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/BootstrapGraphicsTransportStartup.cs"
       ]
     }
   }

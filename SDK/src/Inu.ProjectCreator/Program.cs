@@ -28,6 +28,7 @@ static int MainEntry(string[] args)
     if (mainProjectPath is null) throw new InvalidOperationException("Could not resolve the kernel project path.");
     if (!RemoveSdkOwnedLegacyTrees(output)) throw new InvalidOperationException("Could not remove SDK-owned legacy trees.");
     if (!MaterializeCanonicalUserlandWorkspace(sdkRoot, output)) throw new InvalidOperationException("Could not materialize the canonical userland workspace.");
+    if (!MaterializeCanonicalKernelStartupSource(sdkRoot, output)) throw new InvalidOperationException("Could not materialize canonical kernel startup source.");
 
     // SDK-owned implementation remains canonical under $(InuSdkRoot)\src. Generated projects
     // carry only project-owned scaffolding plus user-editable workspace projects.
@@ -439,6 +440,43 @@ static bool RemoveSdkOwnedLegacyTrees(string output)
     return true;
 }
 
+
+static bool MaterializeCanonicalKernelStartupSource(string sdkRoot, string output)
+{
+    string sourceRoot = Path.Combine(sdkRoot, "src", "Inu.Kernel.Bootstrap", "SourceComponents");
+    if (!Directory.Exists(sourceRoot))
+    {
+        Console.Error.WriteLine($"[FAIL] Canonical Inu kernel startup source is missing: {sourceRoot}");
+        return false;
+    }
+
+    (string Source, string Destination)[] groups =
+    [
+        (Path.Combine(sourceRoot, "Boot"), Path.Combine(output, "Boot", "Provided", "Startup")),
+        (Path.Combine(sourceRoot, "HAL"), Path.Combine(output, "Kernel", "Provided", "HAL")),
+        (Path.Combine(sourceRoot, "Startup"), Path.Combine(output, "Kernel", "Provided", "Startup"))
+    ];
+
+    foreach ((string sourceDirectory, string destinationDirectory) in groups)
+    {
+        if (!Directory.Exists(sourceDirectory))
+        {
+            Console.Error.WriteLine($"[FAIL] Canonical Inu source-component directory is missing: {sourceDirectory}");
+            return false;
+        }
+        Directory.CreateDirectory(destinationDirectory);
+        foreach (string source in Directory.EnumerateFiles(sourceDirectory, "*.cs", SearchOption.AllDirectories))
+        {
+            string relative = Path.GetRelativePath(sourceDirectory, source);
+            string destination = Path.Combine(destinationDirectory, relative);
+            Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+            File.Copy(source, destination, true);
+        }
+    }
+
+    Console.WriteLine("[ OK ] Kernel startup/HAL source materialized from the single Inu/SDK/src authority.");
+    return true;
+}
 
 static bool MaterializeCanonicalUserlandWorkspace(string sdkRoot, string output)
 {

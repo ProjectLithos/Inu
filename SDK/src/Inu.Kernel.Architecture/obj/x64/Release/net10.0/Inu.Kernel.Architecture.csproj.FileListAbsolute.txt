@@ -1,0 +1,15 @@
+C:\KandI\Inu\SDK\Artifacts\UsingsBuild\Inu.Arch.X64\Inu.Kernel.Architecture.deps.json
+C:\KandI\Inu\SDK\Artifacts\UsingsBuild\Inu.Arch.X64\Inu.Kernel.Architecture.dll
+C:\KandI\Inu\SDK\Artifacts\UsingsBuild\Inu.Arch.X64\Inu.Kernel.Architecture.pdb
+C:\KandI\Inu\SDK\src\Inu.Kernel.Architecture\obj\x64\Release\net10.0\Inu.Kernel.Architecture.csproj.AssemblyReference.cache
+C:\KandI\Inu\SDK\src\Inu.Kernel.Architecture\obj\x64\Release\net10.0\Inu.Kernel.Architecture.GeneratedMSBuildEditorConfig.editorconfig
+C:\KandI\Inu\SDK\src\Inu.Kernel.Architecture\obj\x64\Release\net10.0\Inu.Kernel.Architecture.csproj.CoreCompileInputs.cache
+C:\KandI\Inu\SDK\src\Inu.Kernel.Architecture\obj\x64\Release\net10.0\Inu.Kernel.Architecture.sourcelink.json
+C:\KandI\Inu\SDK\src\Inu.Kernel.Architecture\obj\x64\Release\net10.0\Inu.Kern.5BA742AC.Up2Date
+C:\KandI\Inu\SDK\src\Inu.Kernel.Architecture\obj\x64\Release\net10.0\Inu.Kernel.Architecture.dll
+C:\KandI\Inu\SDK\src\Inu.Kernel.Architecture\obj\x64\Release\net10.0\refint\Inu.Kernel.Architecture.dll
+C:\KandI\Inu\SDK\src\Inu.Kernel.Architecture\obj\x64\Release\net10.0\Inu.Kernel.Architecture.pdb
+C:\KandI\Inu\SDK\src\Inu.Kernel.Architecture\obj\x64\Release\net10.0\ref\Inu.Kernel.Architecture.dll
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Arch.X64\Inu.Kernel.Architecture.deps.json
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Arch.X64\Inu.Kernel.Architecture.dll
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Arch.X64\Inu.Kernel.Architecture.pdb

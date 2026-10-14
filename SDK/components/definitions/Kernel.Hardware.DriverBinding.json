@@ -28,7 +28,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/HAL/DriverBindingStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/DriverBindingStartup.cs"
       ]
     }
   }

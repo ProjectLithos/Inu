@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Inu.Architecture.Contracts</name>
+    </assembly>
+    <members>
+        <member name="T:Inu.Architecture.ICpuArchitecture">
+            <summary>Defines lifecycle and discovery services implemented by a processor architecture.</summary>
+            <nova.when>Use this contract when kernel code selects or initialises an architecture implementation.</nova.when>
+            <nova.depends>Inu.Core</nova.depends>
+        </member>
+        <member name="P:Inu.Architecture.ICpuArchitecture.Architecture">
+            <summary>Gets the architecture implemented by this instance.</summary>
+            <nova.when>Use this value to validate architecture selection before initialisation.</nova.when>
+            <nova.depends>Inu.Core.SupportedArchitecture</nova.depends>
+        </member>
+        <member name="M:Inu.Architecture.ICpuArchitecture.InitialiseEarly">
+            <summary>Initialises architecture state required before memory and interrupt services.</summary>
+            <nova.when>Call once on the bootstrap processor during managed bootstrap.</nova.when>
+            <nova.depends>Architecture-specific native entry support</nova.depends>
+            <returns><see langword="true"/> when early initialisation completed.</returns>
+            <example><code>bool ready = architecture.InitialiseEarly();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.ICpuArchitecture.InitialiseProcessor(System.UInt32)">
+            <summary>Initialises architecture state for one logical processor.</summary>
+            <nova.when>Call on each processor before enabling interrupts or scheduling work.</nova.when>
+            <nova.depends>InitialiseEarly</nova.depends>
+            <returns><see langword="true"/> when the processor was initialised.</returns>
+            <example><code>bool ready = architecture.InitialiseProcessor(0);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.ICpuArchitecture.EnableInterrupts">
+            <summary>Enables maskable interrupts on the current processor.</summary>
+            <nova.when>Call only after the interrupt tables and controller are ready.</nova.when>
+            <nova.depends>Architecture interrupt-entry stubs</nova.depends>
+            <returns><see langword="true"/> when interrupts are enabled.</returns>
+            <example><code>bool enabled = architecture.EnableInterrupts();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.ICpuArchitecture.DisableInterrupts">
+            <summary>Disables maskable interrupts on the current processor.</summary>
+            <nova.when>Use around short critical regions or before terminal halt.</nova.when>
+            <nova.depends>Architecture instruction binding</nova.depends>
+            <returns><see langword="true"/> when interrupts are disabled.</returns>
+            <example><code>bool disabled = architecture.DisableInterrupts();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.ICpuArchitecture.Halt">
+            <summary>Halts the current processor according to architecture policy.</summary>
+            <nova.when>Use when the current processor has no executable work or has reached a terminal state.</nova.when>
+            <nova.depends>Architecture instruction binding</nova.depends>
+            <returns><see langword="true"/> if control resumes after a non-terminal halt.</returns>
+            <example><code>bool resumed = architecture.Halt();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.ICpuArchitecture.ReadTimestamp">
+            <summary>Reads the architecture timestamp counter.</summary>
+            <nova.when>Use for monotonic low-level timing after feature validation.</nova.when>
+            <nova.depends>Architecture timestamp source</nova.depends>
+            <returns>The current architecture timestamp value.</returns>
+            <example><code>ulong ticks = architecture.ReadTimestamp();</code></example>
+        </member>
+        <member name="T:Inu.Architecture.MemoryBarrierKind">
+            <summary>Identifies architecture-independent memory barrier strengths.</summary>
+            <nova.when>Use when ordering memory operations shared with processors or devices.</nova.when>
+            <nova.depends>Architecture-specific barrier implementation</nova.depends>
+        </member>
+        <member name="F:Inu.Architecture.MemoryBarrierKind.Load">
+            <summary>Orders preceding loads before subsequent loads.</summary>
+        </member>
+        <member name="F:Inu.Architecture.MemoryBarrierKind.Store">
+            <summary>Orders preceding stores before subsequent stores.</summary>
+        </member>
+        <member name="F:Inu.Architecture.MemoryBarrierKind.Full">
+            <summary>Orders all preceding memory operations before subsequent operations.</summary>
+        </member>
+        <member name="F:Inu.Architecture.MemoryBarrierKind.Instruction">
+            <summary>Orders instruction fetching after code or translation changes.</summary>
+        </member>
+        <member name="T:Inu.Architecture.CpuFeatureResult">
+            <summary>Describes an architecture-neutral CPU feature query result.</summary>
+            <nova.when>Use when optional architecture capabilities affect kernel policy.</nova.when>
+            <nova.depends>Architecture-specific feature detector</nova.depends>
+        </member>
+        <member name="M:Inu.Architecture.CpuFeatureResult.#ctor(System.UInt32,System.Boolean,System.UInt64)">
+            <summary>Describes an architecture-neutral CPU feature query result.</summary>
+            <nova.when>Use when optional architecture capabilities affect kernel policy.</nova.when>
+            <nova.depends>Architecture-specific feature detector</nova.depends>
+        </member>
+        <member name="T:Inu.Architecture.PageTableEntryDescriptor">
+            <summary>Describes a page-table entry without exposing an architecture encoding.</summary>
+            <nova.when>Use in architecture-neutral memory-management code before requesting native encoding.</nova.when>
+            <nova.depends>Architecture-specific page-table encoder</nova.depends>
+        </member>
+        <member name="M:Inu.Architecture.PageTableEntryDescriptor.#ctor(System.UInt64,Inu.Architecture.PageTableEntryFlags)">
+            <summary>Describes a page-table entry without exposing an architecture encoding.</summary>
+            <nova.when>Use in architecture-neutral memory-management code before requesting native encoding.</nova.when>
+            <nova.depends>Architecture-specific page-table encoder</nova.depends>
+        </member>
+        <member name="T:Inu.Architecture.PageTableEntryFlags">
+            <summary>Defines architecture-neutral page-table permissions and attributes.</summary>
+            <nova.when>Use to describe mappings independently of x64 or ARM64 bit layouts.</nova.when>
+            <nova.depends>Architecture-specific page-table encoder</nova.depends>
+        </member>
+        <member name="F:Inu.Architecture.PageTableEntryFlags.None">
+            <summary>No mapping attributes are selected.</summary>
+        </member>
+        <member name="F:Inu.Architecture.PageTableEntryFlags.Present">
+            <summary>The mapping is present and valid.</summary>
+        </member>
+        <member name="F:Inu.Architecture.PageTableEntryFlags.Writable">
+            <summary>The mapping may be written.</summary>
+        </member>
+        <member name="F:Inu.Architecture.PageTableEntryFlags.User">
+            <summary>The mapping may be accessed from user mode.</summary>
+        </member>
+        <member name="F:Inu.Architecture.PageTableEntryFlags.LargePage">
+            <summary>The mapping represents a large page.</summary>
+        </member>
+        <member name="F:Inu.Architecture.PageTableEntryFlags.Global">
+            <summary>The mapping is global across address spaces.</summary>
+        </member>
+        <member name="F:Inu.Architecture.PageTableEntryFlags.NoExecute">
+            <summary>Instruction execution is prohibited.</summary>
+        </member>
+        <member name="F:Inu.Architecture.PageTableEntryFlags.Device">
+            <summary>Device or strongly ordered memory semantics are requested.</summary>
+        </member>
+        <member name="F:Inu.Architecture.PageTableEntryFlags.WriteThrough">
+            <summary>Write-through caching is requested.</summary>
+        </member>
+        <member name="F:Inu.Architecture.PageTableEntryFlags.CacheDisable">
+            <summary>Caching is disabled.</summary>
+        </member>
+        <member name="T:Inu.Architecture.ArchitectureValueResult">
+            <summary>Provides a common result for architecture operations that also return a machine value.</summary>
+            <nova.when>Use when an operation must report success separately from a zero-valued result.</nova.when>
+            <nova.depends>None</nova.depends>
+        </member>
+        <member name="M:Inu.Architecture.ArchitectureValueResult.#ctor(System.Boolean,System.UInt64)">
+            <summary>Provides a common result for architecture operations that also return a machine value.</summary>
+            <nova.when>Use when an operation must report success separately from a zero-valued result.</nova.when>
+            <nova.depends>None</nova.depends>
+        </member>
+        <member name="T:Inu.Architecture.SegmentSelector">
+            <summary>Identifies a selector loaded into an x64 segment register.</summary>
+        </member>
+        <member name="M:Inu.Architecture.SegmentSelector.#ctor(System.UInt16)">
+            <summary>Identifies a selector loaded into an x64 segment register.</summary>
+        </member>
+        <member name="P:Inu.Architecture.SegmentSelector.Index">
+            <summary>Gets the descriptor-table index encoded by this selector.</summary>
+        </member>
+        <member name="P:Inu.Architecture.SegmentSelector.PrivilegeLevel">
+            <summary>Gets the requested privilege level encoded by this selector.</summary>
+        </member>
+        <member name="M:Inu.Architecture.SegmentSelector.Create(System.UInt16,Inu.Architecture.DescriptorPrivilegeLevel)">
+            <summary>Creates a selector for a GDT entry.</summary>
+            <returns>The encoded selector value.</returns>
+        </member>
+        <member name="T:Inu.Architecture.DescriptorPrivilegeLevel">
+            <summary>Defines x64 descriptor privilege levels.</summary>
+        </member>
+        <member name="F:Inu.Architecture.DescriptorPrivilegeLevel.Kernel">
+            <summary>Kernel privilege.</summary>
+        </member>
+        <member name="F:Inu.Architecture.DescriptorPrivilegeLevel.Level1">
+            <summary>Privilege level one.</summary>
+        </member>
+        <member name="F:Inu.Architecture.DescriptorPrivilegeLevel.Level2">
+            <summary>Privilege level two.</summary>
+        </member>
+        <member name="F:Inu.Architecture.DescriptorPrivilegeLevel.User">
+            <summary>User privilege.</summary>
+        </member>
+        <member name="T:Inu.Architecture.IoPermissionBitmapPolicy">
+            <summary>Defines the I/O bitmap policy applied to an x64 TSS.</summary>
+        </member>
+        <member name="F:Inu.Architecture.IoPermissionBitmapPolicy.Disabled">
+            <summary>No bitmap is installed; all port access is controlled by IOPL.</summary>
+        </member>
+        <member name="F:Inu.Architecture.IoPermissionBitmapPolicy.DenyByDefault">
+            <summary>A caller-provided deny-by-default bitmap follows the TSS.</summary>
+        </member>
+        <member name="T:Inu.Architecture.GlobalDescriptorTableConfiguration">
+            <summary>Describes storage and selectors for one processor's x64 GDT.</summary>
+        </member>
+        <member name="M:Inu.Architecture.GlobalDescriptorTableConfiguration.#ctor(Inu.Primitives.ProcessorId,Inu.Primitives.Address,System.UInt32,Inu.Architecture.SegmentSelector,Inu.Architecture.SegmentSelector,Inu.Architecture.SegmentSelector,Inu.Architecture.SegmentSelector,Inu.Architecture.SegmentSelector)">
+            <summary>Describes storage and selectors for one processor's x64 GDT.</summary>
+        </member>
+        <member name="T:Inu.Architecture.TaskStateSegmentConfiguration">
+            <summary>Describes one processor's x64 TSS and emergency stacks.</summary>
+        </member>
+        <member name="M:Inu.Architecture.TaskStateSegmentConfiguration.#ctor(Inu.Primitives.ProcessorId,Inu.Primitives.Address,System.UInt32,Inu.Primitives.Address,Inu.Primitives.Address,Inu.Primitives.Address,Inu.Primitives.Address,Inu.Architecture.IoPermissionBitmapPolicy,Inu.Primitives.Address,System.UInt32)">
+            <summary>Describes one processor's x64 TSS and emergency stacks.</summary>
+        </member>
+        <member name="T:Inu.Architecture.IGlobalDescriptorTable">
+            <summary>Controls and installs one processor's global descriptor table.</summary>
+        </member>
+        <member name="M:Inu.Architecture.IGlobalDescriptorTable.GetProcessorId">
+            <summary>Gets the processor that owns this table.</summary>
+        </member>
+        <member name="M:Inu.Architecture.IGlobalDescriptorTable.Configure(Inu.Architecture.GlobalDescriptorTableConfiguration,Inu.Architecture.ITaskStateSegment)">
+            <summary>Builds all required descriptors into caller-owned memory.</summary>
+            <returns><see langword="true"/> when the table is valid.</returns>
+        </member>
+        <member name="M:Inu.Architecture.IGlobalDescriptorTable.Install">
+            <summary>Loads the configured table and reloads segment registers.</summary>
+            <returns><see langword="true"/> when LGDT and segment reload complete.</returns>
+        </member>
+        <member name="M:Inu.Architecture.IGlobalDescriptorTable.GetSelector(System.UInt16)">
+            <summary>Gets a configured selector by descriptor index.</summary>
+            <returns>The selector, or zero when the index is unavailable.</returns>
+        </member>
+        <member name="T:Inu.Architecture.ITaskStateSegment">
+            <summary>Controls one processor's x64 Task State Segment.</summary>
+        </member>
+        <member name="M:Inu.Architecture.ITaskStateSegment.GetProcessorId">
+            <summary>Gets the processor that owns this TSS.</summary>
+        </member>
+        <member name="M:Inu.Architecture.ITaskStateSegment.Configure(Inu.Architecture.TaskStateSegmentConfiguration)">
+            <summary>Initialises RSP0, IST stacks and I/O bitmap policy.</summary>
+            <returns><see langword="true"/> when the TSS is valid.</returns>
+        </member>
+        <member name="M:Inu.Architecture.ITaskStateSegment.Install(Inu.Architecture.SegmentSelector)">
+            <summary>Loads this TSS into the current processor's task register.</summary>
+            <returns><see langword="true"/> when LTR completes.</returns>
+        </member>
+        <member name="M:Inu.Architecture.ITaskStateSegment.SetRingZeroStack(Inu.Primitives.Address)">
+            <summary>Updates the ring-zero stack used for user-to-kernel transitions.</summary>
+            <returns><see langword="true"/> when RSP0 was updated.</returns>
+        </member>
+        <member name="M:Inu.Architecture.ITaskStateSegment.SetInterruptStack(System.Byte,Inu.Primitives.Address)">
+            <summary>Updates one Interrupt Stack Table entry.</summary>
+            <returns><see langword="true"/> when the entry was updated.</returns>
+        </member>
+        <member name="M:Inu.Architecture.ITaskStateSegment.GetAddress">
+            <summary>Gets the TSS address used by the descriptor.</summary>
+        </member>
+        <member name="M:Inu.Architecture.ITaskStateSegment.GetLimit">
+            <summary>Gets the architectural TSS limit.</summary>
+        </member>
+        <member name="T:Inu.Architecture.ICpu">
+            <summary>Defines the architecture-neutral processor operations exposed to kernel services.</summary>
+            <nova.when>Use this contract when code needs processor control without depending on x64 or ARM64 implementation details.</nova.when>
+            <nova.depends>Inu.Primitives.ProcessorId</nova.depends>
+        </member>
+        <member name="M:Inu.Architecture.ICpu.EnableInterrupts">
+            <summary>Enables maskable interrupts on the current processor.</summary>
+            <returns><see langword="true"/> when interrupts are enabled.</returns>
+            <example><code>bool enabled = cpu.EnableInterrupts();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.ICpu.DisableInterrupts">
+            <summary>Disables maskable interrupts on the current processor.</summary>
+            <returns><see langword="true"/> when interrupts are disabled.</returns>
+            <example><code>bool disabled = cpu.DisableInterrupts();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.ICpu.AreInterruptsEnabled">
+            <summary>Determines whether maskable interrupts are enabled on the current processor.</summary>
+            <returns><see langword="true"/> when interrupts are enabled; otherwise, <see langword="false"/>.</returns>
+            <example><code>bool enabled = cpu.AreInterruptsEnabled();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.ICpu.GetProcessorId">
+            <summary>Gets the stable Inu identifier for the current logical processor.</summary>
+            <returns>The current logical processor identifier.</returns>
+            <example><code>ProcessorId processor = cpu.GetProcessorId();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.ICpu.Halt">
+            <summary>Halts the current processor until an interrupt or architecture-defined wake event occurs.</summary>
+            <returns><see langword="true"/> if execution resumes after the halt operation.</returns>
+            <example><code>bool resumed = cpu.Halt();</code></example>
+        </member>
+    </members>
+</doc>

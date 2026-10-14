@@ -17,7 +17,9 @@ $ErrorActionPreference = "Stop"
 $VerbosePreference = "Continue"
 if (Test-Path variable:PSCSharpommandUseErrorActionPreference) { $PSCSharpommandUseErrorActionPreference = $false }
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$releaseVersion = ([IO.File]::ReadAllText((Join-Path (Split-Path -Parent $root) 'VERSION'))).Trim()
+$productRoot = Split-Path -Parent (Split-Path -Parent $root)
+$releaseVersion = ([IO.File]::ReadAllText((Join-Path $productRoot 'VERSION'))).Trim()
+& (Join-Path $root 'Verify-SourceOwnership.ps1')
 
 function Get-InuSdkCodeFingerprint {
     param([Parameter(Mandatory = $true)][string]$SdkRoot)
@@ -662,14 +664,14 @@ function Ensure-HighLevelUserKernelSource {
         [Parameter(Mandatory = $true)][string]$DisplayName
     )
 
-    $canonicalKernelPath = Join-Path $SdkRoot "templates\\InuKernel\\Kernel\\Kernel.cs"
+    $canonicalKernelPath = Join-Path $SdkRoot "src\\Inu.Kernel.Bootstrap\\SourceComponents\\Kernel\\Kernel.cs"
     if (-not (Test-Path -LiteralPath $canonicalKernelPath -PathType Leaf)) {
-        throw "Canonical Inu high-level user kernel template was not found: $canonicalKernelPath"
+        throw "Canonical Inu high-level user kernel source was not found: $canonicalKernelPath"
     }
 
     $canonicalSource = [IO.File]::ReadAllText($canonicalKernelPath)
     if ([string]::IsNullOrWhiteSpace($canonicalSource)) {
-        throw "Canonical Inu high-level user kernel template is empty: $canonicalKernelPath"
+        throw "Canonical Inu high-level user kernel source is empty: $canonicalKernelPath"
     }
 
     $needsRepair = -not (Test-Path -LiteralPath $KernelPath -PathType Leaf)
@@ -684,7 +686,7 @@ function Ensure-HighLevelUserKernelSource {
             New-Item -ItemType Directory -Path $kernelDirectory -Force | Out-Null
         }
         [IO.File]::WriteAllText($KernelPath, $canonicalSource)
-        Write-Host "[ OK ] Repaired empty $DisplayName from canonical SDK template: $KernelPath"
+        Write-Host "[ OK ] Repaired empty $DisplayName from canonical SDK source: $KernelPath"
     }
 
     $verifiedSource = [IO.File]::ReadAllText($KernelPath)

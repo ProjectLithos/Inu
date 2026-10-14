@@ -1,0 +1,325 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Inu.Architecture.X64</name>
+    </assembly>
+    <members>
+        <member name="T:Inu.Architecture.X64.CPU">
+            <summary>Provides direct x64 processor operations for compatibility with existing kernel code.</summary>
+            <nova.when>Use for small processor operations when the architecture has already been selected as x64.</nova.when>
+            <nova.depends>Inu x64 native entry points</nova.depends>
+        </member>
+        <member name="M:Inu.Architecture.X64.CPU.EnableInterrupts">
+            <summary>Enables maskable interrupts on the current x64 processor.</summary>
+            <returns><see langword="true"/> when interrupts were enabled.</returns>
+            <example><code>bool enabled = CPU.EnableInterrupts();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.CPU.DisableInterrupts">
+            <summary>Disables maskable interrupts on the current x64 processor.</summary>
+            <returns><see langword="true"/> when interrupts were disabled.</returns>
+            <example><code>bool disabled = CPU.DisableInterrupts();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.CPU.AreInterruptsEnabled">
+            <summary>Determines whether maskable interrupts are enabled on the current x64 processor.</summary>
+            <returns><see langword="true"/> when maskable interrupts are enabled.</returns>
+            <example><code>bool enabled = CPU.AreInterruptsEnabled();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.CPU.Halt">
+            <summary>Enters the architecture-defined terminal halt operation.</summary>
+            <returns><see langword="true"/> only if the native halt operation returns.</returns>
+            <example><code>bool resumed = CPU.Halt();</code></example>
+        </member>
+        <member name="T:Inu.Architecture.X64.Port">
+            <summary>Provides x64 port-mapped input/output operations.</summary>
+            <nova.when>Use only for hardware that exposes legacy x64 I/O ports.</nova.when>
+            <nova.depends>Inu x64 native port-I/O entry points</nova.depends>
+        </member>
+        <member name="M:Inu.Architecture.X64.Port.Write8(System.UInt16,System.Byte)">
+            <summary>Writes one byte to an x64 I/O port.</summary>
+            <param name="port">The destination I/O port.</param>
+            <param name="value">The byte to write.</param>
+            <returns><see langword="true"/> when the byte was written.</returns>
+            <example><code>bool written = Port.Write8(0x3F8, value);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.Port.TryRead8(System.UInt16,System.Byte@)">
+            <summary>Attempts to read one byte from an x64 I/O port.</summary>
+            <param name="port">The source I/O port.</param>
+            <param name="value">Receives the byte read from the port.</param>
+            <returns><see langword="true"/> when the byte was read.</returns>
+            <example><code>bool read = Port.TryRead8(0x3FD, out byte status);</code></example>
+        </member>
+        <member name="T:Inu.Architecture.X64.X64ControlRegister">
+            <summary>Identifies x64 control registers exposed through the architecture boundary.</summary>
+            <nova.when>Use with <see cref="M:Inu.Architecture.X64.X64Operations.ReadControlRegister(Inu.Architecture.X64.X64ControlRegister)"/> and <see cref="M:Inu.Architecture.X64.X64Operations.WriteControlRegister(Inu.Architecture.X64.X64ControlRegister,System.UInt64)"/>.</nova.when>
+            <nova.depends>Inu.Architecture.X64 native bindings</nova.depends>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64ControlRegister.Cr0">
+            <summary>System control flags.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64ControlRegister.Cr2">
+            <summary>Page-fault linear address.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64ControlRegister.Cr3">
+            <summary>Page-table root address.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64ControlRegister.Cr4">
+            <summary>Extended processor control flags.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64ControlRegister.Xcr0">
+            <summary>Extended control register selected by XCR index zero.</summary>
+        </member>
+        <member name="T:Inu.Architecture.X64.X64CpuFeature">
+            <summary>Identifies common x64 CPU features without exposing CPUID leaf mechanics to callers.</summary>
+            <nova.when>Use to select optional x64 facilities after early initialisation.</nova.when>
+            <nova.depends>CPUID native binding</nova.depends>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64CpuFeature.Apic">
+            <summary>APIC support.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64CpuFeature.X2Apic">
+            <summary>x2APIC support.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64CpuFeature.ExecuteDisable">
+            <summary>NX execute-disable support.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64CpuFeature.Syscall">
+            <summary>SYSCALL and SYSRET support.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64CpuFeature.FsGsBase">
+            <summary>FSGSBASE instruction support.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64CpuFeature.XSave">
+            <summary>XSAVE processor-state support.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64CpuFeature.Smep">
+            <summary>Supervisor mode execution prevention.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64CpuFeature.Smap">
+            <summary>Supervisor mode access prevention.</summary>
+        </member>
+        <member name="F:Inu.Architecture.X64.X64CpuFeature.InvariantTimestamp">
+            <summary>Invariant timestamp-counter support.</summary>
+        </member>
+        <member name="T:Inu.Architecture.X64.X64NativeBindings">
+            <summary>Contains the native function pointers required by the x64 static operation API.</summary>
+            <nova.when>Create once during native-to-managed bootstrap and bind before any x64 operation is called.</nova.when>
+            <nova.depends>Inu x64 assembly implementation</nova.depends>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64NativeBindings.#ctor(,,,,,,,,,,,,,,,,,,,)">
+            <summary>Creates a complete x64 native binding table.</summary>
+            <nova.when>Use at bootstrap after native symbols have been resolved.</nova.when>
+            <nova.depends>Inu x64 assembly implementation</nova.depends>
+            <returns>A binding table suitable for <see cref="M:Inu.Architecture.X64.X64Operations.Bind(Inu.Architecture.X64.X64NativeBindings)"/>.</returns>
+            <example><code>X64NativeBindings bindings = new(enable, disable, halt, pause, timestamp, readCr, writeCr, readMsr, writeMsr, in8, in16, in32, out8, out16, out32, barrier, atomicCompareExchange, encodePage, switchContext, detectFeature);</code></example>
+        </member>
+        <member name="T:Inu.Architecture.X64.X64Operations">
+            <summary>Provides zero-allocation static x64 operations backed by native assembly function pointers.</summary>
+            <nova.when>Use in performance-critical kernel paths after <see cref="M:Inu.Architecture.X64.X64Operations.Bind(Inu.Architecture.X64.X64NativeBindings)"/> succeeds.</nova.when>
+            <nova.depends>X64NativeBindings</nova.depends>
+        </member>
+        <member name="P:Inu.Architecture.X64.X64Operations.IsBound">
+            <summary>Gets whether a complete native x64 operation table has been bound.</summary>
+            <nova.when>Check before invoking x64 static operations during bootstrap.</nova.when>
+            <nova.depends>X64NativeBindings</nova.depends>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.Bind(Inu.Architecture.X64.X64NativeBindings)">
+            <summary>Binds the static API to architecture assembly entry points.</summary>
+            <nova.when>Call once during bootstrap before architecture services are exposed.</nova.when>
+            <nova.depends>X64NativeBindings</nova.depends>
+            <returns><see langword="true"/> when every required function pointer is present.</returns>
+            <example><code>bool bound = X64Operations.Bind(bindings);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.EnableInterrupts">
+            <summary>Enables maskable interrupts.</summary>
+            <nova.when>Use after IDT and interrupt-controller initialisation.</nova.when>
+            <nova.depends>Bound x64 STI wrapper</nova.depends>
+            <returns><see langword="true"/> when the native operation succeeds.</returns>
+            <example><code>bool enabled = X64Operations.EnableInterrupts();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.DisableInterrupts">
+            <summary>Disables maskable interrupts.</summary>
+            <nova.when>Use for short critical regions and terminal processor shutdown.</nova.when>
+            <nova.depends>Bound x64 CLI wrapper</nova.depends>
+            <returns><see langword="true"/> when the native operation succeeds.</returns>
+            <example><code>bool disabled = X64Operations.DisableInterrupts();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.Halt">
+            <summary>Executes the processor halt operation.</summary>
+            <nova.when>Use in idle or terminal loops according to interrupt policy.</nova.when>
+            <nova.depends>Bound x64 HLT wrapper</nova.depends>
+            <returns><see langword="true"/> if the call returns successfully.</returns>
+            <example><code>bool resumed = X64Operations.Halt();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.Pause">
+            <summary>Executes the processor pause hint.</summary>
+            <nova.when>Use inside bounded spin-wait loops.</nova.when>
+            <nova.depends>Bound x64 PAUSE wrapper</nova.depends>
+            <returns><see langword="true"/> when the hint was issued.</returns>
+            <example><code>bool paused = X64Operations.Pause();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.ReadTimestamp">
+            <summary>Reads the x64 timestamp counter.</summary>
+            <nova.when>Use after invariant-counter capability and synchronisation policy are established.</nova.when>
+            <nova.depends>Bound RDTSC or RDTSCP wrapper</nova.depends>
+            <returns>The timestamp value, or zero when unbound.</returns>
+            <example><code>ulong ticks = X64Operations.ReadTimestamp();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.ReadControlRegister(Inu.Architecture.X64.X64ControlRegister)">
+            <summary>Reads an x64 control register.</summary>
+            <nova.when>Use only inside privileged architecture and memory-management code.</nova.when>
+            <nova.depends>Bound control-register wrapper</nova.depends>
+            <returns>The operation result and register value.</returns>
+            <example><code>ArchitectureValueResult cr3 = X64Operations.ReadControlRegister(X64ControlRegister.Cr3);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.WriteControlRegister(Inu.Architecture.X64.X64ControlRegister,System.UInt64)">
+            <summary>Writes an x64 control register.</summary>
+            <nova.when>Use only after validating reserved bits and required serialisation.</nova.when>
+            <nova.depends>Bound control-register wrapper</nova.depends>
+            <returns><see langword="true"/> when the register was written.</returns>
+            <example><code>bool written = X64Operations.WriteControlRegister(X64ControlRegister.Cr3, root);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.ReadModelSpecificRegister(System.UInt32)">
+            <summary>Reads a model-specific register.</summary>
+            <nova.when>Use after feature detection confirms that the selected MSR exists.</nova.when>
+            <nova.depends>Bound RDMSR wrapper</nova.depends>
+            <returns>The operation result and MSR value.</returns>
+            <example><code>ArchitectureValueResult efer = X64Operations.ReadModelSpecificRegister(0xC0000080);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.WriteModelSpecificRegister(System.UInt32,System.UInt64)">
+            <summary>Writes a model-specific register.</summary>
+            <nova.when>Use after validating feature support, reserved bits and processor scope.</nova.when>
+            <nova.depends>Bound WRMSR wrapper</nova.depends>
+            <returns><see langword="true"/> when the MSR was written.</returns>
+            <example><code>bool written = X64Operations.WriteModelSpecificRegister(0xC0000080, value);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.Input8(System.UInt16)">
+            <summary>Reads an 8-bit x64 I/O port.</summary>
+            <nova.when>Use for legacy port-mapped device access.</nova.when>
+            <nova.depends>Bound IN instruction wrapper</nova.depends>
+            <returns>The operation result and byte value.</returns>
+            <example><code>ArchitectureValueResult status = X64Operations.Input8(0x3FD);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.Input16(System.UInt16)">
+            <summary>Reads a 16-bit x64 I/O port.</summary>
+            <nova.when>Use for legacy port-mapped device access requiring a word transfer.</nova.when>
+            <nova.depends>Bound IN instruction wrapper</nova.depends>
+            <returns>The operation result and word value.</returns>
+            <example><code>ArchitectureValueResult value = X64Operations.Input16(port);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.Input32(System.UInt16)">
+            <summary>Reads a 32-bit x64 I/O port.</summary>
+            <nova.when>Use for legacy port-mapped device access requiring a double-word transfer.</nova.when>
+            <nova.depends>Bound IN instruction wrapper</nova.depends>
+            <returns>The operation result and double-word value.</returns>
+            <example><code>ArchitectureValueResult value = X64Operations.Input32(port);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.Output8(System.UInt16,System.Byte)">
+            <summary>Writes an 8-bit x64 I/O port.</summary>
+            <nova.when>Use for legacy port-mapped device control.</nova.when>
+            <nova.depends>Bound OUT instruction wrapper</nova.depends>
+            <returns><see langword="true"/> when the byte was written.</returns>
+            <example><code>bool written = X64Operations.Output8(0x3F8, value);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.Output16(System.UInt16,System.UInt16)">
+            <summary>Writes a 16-bit x64 I/O port.</summary>
+            <nova.when>Use for legacy port-mapped device control requiring a word transfer.</nova.when>
+            <nova.depends>Bound OUT instruction wrapper</nova.depends>
+            <returns><see langword="true"/> when the word was written.</returns>
+            <example><code>bool written = X64Operations.Output16(port, value);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.Output32(System.UInt16,System.UInt32)">
+            <summary>Writes a 32-bit x64 I/O port.</summary>
+            <nova.when>Use for legacy port-mapped device control requiring a double-word transfer.</nova.when>
+            <nova.depends>Bound OUT instruction wrapper</nova.depends>
+            <returns><see langword="true"/> when the double word was written.</returns>
+            <example><code>bool written = X64Operations.Output32(port, value);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.MemoryBarrier(Inu.Architecture.MemoryBarrierKind)">
+            <summary>Issues an architecture memory barrier.</summary>
+            <nova.when>Use to enforce processor or device memory ordering.</nova.when>
+            <nova.depends>Bound x64 fence wrapper</nova.depends>
+            <returns><see langword="true"/> when the barrier was issued.</returns>
+            <example><code>bool ordered = X64Operations.MemoryBarrier(MemoryBarrierKind.Full);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.CompareExchange64(System.UInt64*,System.UInt64,System.UInt64)">
+            <summary>Atomically compares and exchanges a 64-bit value.</summary>
+            <nova.when>Use to build lock-free architecture services and synchronisation primitives.</nova.when>
+            <nova.depends>Bound LOCK CMPXCHG wrapper</nova.depends>
+            <returns>The operation result and value observed before exchange.</returns>
+            <example><code>ArchitectureValueResult observed = X64Operations.CompareExchange64(location, expected, replacement);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.EncodePageTableEntry(Inu.Architecture.PageTableEntryDescriptor)">
+            <summary>Encodes an architecture-neutral descriptor as an x64 page-table entry.</summary>
+            <nova.when>Use in the x64 page-table builder after physical-address validation.</nova.when>
+            <nova.depends>Bound x64 page-table encoder</nova.depends>
+            <returns>The operation result and encoded entry.</returns>
+            <example><code>ArchitectureValueResult entry = X64Operations.EncodePageTableEntry(descriptor);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.SwitchContext(System.UIntPtr,System.UIntPtr)">
+            <summary>Switches from one architecture context frame to another.</summary>
+            <nova.when>Use only from the scheduler with architecture-owned context frame addresses.</nova.when>
+            <nova.depends>Bound x64 context-switch assembly</nova.depends>
+            <returns><see langword="true"/> when control later returns to the outgoing context.</returns>
+            <example><code>bool switched = X64Operations.SwitchContext(oldFrame, newFrame);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64Operations.DetectFeature(Inu.Architecture.X64.X64CpuFeature)">
+            <summary>Queries a named x64 CPU feature.</summary>
+            <nova.when>Use before enabling optional processor facilities.</nova.when>
+            <nova.depends>Bound CPUID feature detector</nova.depends>
+            <returns>A feature result containing support and architecture-specific detail.</returns>
+            <example><code>CpuFeatureResult nx = X64Operations.DetectFeature(X64CpuFeature.ExecuteDisable);</code></example>
+        </member>
+        <member name="T:Inu.Architecture.X64.X64CpuArchitecture">
+            <summary>Implements the architecture lifecycle contract for x64 while delegating hot operations to static bindings.</summary>
+            <nova.when>Use as the selected architecture service on an x64 kernel.</nova.when>
+            <nova.depends>X64Operations</nova.depends>
+        </member>
+        <member name="P:Inu.Architecture.X64.X64CpuArchitecture.Architecture">
+            <summary>Gets the x64 architecture identifier.</summary>
+            <nova.when>Use to validate architecture selection.</nova.when>
+            <nova.depends>Inu.Core</nova.depends>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64CpuArchitecture.InitialiseEarly">
+            <summary>Validates that the x64 operation table is ready.</summary>
+            <nova.when>Call during bootstrap after binding native operations.</nova.when>
+            <nova.depends>X64Operations.Bind</nova.depends>
+            <returns><see langword="true"/> when x64 operations are bound.</returns>
+            <example><code>bool ready = architecture.InitialiseEarly();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64CpuArchitecture.InitialiseProcessor(System.UInt32)">
+            <summary>Initialises one x64 processor at the contract boundary.</summary>
+            <nova.when>Call on each logical processor after its native entry path is established.</nova.when>
+            <nova.depends>Native per-CPU GDT, TSS, IDT and APIC setup</nova.depends>
+            <returns><see langword="true"/> when the operation table is available for the processor.</returns>
+            <example><code>bool ready = architecture.InitialiseProcessor(processorId);</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64CpuArchitecture.EnableInterrupts">
+            <summary>Enables maskable interrupts through the static x64 operation API.</summary>
+            <nova.when>Call after the IDT and interrupt controller are initialised.</nova.when>
+            <nova.depends>X64Operations.EnableInterrupts</nova.depends>
+            <returns><see langword="true"/> when interrupts are enabled.</returns>
+            <example><code>bool enabled = architecture.EnableInterrupts();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64CpuArchitecture.DisableInterrupts">
+            <summary>Disables maskable interrupts through the static x64 operation API.</summary>
+            <nova.when>Use for critical regions or terminal processor shutdown.</nova.when>
+            <nova.depends>X64Operations.DisableInterrupts</nova.depends>
+            <returns><see langword="true"/> when interrupts are disabled.</returns>
+            <example><code>bool disabled = architecture.DisableInterrupts();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64CpuArchitecture.Halt">
+            <summary>Halts the current processor through the static x64 operation API.</summary>
+            <nova.when>Use in idle or terminal halt loops.</nova.when>
+            <nova.depends>X64Operations.Halt</nova.depends>
+            <returns><see langword="true"/> if execution resumes and the wrapper succeeds.</returns>
+            <example><code>bool resumed = architecture.Halt();</code></example>
+        </member>
+        <member name="M:Inu.Architecture.X64.X64CpuArchitecture.ReadTimestamp">
+            <summary>Reads the x64 timestamp counter through the static operation API.</summary>
+            <nova.when>Use after timestamp feature and synchronisation checks.</nova.when>
+            <nova.depends>X64Operations.ReadTimestamp</nova.depends>
+            <returns>The current timestamp, or zero when operations are unbound.</returns>
+            <example><code>ulong ticks = architecture.ReadTimestamp();</code></example>
+        </member>
+    </members>
+</doc>

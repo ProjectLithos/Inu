@@ -24,7 +24,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/Boot/ProtectionStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/Boot/ProtectionStartup.cs"
       ]
     }
   }

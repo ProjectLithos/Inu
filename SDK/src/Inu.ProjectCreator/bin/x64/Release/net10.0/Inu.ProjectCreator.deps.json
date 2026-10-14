@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "Inu.ProjectCreator/0.1.63": {
+        "runtime": {
+          "Inu.ProjectCreator.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Inu.ProjectCreator/0.1.63": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -34,7 +34,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/Boot/MemoryRuntimeStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/Boot/MemoryRuntimeStartup.cs"
       ]
     }
   }

@@ -1,0 +1,14 @@
+C:\KandI\Inu\SDK\src\Inu.Core\bin\x64\Debug\net10.0\Inu.Core.deps.json
+C:\KandI\Inu\SDK\src\Inu.Core\bin\x64\Debug\net10.0\Inu.Core.dll
+C:\KandI\Inu\SDK\src\Inu.Core\bin\x64\Debug\net10.0\Inu.Core.pdb
+C:\KandI\Inu\SDK\src\Inu.Core\bin\x64\Debug\net10.0\Inu.Core.xml
+C:\KandI\Inu\SDK\src\Inu.Core\obj\x64\Debug\net10.0\Inu.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\KandI\Inu\SDK\src\Inu.Core\obj\x64\Debug\net10.0\Inu.Core.AssemblyInfoInputs.cache
+C:\KandI\Inu\SDK\src\Inu.Core\obj\x64\Debug\net10.0\Inu.Core.AssemblyInfo.cs
+C:\KandI\Inu\SDK\src\Inu.Core\obj\x64\Debug\net10.0\Inu.Core.csproj.CoreCompileInputs.cache
+C:\KandI\Inu\SDK\src\Inu.Core\obj\x64\Debug\net10.0\Inu.Core.sourcelink.json
+C:\KandI\Inu\SDK\src\Inu.Core\obj\x64\Debug\net10.0\Inu.Core.dll
+C:\KandI\Inu\SDK\src\Inu.Core\obj\x64\Debug\net10.0\refint\Inu.Core.dll
+C:\KandI\Inu\SDK\src\Inu.Core\obj\x64\Debug\net10.0\Inu.Core.xml
+C:\KandI\Inu\SDK\src\Inu.Core\obj\x64\Debug\net10.0\Inu.Core.pdb
+C:\KandI\Inu\SDK\src\Inu.Core\obj\x64\Debug\net10.0\ref\Inu.Core.dll

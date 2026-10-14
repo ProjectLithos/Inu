@@ -26,7 +26,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/Startup/DesktopOrTextSessionStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/Startup/DesktopOrTextSessionStartup.cs"
       ]
     }
   }

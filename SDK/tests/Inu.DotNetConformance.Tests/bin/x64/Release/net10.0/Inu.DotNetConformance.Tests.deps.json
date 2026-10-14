@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "Inu.DotNetConformance.Tests/0.1.66": {
+        "runtime": {
+          "Inu.DotNetConformance.Tests.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Inu.DotNetConformance.Tests/0.1.66": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

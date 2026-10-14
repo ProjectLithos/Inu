@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Inu.Architecture.X64.Descriptors</name>
+    </assembly>
+    <members>
+        <member name="T:Inu.Architecture.X64.Descriptors.X64GlobalDescriptorTable">
+            <summary>Builds and installs one processor-local x64 GDT.</summary>
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64GlobalDescriptorTable.GetProcessorId">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64GlobalDescriptorTable.Configure(Inu.Architecture.GlobalDescriptorTableConfiguration,Inu.Architecture.ITaskStateSegment)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64GlobalDescriptorTable.Install">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64GlobalDescriptorTable.GetSelector(System.UInt16)">
+            <inheritdoc />
+        </member>
+        <member name="T:Inu.Architecture.X64.Descriptors.X64TaskStateSegment">
+            <summary>Initialises and owns one caller-allocated x64 Task State Segment.</summary>
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64TaskStateSegment.GetProcessorId">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64TaskStateSegment.Configure(Inu.Architecture.TaskStateSegmentConfiguration)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64TaskStateSegment.Install(Inu.Architecture.SegmentSelector)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64TaskStateSegment.SetRingZeroStack(Inu.Primitives.Address)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64TaskStateSegment.SetInterruptStack(System.Byte,Inu.Primitives.Address)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64TaskStateSegment.GetAddress">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Descriptors.X64TaskStateSegment.GetLimit">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

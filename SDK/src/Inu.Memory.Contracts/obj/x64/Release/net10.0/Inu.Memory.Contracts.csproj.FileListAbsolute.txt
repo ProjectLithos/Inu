@@ -1,0 +1,17 @@
+C:\KandI\Inu\SDK\Artifacts\UsingsBuild\Inu.Boot.Memory\Inu.Memory.Contracts.deps.json
+C:\KandI\Inu\SDK\Artifacts\UsingsBuild\Inu.Boot.Memory\Inu.Memory.Contracts.dll
+C:\KandI\Inu\SDK\Artifacts\UsingsBuild\Inu.Boot.Memory\Inu.Memory.Contracts.pdb
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\Inu.Memory.Contracts.csproj.AssemblyReference.cache
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\Inu.Memory.Contracts.GeneratedMSBuildEditorConfig.editorconfig
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\Inu.Memory.Contracts.AssemblyInfoInputs.cache
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\Inu.Memory.Contracts.AssemblyInfo.cs
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\Inu.Memory.Contracts.csproj.CoreCompileInputs.cache
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\Inu.Memory.Contracts.sourcelink.json
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\Inu.Memo.31BA119A.Up2Date
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\Inu.Memory.Contracts.dll
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\refint\Inu.Memory.Contracts.dll
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\Inu.Memory.Contracts.pdb
+C:\KandI\Inu\SDK\src\Inu.Memory.Contracts\obj\x64\Release\net10.0\ref\Inu.Memory.Contracts.dll
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Boot.Memory\Inu.Memory.Contracts.deps.json
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Boot.Memory\Inu.Memory.Contracts.dll
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Boot.Memory\Inu.Memory.Contracts.pdb

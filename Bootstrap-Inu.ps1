@@ -2,10 +2,10 @@ param([string]$Root = $PSScriptRoot, [switch]$ForceRebuild)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $Root = [IO.Path]::GetFullPath($Root)
-$VersionPath = Join-Path $Root 'VERSION'
-if(-not(Test-Path -LiteralPath $VersionPath -PathType Leaf)){throw "[FAIL] Inu VERSION is missing: $VersionPath"}
+$VersionPath = Join-Path (Split-Path -Parent $Root) 'VERSION'
+if(-not(Test-Path -LiteralPath $VersionPath -PathType Leaf)){throw "[FAIL] Kath&Inu root VERSION is missing: $VersionPath"}
 $Version = (Get-Content -LiteralPath $VersionPath -Raw).Trim()
-if($Version -notmatch '^\d+\.\d+\.\d+$'){throw "[FAIL] Inu VERSION is invalid: '$Version'"}
+if($Version -notmatch '^\d+\.\d+\.\d+$'){throw "[FAIL] Kath&Inu root VERSION is invalid: '$Version'"}
 $Bin = Join-Path $Root 'Bin'
 $DotNet = Join-Path $Root '.toolchain\DotNet\dotnet.exe'
 $Clang = Join-Path $Root '.toolchain\LLVM\bin\clang.exe'

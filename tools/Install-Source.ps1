@@ -87,6 +87,8 @@ function Remove-KnownObsolete([string]$root) {
     Remove-Item -LiteralPath (Join-Path $DestinationRoot 'Inu\Bin\Kath.exe') -Force -ErrorAction SilentlyContinue
 
     Info 'Cleaning the Kath and Inu root and removing obsolete layout files.'
+    Remove-Item -LiteralPath (Join-Path $destInu 'VERSION') -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath (Join-Path $destKath 'VERSION') -Force -ErrorAction SilentlyContinue
 
     # This is the dedicated Kath&Inu product root. Keep only the supported
     # root contract. Hidden Git metadata is preserved when present.
@@ -98,6 +100,9 @@ function Remove-KnownObsolete([string]$root) {
         }
 
     if (Test-Path -LiteralPath $destInu) {
+        foreach ($obsoleteToolchainSource in @('toolchains\Inu.NativeAot.Bootstrap.cs','toolchains\Inu.NativeAot.Bootstrap.csproj')) {
+            Remove-Item -LiteralPath (Join-Path $destInu $obsoleteToolchainSource) -Force -ErrorAction SilentlyContinue
+        }
         foreach ($name in @('Repos','toolchain','Inu.Common','Inu.Language.Input','Inu.Language.Output','Inu.Target','Inu.Build')) {
             $p = Join-Path $destInu $name
             if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p -Recurse -Force }
@@ -177,11 +182,6 @@ function Remove-KnownObsolete([string]$root) {
 }
 
 $release = Read-Version (Join-Path $SourceRoot 'VERSION') 'FullSource'
-$inuVersion = Read-Version (Join-Path $sourceInu 'VERSION') 'Inu'
-$kathVersion = Read-Version (Join-Path $sourceKath 'VERSION') 'Kath'
-if ($inuVersion -ne $release -or $kathVersion -ne $release) {
-    Fail "Version mismatch: FullSource=$release Inu=$inuVersion Kath=$kathVersion"
-}
 foreach ($p in @(
     (Join-Path $sourceInu 'src\Common\Inu.Cli\Inu.Cli.csproj'),
     (Join-Path $sourceInu 'targets\X64\PC\UEFI\Target.json'),

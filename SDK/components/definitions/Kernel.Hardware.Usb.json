@@ -30,7 +30,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/HAL/UsbHardwareStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/UsbHardwareStartup.cs"
       ]
     }
   }

@@ -13,7 +13,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 $root=$PSScriptRoot
-$releaseVersion=([IO.File]::ReadAllText((Join-Path (Split-Path -Parent $root) 'VERSION'))).Trim()
+$releaseVersion=([IO.File]::ReadAllText((Join-Path (Split-Path -Parent (Split-Path -Parent $root)) 'VERSION'))).Trim()
 $dotnet=Join-Path $root '.toolchain\DotNet\dotnet.exe'
 $launcher=Join-Path $root 'src\Inu.QemuLauncher\bin\x64\Release\net10.0\Inu.QemuLauncher.dll'
 if(!(Test-Path -LiteralPath $dotnet -PathType Leaf)){throw "Private Inu .NET host not found: $dotnet"}

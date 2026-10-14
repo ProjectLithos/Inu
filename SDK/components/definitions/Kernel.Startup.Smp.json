@@ -28,7 +28,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/Boot/SmpStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/Boot/SmpStartup.cs"
       ]
     }
   }

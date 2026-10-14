@@ -1,0 +1,15 @@
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\bin\x64\Release\net10.0\Inu.ProjectCreator.exe
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\bin\x64\Release\net10.0\Inu.ProjectCreator.deps.json
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\bin\x64\Release\net10.0\Inu.ProjectCreator.runtimeconfig.json
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\bin\x64\Release\net10.0\Inu.ProjectCreator.dll
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\bin\x64\Release\net10.0\Inu.ProjectCreator.pdb
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\obj\x64\Release\net10.0\Inu.ProjectCreator.GeneratedMSBuildEditorConfig.editorconfig
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\obj\x64\Release\net10.0\Inu.ProjectCreator.AssemblyInfoInputs.cache
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\obj\x64\Release\net10.0\Inu.ProjectCreator.AssemblyInfo.cs
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\obj\x64\Release\net10.0\Inu.ProjectCreator.csproj.CoreCompileInputs.cache
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\obj\x64\Release\net10.0\Inu.ProjectCreator.sourcelink.json
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\obj\x64\Release\net10.0\Inu.ProjectCreator.dll
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\obj\x64\Release\net10.0\refint\Inu.ProjectCreator.dll
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\obj\x64\Release\net10.0\Inu.ProjectCreator.pdb
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\obj\x64\Release\net10.0\Inu.ProjectCreator.genruntimeconfig.cache
+C:\KandI\Inu\SDK\src\Inu.ProjectCreator\obj\x64\Release\net10.0\ref\Inu.ProjectCreator.dll

@@ -1,0 +1,15 @@
+C:\KandI\Inu\SDK\Artifacts\UsingsBuild\Inu.Arch.X64\Inu.Arch.X64.deps.json
+C:\KandI\Inu\SDK\Artifacts\UsingsBuild\Inu.Arch.X64\Inu.Arch.X64.dll
+C:\KandI\Inu\SDK\Artifacts\UsingsBuild\Inu.Arch.X64\Inu.Arch.X64.pdb
+C:\KandI\Inu\SDK\src\Inu.Arch.X64\obj\x64\Release\net10.0\Inu.Arch.X64.csproj.AssemblyReference.cache
+C:\KandI\Inu\SDK\src\Inu.Arch.X64\obj\x64\Release\net10.0\Inu.Arch.X64.GeneratedMSBuildEditorConfig.editorconfig
+C:\KandI\Inu\SDK\src\Inu.Arch.X64\obj\x64\Release\net10.0\Inu.Arch.X64.csproj.CoreCompileInputs.cache
+C:\KandI\Inu\SDK\src\Inu.Arch.X64\obj\x64\Release\net10.0\Inu.Arch.X64.sourcelink.json
+C:\KandI\Inu\SDK\src\Inu.Arch.X64\obj\x64\Release\net10.0\Inu.Arch.7A156A5B.Up2Date
+C:\KandI\Inu\SDK\src\Inu.Arch.X64\obj\x64\Release\net10.0\Inu.Arch.X64.dll
+C:\KandI\Inu\SDK\src\Inu.Arch.X64\obj\x64\Release\net10.0\refint\Inu.Arch.X64.dll
+C:\KandI\Inu\SDK\src\Inu.Arch.X64\obj\x64\Release\net10.0\Inu.Arch.X64.pdb
+C:\KandI\Inu\SDK\src\Inu.Arch.X64\obj\x64\Release\net10.0\ref\Inu.Arch.X64.dll
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Arch.X64\Inu.Arch.X64.deps.json
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Arch.X64\Inu.Arch.X64.dll
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Arch.X64\Inu.Arch.X64.pdb

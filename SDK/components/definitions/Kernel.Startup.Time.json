@@ -24,7 +24,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/Boot/TimeStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/Boot/TimeStartup.cs"
       ]
     }
   }

@@ -29,6 +29,7 @@
     <ProjectReference Include="..\Inu.Kernel.Scheduler\Inu.Kernel.Scheduler.csproj" />
     <ProjectReference Include="..\Inu.Kernel.Protection\Inu.Kernel.Protection.csproj" />
     <ProjectReference Include="..\Inu.Kernel.Security\Inu.Kernel.Security.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Power\Inu.Kernel.Power.csproj" />
     <ProjectReference Include="..\Inu.Kernel.SystemCalls\Inu.Kernel.SystemCalls.csproj" />
     <ProjectReference Include="..\Inu.Kernel.Ps2\Inu.Kernel.Ps2.csproj" />
     <ProjectReference Include="..\Inu.Kernel.Processes\Inu.Kernel.Processes.csproj" />

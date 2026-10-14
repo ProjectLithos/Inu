@@ -28,7 +28,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/Boot/GraphicsStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/Boot/GraphicsStartup.cs"
       ]
     }
   }

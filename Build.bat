@@ -2,9 +2,9 @@
 setlocal EnableExtensions EnableDelayedExpansion
 set "ROOT=%~dp0"
 set "ROOT=%ROOT:~0,-1%"
-set /p INU_VERSION=<"%ROOT%\VERSION"
+set /p INU_VERSION=<"%ROOT%\..\VERSION"
 if not defined INU_VERSION (
-    echo [FAIL] Inu VERSION is missing.
+    echo [FAIL] Kath^&Inu root VERSION is missing.
     exit /b 1
 )
 for %%I in ("%ROOT%\..") do set "PRODUCT_ROOT=%%~fI"
@@ -31,17 +31,6 @@ if not exist "%ROOT%\toolchains\Inu.Toolchain.json" (
 )
 if not exist "%KATH_ROOT%\Build-Kath.bat" (
     echo [FAIL] Required source is missing: %KATH_ROOT%\Build-Kath.bat
-    exit /b 1
-)
-if not exist "%KATH_ROOT%\VERSION" (
-    echo [FAIL] Required source is missing: %KATH_ROOT%\VERSION
-    exit /b 1
-)
-
-set "KATH_VERSION="
-set /p KATH_VERSION=<"%KATH_ROOT%\VERSION"
-if /I not "%KATH_VERSION%"=="%INU_VERSION%" (
-    echo [FAIL] Inu/Kath version mismatch. Inu=%INU_VERSION% Kath=%KATH_VERSION%
     exit /b 1
 )
 if exist "%ROOT%\Repos" (

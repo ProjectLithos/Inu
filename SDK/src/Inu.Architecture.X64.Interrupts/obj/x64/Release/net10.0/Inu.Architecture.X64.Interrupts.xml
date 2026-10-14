@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Inu.Architecture.X64.Interrupts</name>
+    </assembly>
+    <members>
+        <member name="T:Inu.Architecture.X64.Interrupts.EssentialExceptionHandlers">
+            <summary>Registers essential x64 exception handling, including resumable asynchronous NMI and fatal synchronous diagnostics.</summary>
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.EssentialExceptionHandlers.#ctor(Inu.Interrupts.IInterruptDescriptorTable,Inu.Interrupts.IExceptionDiagnosticSink)">
+            <summary>Creates the essential exception handler set.</summary>
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.EssentialExceptionHandlers.RegisterAll">
+            <summary>Registers essential x64 exception handlers. NMI is asynchronous and resumable; fatal synchronous exceptions retain stop-on-fault diagnostics.</summary>
+        </member>
+        <member name="T:Inu.Architecture.X64.Interrupts.X64InterruptDescriptorTable">
+            <summary>Builds and dispatches a complete processor-local x64 IDT.</summary>
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.X64InterruptDescriptorTable.Configure(Inu.Interrupts.InterruptDescriptorTableConfiguration)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.X64InterruptDescriptorTable.Install">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.X64InterruptDescriptorTable.Register(System.Byte,Inu.Interrupts.InterruptHandler,Inu.Interrupts.InterruptRegistrationOptions)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.X64InterruptDescriptorTable.Remove(Inu.Interrupts.InterruptRegistrationHandle)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.X64InterruptDescriptorTable.IsRegistered(System.Byte)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.X64InterruptDescriptorTable.Dispatch(Inu.Interrupts.InterruptContext@)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.X64InterruptDescriptorTable.StopProcessor">
+            <summary>Stops the current processor through the native terminal halt loop.</summary>
+        </member>
+        <member name="T:Inu.Architecture.X64.Interrupts.X64InterruptVectorAllocator">
+            <summary>Allocates x64 device vectors only from Inu's formal dynamic-device vector band.</summary>
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.X64InterruptVectorAllocator.Allocate">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.X64InterruptVectorAllocator.Release(System.Byte)">
+            <inheritdoc />
+        </member>
+        <member name="M:Inu.Architecture.X64.Interrupts.X64InterruptVectorAllocator.IsAllocated(System.Byte)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

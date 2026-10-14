@@ -124,7 +124,7 @@ function Install-DotNet([string]$RepositoryRoot, [pscustomobject]$Manifest) {
 }
 
 function Install-NativeAot([string]$RepositoryRoot, [string]$DotNet, [pscustomobject]$Manifest) {
-    $project = Join-Path $RepositoryRoot 'toolchains\Inu.NativeAot.Bootstrap.csproj'
+    $project = Join-Path $RepositoryRoot 'SDK\toolchain\Inu.NativeAot.Bootstrap.csproj'
     $packages = Join-Path $RepositoryRoot $Manifest.nativeAot.packageDirectory
     $compilerPackage = Join-Path $packages ("microsoft.dotnet.ilcompiler\" + $Manifest.nativeAot.packageVersion)
     $hostPackage = Join-Path $packages ("runtime.win-x64.microsoft.dotnet.ilcompiler\" + $Manifest.nativeAot.packageVersion)

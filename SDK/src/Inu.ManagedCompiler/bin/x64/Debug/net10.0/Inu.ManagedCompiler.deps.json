@@ -1,0 +1,55 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "Inu.ManagedCompiler/0.1.65": {
+        "dependencies": {
+          "Inu.ProjectModel": "0.1.65"
+        },
+        "runtime": {
+          "Inu.ManagedCompiler.dll": {}
+        }
+      },
+      "Inu.Core/0.1.65": {
+        "runtime": {
+          "Inu.Core.dll": {
+            "assemblyVersion": "0.1.65.0",
+            "fileVersion": "0.1.65.0"
+          }
+        }
+      },
+      "Inu.ProjectModel/0.1.65": {
+        "dependencies": {
+          "Inu.Core": "0.1.65"
+        },
+        "runtime": {
+          "Inu.ProjectModel.dll": {
+            "assemblyVersion": "0.1.65.0",
+            "fileVersion": "0.1.65.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Inu.ManagedCompiler/0.1.65": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Inu.Core/0.1.65": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Inu.ProjectModel/0.1.65": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

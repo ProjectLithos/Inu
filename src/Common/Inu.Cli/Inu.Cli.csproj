@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <AssemblyName>inu</AssemblyName>
     <RootNamespace>Inu.Cli</RootNamespace>
-    <Version>0.1.66</Version>
-    <FileVersion>0.1.66.0</FileVersion>
-    <AssemblyVersion>0.1.66.0</AssemblyVersion>
+    <Version>0.1.67</Version>
+    <FileVersion>0.1.67.0</FileVersion>
+    <AssemblyVersion>0.1.67.0</AssemblyVersion>
   </PropertyGroup>
 </Project>

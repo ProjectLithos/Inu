@@ -32,7 +32,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/Boot/BootDiagnosticsStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/Boot/BootDiagnosticsStartup.cs"
       ]
     }
   }

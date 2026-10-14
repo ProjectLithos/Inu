@@ -24,7 +24,7 @@
       "status": "available",
       "project": null,
       "sources": [
-        "templates/InuKernel/Startup/TimerDispatchStartup.cs"
+        "src/Inu.Kernel.Bootstrap/SourceComponents/Startup/TimerDispatchStartup.cs"
       ]
     }
   }

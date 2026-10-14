@@ -1,0 +1,12 @@
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Userland.Shell\Inu.Userland.Shell.deps.json
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Userland.Shell\Inu.Userland.Shell.dll
+C:\KandI\Inu\SDK\Artifacts\ReferenceBuild\Inu.Userland.Shell\Inu.Userland.Shell.pdb
+C:\KandI\Inu\SDK\src\Userland\Shell\obj\x64\Release\net10.0\Inu.Userland.Shell.csproj.AssemblyReference.cache
+C:\KandI\Inu\SDK\src\Userland\Shell\obj\x64\Release\net10.0\Inu.Userland.Shell.GeneratedMSBuildEditorConfig.editorconfig
+C:\KandI\Inu\SDK\src\Userland\Shell\obj\x64\Release\net10.0\Inu.Userland.Shell.csproj.CoreCompileInputs.cache
+C:\KandI\Inu\SDK\src\Userland\Shell\obj\x64\Release\net10.0\Inu.Userland.Shell.sourcelink.json
+C:\KandI\Inu\SDK\src\Userland\Shell\obj\x64\Release\net10.0\Inu.User.759EF2CC.Up2Date
+C:\KandI\Inu\SDK\src\Userland\Shell\obj\x64\Release\net10.0\Inu.Userland.Shell.dll
+C:\KandI\Inu\SDK\src\Userland\Shell\obj\x64\Release\net10.0\refint\Inu.Userland.Shell.dll
+C:\KandI\Inu\SDK\src\Userland\Shell\obj\x64\Release\net10.0\Inu.Userland.Shell.pdb
+C:\KandI\Inu\SDK\src\Userland\Shell\obj\x64\Release\net10.0\ref\Inu.Userland.Shell.dll
