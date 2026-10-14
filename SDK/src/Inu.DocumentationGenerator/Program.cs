@@ -7,8 +7,7 @@ if (args.Length == 0 || args[0] is "--help" or "-h")
 }
 if (!string.Equals(args[0], "generate", StringComparison.OrdinalIgnoreCase))
 {
-    Console.Error.WriteLine($"Unknown command: {args[0]}");
-    return 2;
+    throw new ArgumentException($"Unknown command: {args[0]}", nameof(args));
 }
 
 string root = FindRepositoryRoot(GetOption(args, "--root") ?? Directory.GetCurrentDirectory());
@@ -28,9 +27,7 @@ if (validate && configuration.RequireDocumentationForPublicItems)
 HtmlSiteWriter.Write(root, configuration, projects);
 Console.WriteLine("[ OK ] Generated Inu SDK current API site from Inu.ApiContract.json.");
 Console.WriteLine($@"[INFO] Explicit API documentation audit: {findings.Count} finding(s). See Artifacts\Documentation\PublicApiAudit.json and Inu.ApiCompatibility.json.");
-if (failures.Count == 0) return 0;
-foreach (string failure in failures) Console.Error.WriteLine($"[FAIL] {failure}");
-return 1;
+if (failures.Count != 0) throw new InvalidOperationException(string.Join(Environment.NewLine, failures));
 
 static string? GetOption(string[] arguments, string name)
 {

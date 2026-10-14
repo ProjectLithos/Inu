@@ -9,14 +9,14 @@ static int MainEntry(string[] args)
 {
     if (args.Length < 1 || !string.Equals(args[0], "create", StringComparison.OrdinalIgnoreCase))
     {
-        return Fail("Usage: Inu.ProjectCreator create [--output <directory>] [--sdk-root <directory>]");
+        throw Fail("Usage: Inu.ProjectCreator create [--output <directory>] [--sdk-root <directory>]");
     }
 
     string sdkRoot = Path.GetFullPath(GetOption(args, "--sdk-root") ?? FindSdkRoot(AppContext.BaseDirectory));
     string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     string output = Path.GetFullPath(GetOption(args, "--output") ?? Path.Combine(userProfile, "Source", "Repos", "InuKernel"));
     string template = Path.Combine(sdkRoot, "templates", "InuKernel");
-    if (!Directory.Exists(template)) return Fail($"Kernel project template was not found: {template}");
+    if (!Directory.Exists(template)) throw Fail($"Kernel project template was not found: {template}");
 
     Directory.CreateDirectory(output);
     foreach (string obsoleteSolution in Directory.EnumerateFiles(output, "*.sln", SearchOption.TopDirectoryOnly).Concat(Directory.EnumerateFiles(output, "*.slnx", SearchOption.TopDirectoryOnly)))
@@ -25,9 +25,9 @@ static int MainEntry(string[] args)
         Console.WriteLine($"[ OK ] Removed obsolete Visual Studio solution file: {obsoleteSolution}");
     }
     string? mainProjectPath = ResolveMainProjectPath(output);
-    if (mainProjectPath is null) return 1;
-    if (!RemoveSdkOwnedLegacyTrees(output)) return 1;
-    if (!MaterializeCanonicalUserlandWorkspace(sdkRoot, output)) return 1;
+    if (mainProjectPath is null) throw new InvalidOperationException("Could not resolve the kernel project path.");
+    if (!RemoveSdkOwnedLegacyTrees(output)) throw new InvalidOperationException("Could not remove SDK-owned legacy trees.");
+    if (!MaterializeCanonicalUserlandWorkspace(sdkRoot, output)) throw new InvalidOperationException("Could not materialize the canonical userland workspace.");
 
     // SDK-owned implementation remains canonical under $(InuSdkRoot)\src. Generated projects
     // carry only project-owned scaffolding plus user-editable workspace projects.
@@ -71,7 +71,7 @@ static int MainEntry(string[] args)
     }
 
     string mainProjectFileName = Path.GetFileName(mainProjectPath);
-    if (string.IsNullOrWhiteSpace(mainProjectFileName)) return Fail($"Kernel project filename is invalid: {mainProjectPath}");
+    if (string.IsNullOrWhiteSpace(mainProjectFileName)) throw Fail($"Kernel project filename is invalid: {mainProjectPath}");
     File.Copy(Path.Combine(template, "InuKernel.csproj"), mainProjectPath, true);
 
     string manifestPath = Path.Combine(output, "InuProject.json");
@@ -150,8 +150,7 @@ static int MainEntry(string[] args)
         }
         catch (JsonException)
         {
-            Console.Error.WriteLine($"[FAIL] Inu configuration is malformed: {configurationPath}");
-            return 1;
+            throw new InvalidDataException($"Inu configuration is malformed: {configurationPath}");
         }
     }
 
@@ -189,18 +188,17 @@ static int MainEntry(string[] args)
         }
         catch (JsonException)
         {
-            Console.Error.WriteLine($"[FAIL] Kath configuration is malformed: {ideConfigurationPath}");
-            return 1;
+            throw new InvalidDataException($"Kath configuration is malformed: {ideConfigurationPath}");
         }
     }
 
-    if (!RepairTestOsKernelStorageImport(output, projectName, testOs)) return 1;
-    if (!MaterializeCoderCommands(sdkRoot, output, projectName)) return 1;
+    if (!RepairTestOsKernelStorageImport(output, projectName, testOs)) throw new InvalidOperationException("Could not repair the Test OS kernel storage import.");
+    if (!MaterializeCoderCommands(sdkRoot, output, projectName)) throw new InvalidOperationException("Could not materialize coder commands.");
     // Shell.cs is coder-owned. Never rewrite it during compile/run preparation, even when it
     // still contains markers from an older generated template. Existing shell source is preserved
     // byte-for-byte; new projects receive the current template only when the file is absent.
     EnsureProvidedWorkspaceFoldersVisible(output);
-    if (!RefreshCentralKernelConsoleSourcePlan(sdkRoot, output)) return 1;
+    if (!RefreshCentralKernelConsoleSourcePlan(sdkRoot, output)) throw new InvalidOperationException("Could not refresh the central kernel console source plan.");
 
     File.WriteAllText(manifestPath, JsonSerializer.Serialize(new
     {
@@ -255,7 +253,7 @@ static bool RepairTestOsKernelStorageImport(string output, string projectName, b
         else
         {
             int namespaceIndex = source.IndexOf("namespace ", StringComparison.Ordinal);
-            if (namespaceIndex < 0) return Fail($"Test OS kernel uses filesystem APIs but has no namespace declaration to anchor the Inu.Kernel.Storage import: {kernelPath}") == 0;
+            if (namespaceIndex < 0) throw Fail($"Test OS kernel uses filesystem APIs but has no namespace declaration to anchor the Inu.Kernel.Storage import: {kernelPath}");
             source = source.Insert(namespaceIndex, "using Inu.Kernel.Storage;" + Environment.NewLine + Environment.NewLine);
         }
 
@@ -363,11 +361,7 @@ static bool RefreshCentralKernelConsoleSourcePlan(string sdkRoot, string output)
     }
 }
 
-static bool FailBool(string message)
-{
-    Console.Error.WriteLine($"[FAIL] {message}");
-    return false;
-}
+static bool FailBool(string message) => throw new InvalidOperationException(message);
 
 static string? ResolveMainProjectPath(string output)
 {
@@ -650,8 +644,4 @@ static string? GetOption(ReadOnlySpan<string> args, string name)
     return null;
 }
 
-static int Fail(string message)
-{
-    Console.Error.WriteLine($"[FAIL] {message}");
-    return 1;
-}
+static Exception Fail(string message) => new InvalidOperationException(message);

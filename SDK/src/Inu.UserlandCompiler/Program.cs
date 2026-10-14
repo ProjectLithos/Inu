@@ -8,8 +8,8 @@ return MainEntry(args);
 static int MainEntry(string[] args)
 {
     if(args.Length<2||!string.Equals(args[0],"compile",StringComparison.OrdinalIgnoreCase))
-        return Fail("Usage: Inu.UserlandCompiler compile <InuProject.json> --dotnet <path> --ilc <path> --lld-link <path> --nasm <path> --native-root <path> --sdk-root <path> [--configuration Debug|Release]");
-    if(!InuProject.TryLoad(args[1],out InuProject? project,out string error)||project is null)return Fail(error);
+        throw Fail("Usage: Inu.UserlandCompiler compile <InuProject.json> --dotnet <path> --ilc <path> --lld-link <path> --nasm <path> --native-root <path> --sdk-root <path> [--configuration Debug|Release]");
+    if(!InuProject.TryLoad(args[1],out InuProject? project,out string error)||project is null)throw Fail(error);
     string dotnet=GetOption(args,"--dotnet")??"dotnet";
     string ilc=GetOption(args,"--ilc")??returnFail("--ilc is required");
     string lld=GetOption(args,"--lld-link")??returnFail("--lld-link is required");
@@ -33,13 +33,11 @@ static int MainEntry(string[] args)
     string userEntryObject=Path.Combine(nativeRoot,"UserEntry.obj");
     string userExceptionSource=Path.Combine(sdkRoot,"native","x64","ExceptionHandling.asm");
     string userExceptionObject=Path.Combine(nativeRoot,"UserExceptionHandling.obj");
-    if(!File.Exists(userEntrySource)||!File.Exists(Path.Combine(nativeRoot,"Runtime.obj"))||!File.Exists(userExceptionSource))return Fail("Userland native runtime objects are missing. Build the Inu x64 native substrate first.");
+    if(!File.Exists(userEntrySource)||!File.Exists(Path.Combine(nativeRoot,"Runtime.obj"))||!File.Exists(userExceptionSource))throw Fail("Userland native runtime objects are missing. Build the Inu x64 native substrate first.");
     bool force=HasOption(args,"--force-rebuild");
     string cacheDirectory=Path.Combine(project.OutputDirectory,"StageCache","Userland");
-    int rc=UserlandStageCache.Run("Userland entry assembly",cacheDirectory,[userEntrySource,nasm],[userEntryObject],["-f","win64"],force,()=>Run(nasm,["-f","win64",userEntrySource,"-o",userEntryObject],sdkRoot));
-    if(rc!=0)return Fail($"NASM failed for UserEntry.asm with exit code {rc}.");
-    rc=UserlandStageCache.Run("Userland exception assembly",cacheDirectory,[userExceptionSource,nasm],[userExceptionObject],["-f","win64","-DINU_USERLAND=1"],force,()=>Run(nasm,["-f","win64","-DINU_USERLAND=1",userExceptionSource,"-o",userExceptionObject],sdkRoot));
-    if(rc!=0)return Fail($"NASM failed for ring-3 exception helpers with exit code {rc}.");
+    UserlandStageCache.Run("Userland entry assembly",cacheDirectory,[userEntrySource,nasm],[userEntryObject],["-f","win64"],force,()=>Run(nasm,["-f","win64",userEntrySource,"-o",userEntryObject],sdkRoot));
+    UserlandStageCache.Run("Userland exception assembly",cacheDirectory,[userExceptionSource,nasm],[userExceptionObject],["-f","win64","-DINU_USERLAND=1"],force,()=>Run(nasm,["-f","win64","-DINU_USERLAND=1",userExceptionSource,"-o",userExceptionObject],sdkRoot));
     string directoryBuildProps=Path.Combine(sdkRoot,"Directory.Build.props");
     // Cache against the compiler source/project rather than this freshly rebuilt host DLL.
     // Rebuilding Inu.UserlandCompiler can produce a different binary identity even when its
@@ -58,30 +56,21 @@ static int MainEntry(string[] args)
     Console.WriteLine($"[INFO] Ring-3 build is checking {executableCount} userland executable(s) ({(File.Exists(shellSource)?"Shell + ":String.Empty)}{commandCount} command(s)); only stale inputs will be recompiled.");
     if(File.Exists(shellSource))
     {
-        if(!ValidateLiteralPathPolicy(shellSource))return 1;
+        ValidateLiteralPathPolicy(shellSource);
         string shellType=FindTypeWithMethod(shellSource,"Configure")??returnFail($"Could not find Shell.Configure in {shellSource}");
-        if(FindTypeWithMethod(shellSource,"Run") is string runType && string.Equals(runType,shellType,StringComparison.Ordinal))
-        {
-            rc=CompileApp("Shell",[shellSource],$"if(!_configured){{global::{shellType}.Configure();_configured=true;}} global::{shellType}.Run(); return 0;",true,Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
-        }
-        else
-        {
-            // Compatibility for coder-owned shells generated before 0.0.80. New shells own their
-            // complete Run() loop directly in Shell.cs and do not use this provided runtime.
-            string shellRuntime=Path.Combine(projectRoot,"Userland","Provided","Shell","InuShell.cs");
-            if(!File.Exists(shellRuntime))shellRuntime=Path.Combine(sdkRoot,"src","Userland","Shell","InuShell.cs");
-            if(!HasPromptMember(shellSource))return Fail($"Coder-owned shell source must define public static Run() (preferred) or the legacy Prompt string: {shellSource}");
-            rc=CompileApp("Shell",[shellRuntime,shellSource],$"if(!_configured){{global::{shellType}.Configure();_configured=true;}} return global::Inu.Userland.Shell.InuShell.Run(global::{shellType}.Prompt);",true,Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
-        }
-        if(rc!=0)return rc;
+        string? runType=FindTypeWithMethod(shellSource,"Run");
+        if(runType is null||!string.Equals(runType,shellType,StringComparison.Ordinal))throw Fail($"Coder-owned shell source must define public static Run() on the same type as Configure(): {shellSource}");
+        string shellRuntime=Path.Combine(projectRoot,"Userland","Provided","Shell","InuShell.cs");
+        if(!File.Exists(shellRuntime))shellRuntime=Path.Combine(sdkRoot,"src","Userland","Shell","InuShell.cs");
+        CompileApp("Shell",[shellRuntime,shellSource],$"global::Inu.Userland.Shell.InuShell.Run(global::{shellType}.Configure, global::{shellType}.Run); return 0;",true,Path.Combine(outputRoot,"Shell","SHELL.EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
     }
 
     if(Directory.Exists(commands))
     {
         foreach(string source in Directory.GetFiles(commands,"*.cs",SearchOption.TopDirectoryOnly).OrderBy(Path.GetFileName,StringComparer.OrdinalIgnoreCase))
         {
-            if(!ValidateLiteralPathPolicy(source))return 1;
-            string? type=FindTypeWithMethod(source,"Main");if(type is null)return Fail($"Command source has no public static Main: {source}");
+            ValidateLiteralPathPolicy(source);
+            string? type=FindTypeWithMethod(source,"Main");if(type is null)throw Fail($"Command source has no public static Main: {source}");
             Boolean withArguments=HasStringArrayMain(source,type),returnsVoid=MainReturnsVoid(source);
             string invocation=withArguments?$"global::{type}.Main(global::Inu.Userland.Runtime.CommandLine.GetArguments())":$"global::{type}.Main()";
             string body=returnsVoid?$"{invocation}; return 0;":$"return {invocation};";
@@ -89,11 +78,10 @@ static int MainEntry(string[] args)
             // The generated GUI command is a normal executable and may include the coder GUI entry source.
             if(string.Equals(Path.GetFileNameWithoutExtension(source),"Gui",StringComparison.OrdinalIgnoreCase))
             {
-                string gui=Path.Combine(coderRoot,"Gui.cs");if(File.Exists(gui)){if(!ValidateLiteralPathPolicy(gui))return 1;sources.Add(gui);}
+                string gui=Path.Combine(coderRoot,"Gui.cs");if(File.Exists(gui)){ValidateLiteralPathPolicy(gui);sources.Add(gui);}
             }
             string name=Sanitize(Path.GetFileNameWithoutExtension(source));
-            rc=CompileApp(name,sources,body,false,Path.Combine(outputRoot,"Commands",name.ToUpperInvariant()+".EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
-            if(rc!=0)return rc;
+            CompileApp(name,sources,body,false,Path.Combine(outputRoot,"Commands",name.ToUpperInvariant()+".EXE"),dotnet,ilc,lld,userEntryObject,userExceptionObject,nativeRoot,sdkRoot,configuration,cacheDirectory,sharedIdentity,ilcIdentity,force);
         }
     }
     string commandsOutput=Path.Combine(outputRoot,"Commands");
@@ -106,7 +94,7 @@ static int MainEntry(string[] args)
     static string returnFail(string message)=>throw new ArgumentException(message);
 }
 
-static bool ValidateLiteralPathPolicy(string sourcePath)
+static void ValidateLiteralPathPolicy(string sourcePath)
 {
     string text=File.ReadAllText(sourcePath);
     MatchCollection separatorMatches=Regex.Matches(text,@"\bFileSystemPaths\.SetPathSeparator\s*\(\s*'(\\.|[^'\\])'\s*\)");
@@ -160,7 +148,7 @@ static bool ValidateLiteralPathPolicy(string sourcePath)
             if(IsSeparatorLike(c)&&c!=separator)ReportInvalidSeparator(sourcePath,text,i,separator,c,ref valid);
         }
     }
-    return valid;
+    if(!valid) throw new InvalidOperationException($"Literal path policy validation failed: {sourcePath}");
 }
 
 
@@ -186,12 +174,12 @@ static (int Line,int Column) SourceLocation(string text,int index)
     return (line,column);
 }
 
-static int CompileApp(string name,IReadOnlyList<string> sources,string callBody,bool shellLifecycle,string output,string dotnet,string ilc,string lld,string userEntry,string userException,string nativeRoot,string sdkRoot,string configuration,string cacheDirectory,string sharedIdentity,string ilcIdentity,bool force)
+static void CompileApp(string name,IReadOnlyList<string> sources,string callBody,bool shellLifecycle,string output,string dotnet,string ilc,string lld,string userEntry,string userException,string nativeRoot,string sdkRoot,string configuration,string cacheDirectory,string sharedIdentity,string ilcIdentity,bool force)
 {
     string work=Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(output)!)!,"Build",Sanitize(name));
     Directory.CreateDirectory(work);Directory.CreateDirectory(Path.GetDirectoryName(output)!);
     string entry=Path.Combine(sdkRoot,"templates","Userland","UserApplicationEntry.cs");
-    if(!File.Exists(entry))return Fail($"Shared userland entry wrapper is missing: {entry}");
+    if(!File.Exists(entry))throw Fail($"Shared userland entry wrapper is missing: {entry}");
     string binding=Path.Combine(work,"ApplicationEntryBinding.cs");
     File.WriteAllText(binding,$$"""
 using System;
@@ -199,7 +187,7 @@ using Inu.Userland.Runtime;
 
 internal static class InuUserApplicationBinding
 {
-{{(shellLifecycle ? "    private static Boolean _configured;\n" : String.Empty)}}    internal static Int32 Invoke()
+    internal static Int32 Invoke()
     {
         {{callBody}}
     }
@@ -212,12 +200,12 @@ internal static class InuUserApplicationBinding
     xml.AppendLine("</ItemGroup></Project>");File.WriteAllText(project,xml.ToString());
     string managed=Path.Combine(work,"Managed");Directory.CreateDirectory(managed);
     string[] buildArgs=["build",project,"--configuration",configuration,"--output",managed,"--nologo","-p:PublishAot=false","-p:SelfContained=false"];
-    int rc=UserlandStageCache.Run(name+" managed IL",cacheDirectory,sources.Concat([entry,binding,project]),[managed],buildArgs.Concat([sharedIdentity]),force,()=>{if(Directory.Exists(managed))Directory.Delete(managed,true);Directory.CreateDirectory(managed);return Run(dotnet,buildArgs,work);});if(rc!=0)return Fail($"Managed userland build failed for {name} with exit code {rc}.");
-    string[] dlls=Directory.GetFiles(managed,"*.dll").OrderBy(x=>x,StringComparer.OrdinalIgnoreCase).ToArray();if(dlls.Length==0)return Fail($"Managed userland build produced no assemblies for {name}.");
+    UserlandStageCache.Run(name+" managed IL",cacheDirectory,sources.Concat([entry,binding,project]),[managed],buildArgs.Concat([sharedIdentity]),force,()=>{if(Directory.Exists(managed))Directory.Delete(managed,true);Directory.CreateDirectory(managed);return Run(dotnet,buildArgs,work);});
+    string[] dlls=Directory.GetFiles(managed,"*.dll").OrderBy(x=>x,StringComparer.OrdinalIgnoreCase).ToArray();if(dlls.Length==0)throw Fail($"Managed userland build produced no assemblies for {name}.");
     string native=Path.Combine(work,name+".obj");List<string> ilcArgs=[..dlls,$"-o:{native}","--systemmodule","System.Private.CoreLib","--targetos:win","--targetarch:x64","--nativelib","--directpinvoke:*","--noscan","--root","Inu.Runtime.UserlandNativeAot","--root","Inu.Userland.Runtime","--scanreflection","--nopreinitstatics"];
-    rc=UserlandStageCache.Run(name+" NativeAOT",cacheDirectory,dlls,[native],ilcArgs.Concat([ilcIdentity]),force,()=>Run(ilc,ilcArgs,sdkRoot));if(rc!=0)return Fail($"NativeAOT userland compilation failed for {name} with exit code {rc}.");
+    UserlandStageCache.Run(name+" NativeAOT",cacheDirectory,dlls,[native],ilcArgs.Concat([ilcIdentity]),force,()=>Run(ilc,ilcArgs,sdkRoot));
     List<string> link=["/nologo","/subsystem:native","/machine:x64","/nodefaultlib","/entry:InuUserEntry","/base:0x0000400000100000","/fixed","/merge:.modules=.rdata","/errorlimit:64",$"/out:{output}",userEntry,Path.Combine(nativeRoot,"Runtime.obj"),userException,native];
-    rc=UserlandStageCache.Run(name+" native link",cacheDirectory,[lld,userEntry,userException,native,Path.Combine(nativeRoot,"Runtime.obj")],[output],link,force,()=>Run(lld,link,work));if(rc!=0)return Fail($"Userland link failed for {name} with exit code {rc}.");if(!File.Exists(output))return Fail($"Userland linker did not produce {output}");Console.WriteLine($"[ OK ] Ring-3 executable: {output}");return 0;
+    UserlandStageCache.Run(name+" native link",cacheDirectory,[lld,userEntry,userException,native,Path.Combine(nativeRoot,"Runtime.obj")],[output],link,force,()=>Run(lld,link,work));if(!File.Exists(output))throw Fail($"Userland linker did not produce {output}");Console.WriteLine($"[ OK ] Ring-3 executable: {output}");return;
 }
 
 static string FindCoderUserlandRoot(string projectRoot,string osName)
@@ -252,7 +240,6 @@ static string? FindTypeWithMethod(string file,string method)
 }
 static bool HasStringArrayMain(string file,string type)=>Regex.IsMatch(File.ReadAllText(file),@"\bMain\s*\(\s*(?:string|String)\s*\[\s*\]\s+[A-Za-z_]");
 static bool MainReturnsVoid(string file)=>Regex.IsMatch(File.ReadAllText(file),@"\b(?:public\s+)?static\s+(?:void|Void)\s+Main\s*\(");
-static bool HasPromptMember(string file)=>Regex.IsMatch(File.ReadAllText(file),@"\b(?:const\s+)?(?:string|String)\s+Prompt\b");
 static string Sanitize(string value)=>Regex.Replace(value,@"[^A-Za-z0-9_.-]","_");
 static string Esc(string value)=>value.Replace("&","&amp;").Replace("\"","&quot;");
 
@@ -269,6 +256,6 @@ static string CompilationRelevantBuildProps(string path)
 }
 static string? GetOption(string[] args,string name){for(int i=0;i+1<args.Length;i++)if(string.Equals(args[i],name,StringComparison.OrdinalIgnoreCase))return args[i+1];return null;}
 static int Run(string file,IEnumerable<string> args,string cwd){ProcessStartInfo psi=new(file){WorkingDirectory=cwd,UseShellExecute=false};foreach(string arg in args)psi.ArgumentList.Add(arg);using Process p=Process.Start(psi)!;p.WaitForExit();return p.ExitCode;}
-static int Fail(string message){Console.Error.WriteLine("[FAIL] "+message);return 1;}
+static Exception Fail(string message) => new InvalidOperationException(message);
 
 static bool HasOption(string[] args,string name)=>args.Any(a=>string.Equals(a,name,StringComparison.OrdinalIgnoreCase));

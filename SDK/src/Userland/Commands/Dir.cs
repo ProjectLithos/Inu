@@ -8,18 +8,15 @@ namespace Inu.Userland.Commands;
 
 public static class Dir
 {
-    public static int Main(string[] args)
+    public static void Main(string[] args)
     {
         if (args.Length > 1)
         {
-            Console.WriteLine("Usage: dir [path]");
-            return 1;
+            throw new ArgumentException("Usage: dir [path]", nameof(args));
         }
 
         string path = args.Length == 0 ? Directory.GetCurrentDirectory() : args[0];
 
-        try
-        {
             string[] entries = Directory.GetFileSystemEntries(path);
             List<string> directories = new();
             List<string> files = new();
@@ -60,14 +57,7 @@ public static class Dir
                 output.Append('\n');
             }
 
-            Console.Write(output.ToString());
-            return 0;
-        }
-        catch (Exception)
-        {
-            Console.WriteLine("Directory not found or could not be read: " + path);
-            return 1;
-        }
+        Console.Write(output.ToString());
     }
 
     private static string GetName(string path)

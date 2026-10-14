@@ -9,12 +9,12 @@ static int MainEntry(string[] args)
 {
     if (args.Length < 2 || !string.Equals(args[0], "compile", StringComparison.OrdinalIgnoreCase))
     {
-        return Fail("Usage: Inu.ManagedCompiler compile <InuProject.json> [--dotnet <path>] [--ilc <path>] [--configuration Debug|Release] [--sdk-root <path>] [--runtime-conformance] [--test-os] [--source-debug-rendezvous] [--dry-run]");
+        throw Fail("Usage: Inu.ManagedCompiler compile <InuProject.json> [--dotnet <path>] [--ilc <path>] [--configuration Debug|Release] [--sdk-root <path>] [--runtime-conformance] [--test-os] [--source-debug-rendezvous] [--dry-run]");
     }
 
     if (!InuProject.TryLoad(args[1], out InuProject? project, out string error) || project is null)
     {
-        return Fail(error);
+        throw Fail(error);
     }
 
     string dotnet = GetOption(args, "--dotnet") ?? "dotnet";
@@ -25,7 +25,7 @@ static int MainEntry(string[] args)
     bool sourceDebugRendezvous = HasOption(args, "--source-debug-rendezvous");
     if (sourceDebugRendezvous && !debugBuild)
     {
-        return Fail("--source-debug-rendezvous requires --configuration Debug.");
+        throw Fail("--source-debug-rendezvous requires --configuration Debug.");
     }
     bool dryRun = HasOption(args, "--dry-run");
     string repositoryRoot = Path.GetFullPath(GetOption(args, "--sdk-root") ?? FindRepositoryRoot(Path.GetDirectoryName(project.ProjectFile)!));
@@ -72,7 +72,7 @@ static int MainEntry(string[] args)
     int exitCode = Run(dotnet, buildArguments, Path.GetDirectoryName(project.ProjectFile)!);
     if (exitCode != 0)
     {
-        return Fail($"Inu bootstrap C# compilation failed with exit code {exitCode}.");
+        throw Fail($"Inu bootstrap C# compilation failed with exit code {exitCode}.");
     }
 
     string assemblyName = GetAssemblyName(project.ProjectFile);
@@ -80,13 +80,13 @@ static int MainEntry(string[] args)
     string managedAssembly = Path.Combine(managedOutput, assemblyName + ".dll");
     if (!File.Exists(managedAssembly))
     {
-        return Fail($"Roslyn did not produce the bootstrap IL assembly: {managedAssembly}");
+        throw Fail($"Roslyn did not produce the bootstrap IL assembly: {managedAssembly}");
     }
 
     string systemModuleAssembly = Path.Combine(managedOutput, systemModule + ".dll");
     if (!File.Exists(systemModuleAssembly))
     {
-        return Fail($"Roslyn did not produce the configured freestanding system module: {systemModuleAssembly}");
+        throw Fail($"Roslyn did not produce the configured freestanding system module: {systemModuleAssembly}");
     }
 
     string[] managedInputs = Directory
@@ -139,11 +139,11 @@ static int MainEntry(string[] args)
     exitCode = Run(ilc, ilcArguments, repositoryRoot);
     if (exitCode != 0)
     {
-        return Fail($"Direct ILC compilation failed with exit code {exitCode}.");
+        throw Fail($"Direct ILC compilation failed with exit code {exitCode}.");
     }
     if (!File.Exists(nativeObject))
     {
-        return Fail($"ILC did not produce the expected x64 COFF object: {nativeObject}");
+        throw Fail($"ILC did not produce the expected x64 COFF object: {nativeObject}");
     }
 
     string[] managedPdbs = Directory
@@ -153,7 +153,7 @@ static int MainEntry(string[] args)
         .ToArray();
     if (debugBuild && managedPdbs.Length == 0)
     {
-        return Fail("Debug compilation did not produce managed PDBs. Source-level native debugging cannot be enabled.");
+        throw Fail("Debug compilation did not produce managed PDBs. Source-level native debugging cannot be enabled.");
     }
 
     string compileManifest = Path.Combine(project.OutputDirectory, "Inu.Compile.json");
@@ -355,8 +355,4 @@ static string? GetOption(ReadOnlySpan<string> args, string name)
     }
     return null;
 }
-static int Fail(string message)
-{
-    Console.Error.WriteLine($"[FAIL] {message}");
-    return 1;
-}
+static Exception Fail(string message) => new InvalidOperationException(message);

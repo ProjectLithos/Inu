@@ -17,19 +17,19 @@ static int MainEntry(string[] args)
     }
     if (args.Length < 2 || !string.Equals(args[0], "run", StringComparison.OrdinalIgnoreCase))
     {
-        return Fail("Usage: Inu.QemuLauncher run <InuProject.json> --qemu <path> --image <path> [--ovmf-code <path>] [--ovmf-vars <path>] [--timeout-seconds <value>] [--accelerator auto|whpx|kvm|hvf|tcg] [--cpus <n>] [--memory-mib <n>] [--storage virtio-block|ahci|nvme] [--network virtio-net|e1000|none] [--graphics virtio-gpu|gop] [--usb xhci|none] [--run-directory <path>] [--require-marker <text>] [--accept-and-stop] [--dry-run]");
+        throw Fail("Usage: Inu.QemuLauncher run <InuProject.json> --qemu <path> --image <path> [--ovmf-code <path>] [--ovmf-vars <path>] [--timeout-seconds <value>] [--accelerator auto|whpx|kvm|hvf|tcg] [--cpus <n>] [--memory-mib <n>] [--storage virtio-block|ahci|nvme] [--network virtio-net|e1000|none] [--graphics virtio-gpu|gop] [--usb xhci|none] [--run-directory <path>] [--require-marker <text>] [--accept-and-stop] [--dry-run]");
     }
 
     if (!InuProject.TryLoad(args[1], out InuProject? project, out string error) || project is null)
     {
-        return Fail(error);
+        throw Fail(error);
     }
 
     string? qemuOption = GetOption(args, "--qemu") ?? Environment.GetEnvironmentVariable("INU_QEMU_X64");
     string? imageOption = GetOption(args, "--image");
     if (string.IsNullOrWhiteSpace(qemuOption) || string.IsNullOrWhiteSpace(imageOption))
     {
-        return Fail("QEMU and image paths are required.");
+        throw Fail("QEMU and image paths are required.");
     }
 
     string qemu = Path.GetFullPath(qemuOption);
@@ -45,7 +45,7 @@ static int MainEntry(string[] args)
     }
     catch (ArgumentOutOfRangeException exception)
     {
-        return Fail(exception.Message);
+        throw Fail(exception.Message);
     }
 
     int qemuProcessorCount;
@@ -67,11 +67,11 @@ static int MainEntry(string[] args)
     }
     catch (ArgumentOutOfRangeException exception)
     {
-        return Fail(exception.Message);
+        throw Fail(exception.Message);
     }
     catch (ArgumentException exception)
     {
-        return Fail(exception.Message);
+        throw Fail(exception.Message);
     }
     bool acceptAndStop = HasOption(args, "--accept-and-stop");
     string[] requiredMarkers = GetOptions(args, "--require-marker").ToArray();
@@ -100,11 +100,11 @@ static int MainEntry(string[] args)
     string diagnosticWatcherStdout = Path.Combine(runDirectory, "diagnostic-watcher.stdout.log");
     string diagnosticWatcherStderr = Path.Combine(runDirectory, "diagnostic-watcher.stderr.log");
     int qmpPort = ReserveLoopbackPort();
-    if (qmpPort <= 0) return Fail("Unable to reserve a loopback QMP diagnostics port.");
+    if (qmpPort <= 0) throw Fail("Unable to reserve a loopback QMP diagnostics port.");
 
     if (string.IsNullOrWhiteSpace(ovmfCode) || string.IsNullOrWhiteSpace(ovmfVars))
     {
-        return Fail("x64 OVMF firmware was not found. Run Install-InuToolchain.bat or pass --ovmf-code and --ovmf-vars.");
+        throw Fail("x64 OVMF firmware was not found. Run Install-InuToolchain.bat or pass --ovmf-code and --ovmf-vars.");
     }
 
     int hostLogicalProcessorCount = Environment.ProcessorCount;
@@ -132,10 +132,10 @@ static int MainEntry(string[] args)
         return 0;
     }
 
-    if (!File.Exists(qemu)) return Fail($"QEMU executable not found: {qemu}");
-    if (!File.Exists(imagePath)) return Fail($"Boot image not found: {imagePath}");
-    if (!File.Exists(ovmfCode)) return Fail($"OVMF code firmware not found: {ovmfCode}");
-    if (!File.Exists(ovmfVars)) return Fail($"OVMF variable-store template not found: {ovmfVars}");
+    if (!File.Exists(qemu)) throw Fail($"QEMU executable not found: {qemu}");
+    if (!File.Exists(imagePath)) throw Fail($"Boot image not found: {imagePath}");
+    if (!File.Exists(ovmfCode)) throw Fail($"OVMF code firmware not found: {ovmfCode}");
+    if (!File.Exists(ovmfVars)) throw Fail($"OVMF variable-store template not found: {ovmfVars}");
 
     int qemuPid = 0;
     try
@@ -147,7 +147,7 @@ static int MainEntry(string[] args)
             {
                 using JsonDocument previousRunDocument=JsonDocument.Parse(File.ReadAllText(runManifest));
                 if(previousRunDocument.RootElement.TryGetProperty("qemuProcessId",out JsonElement previousPidElement)&&previousPidElement.TryGetInt32(out int previousPid)&&previousPid>0&&IsProcessAlive(previousPid))
-                    return Fail($"A previous accepted Inu QEMU session is still running (PID {previousPid}). Close it before starting another run so both VMs cannot write the same persistent FAT32 image.");
+                    throw Fail($"A previous accepted Inu QEMU session is still running (PID {previousPid}). Close it before starting another run so both VMs cannot write the same persistent FAT32 image.");
             }
             catch(JsonException){ }
         }
@@ -191,14 +191,14 @@ static int MainEntry(string[] args)
             starter.StartInfo.ArgumentList.Add("Bypass");
             starter.StartInfo.ArgumentList.Add("-File");
             starter.StartInfo.ArgumentList.Add(qemuStarterScript);
-            if (!starter.Start()) return Fail($"QEMU detached starter failed to start. Starter: {qemuStarterScript}");
+            if (!starter.Start()) throw Fail($"QEMU detached starter failed to start. Starter: {qemuStarterScript}");
             if (!starter.WaitForExit(5000))
             {
                 try { starter.Kill(true); } catch { }
-                return Fail($"QEMU detached starter did not return within 5 seconds. Starter: {qemuStarterScript}");
+                throw Fail($"QEMU detached starter did not return within 5 seconds. Starter: {qemuStarterScript}");
             }
             if (starter.ExitCode != 0)
-                return Fail($"QEMU detached starter failed with exit code {starter.ExitCode}. Starter: {qemuStarterScript}; diagnostics: {qemuStderrLog}");
+                throw Fail($"QEMU detached starter failed with exit code {starter.ExitCode}. Starter: {qemuStarterScript}; diagnostics: {qemuStderrLog}");
         }
 
         // Launch-Qemu.ps1 owns qemu.pid and writes the PID returned by Start-Process
@@ -207,10 +207,10 @@ static int MainEntry(string[] args)
         // observed, which previously produced the contradictory 'QEMU did not publish
         // its PID' failure after a successful launch.
         qemuPid = WaitForQemuPid(qemuPidFile, 5000);
-        if (qemuPid <= 0) return Fail($"QEMU starter did not publish its PID. PID file: {qemuPidFile}; diagnostics: {qemuStderrLog}");
+        if (qemuPid <= 0) throw Fail($"QEMU starter did not publish its PID. PID file: {qemuPidFile}; diagnostics: {qemuStderrLog}");
         if (!IsProcessAlive(qemuPid))
         {
-            return Fail($"QEMU exited before runtime acceptance started. PID: {qemuPid}; diagnostics: {qemuStderrLog}");
+            throw Fail($"QEMU exited before runtime acceptance started. PID: {qemuPid}; diagnostics: {qemuStderrLog}");
         }
 
         Console.WriteLine($"[ OK ] QEMU started without -S. Process ID: {qemuPid}");
@@ -256,7 +256,7 @@ static int MainEntry(string[] args)
                 serialText = ReadSharedText(serialLog);
                 string? crashDumpPath = TryMaterializeSerialCrashDump(serialText, runDirectory, project.Name, project.TargetArchitecture);
                 PrintSerialTail(serialText);
-                return Fail($"QEMU exited before runtime acceptance completed. PID: {qemuPid}. Serial log: {serialLog}; diagnostics: {qemuStderrLog}" + (crashDumpPath is null ? string.Empty : $"; crash dump: {crashDumpPath}"));
+                throw Fail($"QEMU exited before runtime acceptance completed. PID: {qemuPid}. Serial log: {serialLog}; diagnostics: {qemuStderrLog}" + (crashDumpPath is null ? string.Empty : $"; crash dump: {crashDumpPath}"));
             }
 
             serialText = ReadSharedText(serialLog);
@@ -271,7 +271,7 @@ static int MainEntry(string[] args)
                 string? crashDumpPath = TryMaterializeSerialCrashDump(serialText, runDirectory, project.Name, project.TargetArchitecture);
                 PrintSerialTail(serialText);
                 TryStop(qemuPid);
-                return Fail("Inu reported a kernel panic during runtime acceptance." + (crashDumpPath is null ? $" Serial log: {serialLog}" : $" Crash dump: {crashDumpPath}"));
+                throw Fail("Inu reported a kernel panic during runtime acceptance." + (crashDumpPath is null ? $" Serial log: {serialLog}" : $" Crash dump: {crashDumpPath}"));
             }
             if (serialText.Contains("NOMNG:RETURN:FAIL", StringComparison.Ordinal) ||
                 serialText.Contains("NOKMAIN:FAIL:", StringComparison.Ordinal) ||
@@ -280,7 +280,7 @@ static int MainEntry(string[] args)
                 PersistLatestSerial(outputDirectory, serialText);
                 PrintSerialTail(serialText);
                 TryStop(qemuPid);
-                return Fail($"Inu reported an explicit kernel startup failure during QEMU runtime acceptance. See the serial tail for the failing stage. Serial log: {serialLog}");
+                throw Fail($"Inu reported an explicit kernel startup failure during QEMU runtime acceptance. See the serial tail for the failing stage. Serial log: {serialLog}");
             }
             const string ttfReadyMarker = "[[INU:TTF_READY]]";
             const string interactiveReadyMarker = "[[INU:INTERACTIVE_READY]]";
@@ -328,7 +328,7 @@ static int MainEntry(string[] args)
                 Thread.Sleep(500);
                 if (!IsProcessAlive(qemuPid))
                 {
-                    return Fail($"QEMU exited after the interactive command prompt appeared. PID: {qemuPid}; diagnostics: {qemuStderrLog}");
+                    throw Fail($"QEMU exited after the interactive command prompt appeared. PID: {qemuPid}; diagnostics: {qemuStderrLog}");
                 }
 
                 serialText = ReadSharedText(serialLog);
@@ -340,7 +340,7 @@ static int MainEntry(string[] args)
                     string? crashDumpPath = TryMaterializeSerialCrashDump(serialText, runDirectory, project.Name, project.TargetArchitecture);
                     PrintSerialTail(serialText);
                     TryStop(qemuPid);
-                    return Fail($"Inu reported a runtime failure after the interactive-ready marker. Serial log: {serialLog}" + (crashDumpPath is null ? string.Empty : $"; crash dump: {crashDumpPath}"));
+                    throw Fail($"Inu reported a runtime failure after the interactive-ready marker. Serial log: {serialLog}" + (crashDumpPath is null ? string.Empty : $"; crash dump: {crashDumpPath}"));
                 }
 
                 foreach (string requiredMarker in requiredMarkers)
@@ -349,7 +349,7 @@ static int MainEntry(string[] args)
                     {
                         PrintSerialTail(serialText);
                         TryStop(qemuPid);
-                        return Fail($"Required QEMU acceptance marker was not observed: {requiredMarker}. Serial log: {serialLog}");
+                        throw Fail($"Required QEMU acceptance marker was not observed: {requiredMarker}. Serial log: {serialLog}");
                     }
                 }
 
@@ -429,25 +429,25 @@ static int MainEntry(string[] args)
         TryStop(qemuPid);
         if (string.IsNullOrEmpty(serialText))
         {
-            return Fail($"Timed out before any Inu serial output appeared after {timeoutSeconds} seconds. Serial log: {serialLog}");
+            throw Fail($"Timed out before any Inu serial output appeared after {timeoutSeconds} seconds. Serial log: {serialLog}");
         }
         if (serialText.Contains("EH:188C", StringComparison.Ordinal) &&
             !serialText.Contains("EH:1890", StringComparison.Ordinal))
         {
-            return Fail($"Timed out during managed class-GVM conformance before the graphics-console readiness stage. Base boot window: {timeoutSeconds}s. See the managed-conformance last-stage diagnostic above. Serial log: {serialLog}");
+            throw Fail($"Timed out during managed class-GVM conformance before the graphics-console readiness stage. Base boot window: {timeoutSeconds}s. See the managed-conformance last-stage diagnostic above. Serial log: {serialLog}");
         }
         int gvmCompletedIndex = serialText.LastIndexOf("EH:1890", StringComparison.Ordinal);
         int interfaceGvmCompletedIndex = serialText.LastIndexOf("EH:1896", StringComparison.Ordinal);
         if (gvmCompletedIndex >= 0 && interfaceGvmCompletedIndex < gvmCompletedIndex)
         {
-            return Fail($"Timed out during managed interface-GVM/dynamic-dictionary conformance after class-GVM success. Base boot window: {timeoutSeconds}s; bounded post-GVM progress allowance: {managedProgressGraceSeconds}s. See the managed-conformance last-stage diagnostic above. Serial log: {serialLog}");
+            throw Fail($"Timed out during managed interface-GVM/dynamic-dictionary conformance after class-GVM success. Base boot window: {timeoutSeconds}s; bounded post-GVM progress allowance: {managedProgressGraceSeconds}s. See the managed-conformance last-stage diagnostic above. Serial log: {serialLog}");
         }
         int collectionGateIndex = serialText.LastIndexOf("EH:B4", StringComparison.Ordinal);
         if (interfaceGvmCompletedIndex >= 0 &&
             collectionGateIndex > interfaceGvmCompletedIndex &&
             !serialText.Contains("EH:B5", StringComparison.Ordinal))
         {
-            return Fail($"Timed out during managed collection conformance after interface-GVM success. Base boot window: {timeoutSeconds}s; bounded post-GVM progress allowance: {managedProgressGraceSeconds}s. See the managed-conformance last-stage diagnostic above. Serial log: {serialLog}");
+            throw Fail($"Timed out during managed collection conformance after interface-GVM success. Base boot window: {timeoutSeconds}s; bounded post-GVM progress allowance: {managedProgressGraceSeconds}s. See the managed-conformance last-stage diagnostic above. Serial log: {serialLog}");
         }
         if (serialText.Contains("NOKERN:ENTRY", StringComparison.Ordinal) &&
             !serialText.Contains("NOKERN:GOP", StringComparison.Ordinal) &&
@@ -456,26 +456,26 @@ static int MainEntry(string[] args)
             !serialText.Contains("NOKERN:RUNTIME", StringComparison.Ordinal) &&
             !serialText.Contains("NOKERN:MANAGED", StringComparison.Ordinal))
         {
-            return Fail($"Inu entered the native kernel but made no progress beyond the entry checkpoint. A Debug image may be parked at the source-debugger rendezvous without a debugger resume. Serial log: {serialLog}");
+            throw Fail($"Inu entered the native kernel but made no progress beyond the entry checkpoint. A Debug image may be parked at the source-debugger rendezvous without a debugger resume. Serial log: {serialLog}");
         }
         if (!serialText.Contains("[[INU:TTF_READY]]", StringComparison.Ordinal))
         {
-            return Fail($"Timed out before Inu confirmed the TrueType graphics console after the bounded boot/progress windows. Serial log: {serialLog}");
+            throw Fail($"Timed out before Inu confirmed the TrueType graphics console after the bounded boot/progress windows. Serial log: {serialLog}");
         }
         if (serialText.Contains(gcRunMarker, StringComparison.Ordinal) && !serialText.Contains(gcOkMarker, StringComparison.Ordinal))
         {
-            return Fail($"Timed out before Inu completed the mature-GC stress gate. Base boot window: {timeoutSeconds}s; GC stress allowance: {gcStressGraceSeconds}s. Serial log: {serialLog}");
+            throw Fail($"Timed out before Inu completed the mature-GC stress gate. Base boot window: {timeoutSeconds}s; GC stress allowance: {gcStressGraceSeconds}s. Serial log: {serialLog}");
         }
         if (!serialText.Contains("[[INU:INTERACTIVE_READY]]", StringComparison.Ordinal))
         {
-            return Fail($"Timed out before Inu emitted the interactive-ready marker after the bounded boot/GC acceptance windows. Serial log: {serialLog}");
+            throw Fail($"Timed out before Inu emitted the interactive-ready marker after the bounded boot/GC acceptance windows. Serial log: {serialLog}");
         }
-        return Fail($"Inu readiness markers were observed, but runtime acceptance did not complete within the bounded boot/GC acceptance windows. Serial log: {serialLog}");
+        throw Fail($"Inu readiness markers were observed, but runtime acceptance did not complete within the bounded boot/GC acceptance windows. Serial log: {serialLog}");
     }
     catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException or System.ComponentModel.Win32Exception)
     {
         if (qemuPid > 0) TryStop(qemuPid);
-        return Fail(exception.Message);
+        throw Fail(exception.Message);
     }
 }
 
@@ -485,7 +485,7 @@ static int WatchDiagnostics(string[] args)
     if (!int.TryParse(GetOption(args, "--pid"), NumberStyles.Integer, CultureInfo.InvariantCulture, out int qemuPid) || qemuPid <= 0 ||
         !int.TryParse(GetOption(args, "--qmp-port"), NumberStyles.Integer, CultureInfo.InvariantCulture, out int qmpPort) || qmpPort <= 0)
     {
-        return Fail("watch-diagnostics requires --pid and --qmp-port.");
+        throw Fail("watch-diagnostics requires --pid and --qmp-port.");
     }
 
     string? serialLog = GetOption(args, "--serial");
@@ -498,7 +498,7 @@ static int WatchDiagnostics(string[] args)
         string.IsNullOrWhiteSpace(debugConLog) || string.IsNullOrWhiteSpace(stderrLog) ||
         string.IsNullOrWhiteSpace(reportPath) || string.IsNullOrWhiteSpace(latestReportPath))
     {
-        return Fail("watch-diagnostics is missing one or more diagnostic file paths.");
+        throw Fail("watch-diagnostics is missing one or more diagnostic file paths.");
     }
 
     string lastKnownStatus = "unknown";
@@ -1672,8 +1672,4 @@ static string? GetOption(ReadOnlySpan<string> args, string name)
     return null;
 }
 
-static int Fail(string message)
-{
-    Console.Error.WriteLine($"[FAIL] {message}");
-    return 1;
-}
+static Exception Fail(string message) => new InvalidOperationException(message);

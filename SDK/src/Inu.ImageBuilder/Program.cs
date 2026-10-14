@@ -8,9 +8,9 @@ return MainEntry(args);
 static int MainEntry(string[] args)
 {
     if (args.Length < 2 || !string.Equals(args[0], "create", StringComparison.OrdinalIgnoreCase))
-        return Fail("Usage: Inu.ImageBuilder create <InuProject.json> [--kernel <path>] [--bootloader <path>] [--sdk-root <path>] [--ide-root <path>] [--output <path>] [--dry-run]");
+        throw Fail("Usage: Inu.ImageBuilder create <InuProject.json> [--kernel <path>] [--bootloader <path>] [--sdk-root <path>] [--ide-root <path>] [--output <path>] [--dry-run]");
 
-    if (!InuProject.TryLoad(args[1], out InuProject? project, out string error) || project is null) return Fail(error);
+    if (!InuProject.TryLoad(args[1], out InuProject? project, out string error) || project is null) throw Fail(error);
 
     string outputDirectory = Path.GetFullPath(project.OutputDirectory);
     string kernelPath = Path.GetFullPath(GetOption(args, "--kernel") ?? Path.Combine(outputDirectory, project.Name + ".bin"));
@@ -27,7 +27,7 @@ static int MainEntry(string[] args)
     string kathConfigurationPath = Path.Combine(projectRoot, "Inu.json");
     string configuredGuiPath = Path.IsPathRooted(project.ConfigurationFile) ? project.ConfigurationFile : Path.Combine(projectRoot, project.ConfigurationFile);
     string guiConfigurationPath = File.Exists(kathConfigurationPath) ? kathConfigurationPath : configuredGuiPath;
-    if (!TryReadGuiApplicationConfiguration(guiConfigurationPath, out bool guiEnabled, out string desktopVfsPath, out string loginVfsPath, out error)) return Fail(error);
+    if (!TryReadGuiApplicationConfiguration(guiConfigurationPath, out bool guiEnabled, out string desktopVfsPath, out string loginVfsPath, out error)) throw Fail(error);
     string? fontSource = ResolveConsoleTrueTypeFont(projectRoot, ideRoot);
     string stagingRoot = Path.Combine(outputDirectory, "BootFiles");
     string stagedLoader = Path.Combine(stagingRoot, "EFI", "BOOT", "BOOTX64.EFI");
@@ -53,11 +53,11 @@ static int MainEntry(string[] args)
     Console.WriteLine($"[INFO] FAT32 image  : {imagePath}");
     if (HasOption(args, "--dry-run")) return 0;
 
-    if (!File.Exists(kernelPath)) return Fail($"Non-EFI Inu kernel not found: {kernelPath}");
-    if (!File.Exists(bootLoaderPath)) return Fail($"UEFI FAT32 loader not found: {bootLoaderPath}");
-    if (!Directory.Exists(helpSource)) return Fail($"System command help directory not found: {helpSource}");
-    if (!Directory.Exists(wallpapersSource)) return Fail($"System wallpaper directory not found: {wallpapersSource}");
-    if (!Directory.Exists(userlandAppsSource)) return Fail($"Built userland application directory not found: {userlandAppsSource}");
+    if (!File.Exists(kernelPath)) throw Fail($"Non-EFI Inu kernel not found: {kernelPath}");
+    if (!File.Exists(bootLoaderPath)) throw Fail($"UEFI FAT32 loader not found: {bootLoaderPath}");
+    if (!Directory.Exists(helpSource)) throw Fail($"System command help directory not found: {helpSource}");
+    if (!Directory.Exists(wallpapersSource)) throw Fail($"System wallpaper directory not found: {wallpapersSource}");
+    if (!Directory.Exists(userlandAppsSource)) throw Fail($"Built userland application directory not found: {userlandAppsSource}");
 
     try
     {
@@ -79,31 +79,31 @@ static int MainEntry(string[] args)
         if (sourceDebugRendezvous)
         {
             string debugMapPath = Path.Combine(outputDirectory, "Inu.DebugSymbols.json");
-            if (!File.Exists(debugMapPath)) return Fail($"Debug image creation requires the native debug map produced by the same link: {debugMapPath}");
+            if (!File.Exists(debugMapPath)) throw Fail($"Debug image creation requires the native debug map produced by the same link: {debugMapPath}");
             using JsonDocument debugDocument = JsonDocument.Parse(File.ReadAllText(debugMapPath));
             string? linkedKernel = debugDocument.RootElement.TryGetProperty("image", out JsonElement linkedImageElement) ? linkedImageElement.GetString() : null;
             string? linkedKernelSha256 = debugDocument.RootElement.TryGetProperty("kernelSha256", out JsonElement linkedHashElement) ? linkedHashElement.GetString() : null;
             if (string.IsNullOrWhiteSpace(linkedKernel) || !string.Equals(Path.GetFullPath(linkedKernel), Path.GetFullPath(kernelPath), StringComparison.OrdinalIgnoreCase))
-                return Fail("Debug symbol map does not identify the kernel being staged into the FAT32 image.");
+                throw Fail("Debug symbol map does not identify the kernel being staged into the FAT32 image.");
             if (string.IsNullOrWhiteSpace(linkedKernelSha256) || !string.Equals(linkedKernelSha256, kernelSha256, StringComparison.OrdinalIgnoreCase))
-                return Fail("Debug symbol map/kernel hash mismatch. Refusing to create a Debug image from stale native artifacts.");
+                throw Fail("Debug symbol map/kernel hash mismatch. Refusing to create a Debug image from stale native artifacts.");
         }
         if (File.Exists(shellSource))
             File.Copy(shellSource, Path.Combine(novaRoot, "SYSTEM", "SHELL", "SHELL.EXE"), true);
-        if (!StageCommandsWithHelp(commandsSource, helpSource, Path.Combine(novaRoot, "SYSTEM", "COMMANDS"), Path.Combine(novaRoot, "SYSTEM", "HELP"), out error)) return Fail(error);
+        if (!StageCommandsWithHelp(commandsSource, helpSource, Path.Combine(novaRoot, "SYSTEM", "COMMANDS"), Path.Combine(novaRoot, "SYSTEM", "HELP"), out error)) throw Fail(error);
         CopyDirectoryFiles(wallpapersSource, Path.Combine(novaRoot, "SYSTEM", "WALLPAPERS"));
         if (guiEnabled)
         {
-            if (!StageGuiApplication(userlandAppsSource, "INU-DESKTOP.EXE", stagingRoot, desktopVfsPath, out error)) return Fail(error);
-            if (!StageGuiApplication(userlandAppsSource, "INU-LOGIN.EXE", stagingRoot, loginVfsPath, out error)) return Fail(error);
+            if (!StageGuiApplication(userlandAppsSource, "INU-DESKTOP.EXE", stagingRoot, desktopVfsPath, out error)) throw Fail(error);
+            if (!StageGuiApplication(userlandAppsSource, "INU-LOGIN.EXE", stagingRoot, loginVfsPath, out error)) throw Fail(error);
         }
         if (string.IsNullOrWhiteSpace(fontSource) || !File.Exists(fontSource))
-            return Fail("The generated OS is missing its project-local TrueType console font.");
+            throw Fail("The generated OS is missing its project-local TrueType console font.");
         File.Copy(fontSource, Path.Combine(novaRoot, "SYSTEM", "FONTS", "CONSOLE.TTF"), true);
         Console.WriteLine("[ OK ] Project TrueType console font staged into the OS image.");
         BuildAssetBundle(novaRoot, bundlePath);
 
-        if (!EfiDiskImage.TryCreate(stagingRoot, imagePath, out bool preservedUserState, out error)) return Fail(error);
+        if (!EfiDiskImage.TryCreate(stagingRoot, imagePath, out bool preservedUserState, out error)) throw Fail(error);
         if (preservedUserState) Console.WriteLine("[ OK ] Existing /USERS account, Home and personal settings preserved from the previous image.");
 
         string manifestPath = Path.Combine(outputDirectory, "Inu.Image.json");
@@ -162,7 +162,7 @@ static int MainEntry(string[] args)
     }
     catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException or ArgumentException)
     {
-        return Fail(exception.Message);
+        throw Fail(exception.Message);
     }
 }
 
@@ -313,4 +313,4 @@ static string? ResolveConsoleTrueTypeFont(string projectRoot, string ideRoot)
     return null;
 }
 
-static int Fail(string message) { Console.Error.WriteLine($"[FAIL] {message}"); return 1; }
+static Exception Fail(string message) => new InvalidOperationException(message);

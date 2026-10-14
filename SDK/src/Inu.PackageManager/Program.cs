@@ -10,39 +10,35 @@ internal static class Program
 
     public static int Main(string[] args)
     {
-        if (args.Length == 0) return Usage();
+        if (args.Length == 0) throw Usage();
         var command = args[0].ToLowerInvariant();
         var root = GetOption(args, "--root") ?? Path.Combine(Environment.CurrentDirectory, "InuSystem");
-        try
-        {
-            return command switch
+        return command switch
             {
                 "verify" when args.Length >= 2 => Verify(args[1]),
                 "inspect" when args.Length >= 2 => Inspect(args[1]),
                 "install" when args.Length >= 2 => Install(args[1], root),
                 "uninstall" when args.Length >= 2 => Uninstall(args[1], root),
                 "list" => List(root),
-                _ => Usage()
+                _ => throw Usage()
             };
-        }
-        catch (Exception ex) { Console.Error.WriteLine("[FAIL] " + ex.Message); return 1; }
     }
 
-    private static int Usage()
+    private static Exception Usage()
     {
         Console.WriteLine("Inu.PackageManager verify <package.zip>");
         Console.WriteLine("Inu.PackageManager inspect <package.zip>");
         Console.WriteLine("Inu.PackageManager install <package.zip> [--root <system-root>]");
         Console.WriteLine("Inu.PackageManager uninstall <package-id> [--root <system-root>]");
         Console.WriteLine("Inu.PackageManager list [--root <system-root>]");
-        return 2;
+        return new ArgumentException("Invalid Inu.PackageManager command line.");
     }
 
     private static int Verify(string path)
     {
         var result = InuPackageArchive.Verify(Path.GetFullPath(path));
         foreach (var error in result.Errors) Console.Error.WriteLine("[FAIL] " + error);
-        if (!result.Success) return 1;
+        if (!result.Success) throw new InvalidDataException(string.Join("; ", result.Errors));
         Console.WriteLine($"[ OK ] Verified Inu package {result.Manifest!.Id} {result.Manifest.Version} ({result.Manifest.Type}).");
         return 0;
     }
@@ -50,7 +46,7 @@ internal static class Program
     private static int Inspect(string path)
     {
         var result = InuPackageArchive.Verify(Path.GetFullPath(path));
-        if (!result.Success) { foreach (var error in result.Errors) Console.Error.WriteLine("[FAIL] " + error); return 1; }
+        if (!result.Success) throw new InvalidDataException(string.Join("; ", result.Errors));
         Console.WriteLine(JsonSerializer.Serialize(result.Manifest, JsonOptions));
         return 0;
     }

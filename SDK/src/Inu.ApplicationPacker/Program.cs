@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Security.Cryptography;
 
-if(args.Length!=2){Console.Error.WriteLine("Usage: Inu.ApplicationPacker <Inu.Application.json> <output.exe>");return 2;}
+if(args.Length!=2)throw new ArgumentException("Usage: Inu.ApplicationPacker <Inu.Application.json> <output.exe>", nameof(args));
 var manifestPath=Path.GetFullPath(args[0]);var outPath=Path.GetFullPath(args[1]);
 var model=JsonSerializer.Deserialize<Manifest>(File.ReadAllText(manifestPath),new JsonSerializerOptions{PropertyNameCaseInsensitive=true}) ?? throw new InvalidDataException("Invalid manifest.");
 Validate(model);
@@ -25,7 +25,7 @@ for(int i=0;i<caps.Length;i++){int o=(int)capOff+i*CR;Ref(o,caps[i].name);U64(o+
 ReadOnlySpan<byte> stringTable=strings.GetBuffer().AsSpan(0,checked((int)strLen));stringTable.CopyTo(output.AsSpan(checked((int)strOff)));
 ReadOnlySpan<byte> nativeImage=native;nativeImage.CopyTo(output.AsSpan(checked((int)nativeOff)));long dataCursor=resDataOff;
 for(int i=0;i<resources.Count;i++){var r=resources[i];int o=(int)resOff+i*RR;U32(o,r.off);U32(o+4,r.len);U64(o+8,(ulong)dataCursor);U64(o+16,(ulong)r.data.Length);U32(o+24,r.flags);((ReadOnlySpan<byte>)r.data).CopyTo(output.AsSpan(checked((int)dataCursor)));dataCursor+=r.data.Length;}
-Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);File.WriteAllBytes(outPath,output);Console.WriteLine($"[ OK ] Inu application package: {outPath}");Console.WriteLine($"[INFO] Native image: {nativePath}");Console.WriteLine($"[INFO] Dependencies={deps.Length}, capabilities={caps.Length}, resources={resources.Count}, bytes={output.Length}");return 0;
+Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);File.WriteAllBytes(outPath,output);Console.WriteLine($"[ OK ] Inu application package: {outPath}");Console.WriteLine($"[INFO] Native image: {nativePath}");Console.WriteLine($"[INFO] Dependencies={deps.Length}, capabilities={caps.Length}, resources={resources.Count}, bytes={output.Length}");
 
 static long Align(long v,long a)=>(v+(a-1))&~(a-1);
 static ushort Arch(string v)=>v.ToLowerInvariant() switch{"x86_64" or "x64"=>1,"arm64"=>2,"riscv64"=>3,_=>throw new InvalidDataException("Unsupported architecture.")};

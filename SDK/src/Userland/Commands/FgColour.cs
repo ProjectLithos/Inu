@@ -6,16 +6,14 @@ namespace Inu.Userland.Commands;
 /// <summary>Changes the system text-console foreground colour.</summary>
 public static class FgColour
 {
-    public static int Main(string[] args)
+    public static void Main(string[] args)
     {
         if (!TryParseRgb(args, out byte red, out byte green, out byte blue))
         {
-            Console.WriteLine("Usage: fgcolour <red> <green> <blue>");
-            Console.WriteLine("Each colour component must be between 0 and 255.");
-            return 1;
+            throw new ArgumentException("Usage: fgcolour <red> <green> <blue>; each colour component must be between 0 and 255.", nameof(args));
         }
 
-        return ConsolePresentation.SetForegroundRgb(red, green, blue) ? 0 : 1;
+        if (!ConsolePresentation.SetForegroundRgb(red, green, blue)) throw new InvalidOperationException("Console presentation rejected the colour change.");
     }
 
     private static bool TryParseRgb(string[] args, out byte red, out byte green, out byte blue)

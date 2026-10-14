@@ -32,14 +32,17 @@ internal static class Program
         string root = ResolveRoot(args);
 
 
-        return args[0].ToLowerInvariant() switch
+        switch (args[0].ToLowerInvariant())
         {
-            "build" => Build(root, args.Contains("--force-rebuild", StringComparer.OrdinalIgnoreCase)),
-            "toolchain" when args.Length > 1 &&
-                args[1].Equals("ensure", StringComparison.OrdinalIgnoreCase)
-                => ToolchainEnsure(root),
-            _ => Unknown(args[0])
-        };
+            case "build":
+                Build(root, args.Contains("--force-rebuild", StringComparer.OrdinalIgnoreCase));
+                return 0;
+            case "toolchain" when args.Length > 1 && args[1].Equals("ensure", StringComparison.OrdinalIgnoreCase):
+                ToolchainEnsure(root);
+                return 0;
+            default:
+                throw new ArgumentException($"Unknown Inu command: {args[0]}", nameof(args));
+        }
     }
 
     private static void PrintHelp()
@@ -51,12 +54,6 @@ internal static class Program
         Console.WriteLine("  inu toolchain ensure [--root <path>]");
         Console.WriteLine("  inu version        (aliases: --version, -v)");
         Console.WriteLine("  inu help           (aliases: --help, -h)");
-    }
-
-    private static int Unknown(string command)
-    {
-        Console.Error.WriteLine($"[FAIL] Unknown Inu command: {command}");
-        return 2;
     }
 
     private static string ResolveRoot(string[] args)
@@ -76,19 +73,17 @@ internal static class Program
         return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".."));
     }
 
-    private static int ToolchainEnsure(string root)
+    private static void ToolchainEnsure(string root)
     {
         string dotnet = Path.Combine(root, ".toolchain", "DotNet", "dotnet.exe");
         string clang = Path.Combine(root, ".toolchain", "LLVM", "bin", "clang.exe");
         string linker = Path.Combine(root, ".toolchain", "LLVM", "bin", "lld-link.exe");
 
-        bool ok = true;
         foreach (string path in new[] { dotnet, clang, linker })
         {
             if (!File.Exists(path))
             {
-                Console.Error.WriteLine($"[FAIL] Required private tool is missing: {path}");
-                ok = false;
+                throw new FileNotFoundException("Required private tool is missing.", path);
             }
             else
             {
@@ -96,10 +91,9 @@ internal static class Program
             }
         }
 
-        return ok ? 0 : 1;
     }
 
-    private static int Build(string root, bool forceRebuild)
+    private static void Build(string root, bool forceRebuild)
     {
         Console.WriteLine($"[INFO] Inu {Version}");
         Console.WriteLine($"[INFO] Root: {root}");
@@ -116,8 +110,7 @@ internal static class Program
             string path = Path.Combine(root, relative);
             if (!Directory.Exists(path))
             {
-                Console.Error.WriteLine($"[FAIL] Required Inu source directory is missing: {path}");
-                return 1;
+                throw new DirectoryNotFoundException($"Required Inu source directory is missing: {path}");
             }
             Console.WriteLine($"[ OK ] {relative}");
         }
@@ -125,21 +118,17 @@ internal static class Program
         string? dclgRoot = Directory.GetParent(root)?.FullName;
         if (string.IsNullOrWhiteSpace(dclgRoot))
         {
-            Console.Error.WriteLine("[FAIL] Inu must be installed under the Kath&Inu root beside Kath.");
-            return 1;
+            throw new InvalidOperationException("Inu must be installed under the Kath&Inu root beside Kath.");
         }
         string kathRoot = Path.Combine(dclgRoot, "Kath");
         string kathBuild = Path.Combine(kathRoot, "Build-Kath.ps1");
         string kathLauncherProject = Path.Combine(kathRoot, "src", "Kath.Launcher", "Kath.Launcher.csproj");
         if (!File.Exists(kathBuild) || !File.Exists(kathLauncherProject))
         {
-            Console.Error.WriteLine($"[FAIL] The complete Kath source is missing from: {kathRoot}");
-            return 1;
+            throw new DirectoryNotFoundException($"The complete Kath source is missing from: {kathRoot}");
         }
 
-        int tools = ToolchainEnsure(root);
-        if (tools != 0)
-            return tools;
+        ToolchainEnsure(root);
 
         string dotnet = Path.Combine(root, ".toolchain", "DotNet", "dotnet.exe");
         string bin = Path.Combine(root, "Bin");
@@ -149,39 +138,34 @@ internal static class Program
         Directory.CreateDirectory(kathBin);
         string stableKath = Path.Combine(kathBin, "Kath.exe");
         Console.WriteLine("[INFO] Checking Kath build stages...");
-        int result = Run("powershell.exe", $"-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"{kathBuild}\"" + (forceRebuild ? " -ForceRebuild" : ""), kathRoot);
-        if (result != 0)
-            return result;
+        Run("powershell.exe", $"-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"{kathBuild}\"" + (forceRebuild ? " -ForceRebuild" : ""), kathRoot);
 
         string electronMain = Path.Combine(kathRoot, "applications", "electron", "lib", "backend", "electron-main.js");
         if (!File.Exists(electronMain))
         {
-            Console.Error.WriteLine("[FAIL] Kath build reported success but the Electron backend was not produced.");
-            return 1;
+            throw new FileNotFoundException("Kath build reported success but the Electron backend was not produced.", electronMain);
         }
 
         if (!File.Exists(stableKath))
         {
-            Console.Error.WriteLine("[FAIL] Kath build did not produce the stable launcher.");
-            return 1;
+            throw new FileNotFoundException("Kath build did not produce the stable launcher.", stableKath);
         }
 
         string? kathFileVersion = FileVersionInfo.GetVersionInfo(stableKath).FileVersion;
         string expectedKathFileVersion = Version + ".0";
         if (!string.Equals(kathFileVersion, expectedKathFileVersion, StringComparison.OrdinalIgnoreCase))
         {
-            Console.Error.WriteLine($"[FAIL] Kath launcher version mismatch. Expected {expectedKathFileVersion}, got {kathFileVersion ?? "<none>"}.");
             File.Delete(stableKath);
-            return 1;
+            throw new InvalidOperationException($"Kath launcher version mismatch. Expected {expectedKathFileVersion}, got {kathFileVersion ?? "<none>"}.");
         }
 
         Console.WriteLine($"[ OK ] Kath application: {electronMain}");
         Console.WriteLine($"[ OK ] Kath launcher: {stableKath} ({kathFileVersion})");
         Console.WriteLine("[ OK ] Inu and Kath build completed.");
-        return 0;
+        return;
     }
 
-    private static int Run(string fileName, string arguments, string workingDirectory)
+    private static void Run(string fileName, string arguments, string workingDirectory)
     {
         using Process process = new();
         process.StartInfo = new ProcessStartInfo
@@ -194,6 +178,6 @@ internal static class Program
 
         process.Start();
         process.WaitForExit();
-        return process.ExitCode;
+        if (process.ExitCode != 0) throw new InvalidOperationException($"Process '{fileName}' failed with exit code {process.ExitCode}.");
     }
 }

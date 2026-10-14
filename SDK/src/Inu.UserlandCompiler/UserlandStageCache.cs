@@ -54,7 +54,7 @@ internal static class UserlandStageCache
             else if (item.Name.LocalName is "Compile" or "Import") yield return path;
         }
     }
-    internal static int Run(string name, string cacheDirectory, IEnumerable<string> inputs, string[] outputs, IEnumerable<string> arguments, bool force, Func<int> action)
+    internal static void Run(string name, string cacheDirectory, IEnumerable<string> inputs, string[] outputs, IEnumerable<string> arguments, bool force, Func<int> action)
     {
         string[] inputPaths = inputs.ToArray(), args = arguments.ToArray();
         string key = Fingerprint([], new[] { name }.Concat(outputs));
@@ -67,7 +67,7 @@ internal static class UserlandStageCache
             {
                 CacheEntry? entry = JsonSerializer.Deserialize<CacheEntry>(File.ReadAllText(cachePath));
                 if (entry is { Schema: 1 } && entry.Inputs == before && entry.Outputs == Fingerprint(outputs, []))
-                { Console.WriteLine($"[ OK ] {name}: cached; inputs and outputs are current."); return 0; }
+                { Console.WriteLine($"[ OK ] {name}: cached; inputs and outputs are current."); return; }
             }
         }
         catch (JsonException) { } // A damaged record is a miss.
@@ -75,13 +75,13 @@ internal static class UserlandStageCache
         // Initialise the cache on the first run before invalidating a record.
         Directory.CreateDirectory(cacheDirectory);
         File.Delete(cachePath);
-        int result = action(); if (result != 0) return result;
-        if (!Ready()) { Console.Error.WriteLine($"[FAIL] {name} did not produce its cache outputs."); return 1; }
-        if (before != Fingerprint(inputPaths, args)) { Console.WriteLine($"[INFO] {name}: inputs changed during execution; cache not saved."); return 0; }
+        int result = action(); if (result != 0) throw new InvalidOperationException($"{name} failed with exit code {result}.");
+        if (!Ready()) throw new InvalidOperationException($"{name} did not produce its cache outputs.");
+        if (before != Fingerprint(inputPaths, args)) { Console.WriteLine($"[INFO] {name}: inputs changed during execution; cache not saved."); return; }
         Directory.CreateDirectory(cacheDirectory);
         string temporary = cachePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try { File.WriteAllText(temporary, JsonSerializer.Serialize(new CacheEntry(1, before, Fingerprint(outputs, [])))); File.Move(temporary, cachePath, true); }
         finally { File.Delete(temporary); }
-        return 0;
+        return;
     }
 }

@@ -12,19 +12,19 @@ static int MainEntry(string[] args)
 {
     if (args.Length < 2 || !string.Equals(args[0], "link", StringComparison.OrdinalIgnoreCase))
     {
-        return Fail("Usage: Inu.Linker link <InuProject.json> --lld-link <path> --llvm-nm <path> [--native-root <path>] [--dry-run]");
+        throw Fail("Usage: Inu.Linker link <InuProject.json> --lld-link <path> --llvm-nm <path> [--native-root <path>] [--dry-run]");
     }
 
     if (!InuProject.TryLoad(args[1], out InuProject? project, out string error) || project is null)
     {
-        return Fail(error);
+        throw Fail(error);
     }
 
     string? lld = GetOption(args, "--lld-link");
     string? llvmNm = GetOption(args, "--llvm-nm");
     if (string.IsNullOrWhiteSpace(lld) || string.IsNullOrWhiteSpace(llvmNm))
     {
-        return Fail("lld-link and llvm-nm are required.");
+        throw Fail("lld-link and llvm-nm are required.");
     }
 
     string nativeRoot = GetOption(args, "--native-root") ?? Path.Combine(Environment.CurrentDirectory, "Artifacts", "Native", "x64");
@@ -32,7 +32,7 @@ static int MainEntry(string[] args)
     string manifestPath = Path.Combine(project.OutputDirectory, "Inu.Compile.json");
     if (!File.Exists(manifestPath))
     {
-        return Fail($"Compilation manifest not found: {manifestPath}");
+        throw Fail($"Compilation manifest not found: {manifestPath}");
     }
 
     using JsonDocument document = JsonDocument.Parse(File.ReadAllText(manifestPath));
@@ -41,39 +41,39 @@ static int MainEntry(string[] args)
     int schemaVersion = root.GetProperty("schemaVersion").GetInt32();
     if (schemaVersion != SupportedCompilationManifestSchema)
     {
-        return Fail($"Unsupported compilation manifest schema: {schemaVersion}. Supported schema: {SupportedCompilationManifestSchema}.");
+        throw Fail($"Unsupported compilation manifest schema: {schemaVersion}. Supported schema: {SupportedCompilationManifestSchema}.");
     }
     string runtimeMode = root.GetProperty("runtimeMode").GetString() ?? string.Empty;
     if (!string.Equals(runtimeMode, "BootstrapToManagedNativeAot", StringComparison.Ordinal))
     {
-        return Fail($"Unsupported runtime mode: {runtimeMode}");
+        throw Fail($"Unsupported runtime mode: {runtimeMode}");
     }
     string nativeObject = root.GetProperty("nativeObject").GetString() ?? string.Empty;
     if (!File.Exists(nativeObject))
     {
-        return Fail($"ILC native object not found: {nativeObject}");
+        throw Fail($"ILC native object not found: {nativeObject}");
     }
     if (root.GetProperty("windowsRuntimeLibraries").GetInt32() != 0)
     {
-        return Fail("The freestanding Inu runtime must not link Windows runtime libraries.");
+        throw Fail("The freestanding Inu runtime must not link Windows runtime libraries.");
     }
     bool nativeDebugSymbols = root.TryGetProperty("nativeDebugSymbols", out JsonElement debugElement) && debugElement.GetBoolean();
     bool sourceDebugRendezvous = root.TryGetProperty("sourceDebugRendezvous", out JsonElement rendezvousElement) && rendezvousElement.GetBoolean();
     if (sourceDebugRendezvous && !nativeDebugSymbols)
     {
-        return Fail("Compilation manifest requests a source-debug rendezvous without native Debug symbols.");
+        throw Fail("Compilation manifest requests a source-debug rendezvous without native Debug symbols.");
     }
 
     ProcessResult symbols = Capture(llvmNm, ["--defined-only", nativeObject]);
     if (symbols.ExitCode != 0 || !symbols.Output.Contains("InuManagedEntry", StringComparison.Ordinal))
     {
         Console.Error.Write(symbols.Output);
-        return Fail("ILC output does not export InuManagedEntry for KMain.");
+        throw Fail("ILC output does not export InuManagedEntry for KMain.");
     }
     if (!symbols.Output.Contains("__ReadyToRunHeader", StringComparison.Ordinal))
     {
         Console.Error.Write(symbols.Output);
-        return Fail("ILC output does not define __ReadyToRunHeader; NativeAOT module/static metadata cannot be initialized.");
+        throw Fail("ILC output does not define __ReadyToRunHeader; NativeAOT module/static metadata cannot be initialized.");
     }
 
     string entry = Path.Combine(nativeRoot, "Entry.obj");
@@ -92,7 +92,7 @@ static int MainEntry(string[] args)
     {
         if (!File.Exists(file))
         {
-            return Fail($"Native object not found: {file}");
+            throw Fail($"Native object not found: {file}");
         }
     }
 
@@ -151,14 +151,14 @@ static int MainEntry(string[] args)
     Console.Write(result.Output);
     if (result.ExitCode != 0)
     {
-        return Fail($"LLD failed with exit code {result.ExitCode}.");
+        throw Fail($"LLD failed with exit code {result.ExitCode}.");
     }
     Console.WriteLine($"[ OK ] Freestanding non-EFI kernel image: {output}");
     Console.WriteLine($"[ OK ] Link map: {map}");
     if (!TryGetPeBaseRelocationDirectory(output, out ulong kernelImageBase, out uint kernelRelocationRva, out uint kernelRelocationSize) ||
         kernelRelocationRva == 0U || kernelRelocationSize < 8U)
     {
-        return Fail("KERNEL.BIN has no usable PE base-relocation directory. The FAT32 loader must be able to place the native kernel outside its preferred 0x01000000 address when firmware occupies that range.");
+        throw Fail("KERNEL.BIN has no usable PE base-relocation directory. The FAT32 loader must be able to place the native kernel outside its preferred 0x01000000 address when firmware occupies that range.");
     }
     Console.WriteLine($"[ OK ] Native kernel relocation directory: RVA 0x{kernelRelocationRva:x}, {kernelRelocationSize} byte(s); preferred base 0x{kernelImageBase:x}");
 
@@ -179,19 +179,19 @@ static int MainEntry(string[] args)
     Console.Write(bootResult.Output);
     if (bootResult.ExitCode != 0)
     {
-        return Fail($"UEFI loader link failed with exit code {bootResult.ExitCode}.");
+        throw Fail($"UEFI loader link failed with exit code {bootResult.ExitCode}.");
     }
     if (!TryGetPeBaseRelocationDirectory(bootOutput, out ulong bootImageBase, out uint bootRelocationRva, out uint bootRelocationSize) ||
         bootRelocationRva == 0U || bootRelocationSize < 8U)
     {
-        return Fail("UEFI loader has no usable PE base-relocation directory. BOOTX64.EFI must remain relocatable so OVMF can load it below the PE preferred image base in small-memory guests.");
+        throw Fail("UEFI loader has no usable PE base-relocation directory. BOOTX64.EFI must remain relocatable so OVMF can load it below the PE preferred image base in small-memory guests.");
     }
     Console.WriteLine($"[ OK ] UEFI FAT32 kernel loader: {bootOutput}");
     Console.WriteLine($"[ OK ] UEFI loader relocation directory: RVA 0x{bootRelocationRva:x}, {bootRelocationSize} byte(s); preferred base 0x{bootImageBase:x}");
 
     if (nativeDebugSymbols && !File.Exists(pdb))
     {
-        return Fail($"Debug link did not produce the expected native PDB: {pdb}");
+        throw Fail($"Debug link did not produce the expected native PDB: {pdb}");
     }
     if (nativeDebugSymbols)
     {
@@ -206,7 +206,7 @@ static int MainEntry(string[] args)
         string llvmPdbUtil = Path.Combine(toolDirectory, "llvm-pdbutil.exe");
         if (!File.Exists(llvmObjdump) || !File.Exists(llvmSymbolizer) || !File.Exists(llvmPdbUtil))
         {
-            return Fail($"LLVM source-debug tools are required for source-debug rendezvous builds. Expected: {llvmObjdump}, {llvmSymbolizer}, and {llvmPdbUtil}");
+            throw Fail($"LLVM source-debug tools are required for source-debug rendezvous builds. Expected: {llvmObjdump}, {llvmSymbolizer}, and {llvmPdbUtil}");
         }
 
         string entryObject = Path.Combine(nativeRoot, "Entry.obj");
@@ -215,7 +215,7 @@ static int MainEntry(string[] args)
             !TryGetSymbolAddress(llvmNm, entryObject, "InuKernelEntry", out ulong entryObjectAddress) ||
             anchorObjectAddress < entryObjectAddress || resumeObjectAddress <= anchorObjectAddress)
         {
-            return Fail("Debug Entry.obj does not contain a valid InuDebugImageAnchor/InuDebugResume rendezvous. Rebuild Entry.asm with INU_DEBUG.");
+            throw Fail("Debug Entry.obj does not contain a valid InuDebugImageAnchor/InuDebugResume rendezvous. Rebuild Entry.asm with INU_DEBUG.");
         }
 
         // The FAT32 loader passes the preloaded system-asset catalogue in volatile R8/R9.
@@ -227,7 +227,7 @@ static int MainEntry(string[] args)
         // corresponding Entry.obj symbol offsets.
         if (!TryGetPeEntrypointAddress(output, out ulong linkedEntryAddress))
         {
-            return Fail("Debug kernel image entry point could not be read from the PE32+ header.");
+            throw Fail("Debug kernel image entry point could not be read from the PE32+ header.");
         }
 
         ulong anchorAddress;
@@ -239,7 +239,7 @@ static int MainEntry(string[] args)
         }
         catch (OverflowException)
         {
-            return Fail("Debug rendezvous symbol offsets overflow the linked kernel address space.");
+            throw Fail("Debug rendezvous symbol offsets overflow the linked kernel address space.");
         }
 
         string sourceMap = Path.Combine(project.OutputDirectory, "Inu.DebugSymbols.json");
@@ -252,7 +252,7 @@ static int MainEntry(string[] args)
         SourceLineEntry[] entries = BuildSourceLineMap(llvmObjdump, llvmSymbolizer, llvmPdbUtil, output, pdb);
         if (entries.Length == 0)
         {
-            return Fail("Native PDB contains no source line mappings. ILC Debug compilation must preserve managed sequence points.");
+            throw Fail("Native PDB contains no source line mappings. ILC Debug compilation must preserve managed sequence points.");
         }
 
         File.WriteAllText(sourceMap, JsonSerializer.Serialize(new
@@ -882,11 +882,7 @@ static string? GetOption(ReadOnlySpan<string> args, string name)
     }
     return null;
 }
-static int Fail(string message)
-{
-    Console.Error.WriteLine($"[FAIL] {message}");
-    return 1;
-}
+static Exception Fail(string message) => new InvalidOperationException(message);
 
 sealed record SourceLineEntry(string SourcePath, int Line, string LinkedAddress);
 readonly record struct ProcessResult(int ExitCode, string Output, bool TimedOut);

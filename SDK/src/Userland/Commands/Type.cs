@@ -1,12 +1,14 @@
 using System;
 using System.IO;
+
 namespace Inu.Userland.Commands;
+
 public static class Type
 {
-    public static int Main(string[] args)
+    public static void Main(string[] args)
     {
-        if(args.Length!=1){Console.WriteLine("Usage: type <file>");return 1;}
-        try{Console.Write(File.ReadAllText(args[0]));return 0;}
-        catch(Exception){Console.WriteLine("Could not read file: "+args[0]);return 1;}
+        if (args is null) throw new ArgumentNullException(nameof(args));
+        if (args.Length != 1) throw new ArgumentException("Usage: type <file>", nameof(args));
+        Console.Write(File.ReadAllText(args[0]));
     }
 }

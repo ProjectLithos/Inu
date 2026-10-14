@@ -1,12 +1,14 @@
 using System;
 using System.IO;
+
 namespace Inu.Userland.Commands;
+
 public static class View
 {
-    public static int Main(string[] args)
+    public static void Main(string[] args)
     {
-        if(args.Length!=1){Console.WriteLine("Usage: view <file>");return 1;}
-        try{Console.Write(File.ReadAllText(args[0]));return 0;}
-        catch(Exception){Console.WriteLine("Could not read text file: "+args[0]);return 1;}
+        if (args is null) throw new ArgumentNullException(nameof(args));
+        if (args.Length != 1) throw new ArgumentException("Usage: view <file>", nameof(args));
+        Console.Write(File.ReadAllText(args[0]));
     }
 }

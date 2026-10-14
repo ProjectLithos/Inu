@@ -5,8 +5,7 @@ using Inu.PackageFormat;
 
 if (args.Length != 3)
 {
-    Console.Error.WriteLine("Usage: Inu.PackagePacker <Inu.Package.json> <payload-directory> <output.zip>");
-    return 2;
+    throw new ArgumentException("Usage: Inu.PackagePacker <Inu.Package.json> <payload-directory> <output.zip>", nameof(args));
 }
 
 var manifestPath = Path.GetFullPath(args[0]);
@@ -48,6 +47,5 @@ try
     File.Move(temp, outputPath, true);
     Console.WriteLine($"[ OK ] Inu ZIP package: {outputPath}");
     Console.WriteLine($"[INFO] Type={manifest.Type}, id={manifest.Id}, version={manifest.Version}, payload files={manifest.Files.Length}");
-    return 0;
 }
 finally { if (File.Exists(temp)) File.Delete(temp); }

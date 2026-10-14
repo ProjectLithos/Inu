@@ -1,11 +1,21 @@
 using System;
+
 namespace Inu.Userland.Commands;
+
 public static class Echo
 {
-    public static int Main(string[] args)
+    public static void Main(string[] args)
     {
-        for(Int32 i=0;i<args.Length;i++){if(i!=0)Console.Write(" ");Console.Write(args[i]);}
+        for (int index = 0; index < args.Length; index++)
+        {
+            if (index > 0)
+            {
+                Console.Write(" ");
+            }
+
+            Console.Write(args[index]);
+        }
+
         Console.WriteLine();
-        return 0;
     }
 }
