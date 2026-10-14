@@ -44,6 +44,13 @@ public static unsafe class UserlandSystem
     }
 
     public static UInt64 ProcessId(){if(_pid!=0UL)return _pid;Int64 value=Call(UserlandOperation.Get,"process.id.current",null,0UL,null,0UL);if(value>0L)_pid=(UInt64)value;return _pid;}
+    public static Boolean ReportUnhandledException(String message)
+    {
+        if(message==null)message=String.Empty;
+        UInt32 length=(UInt32)message.Length;if(length>512U)length=512U;Byte* bytes=stackalloc Byte[512];
+        for(UInt32 i=0U;i<length;i++){Char c=message[(Int32)i];bytes[i]=(Byte)(c<=255?c:'?');}
+        return Call(UserlandOperation.Event,"process.unhandled-exception",bytes,length,null,0UL)>=0L;
+    }
     public static void Pause()=>Native.Pause();
     internal static UInt64 CopyAscii(String text,Byte* destination,UInt32 capacity){if(text==null||destination==null||(UInt32)text.Length>capacity)return 0UL;for(Int32 i=0;i<text.Length;i++){Char c=text[i];destination[i]=(Byte)(c<=255?c:'?');}return (UInt64)text.Length;}
 }

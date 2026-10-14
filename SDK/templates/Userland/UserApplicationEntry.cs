@@ -24,7 +24,20 @@ internal static unsafe class InuUserApplicationEntry
         if (!NativeAotExceptionRuntime.ConfigureImageBase(imageBase))
             return -101;
 
-        Int32 code = InuUserApplicationBinding.Invoke();
+        Int32 code;
+        try
+        {
+            code = InuUserApplicationBinding.Invoke();
+        }
+        catch (Exception exception)
+        {
+            String message = exception.Message;
+            if (String.IsNullOrEmpty(message)) message = "Unhandled userland exception.";
+            UserlandConsole.Write("ERROR: ");
+            UserlandConsole.WriteLine(message);
+            UserlandSystem.ReportUnhandledException(message);
+            code = 1;
+        }
         UserlandProcess.Exit(code);
         return code;
     }

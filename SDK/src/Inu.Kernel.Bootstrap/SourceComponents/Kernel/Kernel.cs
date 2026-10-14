@@ -41,6 +41,7 @@ public static class Kernel
         if (!NetworkingHardwareStartup.Initialize()) return false;
         if (!UsbHardwareStartup.Initialize()) return false;
         if (!DriverBindingStartup.Initialize()) return false;
+        if (!FilesystemHardwareStartup.Initialize()) return false;
 
         // Userland/session policy is also selected source, not a mandatory kernel behaviour.
         if (!UserlandCommandStartup.Initialize(boot)) return false;

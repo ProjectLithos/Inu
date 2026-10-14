@@ -103,6 +103,7 @@ public static unsafe class UserlandRuntimeStartup
            !KernelSystemCalls.RegisterGet(ConsoleHistoryItemMessage,&ConsoleHistoryItemGet)||
            !KernelSystemCalls.RegisterEvent(ConsoleHistoryAddMessage,&ConsoleHistoryAddEvent)||
            !KernelSystemCalls.RegisterEvent(KernelSystemCallMessages.ProcessSpawn,&ProcessSpawnEvent)||
+           !KernelSystemCalls.RegisterEvent("process.unhandled-exception",&ProcessUnhandledExceptionEvent)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessWait,&ProcessWaitGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessArguments,&ProcessArgumentsGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.ProcessEnvironment,&ProcessEnvironmentGet)||
@@ -673,9 +674,24 @@ public static unsafe class UserlandRuntimeStartup
             written:(Int64)KernelSystemCallError.Fault;
     }
 
+    private static Int64 ProcessUnhandledExceptionEvent(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.DataLength>512UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        // The guest framebuffer receives the full exception message from the shared userland entry wrapper.
+        // Serial gets a deterministic marker even when a user process fails before it can emit diagnostics.
+        return KernelConsole.WriteHostControl("USERLAND_EXCEPTION")?0L:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 WritableFileSystemUnavailable()
+    {
+        KernelConsole.WriteHostControl("FILESYSTEM_SERVICE_UNAVAILABLE");
+        return (Int64)KernelSystemCallError.NotImplemented;
+    }
+
     private static Int64 FileCreateSet(KernelSystemCallFrame* frame)
     {
         if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        if(KernelVfs.MountCount==0U)return WritableFileSystemUnavailable();
         Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
         if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
         return KernelVfs.CreateFileAscii(KernelVfs.DefaultNamespace,path,pathLength,frame->NativeMessage.Value0!=0UL)?
@@ -685,6 +701,7 @@ public static unsafe class UserlandRuntimeStartup
     private static Int64 FileDeleteSet(KernelSystemCallFrame* frame)
     {
         if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        if(KernelVfs.MountCount==0U)return WritableFileSystemUnavailable();
         Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
         if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
         return KernelVfs.DeleteFileAscii(KernelVfs.DefaultNamespace,path,pathLength)?
@@ -713,6 +730,7 @@ public static unsafe class UserlandRuntimeStartup
     private static Int64 DirectoryCreateSet(KernelSystemCallFrame* frame)
     {
         if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        if(KernelVfs.MountCount==0U)return WritableFileSystemUnavailable();
         Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
         if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
         return KernelVfs.CreateDirectoryAscii(KernelVfs.DefaultNamespace,path,pathLength)?
@@ -722,6 +740,7 @@ public static unsafe class UserlandRuntimeStartup
     private static Int64 DirectoryDeleteSet(KernelSystemCallFrame* frame)
     {
         if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
+        if(KernelVfs.MountCount==0U)return WritableFileSystemUnavailable();
         Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
         if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
         return KernelVfs.RemoveDirectoryAscii(KernelVfs.DefaultNamespace,path,pathLength)?

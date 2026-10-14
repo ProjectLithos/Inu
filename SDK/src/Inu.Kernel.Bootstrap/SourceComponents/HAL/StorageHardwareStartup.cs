@@ -2,6 +2,9 @@ using System;
 using Inu.Kernel.Console;
 #if INU_KERNELAREA_STORAGE
 using Inu.Kernel.Storage;
+#if INU_COMPONENT_STORAGE_VIRTIO_BLOCK_DRIVER
+using Inu.Kernel.Virtio;
+#endif
 #if INU_COMPONENT_STORAGE_NVME_DRIVER
 using Inu.Kernel.Nvme;
 #endif
@@ -19,6 +22,9 @@ public static class StorageHardwareStartup
     {
 #if INU_KERNELAREA_STORAGE
         if (!KernelStorage.Initialize()) return false;
+#if INU_COMPONENT_STORAGE_VIRTIO_BLOCK_DRIVER
+        if (!KernelVirtio.Initialize()) return false;
+#endif
 #if INU_COMPONENT_STORAGE_NVME_DRIVER
         if (!KernelNvme.Initialize()) return false;
 #endif

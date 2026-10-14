@@ -226,7 +226,10 @@ public static unsafe class Directory
         {
             Byte* ascii = stackalloc Byte[path.Length];
             PathTransport.CopyAsciiChecked(path, ascii);
-            if (UserlandDirectory.CreateAscii(ascii, (UInt32)path.Length) < 0L)
+            Int64 result = UserlandDirectory.CreateAscii(ascii, (UInt32)path.Length);
+            if (result == UserlandError.NotImplemented)
+                throw new NotSupportedException("No writable filesystem service is available in this OS configuration.");
+            if (result < 0L)
                 throw new IOException("The directory could not be created.");
         }
         return new DirectoryInfo(path);
