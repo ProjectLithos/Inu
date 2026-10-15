@@ -13,7 +13,7 @@ if (-not (Test-Path -LiteralPath $dotnet -PathType Leaf)) {
 
 $projectDirectory = Join-Path $root "src\Inu.DocumentationGenerator"
 $project = Join-Path $projectDirectory "Inu.DocumentationGenerator.csproj"
-$config = Join-Path $root "docs\Inu.Documentation.json"
+$config = Join-Path $root "Help\Inu.Documentation.json"
 if (-not (Test-Path -LiteralPath $config -PathType Leaf)) {
     throw "Documentation configuration was not found: $config"
 }
@@ -44,15 +44,14 @@ Write-Host "[ OK ] Documentation generator: $generator"
 
 $arguments = @("generate", "--root", $root, "--configuration", $config)
 if ($Strict) { $arguments += "--validate" }
-Write-Host "[INFO] Generating Inu SDK usage site."
+Write-Host "[INFO] Generating Inu SDK Help site."
 & $dotnet $generator @arguments
 if ($LASTEXITCODE -ne 0) { throw "Documentation generation failed with exit code $LASTEXITCODE." }
 
 $index = Join-Path $siteRoot "index.html"
 $search = Join-Path $siteRoot "assets\search-index.js"
-$apiIndex = Join-Path $siteRoot "api\index.html"
 $assemblyIndex = Join-Path $siteRoot "assemblies\index.html"
-if (-not (Test-Path -LiteralPath $index -PathType Leaf) -or -not (Test-Path -LiteralPath $search -PathType Leaf) -or -not (Test-Path -LiteralPath $apiIndex -PathType Leaf) -or -not (Test-Path -LiteralPath $assemblyIndex -PathType Leaf)) {
+if (-not (Test-Path -LiteralPath $index -PathType Leaf) -or -not (Test-Path -LiteralPath $search -PathType Leaf) -or -not (Test-Path -LiteralPath $assemblyIndex -PathType Leaf)) {
     throw "Documentation generator did not produce the required current API site outputs beneath $siteRoot."
 }
-Write-Host "[ OK ] Inu SDK usage site: $index"
+Write-Host "[ OK ] Inu SDK Help site: $index"

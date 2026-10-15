@@ -1,5 +1,5 @@
 {
-  "version": "0.1.75",
+  "version": "0.1.76",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -407,7 +407,7 @@
     },
     {
       "path": "Build-InuDocumentation.ps1",
-      "sha256": "a6ca00d7aa85a03de676ea35a778d928123613567d8a24cc36d207740bbedd3f"
+      "sha256": "c22715fab95c45675017b944b84f6f7a11e0c73995b7b893a8a6266127e4211e"
     },
     {
       "path": "components/definitions/Boot.AcpiRootPointer.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "a231f0adb91bc211401b1fadf444a3f7e17918b241eebe0cb7f9274eca79d569"
+      "sha256": "5a46dedd055df2b4b692b6956b260c8b5c18212b028b04b5cbe47e86c9c04505"
     },
     {
       "path": "Directory.Build.targets",
@@ -928,10 +928,6 @@
     {
       "path": "docs/Interactive-Console.md",
       "sha256": "a729f1230bf6766f7af9808c1d43cbae02b0c73b06bd81c72e896550493e170c"
-    },
-    {
-      "path": "docs/Inu.Documentation.json",
-      "sha256": "89fe84390335220d08ee8489ad1baf55e6702981e2e6b5910fea813bbe6865ba"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -1246,1662 +1242,6 @@
       "sha256": "22c00f946b835f84e9b9f5b1ac1e46473fe1ebcfa2dcb8fdcc55c8ffa9de9195"
     },
     {
-      "path": "docs/site-content/Boot-Capability-Interfaces.md",
-      "sha256": "15164e685c18b167fc3cc835c19384e9d7cdd7db27ead58b311c6241c287aec4"
-    },
-    {
-      "path": "docs/site-content/Command-Line-SDK.md",
-      "sha256": "f7990ea57a96020304c9a1095d87ce39119b7ed3ed1ec5f09d2399f6b8fee3de"
-    },
-    {
-      "path": "docs/site-content/Console-Subsystem-Run-API.md",
-      "sha256": "6bdc7e53c007192e21526ab0e08489d06750c14ce5fe645aae6140b610a726ff"
-    },
-    {
-      "path": "docs/site-content/Documentation-Authoring.md",
-      "sha256": "04cac76805cfb42d014d6b94c88d6db25703cd9485a8b60f7a92be2500a18d58"
-    },
-    {
-      "path": "docs/site-content/Executable-Application-Format.md",
-      "sha256": "d3d37fd3ac414c116e11cef65c78d04baccd5e9af19d9c2b610182c680fba71c"
-    },
-    {
-      "path": "docs/site-content/Filesystem-VFS-Contract.md",
-      "sha256": "ff71cc83e430bcb783824d98cc8a1158029722c874a710ae7a00b53f298ace25"
-    },
-    {
-      "path": "docs/site-content/Framebuffer-Font.md",
-      "sha256": "30b617b2b64c385c567dd9b8d92ba99da414252ae7e2bee9680f0c20941c7f47"
-    },
-    {
-      "path": "docs/site-content/Getting-Started.md",
-      "sha256": "8f5fee7a25368af0b4e7fb38895c35c6314f6e8ef232f02e20f120146156ad49"
-    },
-    {
-      "path": "docs/site-content/Memory-Diagnostics.md",
-      "sha256": "00002b0e4649849146f73bdb1155f1e6845ccda56602c2b6e70854b4f666f0a2"
-    },
-    {
-      "path": "docs/site-content/Network-Stack-API.md",
-      "sha256": "adf760d96db477fdc5f30d626abc3e184d1d63c7a15a72a97c6e174b27dae674"
-    },
-    {
-      "path": "docs/site-content/Next-Steps.md",
-      "sha256": "a0ec9fc97b8636ec0f85b1cc981da3c488e244b912c389bd9fe624be3b4bfab6"
-    },
-    {
-      "path": "docs/site-content/Package-Manager-Format.md",
-      "sha256": "a2b696a21fc16f7ca1ce681cb05fc594bf9f65390a7cd0e17b88ebb19d44fb2c"
-    },
-    {
-      "path": "docs/site-content/Physical-Memory.md",
-      "sha256": "92415c1641299802731404898bdc6a35f13c9fce5c778a58c6da44097ad16828"
-    },
-    {
-      "path": "docs/site-content/Power-Management.md",
-      "sha256": "f4aa44f75e6450d38dc73b8e8cde095033312888945018d4f911b2829e209399"
-    },
-    {
-      "path": "docs/site-content/Process-Isolation-Security.md",
-      "sha256": "a81b5f8ce98f63a5c4503b66b57a2f947e1e1b5ccf1ca833baec8cd7ec36f16a"
-    },
-    {
-      "path": "docs/site-content/Public-API-Quality.md",
-      "sha256": "797a28a4271da1c606daff71b3da47564ba76b8e378e3e00faab4927cf4766ef"
-    },
-    {
-      "path": "docs/site-content/SDK-Samples.md",
-      "sha256": "00d38bebd80ec0fe44a5cd84c5ba1eefc3ed4b190f86a27be5fa78c955b984f9"
-    },
-    {
-      "path": "docs/site-content/Synchronization-Primitives.md",
-      "sha256": "32e3637e0d0028bdf2162df94cc51552e701c3da97bc46dbad555092646e52bb"
-    },
-    {
-      "path": "docs/site-content/Timekeeping-Framework.md",
-      "sha256": "0f00065d6e0967410d4611008faa912bb193091a192601859c9703e5b5eb920d"
-    },
-    {
-      "path": "docs/site-content/TrueType-Renderer.md",
-      "sha256": "dacb2bdd1f7a7cd5151fca78f93769c3699ab442fb9b3d448be64493ed1f3420"
-    },
-    {
-      "path": "docs/site-content/Virtual-Memory.md",
-      "sha256": "007ca04545dfbe1c32939bb6a829d69b9f5ef38177eaa5d5563190fc2b3285a2"
-    },
-    {
-      "path": "docs/site/api/index.html",
-      "sha256": "5492f2d5e4cb622eab0c0136367a1636b0153005aaa21d3c83bb70d120ad47c5"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-audio-audio-e52f4cf4.html",
-      "sha256": "875eae4f034fbe90e1d8234adb0eacd613f59e86b9403a4f00f4ef94b7a7af08"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-console-console-a5d2c099.html",
-      "sha256": "ef6f48a9124f02a2dc97cdcc03f67e58e7825564ce00a1def90e31cb170e73df"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-console-consoletype-1cef07ad.html",
-      "sha256": "6931050931b5d2d37b6d82e540abd90bcf13d1f21bd23d2099494e0fa80b15aa"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-drivers-drivers-e89c51d9.html",
-      "sha256": "473399c110541c5939b395b29460709e98182396670da56e8d06e36b62ee7a93"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-graphics-graphics-ba69792b.html",
-      "sha256": "5b18e4c9d95a8ec64cbb9f9f1bf65aedd79c63a900221210cc801ce184ceb197"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-hardware-devices-85f1c8b4.html",
-      "sha256": "99a076e35fa67f3d6e02e8c72d20b3f94f98139e8fec26be06f0fce526cec199"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-input-input-f71549a3.html",
-      "sha256": "acd525e2b4a1f6216a0161d341947c96e1c864c8f5e7834ca387b69ac2f15796"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-interrupts-interrupts-63534f73.html",
-      "sha256": "b7cb73e97d9ab5e0071fa15328f605eb6243109bb4325f09036950a1a6a8f5a0"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-memory-memory-4b769bf1.html",
-      "sha256": "839d9e02abb9a2d17789f72b9bd3bce910baacb2f02c6a3ca290db4eccd84a71"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-networking-networking-700577a0.html",
-      "sha256": "91cf1efa75b1ab5bd03ce56ae12299069b4f77c8a2fe774d197e647688e1a96d"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-power-power-6e186971.html",
-      "sha256": "af335adbef41d10ebf7da135f3310fd6b41f97ec663d04269189e4f44235c8bf"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-processes-desktopsession-ebfc6e4b.html",
-      "sha256": "9e545e34db43dd5f0e7440641fcfd19b84b60868e178dda384bff01f3ac238ee"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-processes-processes-00521739.html",
-      "sha256": "0b5356195b383afcc91425a5f22dcfe985ee62f820909f0cc6e9f321ef1bc24f"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-processes-textsession-a8c960c4.html",
-      "sha256": "f4218ddf74dd953b9d4fb6319af492f5cb3a02a447947a4ca10e204c360da4da"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-scheduler-scheduler-faa83972.html",
-      "sha256": "9826749b21b1066b47f52ba8d49725b34fc59a7b4e81a6fe4346f7cc536232af"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-smp-kernelcpurole-kernelcpuset-88b84e4a.html",
-      "sha256": "14f610a422e4636ec32d42c7079c3bf4c4051d88f93228bc2fc441dcceb5ed9f"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-smp-smp-fe9de433.html",
-      "sha256": "c2e77e1350e2796b3405c3c070d42b5f8f3c7f81508cb546f2dd7961ec94d39c"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-storage-filesystem-1a02518e.html",
-      "sha256": "c99bbcdb63c53b65ea283202382442b2a8ad766938a9216070ff0e718c29e753"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-storage-filesystem-a90364ae.html",
-      "sha256": "b4b313ba5fe55450cfb625725d78dbf6070e53dec8cb17ffd6165abe1447ad08"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-storage-filesystemlogicalpath-9542d7b6.html",
-      "sha256": "22fc301df12c3cce97df893f88344641d3c9e2fddc5279613e821fc02edc849f"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-storage-filesystempathpolicy-b46752d6.html",
-      "sha256": "44ae896e03545c1ba9bf2860f330435bae604820a419e8a82f4489211ed4a2c3"
-    },
-    {
-      "path": "docs/site/api/inu-kernel-time-time-ca307ece.html",
-      "sha256": "1ea21e12a7f4fc51ea813a93a6e5eb41aa6252520319531ce235dbab757b6d37"
-    },
-    {
-      "path": "docs/site/api/inu-userland-runtime-commandline-e8158724.html",
-      "sha256": "6e167927152d4314eda5164b45d30ffb506837a0284a80f4ea48f6ea2a338dd5"
-    },
-    {
-      "path": "docs/site/api/inu-userland-runtime-deviceinfo-a20a1035.html",
-      "sha256": "8540cf264db0d3be70afa7da3372c5ad674d36b0368c0331dd651b6ea325ab80"
-    },
-    {
-      "path": "docs/site/api/inu-userland-runtime-filesystempaths-fcf42d82.html",
-      "sha256": "62130e76056469e7442326823a71ed095e615978b1803fd58a0aeae678429f5e"
-    },
-    {
-      "path": "docs/site/api/inu-userland-runtime-output-7035005e.html",
-      "sha256": "a3e4fc92160e2ba076066bf2c09b47026cf8a61aa8ae50e1ded82ee2560ca76d"
-    },
-    {
-      "path": "docs/site/api/inu-userland-runtime-process-e52ed282.html",
-      "sha256": "58954e061060491ac8e8d61dbbf1c418f75b1c969d41d7148e9e4dca4059f992"
-    },
-    {
-      "path": "docs/site/api/inu-userland-runtime-systeminformation-098ff611.html",
-      "sha256": "bb759e255f920a19c2ba04c49241389147576a62e11ba6a787e257734b0114fd"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-audio-audio-getlifecyclestate-185aa895.html",
-      "sha256": "da6044820d7697a8682c55f5b3709e3ef4ccff1d137ac4de355fa53fff40811d"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-audio-audio-initialize-00eb9e10.html",
-      "sha256": "f0154e4bd83409489a39c7a4a9004b809e9256014753c085e0621877393a8652"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-audio-audio-pause-f07e3f1a.html",
-      "sha256": "d2c02534350231e0515ff4891a5aa953e5d8a6db253eddc04d05943a854488eb"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-audio-audio-resume-585a0ee3.html",
-      "sha256": "44101378f2e219329c14d963692fbe33f51985e48f96a5af098618a6d8c5ea12"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-audio-audio-run-19e03f9e.html",
-      "sha256": "11f6254119334d2cd406f0a94e33d8176885bef83fc45f998e23a8a5e16dfbd4"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-audio-audio-start-b517f1c9.html",
-      "sha256": "6394fa6469eeae0a98d6f93e2b0f062e2cda7b24386abceae5f57fe096f2b997"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-audio-audio-stop-62781bc1.html",
-      "sha256": "2b05b4daf5289438a302d222c757eeb3b679e957f472d1f67a7b8c8310ae8e12"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-audio-audio-unload-a4400702.html",
-      "sha256": "0e585415a06f513850178cb8d2718caaeb4d632f76c2c08f435e98e7197da475"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-clear-e49d0eec.html",
-      "sha256": "506b3bf36efe187fcfebb757c6dc2404e884ca6f102a27ea80d45285064fa34d"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-getbuffercount-6784d854.html",
-      "sha256": "5b469578eaa98e075266ff130140d24c2ec5050d086a9423ab4f227f54b6155e"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-isrunning-d1f549c7.html",
-      "sha256": "3b2b5e50cd5c7aef2757809ef438d8c695eef1ab23df3dd30e90731dc4a4d6dc"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-mode-6e7f38a1.html",
-      "sha256": "f97d16617829f6fe0dd45db6d4de66dfa31fec516dafe71441949377a89d206b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-requestedmode-d1c00971.html",
-      "sha256": "70c76cc82f3485b40fd35d030973c41f5acf12145c696b97a9306db1074c2c6a"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-resume-1d954499.html",
-      "sha256": "dd5d8a747207c7308054f9e3eb5f95edf64603647fd60ac9222650ffc5af30df"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-run-consoletype-57b2e1ff.html",
-      "sha256": "2c75d56e86813cc7dcc30024cdebf4e6c53fd52b87a1fd3822cc69bcab2a8fac"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-setbuffercount-uint-27d46013.html",
-      "sha256": "b84490f998be1ba551ac4096c86ae70394b4e7405f4c8b17df61fbb7ebc11c5f"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-state-ebf6c9c3.html",
-      "sha256": "86e97ef75bd214842c64fcb02f002edfd0e4f4aa59e19f967c715fdba32f896e"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-stop-4b77855f.html",
-      "sha256": "8655c01dbf47219c42c6efb093b1819023f2025ff1962f61fb36cb07fda8ce33"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-trypromotegraphics-b702f62c.html",
-      "sha256": "2d89f8b490a4cded067e6d62123c743926afb68e975ad29080259902d8fb724a"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-unload-f9daf869.html",
-      "sha256": "184c1305e9c14093f0789fec567d096f9d0b284fccd9783ca8d30c4637c8f40c"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-write-string-582da0e6.html",
-      "sha256": "50762a4c4d068844822f0ce13e690b9fa2a5928e5d191435da47c8ea66e4e335"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-console-writeline-string-6be9eab0.html",
-      "sha256": "ecdf8b236f3b545108266b1446c7391fb1d9e4ecd20aa608a7c250890184e104"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-consoletype-auto-00f9bc56.html",
-      "sha256": "b94cd3f2bf8e3e1cc50ec1b5c5659a0e4e70abbd06b0118c7eaa06ce0535e21b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-consoletype-framebuffertext-eb496303.html",
-      "sha256": "214011f7a972efafaf6e741e117c008b7fbd11d67a0756e47b9a35754fb5995d"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-consoletype-graphics-e25b33fb.html",
-      "sha256": "52a98166811e11ac6c9bfd0f94519352857d917c6ac56e97aceae53f05e56974"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-consoletype-serial-cff15514.html",
-      "sha256": "b4a99a3c67557e1d6410f4d736c9ddeb3ec20d07e705c00806354600f46d38df"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-consoletype-textansi-e8d12c14.html",
-      "sha256": "05527db5f2f9bf3913b940d6c624be56b1e530714e121a4d1ddf7de9049b3920"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-console-consoletype-textascii-179480e8.html",
-      "sha256": "12b7f8ef7c2e1b6ac3b376dbffa2ea8fa56afd082681cd4853e624687c1a3b4f"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-drivers-drivers-getlifecyclestate-904c770d.html",
-      "sha256": "02f98811f9eaa5bd2a86d1a4ea6e64ecf5541b3f654970b26fe26a8251cb886d"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-drivers-drivers-initialize-f8cda32f.html",
-      "sha256": "2c68c06fe2575bc27459ccfb5d52a835bd4b623586d79604fd0e51977442a4cf"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-drivers-drivers-pause-ee52b900.html",
-      "sha256": "fa155657a8956de4ff518efb8b07057e93aeddc4eebc6746e8ea79f810df3c04"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-drivers-drivers-resume-f7fbe8de.html",
-      "sha256": "69237da4d2e2aa35552c06e165018a973da121c50ebf1205276aa0f290d7f895"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-drivers-drivers-run-418e590d.html",
-      "sha256": "923743c1ec9d6dd3b6d2afee2d078bc431d9bfff4779ec64796464607bc2dd04"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-drivers-drivers-start-11a67ffa.html",
-      "sha256": "0a986a2c267a68b24d0262bc33ba86739673364eb79920924f16c09e78f0a396"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-drivers-drivers-stop-2802fe43.html",
-      "sha256": "b887c111ef9f85965136356ac95b2ab344d3881d9b27fa3e7719ae473e755f77"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-drivers-drivers-unload-6e2ca0db.html",
-      "sha256": "95ea94a4e004d73c4e3e3b004c455630c20e5da194efb1e0f5e854ea787a57cb"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-graphics-graphics-getlifecyclestate-a290a24c.html",
-      "sha256": "7697bde6f93f3b27c267ea2fa8a2b75cf45237c07895d37cf4de868b0738a221"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-graphics-graphics-initialize-a88151a6.html",
-      "sha256": "6fc12ecdc462296174fd9186811c6a40ae3b688a00c915362b73929cfd7b24e1"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-graphics-graphics-pause-bf94f81d.html",
-      "sha256": "40fa53f7f8449f109c83d7034c93fe2fb442ae6a26eb1d554e6b4dc2394c701c"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-graphics-graphics-resume-e3c3d529.html",
-      "sha256": "23bb7044486c855c47adb0cec8a6f5057606f027009087e589400ed469344834"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-graphics-graphics-run-8a78dea5.html",
-      "sha256": "1d11c65bb861bae56dc910e54910904fe98fa7da1ee2cfd587cc2a4d94921092"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-graphics-graphics-start-c3060f13.html",
-      "sha256": "5d41612c53509323a499ee37b669b521b893194de65540644a0c675ff0d2239f"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-graphics-graphics-stop-588b0fcb.html",
-      "sha256": "a24a35016850ce4e9810d67c9266947ea61ca672004a4ca0e71edb38407e267e"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-graphics-graphics-unload-9f852e2a.html",
-      "sha256": "72dff2d8c5023e2f4f5bdb9ec78634aa994b9cb46fb89861d10a2f9956ea20c6"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-hardware-devices-getbounddevicecount-c7378364.html",
-      "sha256": "3a92146bc5542aec615a19a49cd4d81f63eb568b532a44f065acf6996e315e6d"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-hardware-devices-getregistereddevicecount-3b1eee8b.html",
-      "sha256": "ead6345af45696be27af358e2f88e1956f2a348bea53d65e98b311402977c93e"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-hardware-devices-getstarteddevicecount-26ea77ed.html",
-      "sha256": "1c7324cc29ffc2e510880c1329191def772c8cea64d0c5f0b530eab84cb3e760"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-hardware-devices-isinitialized-4f2b1cd2.html",
-      "sha256": "4561acedc1543982c1c4e562d5aa11f7b797545635494a4e56400fd9bbcd92b0"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-hardware-devices-pauseall-0971693b.html",
-      "sha256": "7dd89d67e93298ef7cb78c47a928cf24ca2f1fe9c050789ce2be1fbf1708147f"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-hardware-devices-resumeall-5cd9ab42.html",
-      "sha256": "25b3aeb8507b71c8bc0d5eddf064c8c69b98a90632aff6997df44776f36ac16f"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-hardware-devices-startmatching-17aa42ed.html",
-      "sha256": "089652bd33bdcb720d70790b736feff1608f2e3e26959030529eb7961b1624c2"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-input-input-getlifecyclestate-ff96d0e5.html",
-      "sha256": "5a88745ca93abf84331773a7dbfab42041fdc45332aa02ff85c1fd24cd7e5263"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-input-input-initialize-4bc24992.html",
-      "sha256": "729e52819b8b094036c3a3b316de77f3df5bd5f18a7e582fd37036806a8ef1e8"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-input-input-pause-8d6fe176.html",
-      "sha256": "256f6b80d43c8c296e63fb3a5947860281307bc6781d36d736a38a0b2ebb2f97"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-input-input-resume-60dd7364.html",
-      "sha256": "06204cb5b5a576a00f9ed6067fa31c6e7463da17f7db2d16105941d726fcbbe2"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-input-input-run-85edc2a6.html",
-      "sha256": "f3fc5cafd1c6c8f86cc1710dd0931db76855ca1b07506f9ec0f6e8a31fa70b14"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-input-input-service-7c04441b.html",
-      "sha256": "86e8b8ae777028f65dc540c85660634330b2b37dbdc80840980067f8aae0cb26"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-input-input-start-fc09ca03.html",
-      "sha256": "03e4f4c5be5bd36ecea7473aaef957d7ae46c16002df770c52a142d6b6048a7a"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-input-input-stop-0a0c4b6b.html",
-      "sha256": "a510dd24a489297d648ead9c7f1590f824b3d26f07943e678b8b6b8215ef1020"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-input-input-unload-9b64a7fb.html",
-      "sha256": "effc2b54b1984c2e8bf07806f95e3472871d491e30c9400db5e0914a8ddf3ca5"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-interrupts-interrupts-getlifecyclestate-8a9cdd9b.html",
-      "sha256": "7c4f37ca06527bcd6fce9fe8041dda714eedd8e5beee13c33b2e9607e1b17f5d"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-interrupts-interrupts-initialize-dd095b7d.html",
-      "sha256": "1c6e0d3e2b8d84e3407943a4073a205fb6ff2a5cac6eedd653a7775a6095bc23"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-interrupts-interrupts-isinitialized-a28d749f.html",
-      "sha256": "b62f602cab5208a5a235db9a4a630406368343864c0001a000b6816be8a6d7fb"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-interrupts-interrupts-pause-a57025a7.html",
-      "sha256": "97a4220e4437d5c5ec0bed4e8e93f22cdfefebc9971926e41d15330b0b354330"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-interrupts-interrupts-resume-8c4656b6.html",
-      "sha256": "1d16bc9b6c53235bcc3ddeff6689f62692d246b523a5ce98181be9890c38828b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-interrupts-interrupts-run-c615d06d.html",
-      "sha256": "0cd383aafce059fce397197edef5cd853a44ed11578c76d1ac339838ad657261"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-interrupts-interrupts-start-545435c6.html",
-      "sha256": "e9eb81a855717e7ce258a88b4472490881d5d8958fe5388d5cf5c23344b20afe"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-interrupts-interrupts-stop-0ca9f83c.html",
-      "sha256": "3119694af5d7515fd904ff612da3cc717e7b7b4232312385850309473043a4ba"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-interrupts-interrupts-wait-6580dfa5.html",
-      "sha256": "1ae85423eb7906f3c5e51572a8869325726368d7fb831249c8d2c2e9f73e61ff"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-memory-memory-getstatistics-5e23eecf.html",
-      "sha256": "4e7e5f6429ff9d9fdca4485904f071480edcb80551d7ba2c5876e31f22db987f"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-memory-memory-isinitialized-e59785ef.html",
-      "sha256": "75e37f8c4b048aabfead57c2b2bbb2f246eb32f29d836184b0aee034bf7036e1"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-memory-memory-release-kernelphysicalallocation-0a60b7d2.html",
-      "sha256": "165ce4605ac62662677c584abf3b47137281bb2ddf8d6f939bb5c7014ee6a7d7"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-memory-memory-tryallocatepages-ulong-out-kernelphysicalallocation-04482788.html",
-      "sha256": "20f543a2d3f085eae4dde8f01f3e9138d15be6ce1f188f21b803be033a55ff1c"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-memory-memory-tryallocatepages-ulong-ulong-out-kernelphysicalallocation-f34960e1.html",
-      "sha256": "5efdd6bfd464ae8557c87212ec446d4d324bf86da8505660121ac581d836b5c7"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-networking-networking-getlifecyclestate-0296bd00.html",
-      "sha256": "3cc685924078e6e1a1f54238b0c09b810148a4d4a5286984313de80982ac9786"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-networking-networking-initialize-5a61018b.html",
-      "sha256": "93ce9b980736ddfa6d2538b81ac134948df423b56caa1c164ee878e9bd0f8656"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-networking-networking-pause-78412e6e.html",
-      "sha256": "f1c8cbfda7ed10343a6e4d1a71ec336a7019a03784e5293c9bbdf4a9ed8457f6"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-networking-networking-resume-9462c00a.html",
-      "sha256": "af643fbfd8d29aba8cfb2bac0c22b8907c14d7f4d84e4180f05bd5ec5da6fab6"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-networking-networking-run-b554e191.html",
-      "sha256": "266525716fdb89b286db8002fc2ca3f04808ca6f511ace28e9ed2968aaebdd58"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-networking-networking-start-de3f2971.html",
-      "sha256": "31d5d459fc7103e1d95c2c6b4a76f5d45d8d26969f11a57d7e3cf8a7872a1ed4"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-networking-networking-stop-edb062ca.html",
-      "sha256": "16c9dad0bb0c6a20635cb93bc31eb39fc8ada5014efc67a9b67a4a91965d8411"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-networking-networking-unload-631cc9dc.html",
-      "sha256": "6dfc1a22e9405497036d56c42c376559ec3d3cd6bd1f16b73c40f5243a3531d5"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-power-power-getlifecyclestate-f22d7a21.html",
-      "sha256": "61ef49491d45dc7f392508a487108bd23d40ef0106daaa9e227dd46a7e4db81b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-power-power-initialize-2dbc3e51.html",
-      "sha256": "d7536b70aeeeeb3563841600d4cf95671b89e8113839146f1d17815d163ba488"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-power-power-pause-cbd7a942.html",
-      "sha256": "d91174760e30996c0b4e824a246650b6d1c18d92d5e60e73e9c33b7a6ec62250"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-power-power-resume-f2a1af5b.html",
-      "sha256": "deaa16f5387f23c88a971b536ec43bc1d9b1cdaa364966ff121775770f92a838"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-power-power-run-633d99e4.html",
-      "sha256": "4b79cc948c933de0752c36fe2cda9dbba41857d050530cde55614392a3a88202"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-power-power-start-9f744461.html",
-      "sha256": "3a647d6806888489f3a24a80c0d7ed2f003bcc087be4977c964e1ebb9589d44a"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-power-power-stop-d8045694.html",
-      "sha256": "789b7cd965cf14abebe46c676c39e49a41a92bbdc12b80f0d5c9a98a38eacd67"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-power-power-unload-ba3c25e1.html",
-      "sha256": "81dd761dfdb22e9bde77f8dbd35fc5c296b5196c1b388f814a1876f431e17f41"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-desktopsession-run-bb830482.html",
-      "sha256": "771528ac25236beeb2e23293391ab38701610e0368eb1d227dfb215ca6331bcb"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-cancelforeground-25088754.html",
-      "sha256": "809ecc7b4dd82ea2de0482096f7befd126569a0cec82b043e36bc3ed0462903c"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-configuregraphicalsession-string-string-5bc8acaf.html",
-      "sha256": "5a355987d579726819f3214be8fe1afc8616b462aa2d5919c1e0a23ae90dda75"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-getactivecount-0f8b6593.html",
-      "sha256": "852cfe488117fe272bce841d57ceeb067071c07e954f182fa09c964968746bd8"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-getforegroundprocessid-69f4191f.html",
-      "sha256": "80d7906164801fd3cfb9f01186b7e8edd838b3b24398e6b88cfe51427dc4ccaa"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-hasgraphicalsessionfailed-129c0464.html",
-      "sha256": "bee96d77209a494b48821f6bc5939042465c1e94952f65b5969aad72c022c013"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-isforegroundcancellationrequested-334ae6d9.html",
-      "sha256": "e6c59081166f1993aedc739ba5a2fbf97ed04ce5281748f4e26ef1b0fdccb2ae"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-isgraphicalsessionactive-bb97d908.html",
-      "sha256": "68e628a6dded1ff4ab8de3309b1adc7f8d5c15ada8a1a3a2d7551524e45240f2"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-isgraphicalsessionstarting-4cd8a879.html",
-      "sha256": "961c6df7019dadfb2c68ec2cbc7cbe8da847e7e6490f2044396caccd79159e6a"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-startgraphicalsession-3a5f721c.html",
-      "sha256": "00e63b860b6cc7ba46f18bc14655fbdf1d9d38076f1aaf7613ef2e25dbfdf944"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-terminate-ulong-long-0c1b9857.html",
-      "sha256": "4c4ac43aaded351b7fa656e74e3f21cc7e56d051bfdb5323149495193a0a5842"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-processes-trystart-ulong-ulong-1a6c0b37.html",
-      "sha256": "f68811441d5abedd697fa9cdc990af5d56683aac257326a31691f7bf5d75595b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-processes-textsession-run-4808c86a.html",
-      "sha256": "13c29c4ff3f012cbb80716fdf49bccaa24808dee300a84f68993575a69373f5a"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-getlifecyclestate-99d26843.html",
-      "sha256": "57552719273993a949c1643c7ec2d33901f9f5e4d29d43e4433f7685afabec46"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-getquantumnanoseconds-875489fc.html",
-      "sha256": "1b31845d329253475fd4de386100d17a43f3e781ee4dcf3a5a0b2e7187be161b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-initialize-faf6e5eb.html",
-      "sha256": "5d9d8dae38dd0421e7ce469bd8190c2b92e5656d1760846afa6d8823f3d2a957"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-isinitialized-d7a53d3d.html",
-      "sha256": "cb296bb7ac489fe64127739bc0cc80a70d327709ac7b6868c1e9e757dba7d143"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-pause-593392fc.html",
-      "sha256": "96b8b7edf91420bb82cb586d518b276cc119b68e9e34e20aeee66f068ff8b29a"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-resume-ed59115d.html",
-      "sha256": "0c0610b6e164ff4f543d360e6979dcde004ced14132b2e019adae3be61201083"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-run-e691b563.html",
-      "sha256": "cd4b0acde7aa1035a1360b6a1dcb6fdbb5fc5124b512d7e8855257ba425b4bdf"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-setquantummilliseconds-uint-c91c94c6.html",
-      "sha256": "e675c9a3cc46e0692d765ef4e60fd5e6939fae692055d35476af6563f2259c16"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-setquantumnanoseconds-ulong-8d05a7df.html",
-      "sha256": "ad6df2055cd8ea82529358025381d541739afb2d386cc54b3342dea85f17a9b0"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-start-d603759a.html",
-      "sha256": "76383c815d12fddf90f9f9561726c1157243a061f1cbe0a833c0d55d72cdf105"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-scheduler-scheduler-stop-e82bb2a1.html",
-      "sha256": "7e8b6f33987fbfead095bc1ce8a5087b3471667c858b7b2840bfb1d473ab614c"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-background-0dc99e7b.html",
-      "sha256": "a5873d2748fa022fd883e7b21f5a0e15c0130e57cc0fe32195a9bf815203d20a"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-drivers-fbe23e2b.html",
-      "sha256": "1beae1aed6393a00aea2f3dbf5b1653b54f65bf798baae1b25ae888f790f537c"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-gui-203e9386.html",
-      "sha256": "8a1b8d891ffc9a737549fcbcf3b8496262503d90964a69d00efaeb1348d9ea91"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-interrupts-b6322245.html",
-      "sha256": "b07ceb0a5d1043ae16267a1207470c2b94165193904853cb390ce15a3dd05ee5"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-kernel-86168e18.html",
-      "sha256": "e068c632d58176cff56922d933cd740d53bbe4f107c83c2ad71fc64e9a026da3"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-networking-1294432b.html",
-      "sha256": "7739124e58d2e6eda4210210cf15b1c3deeab27b2e9d66946ad6bd101074e5db"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-realtime-e17f28d6.html",
-      "sha256": "cc3e07e9f4be77049a77d08d327f03c527f05ca948b8696c50b79abb000bd2db"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-storage-d4fd9082.html",
-      "sha256": "b8a07fb00fc8244f51de42e15adf2c96aa723ceffb87ae36a69bdbca552f5ed3"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-userland-a3fc84da.html",
-      "sha256": "8b17e9198556148637c81efff6056a866a07449b273c204398bd21ff296d98bd"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpuset-all-67a40e4c.html",
-      "sha256": "9b1a0a25e94bde4b2754e2f8deb2a6284dc5683785067e552144bb5c61ce8702"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpuset-contains-uint-0f32f24f.html",
-      "sha256": "9d60bc9157b5fdd468ae87cfdd6d81967276c4071611f900d6fc18a6dcb899ca"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpuset-single-uint-349d21d3.html",
-      "sha256": "705e947ef1fc25060a447ef202bb54697394e4cd4558f47e4eab964b2b044eca"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-getlifecyclestate-46ba1f0c.html",
-      "sha256": "1ec67ccd7d2e8393d6f084e611d20c3c9839da3a10f5c38066b0e893a7f16973"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-getprocessorcount-255752f4.html",
-      "sha256": "0ac3a82590503dda9056b4728412c6ce9e147e8e3ac644a542436cb24c900b8b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-getrole-kernelcpurole-2a2a241d.html",
-      "sha256": "7f18fe3385d351be489f6b297b0be600513d27b2f2d7c984a867d31014a6558a"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-pause-97ca142f.html",
-      "sha256": "9d555b6d6130ad420bc2c9163a497ca0e7455d7caf6a44f4ff592d95ccc784d4"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-resume-c845d81c.html",
-      "sha256": "580406979c138f3f5df235d8024b8d0ecf03f30a7d5689899232bcb724e251c1"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-run-03342d2f.html",
-      "sha256": "6f61d61079f1c62bfe6e9f4312e589e4b39c875d67451ddea414242b682b5a1b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-setrole-kernelcpurole-kernelcpuset-ea43cd0c.html",
-      "sha256": "eae5cd99b50b02c00dccd8f9d95dcdeebfdb2a886668e95c27b45c8a5fbbf574"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-setrole-kernelcpurole-uint-92e88997.html",
-      "sha256": "2ead0e48f9e44dc51c27de9d4affe113676462cd9b8a5b1014a6ab6c2c188dac"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-start-9b6fde94.html",
-      "sha256": "b92c4ba38e5abf084c012cce4f464a537b8b3cbb3cfdb7ce49e4677a4a892163"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-stop-e4776f15.html",
-      "sha256": "b92d631c37c80ec04a0cf9b4a932836a304b42bf67b977c35fe94e39c2ffb058"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-smp-smp-unload-71468a02.html",
-      "sha256": "4eca04140533b2a63914a0b90d4c53ba073f0daf73264d9b35351bbafafafbc5"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-clearlogicalpath-filesystemlogicalpath-33285880.html",
-      "sha256": "29fb13068468186e1876c4248af7cc8097aa6824ea0dfe6b67456d93ff8043e4"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-clearlogicalpath-filesystemlogicalpath-61fd0511.html",
-      "sha256": "7669ba9688423ec43877402ea33adc8b3090b38aa1279f7a05b36c5da2b9edd1"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getcommandspath-5cb348d9.html",
-      "sha256": "4b312c6e519e0b53f571c2d225d44d32dc0f452909b147b4c92ba566834d1b4d"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getcommandspath-c15a63c9.html",
-      "sha256": "dfd6e38c84d388b2af75bc5465293ebce36c2363ea787c755a42dc4d1154a8b2"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getcommandspaths-61fae14c.html",
-      "sha256": "5ddc0bd9cc1e043520ba899d38d462825099a5b89ffb9549f09842ebeafdeff1"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getcommandspaths-82d7517b.html",
-      "sha256": "0fee24415a4734da362a9a124de36b15c61d62d89036e1b9b35c52e7280b9880"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getlifecyclestate-2608e83e.html",
-      "sha256": "7ab1631380e025d731ae566b61ca305dc0afed16c796c9b8414611c3770ce0cd"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getlifecyclestate-2da2bd42.html",
-      "sha256": "4085ccea58b62ad0772711f49413fd9ae7c897846fb2eac56f8ecd267b9f655b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getlogicalpath-filesystemlogicalpath-aa8cf6fc.html",
-      "sha256": "cb13886d63128a75e5a22c847baee566a30aa035e1a7e09f138ed1b08f9e5969"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getlogicalpath-filesystemlogicalpath-c7656dde.html",
-      "sha256": "9c52b1a188d203d2a257c4ab5c5339331b7cd5db4be6031b04a166f0aa4149e0"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getpathpolicy-7ddda1fa.html",
-      "sha256": "c72b3f5cc38e5f51924052b42b531586e3221cf2232c9a098c745a5a0acfa151"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getpathpolicy-c58fb81d.html",
-      "sha256": "bf5bc13898b21c6cd043f64db34c69cc7823bad2eee1784e6cfcf6fa25f10dcf"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getpathseparator-bf403896.html",
-      "sha256": "94f4e1a79ce314d312225b3696342b7c3b130c7098d129fd9c99f375b722eaad"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-getpathseparator-e861fe30.html",
-      "sha256": "8cb02796cbc6d50acb2a2499b084a3c25024a314cf4510e3454872c7524256f2"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-initialize-5653f0d2.html",
-      "sha256": "b39c6a736e6270f8b42786fd6842d4c5a18421609b6bf6dc2d5fe7705d943841"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-initialize-bef8e27f.html",
-      "sha256": "671d015677caebfae0d3c4dcfc3f67cb78358eb722055579f05ce9e3a948fbff"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-pause-1126b38a.html",
-      "sha256": "2873c4831d0039b1629e3bcc60e70d78bc733bf987e2463b4c6b668dfe0abe1b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-pause-6eb9800c.html",
-      "sha256": "9d5bcd9771a5b833bff22b8df9dd3d1b3559a73b04b974f9d3f8e88c9c37cd4c"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-resume-1e82efdb.html",
-      "sha256": "77ce1d3f8ef5deb306bb0ebd70090073a411eef2d7ea946bd42140a28c68770e"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-resume-7e54e33a.html",
-      "sha256": "d6804116d6586c165889748d202693c2dee17e5c41b791dec081c12ba9da0bc3"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-run-1e75b351.html",
-      "sha256": "af3944a4f6ef482ec453047b77b3b93472230f0b2fc405e0c4e51226dc45b1f4"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-run-d1b90b4e.html",
-      "sha256": "7b8051ed9669d9432dbc387f3a7d508d14d21ad5249db0b851a2de64b2ae1d72"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-setcommandspath-string-bad3f21e.html",
-      "sha256": "3670bf77048c71642817389aabad3df965c23929b58c2df07e87a2270b822673"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-setcommandspath-string-cc7cd9db.html",
-      "sha256": "a0fc4f7def3b55944ee6183b6d33b5a21afb4a686af5467716a7f74f973844bc"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-setcommandspaths-string-410cd6f1.html",
-      "sha256": "2c95f40aa3d995f3bc91c3222f19d3f49862193df520290b8aa616f744f607c1"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-setcommandspaths-string-b98e24f6.html",
-      "sha256": "fb9b9d2aec8abb026197382839b1f40b4f8c9690eb5baf93168c5c07da0e7422"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-setlogicalpath-filesystemlogicalpath-string-4f8eae07.html",
-      "sha256": "5ef1731ad54d399dfe0b992873685933631cea7543c42a3c2add53bb1a76c2ed"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-setlogicalpath-filesystemlogicalpath-string-b1b2b60a.html",
-      "sha256": "8ac172eb26671c25a6bc2700c4d4c8862e27359081ecaf923ce83a50a0bc6dda"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-setpathpolicy-filesystempathpolicy-cb1513b9.html",
-      "sha256": "8ad0edba620ba2701d01d66411bd48dd1a8faa4ab3ae6fb78832c63344a20edf"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-setpathpolicy-filesystempathpolicy-e0465f9a.html",
-      "sha256": "e0e67fc2ee7f65833ed0b708bbabb7f0f9cdf9a9ad2a4a6d97e0c6743b37f63e"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-setpathseparator-char-847bc7c9.html",
-      "sha256": "ed3cddf52ea9f0f021c951767bc97298485f059a14cf108066b256c49e2991b0"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-setpathseparator-char-e1089815.html",
-      "sha256": "b9a721366c79824a8237477543da5b6d31a5955205c235df939831c7514d1603"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-start-944d5370.html",
-      "sha256": "9056e28f98afcd311383eb97f6d592478d6770cfb558b326713358eefbb00852"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-start-c4c78c2a.html",
-      "sha256": "a958f10b1e187702332090317e0abe759eefb4da137e72f72fae43b21c620eec"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-stop-cd634c06.html",
-      "sha256": "1629302f2df8de58e01d3fc9fd4b1041df702e82de6089a7f756258d8ed99a8c"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-stop-d1ae2d26.html",
-      "sha256": "cd9c96c961396ae3d5cecf7bcf06f1d8b631233323b43b818649bd85d0b697a3"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-unload-1a567e6e.html",
-      "sha256": "ca3273fca4dd897f6f275160b85dc3749a2ac2fa62f5f06216e02069d1261001"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystem-unload-5f50ee9e.html",
-      "sha256": "0dbe75f53c74485231d794e6d41937527fd8c66763cb7ec3125959394cb7b068"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystemlogicalpath-applications-efd51198.html",
-      "sha256": "811886f1fed51759fb3bac779c2290b4678c14de548514bc93965dcfa49c2113"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystemlogicalpath-commands-2577b3b9.html",
-      "sha256": "ab31ab9d981d76030659ad8a1fbd88ab5e0d25ceeac7b19b44cc912e76083b64"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystemlogicalpath-libraries-899a2dac.html",
-      "sha256": "04d0f20143d67571ddf07059886de309261c9e22f07a654ff4c3c082d1228209"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystemlogicalpath-readablefonts-8edffe9e.html",
-      "sha256": "74955622eceb3a06e1390293d40e917dfb087e4932e23a5c53b53fef03eda5d0"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystemlogicalpath-readableuser-8cb259df.html",
-      "sha256": "2b32519f94133e46a16519192e38665e4635f07cfaa3a4fe190f7550c80d76d4"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystemlogicalpath-temporary-40b97b3d.html",
-      "sha256": "e8c97ab1dcfe839f3d4c8159cde31354a4364c54941859adc94e76d6d4492100"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystemlogicalpath-visiblefonts-f3ffc94d.html",
-      "sha256": "3fa4fea84f5f5c8d93f423a7b94153cf11e84831c65acf4d87c4dafc6193aeef"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystemlogicalpath-visibleuser-57656a15.html",
-      "sha256": "37c09cdeacae07e9f43cc66a5f36bdc8f88da3ce0a53f1ecbed551e8f60e190c"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystemlogicalpath-writablefonts-c010970b.html",
-      "sha256": "3d210e8f00e9ab646b5c3569d4880e787456ff9b423a5ad251acec66c0576a31"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystemlogicalpath-writableuser-0c07eb8e.html",
-      "sha256": "f30f5c85903958c5ab9b70204d53c74e368de318396d1ecc9b2bd8f4b47225e8"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystempathpolicy-allownumbers-69f41718.html",
-      "sha256": "d9ee4885e69f8826986578c20be8c700537a71bf115ed16266e9f2950b33bac8"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystempathpolicy-allowspaces-c4bfa94f.html",
-      "sha256": "a31a7913b9ee26437dee3ad4f0e6044144efce9927b95909b8c40192b14f086a"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystempathpolicy-casesensitive-9fe66038.html",
-      "sha256": "7efe0e3caeda89d76e044209c7b3541e0cb66d5a5298013cf8ca3bb3d0cafeb3"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystempathpolicy-filesystempathpolicy-char-bool-uint-bool-bool-string-2dd59205.html",
-      "sha256": "58f7e940240fd55f44ba4e8e183a60064a75ae3e9d943307f5212bff678bd4ec"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystempathpolicy-invalidcharacters-45ae7c57.html",
-      "sha256": "0b710bc6b21001f11dafc780f5b405155da0ba400ded3c384cd00111508dbf54"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystempathpolicy-maximumcomponentlength-46121617.html",
-      "sha256": "b4ef0e3e930ef1f412a4d1c1599ae1cd4cdb44cfe87931a35211cd7663a7a3f9"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-storage-filesystempathpolicy-separator-b75f2067.html",
-      "sha256": "6770b6a5049d14852168f8d2a62ebd8b889a77adf8d9fdfd7e35c86abb06277d"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-time-time-getlifecyclestate-7ae644c7.html",
-      "sha256": "0c1e7be53036d97978ea8f230ad0b46f9e0de3a343912113da7c3c43d0bfe2b1"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-time-time-initialize-3ff41494.html",
-      "sha256": "c89761788749e317f64d8012a7840bb6144066a84fe3837cc4d7420891897f72"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-time-time-pause-3c302bdb.html",
-      "sha256": "a739fc5782fa1ac73e1a758926d78d4bb62ebbf43116db899297691202de1eda"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-time-time-resume-feab3a6f.html",
-      "sha256": "f2292cd078e853ac2664aa46cc3b32a5b66dbc27861c98897ae313f8a1cf277c"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-time-time-run-596e9989.html",
-      "sha256": "a20fb886bb87e65f2e73f399b22630848b4d84e3f69b81a3621b9d89bc3f80ad"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-time-time-start-39af0b57.html",
-      "sha256": "50d19ca78a76cc3ddf9bb3d17285626dacbb23023dbb8a32663583f33ee6111e"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-time-time-stop-009c3582.html",
-      "sha256": "f1f31ea81fde08feb4a10c955ee464b84f9837b34b02d49520de4164d7b2c98b"
-    },
-    {
-      "path": "docs/site/api/members/inu-kernel-time-time-unload-b9edbc40.html",
-      "sha256": "ba2031b91fec18fb2d2b9498a0f80b4e4c7d232713024af50829c069a6306460"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-commandline-getrawarguments-92e3c511.html",
-      "sha256": "b1ac0221f3721acee1fdacf2f2b7c18a406c49419d8339a2ecc967632a0395c1"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-deviceinfo-bus-fc3d620f.html",
-      "sha256": "5c8ffab1de71aa404436ec0a6dd57ae0603de5a6d864279837b0a591d448a094"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-deviceinfo-classcode-ad5b6865.html",
-      "sha256": "312dfa1f86b3a34df1b7fce78b7f57c456a4876ba0fca2bea325443ebdf791e3"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-deviceinfo-device-511921fe.html",
-      "sha256": "a1e8c8bcecfbab75d8f63e0c7b5c10dd7a47edcef95062df02237f6a1a2ee2b5"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-deviceinfo-driver-a38b5b97.html",
-      "sha256": "cb1cb5689a4b6844b2725d46beee7c3880312313bfbff3a02b8da9b9ae14e653"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-deviceinfo-failure-544e1639.html",
-      "sha256": "67c40fcfb674b13d9da444a5d75eb145ddd0652049bbf614a6070fdfe827bf5e"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-deviceinfo-handle-b62392f2.html",
-      "sha256": "5e4261018eadbed8cf3775074b71268226a900d972f1c7f07f36edbbf74460f0"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-deviceinfo-state-83ed0a71.html",
-      "sha256": "dc61ca2a2b4d793f79359e7699f0ee66b692254ef65a33992ab15d669ff81000"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-deviceinfo-vendor-91b43e04.html",
-      "sha256": "0db07b8b1f6de16ba01904abf9ffc7db11c58559ae784a9a403afa44e62c4a2f"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-filesystempaths-buildcommandspath-string-1b9eadb2.html",
-      "sha256": "24be6fcc64897975682b2a47af40e391a3ff2228f1e2ad56d45de9d8dd48f9dd"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-filesystempaths-buildcommandspaths-string-373eeeba.html",
-      "sha256": "7985d5d25398f1e49a8386f85d539930e5ba8d0b360cdb8a6085d94504369014"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-filesystempaths-getcommandspath-95803581.html",
-      "sha256": "7990519c1307c2d207e173d5afbccafce1a3710f064133819d7c205e5e3e0856"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-filesystempaths-getcommandspaths-ed8cfcd5.html",
-      "sha256": "8fe87edea8b36053018fdbc12a915d9131fb2265ff5d48623ec7693627636147"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-filesystempaths-getpathseparator-e1ea281e.html",
-      "sha256": "99c835992775a13ef11d6674f136caf55e9677d2ba4c334d84c65d4aa01add9d"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-filesystempaths-setcommandspath-string-cf84ebb0.html",
-      "sha256": "eba3b1303a5ec8c17915ecc155fc0403eb09eb08d1c2eafcfa44627b35a705a8"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-filesystempaths-setcommandspaths-string-e3544d02.html",
-      "sha256": "263da15745629655344e6e5d7b04857c1610d8d1d8f0505c7bede1f344fc77e6"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-filesystempaths-setpathseparator-char-663031fe.html",
-      "sha256": "d093315731dc9caa53a030feea1a9b33ed344d5bec9407545899f8ea1f956c24"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-output-clear-25ac8165.html",
-      "sha256": "70e59818a217099e7b20681f87d5e0a03a42d2121aa912e60c495ad405210884"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-output-write-string-66bf15fa.html",
-      "sha256": "8942769b58656f499b4759fc7f15d2cf1966453a70fb23d1f91f014e402c117c"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-output-writeline-string-498d30a9.html",
-      "sha256": "2c00714421143a469200bd0e4507b7c918157bf94621492196381979b1ef6891"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-process-trystart-string-string-feb1d55e.html",
-      "sha256": "d42f4c85cfe818fbd58f242875d5389c0dcea4ae585f063f91405cb8223c4016"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-systeminformation-getonlineprocessorcount-29e5d9e1.html",
-      "sha256": "eb7d8925d91ebae4adca37e2550f0391f962f5342303bcbc9ba90509f147fabf"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-systeminformation-getschedulerquantumnanoseconds-71d03983.html",
-      "sha256": "7aa4a0d0f0141b0298a119302c63857033d0cecf9c03032b1a316db1338487ed"
-    },
-    {
-      "path": "docs/site/api/members/inu-userland-runtime-systeminformation-trygetdevice-uint-out-deviceinfo-0bcef2d4.html",
-      "sha256": "2787ce04df20461aa0bec314c9a45d85b69f35a7617708fdedad12297348f81b"
-    },
-    {
-      "path": "docs/site/api/members/system-array-empty-t-ad80b78e.html",
-      "sha256": "cab7ba48fa6788dcde2b30eee94ded6b28481941bb2ed8775994ebe035b6f845"
-    },
-    {
-      "path": "docs/site/api/members/system-array-getlength-int-561076c2.html",
-      "sha256": "2d18b029f5df6388d7d4bbf7f1ac2074c65e3350217dec83c38633d16ade6c27"
-    },
-    {
-      "path": "docs/site/api/members/system-array-length-3d737b3f.html",
-      "sha256": "1a775611ea33c40956a05618cb13c972495fca21aaf832485c34f45067e24416"
-    },
-    {
-      "path": "docs/site/api/members/system-array-rank-4474b52b.html",
-      "sha256": "a132245850614a358af65924173e21c3411c6927d6f03711c69eecc92d1a6213"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-collection-contracts-icollection-b4bee5e8.html",
-      "sha256": "acc1c9148e8bb56bd43cce511447f22154cac0647eef71782e4de576dbd8eaf4"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-collection-contracts-ienumerable-8bf77891.html",
-      "sha256": "43e3843c1ec2d9be08ebc151a6cef3f9b7cf79826035d9c62b3a8d7e7e16f330"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-collection-contracts-ienumerator-d2cb9504.html",
-      "sha256": "8271d569058e9822f48f2abf69ae12533ca1a06dfeac322ed8a78bf083ef1a49"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-dictionary-tkey-tvalue-1df3f2ef.html",
-      "sha256": "b07dc23fad84bed68762e2ca51c430ad6d695684a3103228be65a7efa0a62741"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-equalitycomparer-t-eed98897.html",
-      "sha256": "e98e27070d3604520e7f553621ccbd241b106a368a7540d51f9ddb5d9b9ae7ce"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-icollection-t-caf246ad.html",
-      "sha256": "fe8c1dec74c83e9a8197987c90d7357bf7630e1cc9e1bf12a270efcdf7e8b7fe"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-ienumerable-t-4a1ace8e.html",
-      "sha256": "eef15374aec427d8c427c43c9ae401696c1ee4710dab5ad3cf8d87e98b105891"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-ienumerator-t-4140f01a.html",
-      "sha256": "b66e1970c503220b839bd118db35f5d1a0641ecb55efd64bf56b4c102b9f0026"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-ilist-t-56336f6c.html",
-      "sha256": "76ee6df92515c5750dd655ed15830f1cc2cae51155f4e14b7991b97f443062d9"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-ireadonlycollection-t-ad45add4.html",
-      "sha256": "1b7872ebde95371c8b7db54cc023035f48fa7a771d692326e02617c53f32f41f"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-ireadonlylist-t-841a2eba.html",
-      "sha256": "0f29c84cadde048008969fc79b244eef64017ff164878cefe4fd830ab76e7c62"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-keyvaluepair-tkey-tvalue-8f4ca9d8.html",
-      "sha256": "c2eb3ff81dddaf772ed98c23433d3ba40a57696246cdc5897ca467df1039f6f9"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-list-t-db1d165f.html",
-      "sha256": "181f1e6c80d20179197fd60512c454ba30da815e87a61c4f04b4f25b814c7feb"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-queue-t-2bad7d0e.html",
-      "sha256": "1d053c34c6eb30b5fa7a2c4eb4dea4511b67c54440706abef24a9974a2e24d0b"
-    },
-    {
-      "path": "docs/site/api/members/system-collections-generic-generic-collections-stack-t-58443e3e.html",
-      "sha256": "9aab5dc0df4cd247d51aeb2b61c1fdcf32fa3fc5e9cd12607392acf2034b225d"
-    },
-    {
-      "path": "docs/site/api/members/system-console-clear-98ae2fbd.html",
-      "sha256": "58620c71dedaac3048cf8a1cc7382d641988b38fd5cd52fd9d7f08630eeec428"
-    },
-    {
-      "path": "docs/site/api/members/system-console-read-1722c14c.html",
-      "sha256": "40a19ae34edff176acf407747ccf66c6a975470d95dd062963f1ec30e7cea557"
-    },
-    {
-      "path": "docs/site/api/members/system-console-readline-ab0d0354.html",
-      "sha256": "c67b24879412efc53d7cd641482e3d7e541c80020f709b0c57c9af9958e53703"
-    },
-    {
-      "path": "docs/site/api/members/system-console-write-bool-f6e6d8ae.html",
-      "sha256": "ac73fbb04010724863e70ec96b6f245323bdfbf49f954675d8d7d6ac51ed06f2"
-    },
-    {
-      "path": "docs/site/api/members/system-console-write-char-231cdd93.html",
-      "sha256": "333113da49ab9e3fd607c80139de290a6012099d8b8b6b958d492eef1212176b"
-    },
-    {
-      "path": "docs/site/api/members/system-console-write-int-aa3d3493.html",
-      "sha256": "15d39f080497621b078cc9d0c1777653d3c1bb188f6effd36eb0f0c6013fab17"
-    },
-    {
-      "path": "docs/site/api/members/system-console-write-long-4edc5fbf.html",
-      "sha256": "8b98ada09ef50297cae5c59f91f5ba9b7d8fd59dec08927210fd1d0f1e9e6da3"
-    },
-    {
-      "path": "docs/site/api/members/system-console-write-string-c9777d71.html",
-      "sha256": "fcf29bcdf6d5b4c98260c3cc9fa51ee3b08b576f2266bbeeff9c810a09cb904c"
-    },
-    {
-      "path": "docs/site/api/members/system-console-write-uint-20bb177f.html",
-      "sha256": "c67eb5df467fd3ae65ae0ef803e773e3767a61e423d9091dd3f79ca8acd66e3f"
-    },
-    {
-      "path": "docs/site/api/members/system-console-write-ulong-7a457587.html",
-      "sha256": "cf8bc5dcef14d9b4a7afd1309a9045311311ad0ba34ed1d93b92ecada2f934f2"
-    },
-    {
-      "path": "docs/site/api/members/system-console-writeline-03fbf56d.html",
-      "sha256": "7957a230122b055863bc8b1e929bc58050e9831247f55096b5084661bb6f4338"
-    },
-    {
-      "path": "docs/site/api/members/system-console-writeline-bool-6b866ba5.html",
-      "sha256": "4f65c784c566da2687c88dff267ea250bb9d74dc243999506c04ebf7c9df9a51"
-    },
-    {
-      "path": "docs/site/api/members/system-console-writeline-char-a18d4dfd.html",
-      "sha256": "66010641a614c52ff08180b3f101a39f91e8a36a61401bde56682e631a8d1621"
-    },
-    {
-      "path": "docs/site/api/members/system-console-writeline-int-a8d293f2.html",
-      "sha256": "46568fd9f7f6f8cc7aa1e6312a04be7c0999d45b3d53eafcbd4962c89bdc8b81"
-    },
-    {
-      "path": "docs/site/api/members/system-console-writeline-long-39e74219.html",
-      "sha256": "355bbcc405398a1f333305051b4de13de549cc64fc8ff5ff53f236ce8874547b"
-    },
-    {
-      "path": "docs/site/api/members/system-console-writeline-string-760663f4.html",
-      "sha256": "0127a4307bd0ef59a0c6536358cfbc6f8edd95fcd1e9df5b756977e0de975566"
-    },
-    {
-      "path": "docs/site/api/members/system-console-writeline-uint-7647d61b.html",
-      "sha256": "e17ee332272e18b264572fd43fa6c2758959838b6e44887b4217234ae038e22e"
-    },
-    {
-      "path": "docs/site/api/members/system-console-writeline-ulong-c67badb2.html",
-      "sha256": "475eb5fdea5128a4e6f2fab64565a64ebc73ae3cfea3500971192b4838e04bd5"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directory-createdirectory-string-f0de1aa2.html",
-      "sha256": "3c2cb0e3929a57e6a1b11a9aafacc0f0cf3f0ca0ffb779e6727ab2c10ce651f0"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directory-delete-string-39a05f2a.html",
-      "sha256": "34c26e9227c9760d63399406818fbacff6d4a2eef4221eae742a8135e59293df"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directory-exists-string-c6a96cc3.html",
-      "sha256": "85cfc30831d8145543524a3ea1af5862fd416192874ad1d44d8987eab1721b5a"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directory-getcurrentdirectory-4a13cad2.html",
-      "sha256": "3157547398cee6c5b5f79e04c1315ca046e78fb2eba22dfd7168e8101fd69904"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directory-setcurrentdirectory-string-6d167644.html",
-      "sha256": "4dafa48df9dafdc8f314de102f45615c5d575e732fadff2f01b533be6a06a01d"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directoryinfo-create-3880b696.html",
-      "sha256": "448cb04c911a99f8748db7f396f9bf45a97dcddb41030b096aa1a4c029f703ea"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directoryinfo-delete-6d541d78.html",
-      "sha256": "6f4dfb15cf0c12a3a976b64d10120ef22fe1cb7c937dc593b645e57b774cff12"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directoryinfo-exists-76283f82.html",
-      "sha256": "c28600235617b6e18216c38e4511059c53caaa3d13162085b1dcca765b9dd190"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directoryinfo-fullname-dd675e2c.html",
-      "sha256": "353d55c8f00a2f6caf0d4de387663256c1bbb0b5128fafe76598f30dc89c81a6"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directoryinfo-string-9b8ed40e.html",
-      "sha256": "c7e88535eeb344cd29f2045a8b5f978832b01550c24d014cc5c4fcf318c6b067"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-directorynotfoundexception-416150e4.html",
-      "sha256": "a541b69f4a4a641c40106f4d237d6fa55efcd2d3c5c0d9096b84bcfd2edeca72"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-file-delete-string-97bad31b.html",
-      "sha256": "325c2d992a7067725a1ff926691c01144e40bdf2af8bca537491949193861a5b"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-file-exists-string-e29c9e7d.html",
-      "sha256": "91a602ab004176d7374683fc946dbf237fd7d11b76e2609de97eb7f27ce185fc"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-file-readallbytes-string-0b7eb683.html",
-      "sha256": "0ba44fef9b17fb7e9e3096425603ddbf3b46230daef4800c5a4cd48f855b1c75"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-file-readalltext-string-27b2ade7.html",
-      "sha256": "a790ea40dc17bf04a275bc45d3d078ca7b3f0a4cf9e681ce58b9c65b0701ed5e"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-file-writeallbytes-string-byte-4e9bac09.html",
-      "sha256": "701d59843200ab66d812ab0b717648ce94675bf256e6e05b66b8e7a9cc9a21b9"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-file-writealltext-string-string-ea245657.html",
-      "sha256": "08e87a76581b078367d420d37789c23d56e6c7a4f6edf3e75597de122db8a072"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-filenotfoundexception-f53d6a7a.html",
-      "sha256": "a72d780a13a620c94013d84fab5ed32447f2a2ca60121a5fd4861368a86526c8"
-    },
-    {
-      "path": "docs/site/api/members/system-io-whole-file-and-directory-i-o-ioexception-1cc8e1fd.html",
-      "sha256": "1553317669b56577b8ccd6549bc01d9b7d6530fe6e8353cc902c2130db28f411"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-boolean-f1983d0a.html",
-      "sha256": "4cbf7ad3a68073f1b7472cd7e3b387e7fd8d24648583990662589298b1f55497"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-byte-71437ccf.html",
-      "sha256": "703644d15856c33a782f0db9defff437e95ede6d8cbf3f7dfd67a62f6b5be7e3"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-char-bf331612.html",
-      "sha256": "c29ad5b7858e07fe07db4dac2ac8cb1ea341d3a205ac9ece0015632afcda8ee6"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-double-bb3c1f1d.html",
-      "sha256": "20f43c1eee15cc1a202d61e4469f125990e884d5b469ce0d690a012dce2b2223"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-int16-fe64ddf0.html",
-      "sha256": "f178142c636206d557edd6e679435d1b76210c1848712e881ee589475c0b523c"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-int32-fe7b81cc.html",
-      "sha256": "8d8185e69fd1a9d5883c810f8c90ace69a5e003cfc11da63958b881b3a0c5074"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-int64-31f8f6ea.html",
-      "sha256": "2b02c6f6d5eb210ada5722945c24cd46da3ccf9df71717c79c2e835040d61ebf"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-intptr-78cb033d.html",
-      "sha256": "02862c192602b1894ef2f6264b36154a7107d8d87ec05e6990adba6f0429e77c"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-sbyte-54d03f7f.html",
-      "sha256": "27b57be74707324a38514d222afde4df39fd13cefd0cb3457365f6f8426b2f8c"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-single-17612bf1.html",
-      "sha256": "b81a9f610b608770ce6b30c42c412712f97c5e69a2c09c6dbaa49da521b00327"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-uint16-8291294d.html",
-      "sha256": "3868a586a6e5cec6e1f25906fc3f2998a617e9655567a30e20cdc5dda49c4c70"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-uint32-9bcb37ea.html",
-      "sha256": "0f50118e716d1a4a82a35def2be49e329b8301aa4ec446889aa967d5bc75397b"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-uint64-820825cd.html",
-      "sha256": "6d0ef392f71bfa8c6c2a215d4db8dfc0168aad1201563c7c81b4c17589c66da1"
-    },
-    {
-      "path": "docs/site/api/members/system-primitive-types-uintptr-4c63b4d0.html",
-      "sha256": "0f97874591e8b69ecafea51f8cb1966cb3c4dee21e24a32c9990baa45c0c143e"
-    },
-    {
-      "path": "docs/site/api/members/system-string-compareordinal-string-string-d2260052.html",
-      "sha256": "66573de22eaf920b863a4de670d2f87e63b2386cd3cad7de3049354e14a6de84"
-    },
-    {
-      "path": "docs/site/api/members/system-string-concat-string-string-b6183084.html",
-      "sha256": "8b0fb8a1d7aa439e8b0ff1243d8c0bfb772c98bcb577956ae275505854f9d444"
-    },
-    {
-      "path": "docs/site/api/members/system-string-concat-string-string-string-d6dd65a4.html",
-      "sha256": "9f79b084d5a92f1f06ad5c874d15ee58f4d295c0fe48bcafe38a388e9b4ccddd"
-    },
-    {
-      "path": "docs/site/api/members/system-string-concat-string-string-string-string-1ba313d9.html",
-      "sha256": "0233c532b795675cfc8eb1d081f19e2e5141e7e7db32dd4b2363334b3912ec98"
-    },
-    {
-      "path": "docs/site/api/members/system-string-contains-char-cdfb9bf7.html",
-      "sha256": "0a0c7af8cc507372e019ea1a52ef11d42c709f629d7623eb7e88a68bf9b8807e"
-    },
-    {
-      "path": "docs/site/api/members/system-string-endswith-string-a06e8dc2.html",
-      "sha256": "b2e624d5760a61310df8261b95f0fc5bed539a8c1be49a6293755fb54c5996b3"
-    },
-    {
-      "path": "docs/site/api/members/system-string-equals-string-86b69af8.html",
-      "sha256": "425c3bed70d13ccdea4b61f7145b03b08279b465052ad0d61fea6b83cc515872"
-    },
-    {
-      "path": "docs/site/api/members/system-string-equals-string-string-ab53dd76.html",
-      "sha256": "b13f9925935b34a95a4abfa59774494facd5149c6e5797ab294dcdb32fcd3d3f"
-    },
-    {
-      "path": "docs/site/api/members/system-string-getpinnablereference-d516c907.html",
-      "sha256": "2c665b76c3fb11e97da4e1c9c0ca1e08abe31a34a35c1cff98bc17e00ef47015"
-    },
-    {
-      "path": "docs/site/api/members/system-string-indexof-char-d5231143.html",
-      "sha256": "983c630e7177835b2bd6eb04273d6e99a1e3137445a9486e39c0da2b80f106bf"
-    },
-    {
-      "path": "docs/site/api/members/system-string-isnullorempty-string-2d105b40.html",
-      "sha256": "46f7be73e246fc7a455f7d1552a83454e49460b8dad878f8a11267aa4363cd78"
-    },
-    {
-      "path": "docs/site/api/members/system-string-isnullorwhitespace-string-2df061b2.html",
-      "sha256": "55bbcd3b9d11cb8984504acd716143faa63bf66b0985f3c51bb39bff43d2b9b8"
-    },
-    {
-      "path": "docs/site/api/members/system-string-length-d8a4dcf9.html",
-      "sha256": "a1bb4cc03d2d6c19bc8440a63cd6aac38a5257640d0138c8c06b6d2bf748deb2"
-    },
-    {
-      "path": "docs/site/api/members/system-string-startswith-string-1b10e729.html",
-      "sha256": "7ad1292197907f43fbf8aa055ed52b9680bca4489e38e1018a7d1bdabb179394"
-    },
-    {
-      "path": "docs/site/api/members/system-string-string-empty-8ac2768a.html",
-      "sha256": "200456422aad578fda047e82980a461c8eebdddd39bf2a01a470f538d10e9e98"
-    },
-    {
-      "path": "docs/site/api/members/system-string-substring-int-35609a91.html",
-      "sha256": "8601f0d8567d4b498b86d47ecb6d0b6043ad7c3c39663159a29cd73f84696954"
-    },
-    {
-      "path": "docs/site/api/members/system-string-substring-int-int-08a14279.html",
-      "sha256": "cf4b6307d532e2e6afb505773ff193c5dcce547dad9b5470a3eb312edd4fc30c"
-    },
-    {
-      "path": "docs/site/api/members/system-string-this-int-0549e882.html",
-      "sha256": "a9f75ef2ab3bffc78992544c446e6aec8441dd762e1d851d709ef0ef6401f242"
-    },
-    {
-      "path": "docs/site/api/members/system-string-tostring-b75a9f79.html",
-      "sha256": "a47fb96304e29778b3814a4baaa5e00d0cbdde4b0ecd5b9f93ea5c67115871ac"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-asciiencoding-dd782d15.html",
-      "sha256": "69a769a62589972d06256848b569c4fbe976ce19ac33b198b6781cf1c45a5a67"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-encoding-ascii-9c0684a6.html",
-      "sha256": "f68fc1435d844b8408d840bb8936aa2b74737c8c77a3a241c7108b4dc8db0dbc"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-encoding-getbytecount-string-ada3de9e.html",
-      "sha256": "720c2f60937b5e08bd12dcdeff08c9a8d0c22e417aba7240cccadc125bc5b8cb"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-encoding-getbytes-string-9a3c5ca3.html",
-      "sha256": "d5e71957af5b61ca7b95ca915736daf6b857f5223184994a30d1f6268646797f"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-encoding-getstring-byte-9b28d674.html",
-      "sha256": "862b76a90d9929e34cbe2f4237d4a1d6d81d89af51a9416ee5f6614f68cac6ba"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-encoding-utf8-c5bf1370.html",
-      "sha256": "9b65a2d8ec868af12af108ca6a5e7a37f0c2b655e553b5700cce57e84dbdee40"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-stringbuilder-0c0682dc.html",
-      "sha256": "e17f77cfc3d2cb15db08804a190c79a07239fc6ba0fb9e8741b9b567e2ad36a8"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-stringbuilder-append-bool-8214b7b4.html",
-      "sha256": "21c86eaf27fb95f11be56a261a9939470e69805f806a02230ce7252b17c7f62f"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-stringbuilder-append-char-8aa25d8e.html",
-      "sha256": "2e925f9e3e22e57cdf0e2774eba91196fb06542f9e51597dd21d1ff35e922830"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-stringbuilder-append-int-uint-long-ulong-879c7986.html",
-      "sha256": "d93932cbc3429145464bc8e12d0ffca87a07b6a1ec0fc04d2e46e5575823ee1c"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-stringbuilder-append-string-4795e339.html",
-      "sha256": "f81c2150be9938f58f9a8d12bc67fe95d9d5a67af359f2469ea4d1a5129b6939"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-stringbuilder-appendline-7dd80138.html",
-      "sha256": "da385265c8debe2cad9c157739d7858c0060b8272a387512d3aaa72a65d1ba9b"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-stringbuilder-appendline-string-b46b7ea2.html",
-      "sha256": "105788277263e7ea7b0ecc560111df4065610af57f5a817fee1fc79411a5962b"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-stringbuilder-clear-01998fb2.html",
-      "sha256": "be746ca2a4e70010430721c97cb14af85e9fef64df4b3e0b45d9d38349e463bd"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-stringbuilder-tostring-256e7711.html",
-      "sha256": "bbc60c2b05b41c16bd50d9f73dbed09c1b0190c20e620fc6aa6f35e4ee669b0c"
-    },
-    {
-      "path": "docs/site/api/members/system-text-text-construction-and-encoding-utf8encoding-8cb1b74c.html",
-      "sha256": "3e4333733c891d306edd258863501f2416f8152f2e853430e3a0125edef03ab1"
-    },
-    {
-      "path": "docs/site/api/members/system-threading-current-thread-coordination-thread-sleep-int-fd835e24.html",
-      "sha256": "d4352635417057155a94498b5870053cdc4ac21b701bef19ac418f1c09bd5a96"
-    },
-    {
-      "path": "docs/site/api/members/system-threading-current-thread-coordination-thread-yield-a7fca86a.html",
-      "sha256": "a2fe72a53992063b152ccebebe800adb0d876c51c968d814d2896b8ea2b8eb9f"
-    },
-    {
-      "path": "docs/site/api/members/system-threading-current-thread-coordination-timeout-infinite-8b43e592.html",
-      "sha256": "0cdb4b71868608ad00163be710152dbbfd6a58825a7d16622e5e781b26822d19"
-    },
-    {
-      "path": "docs/site/api/system-array-f046a771.html",
-      "sha256": "11da0af7630f201215aac8026afcac9ae7734bf5aba552d4d7e8b3f284c315ae"
-    },
-    {
-      "path": "docs/site/api/system-collections-collection-contracts-7b20aaeb.html",
-      "sha256": "9ccc8eeed519df0bb93653418b12993c2dbaa308966b8016d8617de265c98b94"
-    },
-    {
-      "path": "docs/site/api/system-collections-generic-generic-collections-2657bab4.html",
-      "sha256": "80ce6c1dd17c7771ae109cc613f18374baa836beca5f720e55c6a42806a6c072"
-    },
-    {
-      "path": "docs/site/api/system-console-eab96167.html",
-      "sha256": "ce60ad12f634925214bf0b3405bc35d824ae150feb23dce09970d0d822e12193"
-    },
-    {
-      "path": "docs/site/api/system-io-whole-file-and-directory-i-o-e559466f.html",
-      "sha256": "f51c9041d5125d039f5e7f8889de515a4e77f3086f79214f62a22491186fcfc2"
-    },
-    {
-      "path": "docs/site/api/system-primitive-types-b5bd2e14.html",
-      "sha256": "174c074385c441ac552f5dda7c93f8ce3f94f16eba3f94e20d89b5e2d96c5dc6"
-    },
-    {
-      "path": "docs/site/api/system-string-995bf9ef.html",
-      "sha256": "712a4dbd590829d6961b2c5860f3159cff77b9c880acc45f6d223ce934923a97"
-    },
-    {
-      "path": "docs/site/api/system-text-text-construction-and-encoding-f379af80.html",
-      "sha256": "ec237c3541b8b7aee79c633d6c81d6be9f5dee6f5dceb229af19e100e9338b22"
-    },
-    {
-      "path": "docs/site/api/system-threading-current-thread-coordination-15e79162.html",
-      "sha256": "d20e1873b66f163086b484453a5c53ee7f17d93f48db50f6bca4c2fb4046535e"
-    },
-    {
-      "path": "docs/site/assemblies/index.html",
-      "sha256": "32a82c69aabc5c1bb2b4f48921a9fa778271c63d10ec1110b622eec9a8f97fae"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-audio.html",
-      "sha256": "7734f633a3cdc12cb38e79f90369584a26c361452933fe4a7db033c34497e353"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-console.html",
-      "sha256": "73eee6824a86909697fa9e5d0645c7b1b1eff2559efeb98f9c5d3c26104988a8"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-drivers.html",
-      "sha256": "86ff7b90ec47c8504969ba29d3d79d4ff37895ad906227fe9afe47e41e950056"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-entry-x64.html",
-      "sha256": "8582da96e851c8824464f9f1f5e53288f5d019303b1f106972101dce430d9d7f"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-graphics.html",
-      "sha256": "fc08a76fcbbfa409715f96b678eaae7f36876bca283308549c5195d06aaa801c"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-input.html",
-      "sha256": "0115a92bd57a158d7298b037aa1289448aa6a8c8a73e38002f5d45b726a30138"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-interruptdispatch.html",
-      "sha256": "d6eeb9c57d9d888f0cd6002c5ae1ac5a10e162e1a876c6b9a720516d744f9e6d"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-memory.html",
-      "sha256": "2610ec69b6311a661dd9adaf9ccaa06ad7bffe77dc9a32b3bc626e00dafd41e7"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-networking.html",
-      "sha256": "bd7554acdc3805debb81c91e25b66f8c5db7ceed099f8ae84f15452fcff0c99b"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-power.html",
-      "sha256": "e3373cdf95a8ea92150323d8e8d57f9dd204f07b5a56efa52e15e91d0bb2abe9"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-processes.html",
-      "sha256": "8fa2e9d0d000c1baf3c04b2c77e5350a919f9c4d9069eb3251301ed8916c10f3"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-scheduler.html",
-      "sha256": "da827e1ecdead21be60d41aa6685414c565acf067ad9ddea174a8e4b58e87708"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-smp.html",
-      "sha256": "cb096b5aa5d91243c5a618ce29e827f9f586893da149989d9fd2ae45715a1bfe"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-storage.html",
-      "sha256": "ae0d03796c5251135e443c27b012fab609dba62b61f6107e86480b36c2247a16"
-    },
-    {
-      "path": "docs/site/assemblies/inu-kernel-time.html",
-      "sha256": "5065b3ef574929cda5ba2af1c6cd42b74cf97b1124f160316e5001e9fd072d5a"
-    },
-    {
-      "path": "docs/site/assemblies/inu-userland-runtime.html",
-      "sha256": "f7f58b986441632e10ff8e0f477b84c687fb8e4069091b4dd52bee73370627d9"
-    },
-    {
-      "path": "docs/site/assemblies/system-private-corelib.html",
-      "sha256": "3039702ecfcc519de0396cb55c1d2cb75a3c1206b1da745ea3b6f839d29379fe"
-    },
-    {
-      "path": "docs/site/assets/search-index.js",
-      "sha256": "ed8bf9e62ed919a9561d34ef0658b891dd3cc60389e58d45a2dd4fb38862447a"
-    },
-    {
-      "path": "docs/site/assets/site.css",
-      "sha256": "c797b6d62dc2046db1151153a1b7ad399b65f52e2b56094e81531d870b5b12a1"
-    },
-    {
-      "path": "docs/site/assets/site.js",
-      "sha256": "35f81cbf6ec44a86cfcde6b8bb61b852fd37dce7c4f4e18b148f93cf0b0fed41"
-    },
-    {
-      "path": "docs/site/index.html",
-      "sha256": "8d68fe8276140527e742057809dccc6013d724d8d20bf6deedde087cafcc066e"
-    },
-    {
-      "path": "docs/site/search-index.json",
-      "sha256": "1bef0190d85c7f2667d75d9ba2c879648b1699d74b7e60aa36bda5c8ea55f265"
-    },
-    {
       "path": "docs/SMP-and-Per-CPU-State.md",
       "sha256": "4c9b912056e92d00145c01ae77321fa71b80f5f715fbcb710fe37de23f7494c5"
     },
@@ -2966,6 +1306,1934 @@
       "sha256": "b132d105648c7dbe49f2c391fe0b9898027e470ddc7cfd4d7239af5df63401fa"
     },
     {
+      "path": "Help/api/inu-boot-contracts-acpirootpointercontext-87ee1766.html",
+      "sha256": "6b7f1052d67dd8627a674136aee52fd88fd8526b11e99f48b117d232523437ad"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-applicationprocessortrampolinecontext-2bb9fd0c.html",
+      "sha256": "3013ca0194b3a097bc6da78972c9644705ca52067a4e48861c2636cd2bdf665e"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-bootframebuffercontext-fbc5ea5f.html",
+      "sha256": "cf1f0b5c78b008d6b1429f0d83995ebdae5fad028a90da1d731a65def00a3709"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-bootmemorymapbuffercontext-3f4b8b9e.html",
+      "sha256": "174f4c4f1178bb4e5ee828ce439a4ba7f0840bed46784d9ecfb36b874b2f2a39"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-bootprotocol-34dbd056.html",
+      "sha256": "7dfd806887457dad8a0d75bb9a16d7ff090c461f818d51310febc6400ec36deb"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-bootprotocolcontext-92a99660.html",
+      "sha256": "26b0de1fd7447e5f13f1c7925db205edd51f2e9d08b14c21c6c63709b85f5e13"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-framebuffer-12ba887e.html",
+      "sha256": "4c00312e6440c2910b1474a9b78ccad99aa96fc537c3d8cc2048da9b0c2cb5ac"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-framebufferpixelformat-1f914ad4.html",
+      "sha256": "ded9f6459061ec0f593d9f0ad7e96dd54f0c7e098ab9b59f3ac51d1e14ce3054"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-iacpirootpointer-42b68fe1.html",
+      "sha256": "6ecb8f4739806820f8c7abc9e7edfffd40d404a4b39350da9711d6c0f52ffa24"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-iapplicationprocessortrampoline-1a05efe4.html",
+      "sha256": "56438ab5462d1e795f9ff66d8669c6945c17bed57d4705efcd33475b1de0932f"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-ibootcontext-f23321b0.html",
+      "sha256": "35069189e30a42687ea823f1387a87c24b60f63fac5b25532a2a11667161a363"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-ibootframebuffer-e9580929.html",
+      "sha256": "d00e7e14d53818131a595c0e0f6abb9db3a9214e60cc1c2d703b9df56b6e7874"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-ibootmemorymapbuffer-ea40c0a9.html",
+      "sha256": "35aeea8d127db09bedce6331cc753b48fc569c6bc8699d30368128f39cfa6c72"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-ibootprotocol-4c061204.html",
+      "sha256": "f38184dbfeecea423f6b2133e8a1f640d656e832c44f678339e8d71a066282fb"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-imemorydescriptorlayout-45aae75a.html",
+      "sha256": "42372907c19a2fbd4475f0a485ffa4424acf09447d95b4f8bd664e8c537d273c"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-iuefimemorymapkey-56a978ef.html",
+      "sha256": "41748140403be38e02b85de34855dc8acabd646c76741c99d20e96efba31ed24"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-memorydescriptorlayoutcontext-f423ae71.html",
+      "sha256": "7e928953d5b137a5cf5f1063fa2c81082d99cf0f13f65537ca21f8718681d999"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-pixelbitmask-a31e300a.html",
+      "sha256": "c64510994e920ce5c9c95d2989d071bfbbbeb472b8a80b103bb01c48087b616f"
+    },
+    {
+      "path": "Help/api/inu-boot-contracts-uefimemorymapkeycontext-55d2e7e0.html",
+      "sha256": "bd9ec06c7c42dcba803ca8b93638c32dd7803775ecda882239b3773e79f9abe6"
+    },
+    {
+      "path": "Help/api/inu-boot-memory-finaluefimemorymapacquirer-02f5416b.html",
+      "sha256": "196c51cbad79375c79e17ffa1204201171676b8a5e795460ac26749f41f9fc63"
+    },
+    {
+      "path": "Help/api/inu-boot-memory-finaluefimemorymapsnapshot-14918ddd.html",
+      "sha256": "0bcc291555321f73b18b209add925513e5bceeff0fb3987fc68ac237a350498c"
+    },
+    {
+      "path": "Help/api/inu-boot-memory-uefimemorymapworkspace-e1688852.html",
+      "sha256": "a9962a9beaa9ae19779fde9e7ca0cbebd261b050d9d0b8d43ba7ff79160d3270"
+    },
+    {
+      "path": "Help/api/inu-kernel-audio-audio-e52f4cf4.html",
+      "sha256": "186423802602dac3a6aeff5027668b9985cd10c0dbe88027915fcca225c1ef51"
+    },
+    {
+      "path": "Help/api/inu-kernel-console-console-a5d2c099.html",
+      "sha256": "0c105c1c1a14167d2d1486ade513b83af4c6d9114449de9a05d33a4e598b1667"
+    },
+    {
+      "path": "Help/api/inu-kernel-console-consoletype-1cef07ad.html",
+      "sha256": "5b7d9e777ef25a680434045f8105a2cbc40bd390c49196e57fca71109b823f19"
+    },
+    {
+      "path": "Help/api/inu-kernel-drivers-drivers-e89c51d9.html",
+      "sha256": "1332fe0eb9aa23c7e52886f950b754ed713a6db3d307b315e185332268501f66"
+    },
+    {
+      "path": "Help/api/inu-kernel-graphics-graphics-ba69792b.html",
+      "sha256": "a6820134e478a5c9ba256a0e47cd3948599843631168d99fc3fd2a6856c3bd14"
+    },
+    {
+      "path": "Help/api/inu-kernel-hardware-devices-85f1c8b4.html",
+      "sha256": "5adf227565a15c5dac7ba9b67bcb590e788380b3b50c88362b0c4fd7028cdb3a"
+    },
+    {
+      "path": "Help/api/inu-kernel-input-input-f71549a3.html",
+      "sha256": "47f4699862bd12688d152b3fdea5ae05dd5f668d33f6325bdbbe91696a02770c"
+    },
+    {
+      "path": "Help/api/inu-kernel-interrupts-interrupts-63534f73.html",
+      "sha256": "89a71016479eaed0619e0e6d4b1e5d17b9a1fd89ed434f349b2d2139ea1ac095"
+    },
+    {
+      "path": "Help/api/inu-kernel-memory-memory-4b769bf1.html",
+      "sha256": "20d6cefdeaf72d4cd7a70dfa644a18eda548ec9564ae1c477b3aff60b858d474"
+    },
+    {
+      "path": "Help/api/inu-kernel-networking-networking-700577a0.html",
+      "sha256": "96885bd42cdace1152b728b266673fc8f4c6096d4c31da01afaf8d33617e2247"
+    },
+    {
+      "path": "Help/api/inu-kernel-power-power-6e186971.html",
+      "sha256": "b7c992d13593c6e2e2d45f343a9c4e54948d4fee09900967fbcbe190c8feddd6"
+    },
+    {
+      "path": "Help/api/inu-kernel-processes-desktopsession-ebfc6e4b.html",
+      "sha256": "b6352e334107785bbac756d0826ce32a6731ad0d90b06cca256b5368791e9b9d"
+    },
+    {
+      "path": "Help/api/inu-kernel-processes-processes-00521739.html",
+      "sha256": "d652a2f6688eab1f1cccfcd7c1d89fe950462aa0da17d365011c0063d7b355f7"
+    },
+    {
+      "path": "Help/api/inu-kernel-processes-textsession-a8c960c4.html",
+      "sha256": "3c2fa5117c09c667bac6d086a249906d89a16bf0816c007b0d192396ecc2c42b"
+    },
+    {
+      "path": "Help/api/inu-kernel-scheduler-scheduler-faa83972.html",
+      "sha256": "bbfb9efaf06826a8606856cc14db2d2f0ac736c171f3f34ff9ecbcd25b1fa134"
+    },
+    {
+      "path": "Help/api/inu-kernel-smp-kernelcpurole-kernelcpuset-88b84e4a.html",
+      "sha256": "3344a2fabf4e181090e43eb83c3d2c5de76450759cf181ce391559710a237e67"
+    },
+    {
+      "path": "Help/api/inu-kernel-smp-smp-fe9de433.html",
+      "sha256": "56cf8877eb3796e635a4fc1bba3980df85fd4e1f1e31aafac58e9a7c764fd952"
+    },
+    {
+      "path": "Help/api/inu-kernel-storage-filesystem-1a02518e.html",
+      "sha256": "2eee7985fbdd15d50291947859df82266924713f1959c17c936367b78f96d540"
+    },
+    {
+      "path": "Help/api/inu-kernel-storage-filesystem-a90364ae.html",
+      "sha256": "65222722d2f439939f721774a9d878ba4f8690fcce4b262ef5ffec31394bea78"
+    },
+    {
+      "path": "Help/api/inu-kernel-storage-filesystemlogicalpath-9542d7b6.html",
+      "sha256": "bc1677981dbde6253e3bdaf5d5443ee433667754f55de9036db57d6ec47f7813"
+    },
+    {
+      "path": "Help/api/inu-kernel-storage-filesystempathpolicy-b46752d6.html",
+      "sha256": "7ee86dc302a3e23f52c4a75c5447fb32ecdaf27964312f69ac04290e0dcfec73"
+    },
+    {
+      "path": "Help/api/inu-kernel-storage-storage-c5c4b245.html",
+      "sha256": "b2275d408eeb36e7248916856616413c29ccf07733e7e38cee1c2a6871b5ee24"
+    },
+    {
+      "path": "Help/api/inu-kernel-time-time-ca307ece.html",
+      "sha256": "ca105ee2462b9d787c6ae13f04a1154fa2d521699f9a94144eb69ee06a13f1b7"
+    },
+    {
+      "path": "Help/api/inu-userland-runtime-commandline-e8158724.html",
+      "sha256": "9697e0018cf0fda631e46fe564c59fd0e04ff70e24a14c40faa31527ff58b9ad"
+    },
+    {
+      "path": "Help/api/inu-userland-runtime-deviceinfo-a20a1035.html",
+      "sha256": "ed9b2fd551e3a6e85e2a3857b66cb135e585ab4dc7031ffb0076b425cd10a837"
+    },
+    {
+      "path": "Help/api/inu-userland-runtime-filesystempaths-fcf42d82.html",
+      "sha256": "fcc957ffc5e78018bd90b0afc140e42d8a4420f6c42012fc1187bba53e1d4c83"
+    },
+    {
+      "path": "Help/api/inu-userland-runtime-output-7035005e.html",
+      "sha256": "1531e60248fc6f8528575878eeca6a804da55f89a5b98fd3b5505fa9eb0a3ed3"
+    },
+    {
+      "path": "Help/api/inu-userland-runtime-process-e52ed282.html",
+      "sha256": "88992a4855a02c0cd113b5f7329ea8ef8b75eb8eaf269885d6542d4c6385c3ab"
+    },
+    {
+      "path": "Help/api/inu-userland-runtime-systeminformation-098ff611.html",
+      "sha256": "99a2b87d4d84af0350194d2d4c6b47d5d8312403add37d61a456357427e9a831"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-acpirootpointercontext-acpirootpointeraddress-a4c88d34.html",
+      "sha256": "d8f4002fa2543c94e1ffacd92c00119d31e32f8ab871fd655cdff7a91637c99c"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-acpirootpointercontext-acpirootpointercontext-physicaladdress-e387d3f7.html",
+      "sha256": "80d5f906c7272fa66bd2f4fc99e190164c356e7bbe98a0fac4ca79d849868043"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-applicationprocessortrampolinecontext-applicationprocessortrampolineaddress-d6d8f12d.html",
+      "sha256": "6421bd18e984baecb2be18e49ca062e18e2736314a8880a71068905a277d7642"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-applicationprocessortrampolinecontext-applicationprocessortrampolinecontext-physicaladdress-35d18ec6.html",
+      "sha256": "21dc6967c833a73fda1fbee34b3020d8a487e02ad8fb941f55eb4a3f8e20b8f5"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootframebuffercontext-bootframebuffercontext-framebuffer-f3db1f7c.html",
+      "sha256": "0d55883fb6ad1d4e5b124cb1f05ba954aaa1d904c234fc193c2a8fd36f127000"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootframebuffercontext-trygetframebuffer-out-framebuffer-25469568.html",
+      "sha256": "e0a3bd3c286d506744e121219e93b9fbb96f4d8b3d24408a92b8cba302155ab2"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootmemorymapbuffercontext-bootmemorymapbuffercontext-physicaladdress-ulong-964aa2ca.html",
+      "sha256": "241d55b3cc575682ca13a2289b9cf7959a6f716699e6c737219b1283e697c28c"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootmemorymapbuffercontext-memorymapaddress-0be34bd8.html",
+      "sha256": "6e739cd7ddad2b10e8c194f805f7be1f94ad14d122ece5400d9e5c90340c3379"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootmemorymapbuffercontext-memorymaplength-5b6f2c62.html",
+      "sha256": "083330d0f2353b7b20e75241cec3b869081306064e6cd56a07233a11f268ed2f"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootprotocol-limine-0f28a2a4.html",
+      "sha256": "f95878b40f75e05fe0f3d7038c07b1aa317d67e31386c743078b456011251b13"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootprotocol-multiboot2-fbecf26e.html",
+      "sha256": "9b0beec6d285a82b07a491ba9fbfbd5037209cb8237dff84b2735d4dba8dee41"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootprotocol-uefi-18470374.html",
+      "sha256": "e48a5d3cc10b559de0e66f81a6065bb028b22c5654396454fb305d505a18055a"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootprotocol-unknown-de5bd845.html",
+      "sha256": "f8f49153e8b0d9063e44a47969539a29e5313cb66a0adf9d28c653dc25668853"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootprotocolcontext-bootprotocolcontext-bootprotocol-2361db8c.html",
+      "sha256": "a6a30d24893f19354622878b19c4029ecdef1948d2645058dfecd604343b8966"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-bootprotocolcontext-protocol-0c637ddc.html",
+      "sha256": "19cb8f1cb6dc58808251564e03b7b523990d3cc9048b4767b28e4db443e34935"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebuffer-address-d0e42486.html",
+      "sha256": "8c098c60f6e4ac256b14288eee72e4056c1272b767e54cc102f6ca30f93afb00"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebuffer-framebuffer-physicaladdress-ulong-uint-uint-uint-framebufferpixelformat-pixelbitmask-10562b11.html",
+      "sha256": "c1d35d221fd740cb3a1fd631488b580dc7890223b7df79246afb64c91ddeda03"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebuffer-height-135b5d63.html",
+      "sha256": "8a04b11ef42f398d98eae95c1dc98a12628fa933b8541c4f620c1357d639a2fe"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebuffer-isavailable-2efc1515.html",
+      "sha256": "cd9ccfee05973abad964ed46db53737e7d4749a78c101c4ca1bde417003ec0d2"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebuffer-pixelformat-71305c14.html",
+      "sha256": "e2c167cb5fec0ea80ba8a98cd090b6dd3aee40dac80d8a2001eaf3e778f30ca0"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebuffer-pixelmask-5b0563bd.html",
+      "sha256": "eef91af686c57f122b4fa8f55083a641379fe6448f0db15d2e717a7b08bbe2c7"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebuffer-pixelsperscanline-bc280c8f.html",
+      "sha256": "dd8bfd71df27eb27f969f820a0be6d2999fe2730206241e4d8b3f7f512f80ecf"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebuffer-sizeinbytes-74adbf8f.html",
+      "sha256": "4a426f5810cedc86f4eef89b55d7ab8223b27f95bfb38e1d40862630d7b601d1"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebuffer-width-5ccf1e4b.html",
+      "sha256": "c75874d987769956aff7e35b44ebab497fb40476af2e9db5673d5be15118dd77"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebufferpixelformat-bitmask-b895883e.html",
+      "sha256": "8b872c85307eda373072d835bf8af0fe39c9cdaf1f6f0ee5d4bc58911b74e97f"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebufferpixelformat-bltonly-61a0be7a.html",
+      "sha256": "82903386d52945bc58719da7d70b38385cf0c56a922ce3c3781ec18884add652"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebufferpixelformat-bluegreenredreserved8bitpercolor-b43ea992.html",
+      "sha256": "60e3a10bb6142c83462156c9c787f9e81111e0bd384b96757fead07b296e582e"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-framebufferpixelformat-redgreenbluereserved8bitpercolor-79b24fd4.html",
+      "sha256": "f6c0adaae26c0b8b220469fe2151718185bb9ddb96c81e6883c482568ef89338"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-iacpirootpointer-acpirootpointeraddress-3812ecbe.html",
+      "sha256": "cc0e35e2b8f02dfc6d633c128df8d45d173e7d9eda4d752728a9de27699fbc86"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-iapplicationprocessortrampoline-applicationprocessortrampolineaddress-7fb758e6.html",
+      "sha256": "9002cee6f91725c197c7780338e980b000e320566116e54672880c8b48c7434d"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-ibootframebuffer-trygetframebuffer-out-framebuffer-af71ca3b.html",
+      "sha256": "30721652ad4f32558f2adce481f0993fbc986eb29cec8b39009f23d6819b27c0"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-ibootmemorymapbuffer-memorymapaddress-26023099.html",
+      "sha256": "47f673ff6c60f3ec041c6830ed5e4bf9f9474318e597687e2bb63f11408fdc4c"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-ibootmemorymapbuffer-memorymaplength-3891aba1.html",
+      "sha256": "a909a0ddbf5006f9ec2d5fee16c798326c5d85a8bbe2c61baae13f16028c3707"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-ibootprotocol-protocol-fbe36f5c.html",
+      "sha256": "ea91f7b2e96191ebe1e8dd0fc27fcec9b4dd877b80a6fdaf277effd7886d80d5"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-imemorydescriptorlayout-memorydescriptorsize-ee510665.html",
+      "sha256": "b5a1d4d45d3f5965e0220ec79f121d963cca3e1de08b72253a986aef8bd3f186"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-imemorydescriptorlayout-memorydescriptorversion-b2981dfa.html",
+      "sha256": "bda5563a38e78b0e8cd1f821cedfb600c80e7c7784b8cba835f6ed2004d68e36"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-iuefimemorymapkey-memorymapkey-55a8b2b4.html",
+      "sha256": "f420b6b27413da4bc2ae044433bac840e06620fb8973ea3956451ab1cf3c1c6f"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-memorydescriptorlayoutcontext-memorydescriptorlayoutcontext-ulong-uint-748db044.html",
+      "sha256": "e61863afb9310ac068b45fa6637f5631c9a4f8be257b831b49f2878b64b06838"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-memorydescriptorlayoutcontext-memorydescriptorsize-3b3ade1b.html",
+      "sha256": "7d1f816bc398969095bb23a3a13862ef0b700cb93c7f89dfd604ab832c23edad"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-memorydescriptorlayoutcontext-memorydescriptorversion-76b5fbe6.html",
+      "sha256": "4e25a475c6c35cefe09d45eeebc6e3b9ad8e7222c92986dc4d48989b26562104"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-pixelbitmask-blue-a842f496.html",
+      "sha256": "b4d70a17e7db06d41e2ceadacbcbd24c85268c2b4fe5326f2af18092992a41dc"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-pixelbitmask-green-e52c3589.html",
+      "sha256": "72191ec2a84ac1cc13cb4cf38ecb8e686c28ef22b5e3a9595426b8937326dc92"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-pixelbitmask-isdirectcolor-794e5f87.html",
+      "sha256": "385fb97117425d5df3a035be83e17467b249dbc06ec853a1d5f00c1e6f2d720e"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-pixelbitmask-pixelbitmask-uint-uint-uint-uint-05485169.html",
+      "sha256": "23b8b5c0fdea6cbb0d70a48305e34e9f0905818e0a7750e5c58dd6e89fadc45c"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-pixelbitmask-red-7f049dde.html",
+      "sha256": "6b97052fdf1b85882921a8bdc030934e74cbb5325bfd9be4385429a0189ab1f8"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-pixelbitmask-reserved-6244f353.html",
+      "sha256": "61d9753dbf264657e9c8dbfc984e351d575e0bdf11c150e288bea6d1be2a6898"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-uefimemorymapkeycontext-memorymapkey-bd2fd3d3.html",
+      "sha256": "bbf6a9d05f9d7ad2c461867e1f2376bb14d9d994d09e30ef7bfdd8bc44f90f2e"
+    },
+    {
+      "path": "Help/api/members/inu-boot-contracts-uefimemorymapkeycontext-uefimemorymapkeycontext-ulong-8d8d79a0.html",
+      "sha256": "cf5778afb0df35ba9b6c8eb53fcb4ad2251821b951931000ab8ebb79f38f5e90"
+    },
+    {
+      "path": "Help/api/members/inu-boot-memory-finaluefimemorymapacquirer-trycaptureandexit-iuefimemorymapprovider-ulong-uefimemorymapworkspace-int-out-finaluefimemorymapsnapshot-out-uefimemorymapstatus-out-uefiexitbootservicesstatus-d4e39d07.html",
+      "sha256": "963b8b3f2fe6863f6339267bd6e8a83254abaa68ff2a47e5d8106b77dcf253a2"
+    },
+    {
+      "path": "Help/api/members/inu-boot-memory-finaluefimemorymapsnapshot-captureattempts-6a21d053.html",
+      "sha256": "e40bf1738901378daaeb67c45c9f15ce364017fb0da041c1792826802dda19d9"
+    },
+    {
+      "path": "Help/api/members/inu-boot-memory-finaluefimemorymapsnapshot-count-6e1d8c95.html",
+      "sha256": "16e34002e0398cc33b3f82734b40055fe192e1f781d37b7f769f3c87455d50fe"
+    },
+    {
+      "path": "Help/api/members/inu-boot-memory-finaluefimemorymapsnapshot-descriptorversion-f7093311.html",
+      "sha256": "f183b4380919b00ea71c79c8c851c1ae58a493c6c9938c3b54dabc5d8a89a0fa"
+    },
+    {
+      "path": "Help/api/members/inu-boot-memory-finaluefimemorymapsnapshot-isfinal-ffaf2a68.html",
+      "sha256": "049f15fc3860ccf5f1e406eb258a4968667579096af918ab73a32312695c2bd2"
+    },
+    {
+      "path": "Help/api/members/inu-boot-memory-finaluefimemorymapsnapshot-mapkey-6873c372.html",
+      "sha256": "7275e0947c297d4eebdd74da6cd966d56f37d42e55dc70bf5298fe60ab441b03"
+    },
+    {
+      "path": "Help/api/members/inu-boot-memory-finaluefimemorymapsnapshot-trygetdescriptor-int-out-memorydescriptor-d5524bf4.html",
+      "sha256": "4a71f84aefae35240e458d42fc07deaa71747b7830abea903aec68ce81ff8706"
+    },
+    {
+      "path": "Help/api/members/inu-boot-memory-finaluefimemorymapsnapshot-trygetuefidescriptor-int-out-uefimemorydescriptor-0a0269c0.html",
+      "sha256": "c5010bc0b4a2f2b581299793437430bfdb3571eb936cebeeecf32e25428bf3a6"
+    },
+    {
+      "path": "Help/api/members/inu-boot-memory-uefimemorymapworkspace-descriptorcapacity-eacfa636.html",
+      "sha256": "8d7743b0e4a7b2beccc0b58be35fba57ff92585364028dde7c0b48e809f1bcd1"
+    },
+    {
+      "path": "Help/api/members/inu-boot-memory-uefimemorymapworkspace-uefimemorymapworkspace-int-3c027c64.html",
+      "sha256": "758d3e69a32cd8e513e22402ed67207e3988dff96f511e37c0c2c440c1e16643"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-audio-audio-getlifecyclestate-185aa895.html",
+      "sha256": "27a88f6300f628f13ecc1671c73ee2a4b287bf4c2e5f904edd2b25e06c716b91"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-audio-audio-initialize-00eb9e10.html",
+      "sha256": "5c09d9dc29b04c5fcd2c63da466af39affd67ab2ea0fb5f03665c77a40fb2010"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-audio-audio-pause-f07e3f1a.html",
+      "sha256": "092a4311a334d82142d9936188fdbe46fdb8f814ababdc2e840f998be3899351"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-audio-audio-resume-585a0ee3.html",
+      "sha256": "e21f540f06fc9f03470382d8ca2188a5d4d2917d08fe0abd7da8759bd0cb1dbb"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-audio-audio-run-19e03f9e.html",
+      "sha256": "cb99b5982d3b7beb5810bfae065f9e9bcd5ce5dd19f8d261931a273e70147f4e"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-audio-audio-start-b517f1c9.html",
+      "sha256": "6ea37de87df65d5615cf8e83e7761903a8c7f24e3c7546958bc9e35bb8c4d930"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-audio-audio-stop-62781bc1.html",
+      "sha256": "25045bf47cba3b2a784b4a7d5a7e3ef9ec522a494d9429024f7f2f28a95d25c5"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-audio-audio-unload-a4400702.html",
+      "sha256": "451d84a5dbe9f85b7281c83a70ab7e941b943902e28b5501b027981dd9b47c63"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-clear-e49d0eec.html",
+      "sha256": "c5120229835ee2205c925850f99b04298a87a9f3c36bf46c5cb32a19cb1552ad"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-getbuffercount-6784d854.html",
+      "sha256": "0f63ee6947458b632b8beab045cff569c06b89cdd245d804ea61d2f5cdf5ad2d"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-isrunning-d1f549c7.html",
+      "sha256": "45e88186150207ef538d99f1517be984db991da6af951bacac8f66fe5e012f8b"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-mode-6e7f38a1.html",
+      "sha256": "b26eced595ba4649463e3b5997e17f77093959f2b38b87357a1032df52bd54cb"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-requestedmode-d1c00971.html",
+      "sha256": "90d5fc19c78025e8047bd724a644565b66200226f54f88d28298dad8a31ad3ad"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-resume-1d954499.html",
+      "sha256": "f4f4579e2c40bc6d2f52a13aa461d76327769cc1bd75d409144ab18c7a711fcb"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-run-consoletype-57b2e1ff.html",
+      "sha256": "348a9e97dc0ff5a9ac5da49dbbe05594be06803f210478e6c969c52036e7f8ed"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-setbuffercount-uint-27d46013.html",
+      "sha256": "0b455f66e2b63753e68c176e3d620b90dcad43caa9728841b9e2f24a12d1d11e"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-state-ebf6c9c3.html",
+      "sha256": "c4932ed8d504291fd7bc1fdd13c011512c65bb5fdbddffbe46d569ddc381ee06"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-stop-4b77855f.html",
+      "sha256": "20c69f495d94176f39f1779961e5c0a623b04531b160ba8c4e806bc7df5703bf"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-trypromotegraphics-b702f62c.html",
+      "sha256": "eb1342e99120fbe49a0de584179b084d784318a025b23f6b5cd01cd58a9b5021"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-unload-f9daf869.html",
+      "sha256": "7f20d638a8739fd9623a21b3ef027b93af0269c5954e12dd16faf08a24161336"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-write-string-582da0e6.html",
+      "sha256": "1d33ae07e07f795619f0cd381d2a98f57a86b473ff53a3b223861bd46a6c62f5"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-console-writeline-string-6be9eab0.html",
+      "sha256": "459683ac078ea75a07d13005c70dfa7dd85ebe90eaa3caecdba243e4ff414222"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-consoletype-auto-00f9bc56.html",
+      "sha256": "0edee31c056e517c4d9757e54b4fddaee63c97dc3a8f3bc33e3c061e878d5eb4"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-consoletype-framebuffertext-eb496303.html",
+      "sha256": "842163ceeb0a94d985d16145d6e51b97a3f0c548ad4d8a4c860bb55143c08cb8"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-consoletype-graphics-e25b33fb.html",
+      "sha256": "8b14d82fefae99e6ef2ca8dc4e0f1ae2b1aa653309e7f7e60b06245a09e90234"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-consoletype-serial-cff15514.html",
+      "sha256": "26288abbd1ca061c8b1b446e358122c7663db80a4a44459b9516a8aa8f549cce"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-consoletype-textansi-e8d12c14.html",
+      "sha256": "60b3b7a16b051584394d8246d64a1c0005c9bef88e325f77ac35451a04c27fa0"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-console-consoletype-textascii-179480e8.html",
+      "sha256": "de0bf4c1246a1d04a0b026e2e5399d381bad91735433b3cc442a91f50d5f33f3"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-drivers-drivers-getlifecyclestate-904c770d.html",
+      "sha256": "6d896906c2c8dee044487c65bf887756b1b217793ac0d26cf0b399aba338525f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-drivers-drivers-initialize-f8cda32f.html",
+      "sha256": "5f212e0a3a2c90774866d3329ff4b6f77d5a0413c921485811c48d0c01a18dd5"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-drivers-drivers-pause-ee52b900.html",
+      "sha256": "31495ef2b136aa713bf3f505e6935980cbde524d9921e941b50fd4c12fa066f4"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-drivers-drivers-resume-f7fbe8de.html",
+      "sha256": "252a73e3c9194fcd07e2df42a7679d8f1910a815187870f253b52c3bd7565bb6"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-drivers-drivers-run-418e590d.html",
+      "sha256": "3bd7cc97a0ccb58d315e1f5cb3efe819e6110849fd428ac891b0814446af5cd2"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-drivers-drivers-start-11a67ffa.html",
+      "sha256": "d5ea073e3e870f1d99e8988a4775639a334d2e4d4c5c33501cc85c2121ec7bfa"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-drivers-drivers-stop-2802fe43.html",
+      "sha256": "c77f7da0d24b713bef660e10867228022427f90b1803ac61e67c6326fcb1db21"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-drivers-drivers-unload-6e2ca0db.html",
+      "sha256": "28ef5d8d0bbf81c84e08aa7ba3e7075b9b8057cec9cf4c8b90939b61958284a3"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-graphics-graphics-getlifecyclestate-a290a24c.html",
+      "sha256": "3760c263392e8a5d71b2595e2105af5feeb19ac27cec9c662226414a3d042cc7"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-graphics-graphics-initialize-a88151a6.html",
+      "sha256": "98a152906c10141e1170f72770acd6d5382a634f82555059d4cbb349f00112a8"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-graphics-graphics-pause-bf94f81d.html",
+      "sha256": "f1f71464921c6d8f54bda872dd364b1d419d6eca903e904c225d54cd769c7009"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-graphics-graphics-resume-e3c3d529.html",
+      "sha256": "d3c5aabd0ac79d3bc307ac2c6277394e71eb440689ac9af85d2c0b2252ee21f3"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-graphics-graphics-run-8a78dea5.html",
+      "sha256": "e886578e815e520f80f5f0a16db0d672c9a1fc29024d3526cbb9f38d594471d8"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-graphics-graphics-start-c3060f13.html",
+      "sha256": "a4d12367df65bdf6177208ccb47efa324a715236fda8060c001b11a687ddc8f1"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-graphics-graphics-stop-588b0fcb.html",
+      "sha256": "1a00502cf7dec68bbd8b5957f0e536244ef02bb296dbe26d5572fa2a469f05a2"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-graphics-graphics-unload-9f852e2a.html",
+      "sha256": "d12e7033b5f12e41ebbb77d397c152d905851ce407f91e15f9c494c092e73600"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-hardware-devices-getbounddevicecount-c7378364.html",
+      "sha256": "f2028d6c4ca2fbdee29dfc9234e7a13a51957d4bc8a2d033d74896f9f404bd05"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-hardware-devices-getregistereddevicecount-3b1eee8b.html",
+      "sha256": "711ec9f0e3336e13af70a349d595bab75473237cc479ef9065319a46b0b3dcd1"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-hardware-devices-getstarteddevicecount-26ea77ed.html",
+      "sha256": "d5cd74bd44008c220e63ff8559217183a3461872b941746b2caeb1cad608b434"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-hardware-devices-isinitialized-4f2b1cd2.html",
+      "sha256": "048652a9a5296eb1b5456f4237013eb14ecb5adf8c752676d7f41c4ba0e8abdd"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-hardware-devices-pauseall-0971693b.html",
+      "sha256": "dd930009556a4d98237686eb38a6abea6a67bc24793385752cc01a1069f67b91"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-hardware-devices-resumeall-5cd9ab42.html",
+      "sha256": "66b4a0db44f80b8b3822c1b361c9eec4af27cb811c6976d86c992560ff15637b"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-hardware-devices-startmatching-17aa42ed.html",
+      "sha256": "7a9ff4340a309d3afb152c0ec0dba1ecbb42187e22f33cfcb49b738006daa6f6"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-input-input-getlifecyclestate-ff96d0e5.html",
+      "sha256": "66424300a01c978d23df89a5999213187ff357eeebbce76b35902d24aa6ecb04"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-input-input-initialize-4bc24992.html",
+      "sha256": "d7ed658139d90ebacbc2f78dd79d4a92ef291ef3efe3882b523c44f3ad8314cf"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-input-input-pause-8d6fe176.html",
+      "sha256": "208bf0de44629b491c1627577f1a5a2ba749d73c1c33141ee6bc47bfff855c5e"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-input-input-resume-60dd7364.html",
+      "sha256": "ae8e70714f358b83f111bca400551b3ee2b7bb0c1e1566a5adf4ff19418d4a41"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-input-input-run-85edc2a6.html",
+      "sha256": "edf5a19fb724988ec639e048482bbf99a5e5e6c9196e1cf217f0c192f77f3ce7"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-input-input-service-7c04441b.html",
+      "sha256": "60093778bfb1a68f27349ddcf2ec93aaad359d0e045682210200d2177f5f87f8"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-input-input-start-fc09ca03.html",
+      "sha256": "a660dd3d78f8ba33cc5103e029fe1d304d02f2ca1e8efb6e7d2018603e105cee"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-input-input-stop-0a0c4b6b.html",
+      "sha256": "552ad4f2cc0c663352917805855454ed80cfe9897fa633a506ef3602fc83b5aa"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-input-input-unload-9b64a7fb.html",
+      "sha256": "c8451479c31c4833981c543d800f21a85f23753fee01c9eaf938a86ec9f6f6b4"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-interrupts-interrupts-getlifecyclestate-8a9cdd9b.html",
+      "sha256": "7f95b0cb6948b7404fa3d105304875186994915a0b42b4d4c0c8ae856d29e4ac"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-interrupts-interrupts-initialize-dd095b7d.html",
+      "sha256": "56b26385927cb52ee106b0ab5dc1668122bf97773ed8377a2e9a38e8736f5ec9"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-interrupts-interrupts-isinitialized-a28d749f.html",
+      "sha256": "10ce4f978f5d0928edb3ae11587fd8801244059870f82f56d8e328be48ab9860"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-interrupts-interrupts-pause-a57025a7.html",
+      "sha256": "3e2c357c0a417ef8ca9da8c36868fc87f90fa8b0451fa56ad3a1bf23fd7b787c"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-interrupts-interrupts-resume-8c4656b6.html",
+      "sha256": "92a5a66191d2b4e97c3cf42cb53f6320f1b8482ab170dad0a7fde3f63a29d3a8"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-interrupts-interrupts-run-c615d06d.html",
+      "sha256": "28ae3e78f3114d1797626aa0139286310e4905c2743946a9d4bde5b2f821a0c1"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-interrupts-interrupts-start-545435c6.html",
+      "sha256": "8f7328e3120647af7e54a50940e14dd2e8a4463273f21099a82ef581c8435e56"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-interrupts-interrupts-stop-0ca9f83c.html",
+      "sha256": "3c736d73e2e331a945b90bf642e53cc45b3375df00255a94b333a802f37aafd2"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-interrupts-interrupts-wait-6580dfa5.html",
+      "sha256": "f49e8f521222a579d038f5f547e6d98ecb80f252cdfc8c9c571e0bb5f4d0ba73"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-memory-memory-getstatistics-5e23eecf.html",
+      "sha256": "630f55244e5b5b2c6b00cdf9545bc402ed5eac8f39c3aa26637cbea7fad59257"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-memory-memory-isinitialized-e59785ef.html",
+      "sha256": "046e42ae8a002c9d40df95b78187a46663402122413b61446fef4b5059032e36"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-memory-memory-release-kernelphysicalallocation-0a60b7d2.html",
+      "sha256": "097cbe795b06a17a7c711b0f7f4c4bcbfe75f5f24056519221fd72db16935d79"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-memory-memory-tryallocatepages-ulong-out-kernelphysicalallocation-04482788.html",
+      "sha256": "21eafb564fb9ef8f5ce22c22177cd4653d4f7fba33bf6ec4753d3c8f346d65f7"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-memory-memory-tryallocatepages-ulong-ulong-out-kernelphysicalallocation-f34960e1.html",
+      "sha256": "391b469c5ab6088f89c792905dae3f4876edd29b99e3e1291244e854e4783252"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-networking-networking-getlifecyclestate-0296bd00.html",
+      "sha256": "b74d769742e9b4641cf7bce5f947a6943a3df91710b511c3118b5f64b13e4a4b"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-networking-networking-initialize-5a61018b.html",
+      "sha256": "9a0412decc84aa9818b76ff6cf700028fd1b3bc8b7d713d49e96f09f79f7847d"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-networking-networking-pause-78412e6e.html",
+      "sha256": "339d7d8c6672ee90a091d0e14eb86471673f521b870951779aa74b7bbdd9849e"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-networking-networking-resume-9462c00a.html",
+      "sha256": "e25c2528cdb59793b5b1ee9abb7701fc99ad09f5d3450d6b7f1b29bedbdc764b"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-networking-networking-run-b554e191.html",
+      "sha256": "0851ef005e7b47aedc04c223c1c85f6338ed8ebd132a5b5fd785849513d4fe38"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-networking-networking-start-de3f2971.html",
+      "sha256": "951aba359b5d031b1bce27554918de6eed820c56437853b6796b63e76f31f0a6"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-networking-networking-stop-edb062ca.html",
+      "sha256": "3cae86bb8eaa8dd71d5ab6b4cfe8d4c60669a381bc4d6fbf9425eedf3d7594d7"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-networking-networking-unload-631cc9dc.html",
+      "sha256": "f7bfd34091e8373862e6dc80e4b5a7616947a89d9ad719e46eda4f1d59bcbc32"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-power-power-getlifecyclestate-f22d7a21.html",
+      "sha256": "28dd20d01fa75541b0697d6da495e76bcf64570540029723a89f0fe05d2db10d"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-power-power-initialize-2dbc3e51.html",
+      "sha256": "347b296367327159f1a94e4d4580925995422307592782c778c76aa3fae65184"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-power-power-pause-cbd7a942.html",
+      "sha256": "1c108b41258dd1919f32b0d8da8ee4bc0d39dea918407f2cc460cd31bb7801fc"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-power-power-resume-f2a1af5b.html",
+      "sha256": "db0996c230af41c4ae886de33a12875535ee50f800e4c19703747ddd40ed4411"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-power-power-run-633d99e4.html",
+      "sha256": "3980c2957d6f493567f314bcb6389c3379283c15e63c362fb4dbb1de758b0397"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-power-power-start-9f744461.html",
+      "sha256": "c9d601ac3fd848dc066cdf7a62a934bd10c20a5797a1bb9dd119116290a00bec"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-power-power-stop-d8045694.html",
+      "sha256": "2670f731abefde1138acde1deef82febd5d6eb16f7c9a31594aa5cdcdc04ac12"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-power-power-unload-ba3c25e1.html",
+      "sha256": "b37d7a4d6b6050a3aed564ffe6301c82bd444a47e81f7a7ac9b0731f0bd7f70d"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-desktopsession-run-bb830482.html",
+      "sha256": "00fa174e38271e111e07b6c800b584dfe1cc4cf207e02812481deacd22f37680"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-cancelforeground-25088754.html",
+      "sha256": "4761bf4f93290fa255d3c760054689f29a49916a03914e2433f43604a9b72474"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-configuregraphicalsession-string-string-5bc8acaf.html",
+      "sha256": "41254a7831490842a3d9596156bac56fdf1705e28c7cab49efdaee02a9db6421"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-getactivecount-0f8b6593.html",
+      "sha256": "b84a94b9b2d21046378fb895411ff9b5369b88c2822199c7df3d8ae28309c383"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-getforegroundprocessid-69f4191f.html",
+      "sha256": "23432c297c5879c30d7c8d12e70b87e8a95c8c1baee7acb798bc48e1cd00032e"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-hasgraphicalsessionfailed-129c0464.html",
+      "sha256": "8946afa0cee8daeff983b7b91d2f69baf7600e3fe7e00c94ee66362f14d36bcf"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-isforegroundcancellationrequested-334ae6d9.html",
+      "sha256": "de4bfea0fa32a1f3c821950f333b2098ab4fdd50fac6a5e05a5031a12d87089f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-isgraphicalsessionactive-bb97d908.html",
+      "sha256": "4c4d0d48776ddf9b24c1b77ea3a7468fcc7a4c149db7480e80489c143d2bc353"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-isgraphicalsessionstarting-4cd8a879.html",
+      "sha256": "5858045bba486d01188bacf72d317efba20bd0c6249d953fa761390d6c2fd332"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-startgraphicalsession-3a5f721c.html",
+      "sha256": "984796ecac9ac37588b043d8f305e6c0939c74efed864aa26cf86e14b0ccb42f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-terminate-ulong-long-0c1b9857.html",
+      "sha256": "64b1cbd287f01c8af4288cb49c56dd25fbf7b40db0e368247e3d396ad43b4ded"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-processes-trystart-ulong-ulong-1a6c0b37.html",
+      "sha256": "fdcb24c5b8840d778405c7ac85d2f42663bac0d2de6af31eb2495f962f18a77e"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-processes-textsession-run-4808c86a.html",
+      "sha256": "1ce2f8a8411dc1bdd9135ef4f91336b61a386c44a554e026548b81790677d938"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-getlifecyclestate-99d26843.html",
+      "sha256": "11d7313c180f8e748e73d3a4707913b0df138c531d54d026dc72acae78761a9e"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-getquantumnanoseconds-875489fc.html",
+      "sha256": "8fc8f4e5820488cf58a070927da7c673a15b6f93655d6f26f99fdfba36378681"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-initialize-faf6e5eb.html",
+      "sha256": "07245a0ebe7b9b393c38c09efc70c483a5f4a8f82af4e8f3a68c3d837034716a"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-isinitialized-d7a53d3d.html",
+      "sha256": "7ca298e5efc06010fe8fae28f87f2546c3f8e6ba63f942449a768a9aedefa76f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-pause-593392fc.html",
+      "sha256": "3a55e9a8bb47007ef8d9e9335e741cb9c381c9937af1a6c2a2013ac81bd160dd"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-resume-ed59115d.html",
+      "sha256": "fe3dfc528326cddcdd7bda1fc45255020c5b9a9437c1fd3bd4b836eccb987d8f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-run-e691b563.html",
+      "sha256": "323f4d6d501bc70e4add04e7064239a646c7c5b2e963437ff132554db55662b0"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-setquantummilliseconds-uint-c91c94c6.html",
+      "sha256": "35edf5a11bff52254da072e0be9bc516cd4c2aa05afa3fbf7862d0785053ec94"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-setquantumnanoseconds-ulong-8d05a7df.html",
+      "sha256": "9eddb0a9b22c8d9f92dd95283447e1bdba26b509cd538c365927ccba64054b6b"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-start-d603759a.html",
+      "sha256": "a952b50bada564270ff5c1c8e961bec023facb617c4b34d82e840bc8d0c626fa"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-scheduler-scheduler-stop-e82bb2a1.html",
+      "sha256": "b246132c112cdb3f2d22579974afadeee8d705efc8f20165f2cb9533208888eb"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-background-0dc99e7b.html",
+      "sha256": "8b960bac77ef094faaede5e6116988bb30eb712fe667a8f9ad723da613a3e1ed"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-drivers-fbe23e2b.html",
+      "sha256": "c3a2a0e719b8f5cc681e087a78b560b2a15c803a1b678eb252015dc327ec02be"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-gui-203e9386.html",
+      "sha256": "62fffe5f5491a059bb728e40824459a31b8ec40375605802d7895e2a03006241"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-interrupts-b6322245.html",
+      "sha256": "571b7fa9611008caba43ebcfb2db5b4a4b870ddab279456560230d773dfab209"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-kernel-86168e18.html",
+      "sha256": "9c9f7f00550fc2929b9237df65307109941e243bc68afc168b59a4e361a016f7"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-networking-1294432b.html",
+      "sha256": "711fd2342529d6d8fd23437394d9faead686b2eb179fa9fd3b4bee80d736c403"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-realtime-e17f28d6.html",
+      "sha256": "5de4dbbff6bb3f521c5d26c37d131cd4c0eef2743947e87d193d9f443587e5d1"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-storage-d4fd9082.html",
+      "sha256": "fd8b3f67bae0c84f0b0685b412ad0b486ee1517bbeb0c74f0bab55836397de38"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpurole-userland-a3fc84da.html",
+      "sha256": "a0ed96b4ee02e6f0c6d7e9dcd9682189d335a3aec66f029a798b1711ec6119da"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpuset-all-67a40e4c.html",
+      "sha256": "b6f9029b2dd46d581963ed896e48ff516a254f2e42191d9f50b3e9e04d6f1924"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpuset-contains-uint-0f32f24f.html",
+      "sha256": "ef6323eb7aefc652d32388b34ea1484d0c5d6560ab4949d0f2cfacffde540d87"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-kernelcpurole-kernelcpuset-kernelcpuset-single-uint-349d21d3.html",
+      "sha256": "e6526530f05d50fc8aed7d0a4a563232b02edfb21ab4a2cb8b6cc2ba0ab79a91"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-getlifecyclestate-46ba1f0c.html",
+      "sha256": "4eabf0836050cc3cfa081add95d460a4c3501e2cfe17fc482831b126785c9f0f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-getprocessorcount-255752f4.html",
+      "sha256": "67826424b068124334e582ddceb715b35ba9f7a8e9b0aae5529c3052304b120a"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-getrole-kernelcpurole-2a2a241d.html",
+      "sha256": "adec6cfb6ef9bea5f66bdc9742a1d7478d1106203f39966e05ad086e2d163464"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-pause-97ca142f.html",
+      "sha256": "7a1f884249b4258bf9aa4ac2121ac1b6395ef9c9c46ba190e7d738747945f34a"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-resume-c845d81c.html",
+      "sha256": "30e5c7a246e3930a41e6bd373257e8b1daca277a4d37c004bca028f8f1d72c21"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-run-03342d2f.html",
+      "sha256": "e865ba0c10be30074159678ac69a1b31ac3beef5a1f984cd2780fcb4fa9f1180"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-setrole-kernelcpurole-kernelcpuset-ea43cd0c.html",
+      "sha256": "34df22dfa25d8111af47e821cec8a10e180732b431fd649ec3b2a7104509b116"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-setrole-kernelcpurole-uint-92e88997.html",
+      "sha256": "bc2326a33040e4fb12542b8d04c8307525a523b71fdf13db6f8b0aff62df8731"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-start-9b6fde94.html",
+      "sha256": "9aab31d64ccbbb372af43079bc39ef861baead73885071cf593729e649f215d7"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-stop-e4776f15.html",
+      "sha256": "ab26cd99b116a67c82f9c32c771e350d8f456b1912098f5b3f56b8cdcc0dc122"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-smp-smp-unload-71468a02.html",
+      "sha256": "9b3085ff7525a6123447c9eaaf69dae1dd8e4a51201f0f043342a06054030fc4"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-clearlogicalpath-filesystemlogicalpath-33285880.html",
+      "sha256": "8e565a061df634d4c1037cdb9f5c0d672d246895cb8567ea125aea5207f42b3d"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-clearlogicalpath-filesystemlogicalpath-61fd0511.html",
+      "sha256": "80fdf7667180d9224ad890cc1c5af03569216c0b542f0aa8737a8d89f011db5c"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getcommandspath-5cb348d9.html",
+      "sha256": "5cee7ba2edeaf755f6eb33ffc3d463f883ca3f9c96c41fe916ce0e016cd24c9c"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getcommandspath-c15a63c9.html",
+      "sha256": "f4b1023512cd8ebd3cbb3a2bee4896de898d8e0ff611134e5dcc267f66fab2b4"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getcommandspaths-61fae14c.html",
+      "sha256": "d337e2f8a0075047abd36595ee1e504913f23124c7a0197a3baace36d832f168"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getcommandspaths-82d7517b.html",
+      "sha256": "850a2ca63bb17dccc42e0a74e44867d2fe2d7c4b236c6d3e1ffb0438a1e2c91d"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getlifecyclestate-2608e83e.html",
+      "sha256": "1e892368564ea4695411ff1d53667f03bbe8adac5b2a7bf3017abc34858a42f4"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getlifecyclestate-2da2bd42.html",
+      "sha256": "703dfa70d823a4443fa0eebc988ffc605307eeb3b018a3d35d1d139e644e61d1"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getlogicalpath-filesystemlogicalpath-aa8cf6fc.html",
+      "sha256": "0d262a3c059d49b92f24126166abdb933773d34c4f3a109219773b766f5bb08f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getlogicalpath-filesystemlogicalpath-c7656dde.html",
+      "sha256": "d95e409d8868cb92020ea7c5a23af0fd22fee79918d711de9499dfa6c5db29c5"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getpathpolicy-7ddda1fa.html",
+      "sha256": "2290722fd69f08fa154f86e29972958f69d9aac945dd34190a626e2decf554cf"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getpathpolicy-c58fb81d.html",
+      "sha256": "11f70858a5d22fdd197fda26523e77d633a4670a36776b3063e785b0a92972b4"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getpathseparator-bf403896.html",
+      "sha256": "4d61a5b1359fb55c0090b338bd2fcb957e7314464e432438e9a25bc94b1d70c1"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-getpathseparator-e861fe30.html",
+      "sha256": "dbc27f5a647192a8c5f20faa9c0a0ae7d7dcd1390a08f2bb6129ccf64fb91592"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-initialize-5653f0d2.html",
+      "sha256": "4af474a8673d37485be5532b33051ae49e928419efa21ecb8705e6e44647cd10"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-initialize-bef8e27f.html",
+      "sha256": "29d9bafad7af5d9e8a0897eaef5242fcec0e53a15bd02b06e827c3b1a61120be"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-pause-1126b38a.html",
+      "sha256": "b200f147796fea4f0b766db272730605a974f3d596c1d47f6df7a027669d7eb1"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-pause-6eb9800c.html",
+      "sha256": "e2ab3c6c830dd4a8d10a906859842ebcf5431233212e74e6ffe09b42547b0dcc"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-resume-1e82efdb.html",
+      "sha256": "adc53879adbb64739f06601ce62f0da92eb67e5f02e5953b7b2d4e0971922b53"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-resume-7e54e33a.html",
+      "sha256": "105ed036cf51218e6ea9c708246eb3afc379828db4839865bab85c7ff2e2aae2"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-run-1e75b351.html",
+      "sha256": "8ffac554322acf06e3498d8153f4151b9ccac1a20cc0091eeba7d7cef18a665c"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-run-d1b90b4e.html",
+      "sha256": "23c641443791021fdd14068b28de640ffefa3d8c8eb54e36ded5884433031103"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-setcommandspath-string-bad3f21e.html",
+      "sha256": "990d00286b75dc3f026a16ab94eae0841b55c62a4f338c2c025c1ef70592cc72"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-setcommandspath-string-cc7cd9db.html",
+      "sha256": "a71028766c5831949116e14d0c99f98ce3c2ba2953ac1d1b8554dffaf7fcbe73"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-setcommandspaths-string-410cd6f1.html",
+      "sha256": "d217c5e993f67480bf5425c93ef2b4815f37720c75c96af87ff1a365cb17000c"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-setcommandspaths-string-b98e24f6.html",
+      "sha256": "a9700c263b6d621672121c4ddf0f286b19e79b83448c8d09ae24b18f3d95ec0f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-setlogicalpath-filesystemlogicalpath-string-4f8eae07.html",
+      "sha256": "0b597a0c73b73815355d7cb6e94477006543ea8b1da93c045981f6cfd0ca2894"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-setlogicalpath-filesystemlogicalpath-string-b1b2b60a.html",
+      "sha256": "5b54c596f23dd91af5c78a62e02977d0c5950bd950aa83b92c6441b5be2bad86"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-setpathpolicy-filesystempathpolicy-cb1513b9.html",
+      "sha256": "7be35b32ce5122833fdab856ea6bc43c5cf76ff76ec95b45e0e40613969dc833"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-setpathpolicy-filesystempathpolicy-e0465f9a.html",
+      "sha256": "e76ffb65d2b4cdd1931231eabee24466123fb6879312c15e5cff087af03bc62c"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-setpathseparator-char-847bc7c9.html",
+      "sha256": "ac61e18280f08a12caf034870cae2fd31e7b76a3a1626f1ba9bc6fdb9c64950b"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-setpathseparator-char-e1089815.html",
+      "sha256": "e1f3ac89851f20feb6e9388dd6969e1cb97782a23e6e3f01f9429ef1d54b5658"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-start-944d5370.html",
+      "sha256": "67148626f08f2d6457c7fb8137212d54c0763aea4d0445da26c1baa200ff3374"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-start-c4c78c2a.html",
+      "sha256": "aa7779070131684129291b78fb4d480473efc50546998daaad0a712157579224"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-stop-cd634c06.html",
+      "sha256": "9c05410d05b56833939e9c95e60b5a59686362b323395268409077d14b854146"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-stop-d1ae2d26.html",
+      "sha256": "4e013a163ad8e89f0767b351e57bc4cd55bb0737b52730afbf2eb1659a3c884f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-unload-1a567e6e.html",
+      "sha256": "e594c518657d6f884287577126b5702ed815e79c5ff849f2a1471a4e338bb8af"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystem-unload-5f50ee9e.html",
+      "sha256": "1fa420a9d5875f3b1d861290e5681dd35ceec5c47716f31b81578c8039dbc53b"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystemlogicalpath-applications-efd51198.html",
+      "sha256": "b0cbb94fba377bdbdf1ab4bde6af6674f20f989b7dd176528f059b0849871c3f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystemlogicalpath-commands-2577b3b9.html",
+      "sha256": "ac18f165af7d144ce4d022996802ef13600d3723b89c916a5a374cf71c9da65c"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystemlogicalpath-libraries-899a2dac.html",
+      "sha256": "38f56b4e2ab55179669635463b286d36e2e4ba34267a63933321b34243cc4c89"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystemlogicalpath-readablefonts-8edffe9e.html",
+      "sha256": "10b6fcaad7b3d0b7bb75293e93395600b9921731d0c403f9ceed2abf405b7350"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystemlogicalpath-readableuser-8cb259df.html",
+      "sha256": "e69df64211d2404b587d831128ca762dcd569172672c591d4d5afbf03334927a"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystemlogicalpath-temporary-40b97b3d.html",
+      "sha256": "18f8b7a79f3e535b252f30850856ea9c82f98f4c5143224f474ab7fb470d9d26"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystemlogicalpath-visiblefonts-f3ffc94d.html",
+      "sha256": "d23d24d32f51a1d69f09bac9cf26f36ba93ed6f5e76a33374b3e86288ed28a64"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystemlogicalpath-visibleuser-57656a15.html",
+      "sha256": "34458f5d17c6c3d54cacae1c6ed777423f5d6727b97b69b5805dd10199a6d898"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystemlogicalpath-writablefonts-c010970b.html",
+      "sha256": "a73d8a607f1add5c95100ea2b9521a43e453e11eb18657f74477f90c4fc48e6b"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystemlogicalpath-writableuser-0c07eb8e.html",
+      "sha256": "5b68edcc84353c6a153436e160c43389f3633359887f1970f31e7e6eab0d0c44"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystempathpolicy-allownumbers-69f41718.html",
+      "sha256": "e4006cccf2e21c5ebb107d6414e9d3f9684dec45730332332c52b47cde779a4f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystempathpolicy-allowspaces-c4bfa94f.html",
+      "sha256": "7cc7eb754b7af3244f18056918a3fe71bee46b7b4cc7a005892afd4f52829ab8"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystempathpolicy-casesensitive-9fe66038.html",
+      "sha256": "f4c6d9d04d31716b6aac64697bbdb01fd5754a4cb349b0c711576c401737bd9e"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystempathpolicy-filesystempathpolicy-char-bool-uint-bool-bool-string-2dd59205.html",
+      "sha256": "2774b83f4f2b3a881304c53bee17afa551e756e703f91f6d7c094c4a8f85ec33"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystempathpolicy-invalidcharacters-45ae7c57.html",
+      "sha256": "a08ee835ec45897085544922533c852a20076c011fbae060aa6bb40d5849a215"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystempathpolicy-maximumcomponentlength-46121617.html",
+      "sha256": "6799ecb22495750a298c9ba71a9d0f08fbc3328081ca7a452de3b94ca021261e"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-filesystempathpolicy-separator-b75f2067.html",
+      "sha256": "2e6b97ef97ec78e1995ca68a9b2eb087e5dbb5fa86eb8867c5109898bfc96d53"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-storage-ensuregptpartitions-kernelstoragedevicehandle-uint-f0e91c08.html",
+      "sha256": "a620f19ab1cb4011e69ef289fe738b82724f25a532b66c165bb557670995cc73"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-storage-getdrivecount-cb3cc639.html",
+      "sha256": "692bf48d7badaf81c39c22c902bd155e7fa9814589db15e25a48f9e08c658537"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-storage-repartitiongpt-kernelstoragedevicehandle-uint-5753b6ac.html",
+      "sha256": "86f9691319b78de6f0ed47769d89579b4d6c8d42d76c666fc6fe870af1e0d6d5"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-storage-trygetdrive-kernelstoragedevicekind-uint-out-kernelstoragedevicehandle-8814c569.html",
+      "sha256": "56059b8b6443264a4be1d08b96942ea260338c7346bac6fb60eab6874ab631f8"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-storage-trygetdrive-uint-out-kernelstoragedevicehandle-out-kernelstoragedevicekind-out-kernelstoragegeometry-3090da52.html",
+      "sha256": "7d0dd4d51efe77d9cee458eefd611047d93cb296d6d5ca93e99837dbf590982f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-storage-storage-trygetpartition-kernelstoragedevicehandle-uint-out-kernelstoragevolumehandle-242af370.html",
+      "sha256": "90a1430ccf7cf434f79cbb593ada73ef8fda20c567a53e7a35e05ab1c72ee6d6"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-time-time-getlifecyclestate-7ae644c7.html",
+      "sha256": "f92ae1256fb9683b82021b689c2bb1939b978051a735e6f67e148df3b40a438f"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-time-time-initialize-3ff41494.html",
+      "sha256": "5bebd985bee5b8d2909d6c9a5ec4e65796ee4d0376b9833898f345d202b9b48a"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-time-time-pause-3c302bdb.html",
+      "sha256": "601eb116db5cb0463e26ec2e06e1459c52098d883bc91fb4d467ba78f10b3ec6"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-time-time-resume-feab3a6f.html",
+      "sha256": "63a3b5feeef78bb00558671d10ffda796260087079ce6a24785210c98612e388"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-time-time-run-596e9989.html",
+      "sha256": "9de4a1d4523b4f8a53edbdfe07894675150bb1fe98c963e9421ff16532bd5bbf"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-time-time-start-39af0b57.html",
+      "sha256": "667e7f4b51acc18dad61dbe00dc3345f37459b3e7fb0c6b16fa4a4e10890a029"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-time-time-stop-009c3582.html",
+      "sha256": "5c9adebedede2235533aabf5dcf9651fca43af617dcd7d913ccc8c8c86c83a6c"
+    },
+    {
+      "path": "Help/api/members/inu-kernel-time-time-unload-b9edbc40.html",
+      "sha256": "6a1d0be60be9843398c5029c89e080f531e16a83a3e1025a99bd21ba040a49c5"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-commandline-getrawarguments-92e3c511.html",
+      "sha256": "9ad838bd5e7e60f386db37bf6f3e29eceb0017046bd62e14f1d1ee72cf432dfd"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-deviceinfo-bus-fc3d620f.html",
+      "sha256": "ea7bc21368ab988c8af7f0aebaf486475e9b19df7c70d9ccf4d6346129e0ee66"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-deviceinfo-classcode-ad5b6865.html",
+      "sha256": "2d9c98d219a778f0a452bd7a67138b8e4c54714c0297949385190523332e2bf2"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-deviceinfo-device-511921fe.html",
+      "sha256": "2305f2921dd79a1a03cde9c9955c53bc7ec7ffd5c2ad49919dfe03d44e3e621d"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-deviceinfo-driver-a38b5b97.html",
+      "sha256": "2c7a84f63f755ae82faa138df370f024674d5502b8b303e108e66c9cc91ce642"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-deviceinfo-failure-544e1639.html",
+      "sha256": "ce82a83e5d68176ad79ecde48cc7697f1833db6c03ab2ae4d247fcafd3a91a4e"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-deviceinfo-handle-b62392f2.html",
+      "sha256": "dde40fe523051ede4ab539f84066a4be1441541454d6b92a5542e527d15c10fc"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-deviceinfo-state-83ed0a71.html",
+      "sha256": "afef8599e7cf6822a88fa2e93e9bf8594673c59df15f418768a3d1873a4eb142"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-deviceinfo-vendor-91b43e04.html",
+      "sha256": "70b3d82b319a736bb26aca94983d202542ad08f40dba9052f6cd33df53c66a7f"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-filesystempaths-buildcommandspath-string-1b9eadb2.html",
+      "sha256": "bfcab58c85707219c6b7169522c7fc769131ab59792a615345541bfba16b6044"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-filesystempaths-buildcommandspaths-string-373eeeba.html",
+      "sha256": "420841335662ff794a179dc6d6af706b7ea2f7f23b8b6bf144818899336dfaf0"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-filesystempaths-getcommandspath-95803581.html",
+      "sha256": "e1b0927b520a258bf5e0aa5315eb6017e0039c8a65b94fdcbc03b1d4e61f91e8"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-filesystempaths-getcommandspaths-ed8cfcd5.html",
+      "sha256": "33c35947fc59f3547968be0de7360db10bf548c632881d7554cc66788ecdd26e"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-filesystempaths-getpathseparator-e1ea281e.html",
+      "sha256": "71923fa5e9070d65277c974c2e51b90640d66d24f2a3941c47fb4e52e0d69684"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-filesystempaths-setcommandspath-string-cf84ebb0.html",
+      "sha256": "71a3f9a47e9f83434e18375e495e32629d39934cf8be43a9404c0ed25ba85312"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-filesystempaths-setcommandspaths-string-e3544d02.html",
+      "sha256": "845652deb2105f47379a77f608584fb28e89ce0fc50effb7a1e181cecd096941"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-filesystempaths-setpathseparator-char-663031fe.html",
+      "sha256": "10139ad32324851e320aaf8db348f4cdccd6ae05a95804768245dbc38f1ee28c"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-output-clear-25ac8165.html",
+      "sha256": "f8d17cc96fe3ee63094b65076daf0ece71853d1a4a17d0542bce9ac5acbd8f2d"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-output-write-string-66bf15fa.html",
+      "sha256": "6e23de3ae13f4271caf36ee83d76d01599435000f5ecbeb9b9e3e74c15cb6e1c"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-output-writeline-string-498d30a9.html",
+      "sha256": "cc73a7d92804fc5ab469197bf306bd187eac9d45689d6766781c43a9da12f987"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-process-trystart-string-string-feb1d55e.html",
+      "sha256": "964ec32a11c284e21de32adaca7fa94efc2c85bdb2bfa9b58385607f7b8e1861"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-systeminformation-getonlineprocessorcount-29e5d9e1.html",
+      "sha256": "9111fff63969c453c6f21b6d80a11b715eb8fc443d211b5870eb8d07ea8b3a30"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-systeminformation-getschedulerquantumnanoseconds-71d03983.html",
+      "sha256": "07bd8731962014f5f4a2a60356e036f85faa37715077a5759a1edc3903ca1642"
+    },
+    {
+      "path": "Help/api/members/inu-userland-runtime-systeminformation-trygetdevice-uint-out-deviceinfo-0bcef2d4.html",
+      "sha256": "c9cf7d2834b8555ed4ef2fedf0794acb534c4ed9720338ac37d020c7dd4bbece"
+    },
+    {
+      "path": "Help/api/members/system-array-empty-t-ad80b78e.html",
+      "sha256": "ab7c439ad22fd016b51fdbdeafacdd4ecfe78f0c316e316585033b0a6c2bda56"
+    },
+    {
+      "path": "Help/api/members/system-array-getlength-int-561076c2.html",
+      "sha256": "47297fd63764500acecffee215e429cae3d468ea85333ecf474362aedc01340c"
+    },
+    {
+      "path": "Help/api/members/system-array-length-3d737b3f.html",
+      "sha256": "af23d78659f5ddb5bef0300d6c81eb73908be132cc9d750dc79f40facc55c16e"
+    },
+    {
+      "path": "Help/api/members/system-array-rank-4474b52b.html",
+      "sha256": "36c680cff4aca54e61f2e6c0b50437a52c0ccd712a4e7e1336eb70bd6af13294"
+    },
+    {
+      "path": "Help/api/members/system-collections-collection-contracts-icollection-b4bee5e8.html",
+      "sha256": "8d511fe7337b26c212f96d36f12a6f4a9f3fa8b04a6d34a3a4b31c2d7671ca44"
+    },
+    {
+      "path": "Help/api/members/system-collections-collection-contracts-ienumerable-8bf77891.html",
+      "sha256": "6c036be6fd780a5de4f144307de39c0a47e05ea0d6f4071d7729eabaaf5d3f44"
+    },
+    {
+      "path": "Help/api/members/system-collections-collection-contracts-ienumerator-d2cb9504.html",
+      "sha256": "f193a83eaf5bab1abcf0ceb12cf419ccefd5bb1f1c5e4cf3f809b5451658ab31"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-dictionary-tkey-tvalue-1df3f2ef.html",
+      "sha256": "f230ad8be3059bf67d26ebb9b6c52276203ae7d05e86a8b8195e8f0e4c843ced"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-equalitycomparer-t-eed98897.html",
+      "sha256": "0d822fb1374f045d65211a4267fe38ab964ab759ba02ea2a4011271bd1926a4b"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-icollection-t-caf246ad.html",
+      "sha256": "64587d42e55c2f02f302d8802d4a2410cf10ef7e6316df19dad26944dc6602cd"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-ienumerable-t-4a1ace8e.html",
+      "sha256": "4bf7fc073d7060bfe63426b386d19a5619ee0e0688b0ec51584f6e2169ce19ef"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-ienumerator-t-4140f01a.html",
+      "sha256": "acc53a06784400c829ed7b93eea7a85158ad16f3b5cc0d4dec5ac67276d35e90"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-ilist-t-56336f6c.html",
+      "sha256": "ad6ed4555e944a5a4acee5048947dba95297f1f56033f00867b70aff3bff4392"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-ireadonlycollection-t-ad45add4.html",
+      "sha256": "428b2aa3507479fb27ad673b357d06925d205bb954793894144eb71343384e2c"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-ireadonlylist-t-841a2eba.html",
+      "sha256": "cb0dc4e4a12b6b0739c5d3927a6f6c25755139d8367727ff5032d91396ec968f"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-keyvaluepair-tkey-tvalue-8f4ca9d8.html",
+      "sha256": "f9d1c2516dc9de99d7f10d57807688d0d35090f8c6fd4426d7998e16f1169927"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-list-t-db1d165f.html",
+      "sha256": "e62c1bfa821955beabff52515e9d1ef4c9c89ef3cbe6234c76b11ab91dabc114"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-queue-t-2bad7d0e.html",
+      "sha256": "a540b675614d9e5abd449fd1710d3603cbeec1f280935f60cdddf2936b41849f"
+    },
+    {
+      "path": "Help/api/members/system-collections-generic-generic-collections-stack-t-58443e3e.html",
+      "sha256": "b5d4733bf2406439ba07c30c8d2b099b1cbc5bf4cb94b07692f1e2699188c15a"
+    },
+    {
+      "path": "Help/api/members/system-console-clear-98ae2fbd.html",
+      "sha256": "88945bcab73b06efadd065932ece95e3ea126887cbaf35ba8be74d7b37c3945c"
+    },
+    {
+      "path": "Help/api/members/system-console-read-1722c14c.html",
+      "sha256": "d84d4ce3f0b67d7396e01d1dd4b582453253f72b7ef23f644b6c57ac8508bbc1"
+    },
+    {
+      "path": "Help/api/members/system-console-readline-ab0d0354.html",
+      "sha256": "284078f163a1a7bc6552936f38833be7b746ee2af2f520147df0b51122a52c9b"
+    },
+    {
+      "path": "Help/api/members/system-console-write-bool-f6e6d8ae.html",
+      "sha256": "0e96053257a7d2b1d64e477f2bbd40b61b321b422bf27802a1bbb75e8cf2ceb0"
+    },
+    {
+      "path": "Help/api/members/system-console-write-char-231cdd93.html",
+      "sha256": "b7452b956817a2b24775ac02911d6f853cb99ba88fc6f089ccb6690af5dfb979"
+    },
+    {
+      "path": "Help/api/members/system-console-write-int-aa3d3493.html",
+      "sha256": "0047451e064a6d13897e206d5f9745281bc3627a234d4dd44f40387f1785d5c3"
+    },
+    {
+      "path": "Help/api/members/system-console-write-long-4edc5fbf.html",
+      "sha256": "f276f16629542e769be19f36f108c60e4a0028aef7a5b2e8898e6f439f75d331"
+    },
+    {
+      "path": "Help/api/members/system-console-write-string-c9777d71.html",
+      "sha256": "ecd7beb40cd5ff437bf38ec02d997ba1306ab91ffbcbdaa570b80bebf9598223"
+    },
+    {
+      "path": "Help/api/members/system-console-write-uint-20bb177f.html",
+      "sha256": "54ecd0ca128e388e3b32452adbaae79fd62abdaac7c72103cb89d57ec847559f"
+    },
+    {
+      "path": "Help/api/members/system-console-write-ulong-7a457587.html",
+      "sha256": "25695f7733d80729ad47c69be35423bad653022267341ab8cd4485a06c86800c"
+    },
+    {
+      "path": "Help/api/members/system-console-writeline-03fbf56d.html",
+      "sha256": "53fe99bbe895b4683e405bc7a268ff8acf9ef02150d75600e615ec4448a4f7a3"
+    },
+    {
+      "path": "Help/api/members/system-console-writeline-bool-6b866ba5.html",
+      "sha256": "4151b8f8578df7451b234756ce536e28fea27341dac095dc6c0b06510252466f"
+    },
+    {
+      "path": "Help/api/members/system-console-writeline-char-a18d4dfd.html",
+      "sha256": "2ddfaf35e853e7182977979ab325b6bf1c284a49954285e0d6a8249336d64d96"
+    },
+    {
+      "path": "Help/api/members/system-console-writeline-int-a8d293f2.html",
+      "sha256": "36bf3b1f8d34b234f156756aa13767f570c67b7b2abb6b101d1a3695879a4903"
+    },
+    {
+      "path": "Help/api/members/system-console-writeline-long-39e74219.html",
+      "sha256": "55472933e3752479c4fcf78957682f41388f97dd9c8f93e79e24cb035f865aa3"
+    },
+    {
+      "path": "Help/api/members/system-console-writeline-string-760663f4.html",
+      "sha256": "47172fcf37efb95cccbfe4e9a858598db19bfd7c0c4baa1166b679657d4adfcf"
+    },
+    {
+      "path": "Help/api/members/system-console-writeline-uint-7647d61b.html",
+      "sha256": "8caf12bab88edaebd9c82495ead29566f700e1e25ccd91b2329c67e6bc135abe"
+    },
+    {
+      "path": "Help/api/members/system-console-writeline-ulong-c67badb2.html",
+      "sha256": "47c4c1bf60b1bcb33bb5c1528a0446002e3d8fe4e2074c03c2d038f5d99b3d47"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directory-createdirectory-string-f0de1aa2.html",
+      "sha256": "d1e3d86e20e1ab991377d81eea9012e5f646dd10f6d51e670d15c5df3241878d"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directory-delete-string-39a05f2a.html",
+      "sha256": "73d58a8aa855222c40703e4c1c48d070b62d55816f2ffb62b7ddb7db177d4adc"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directory-exists-string-c6a96cc3.html",
+      "sha256": "ce3aff8f26ed95458db1224da87437aa28db9dd602fd476b9d46d79714e0f273"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directory-getcurrentdirectory-4a13cad2.html",
+      "sha256": "c57e01677dfba6b81c799b435810db27ef6d894302761f067d6ac308a62ac3e7"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directory-setcurrentdirectory-string-6d167644.html",
+      "sha256": "f5fff50ee6fb84c705c17b0b06d0a9f0b2aad93d4fa93dfa48b243a84c8f2c79"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directoryinfo-create-3880b696.html",
+      "sha256": "05100eb3eea2a0e0476227c153da930b0ba2f5d2b69e3d516b89b2f0513703ee"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directoryinfo-delete-6d541d78.html",
+      "sha256": "e048367a8ce1610dd3384b776293d877df70008f933cb923a1c387172a100cc5"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directoryinfo-exists-76283f82.html",
+      "sha256": "0e447e230459c8b19396161a484df54a1f1a4b85fe2cf78730cc364d6bee83bf"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directoryinfo-fullname-dd675e2c.html",
+      "sha256": "694e0c072ee3a0c8eac83a7241c2eb81447e3eed754c3ccf267d1d9df303325d"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directoryinfo-string-9b8ed40e.html",
+      "sha256": "8ef107a5512db182584f77c13da3cf7820ca39c1fed0194ce5d27bf9744e368a"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-directorynotfoundexception-416150e4.html",
+      "sha256": "206bcc5197e5881ae03c35824f4828b00778c27ebe466b7ff4c85d0b5062befb"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-file-delete-string-97bad31b.html",
+      "sha256": "653fa3fae035ac6a4eeabc5b8aa1811b4df1f8ab6cc3da50ebfa35bb45fa39d5"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-file-exists-string-e29c9e7d.html",
+      "sha256": "09bd90c947eaf8069afa390cbcfe7ba633db875bfda544b99491b80753b6a78b"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-file-readallbytes-string-0b7eb683.html",
+      "sha256": "1577da2de6f3f03e629eefbc9e0a0222e410c1a4f0febb913d1e50019faf5e05"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-file-readalltext-string-27b2ade7.html",
+      "sha256": "6a7af4d4121bd942150d72d7c6c3f3b747b234c69f124dd9d51e316b805af738"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-file-writeallbytes-string-byte-4e9bac09.html",
+      "sha256": "c7d76e1d587c771c9d0cdacc2def3c02e904a8e65c82813cb16230c1bff2a36c"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-file-writealltext-string-string-ea245657.html",
+      "sha256": "a9d9fc461d98d7fa673c9e945a5076fa3e7dc5ba4c070dd4643dd2e827d03c7b"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-filenotfoundexception-f53d6a7a.html",
+      "sha256": "e388cf09f80f86ec0f44736eff88f3c4743b0ca71e6650f169acffe303e23a8b"
+    },
+    {
+      "path": "Help/api/members/system-io-whole-file-and-directory-i-o-ioexception-1cc8e1fd.html",
+      "sha256": "6125309b9f50746647574cba2318d8fddc906afd5476e96285440eddbdc3aaaf"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-boolean-f1983d0a.html",
+      "sha256": "d20e066f95e5165ac31446fc4733b386d023ffdd72b27f13d047adc7704dd3ba"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-byte-71437ccf.html",
+      "sha256": "34e1da308845f1fe6f32eb92a8d35a4d41ce198ea848e1aa5a90fe6804ee0137"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-char-bf331612.html",
+      "sha256": "5475c7f5dfabbb5322551ba3cb108ac70a3b11a1a3e758d80fa0ba54e1f08d14"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-double-bb3c1f1d.html",
+      "sha256": "57201cf0efc0bf8e0312f6d46a9b5d02d0e3e7a04987aa5d6a03d05ea99445a2"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-int16-fe64ddf0.html",
+      "sha256": "85ac3e258fc2e50d1edcbe5caaaaac3b0d66f602cd1e53160e26810f97c2f161"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-int32-fe7b81cc.html",
+      "sha256": "5582ba79c3f421f4a9ae783837ffe9c585a5f149f0dde6760bab0ae6a4d000b1"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-int64-31f8f6ea.html",
+      "sha256": "e2e7fdfe72684372f8967b1497d2de753e59cb81f96f080125c74c837a2049ae"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-intptr-78cb033d.html",
+      "sha256": "dd4637e1380e7aa75a5d7ae4b653c64d94f87581edc45fb3ceb049bae5357495"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-sbyte-54d03f7f.html",
+      "sha256": "7ef9a45d209131f08a9200d7a723c76fb4b37bbc3a220cf1bde9f8c772f33a49"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-single-17612bf1.html",
+      "sha256": "c981890bc2bb83467c7e353891e69dde7bf3a665d60c7e5edfd682d7498377dd"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-uint16-8291294d.html",
+      "sha256": "0c0e88d9e3190d682ced587cd8242d48701d4889037abbe569d19bb2ed0ec392"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-uint32-9bcb37ea.html",
+      "sha256": "ffd11a2c2d00c00191aecdf55e2b9804ff38eb97eb7faaa6040ef9ee8a3a3f5b"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-uint64-820825cd.html",
+      "sha256": "dba666ddcfb8f5dca7491401136495de3d4d6731910d3145090055c0b65e9efa"
+    },
+    {
+      "path": "Help/api/members/system-primitive-types-uintptr-4c63b4d0.html",
+      "sha256": "5ba34b7431fc128db6f93d35d252062579dc64d5957bdbe50f8516456b561f1b"
+    },
+    {
+      "path": "Help/api/members/system-string-compareordinal-string-string-d2260052.html",
+      "sha256": "51b77af1b48cc8856fd7bb07341696966b7c4e4baab23aba508d0d163a465de7"
+    },
+    {
+      "path": "Help/api/members/system-string-concat-string-string-b6183084.html",
+      "sha256": "187c0f8802dc8d84dacd1c31d9740cfdec8f36021a1ed7884aa7d45b7f2997b3"
+    },
+    {
+      "path": "Help/api/members/system-string-concat-string-string-string-d6dd65a4.html",
+      "sha256": "45207ed75fb4b19ad3c531369ce578fdb225a50154b876eaa2eb9d41736df570"
+    },
+    {
+      "path": "Help/api/members/system-string-concat-string-string-string-string-1ba313d9.html",
+      "sha256": "a5e30015097eb232efbda1f01617a0031c4a28bdf1f3157378772c4fae45378e"
+    },
+    {
+      "path": "Help/api/members/system-string-contains-char-cdfb9bf7.html",
+      "sha256": "8e01e6c62d7fceaabb01c0fb0cde773eda91d1569b564f249810b951457691b4"
+    },
+    {
+      "path": "Help/api/members/system-string-endswith-string-a06e8dc2.html",
+      "sha256": "a14f33eb7ccaf3778e0ca3329bd22ae79c76898144a20837c5574d2800fa100c"
+    },
+    {
+      "path": "Help/api/members/system-string-equals-string-86b69af8.html",
+      "sha256": "35bbddd483f012e72a580449a04c36ce5a1441b4382ac75b6a88e6226099d068"
+    },
+    {
+      "path": "Help/api/members/system-string-equals-string-string-ab53dd76.html",
+      "sha256": "a794e9c03caea1373007a2384f781aa8cc47be08de52be7e40c6f3263fe74890"
+    },
+    {
+      "path": "Help/api/members/system-string-getpinnablereference-d516c907.html",
+      "sha256": "800705b9a75b7f631152bb21225a29e1358a96e1a53a97389ec34dc4dcc975ef"
+    },
+    {
+      "path": "Help/api/members/system-string-indexof-char-d5231143.html",
+      "sha256": "aa0fe0ccee7e259c34fdb388032ee25b2fdccb527dbd1fff95b627ff085fd4dd"
+    },
+    {
+      "path": "Help/api/members/system-string-isnullorempty-string-2d105b40.html",
+      "sha256": "2f9cacf948a57bf5042f1f1609997d31c703e9b0c66c3c6bc35bb05cd09d08da"
+    },
+    {
+      "path": "Help/api/members/system-string-isnullorwhitespace-string-2df061b2.html",
+      "sha256": "54964e8d239a9d0edb1799a1f0b478723d112014914a0bda4585b198d381cd3a"
+    },
+    {
+      "path": "Help/api/members/system-string-length-d8a4dcf9.html",
+      "sha256": "e0005e6806e5d0d604b5fdb0071a71eeb315f48b9543ee4d5b7eb10169c68d53"
+    },
+    {
+      "path": "Help/api/members/system-string-startswith-string-1b10e729.html",
+      "sha256": "a51d173054a9d922cde492a9c16640e7cc7a961cbfa013eb9193d32a06d9f28a"
+    },
+    {
+      "path": "Help/api/members/system-string-string-empty-8ac2768a.html",
+      "sha256": "e2952553860d216d6ad3110b67e12bc3a0cdb748cd626d5d46f3eeda76c43208"
+    },
+    {
+      "path": "Help/api/members/system-string-substring-int-35609a91.html",
+      "sha256": "aeb25a2dd334f35f41d1296c6564a8100e7e16cd6eac437c8bb3ed2a530a43e7"
+    },
+    {
+      "path": "Help/api/members/system-string-substring-int-int-08a14279.html",
+      "sha256": "c684f9edfc03558373fe73159a5ea0ac4a489a5499462e6516f9aa66056caed3"
+    },
+    {
+      "path": "Help/api/members/system-string-this-int-0549e882.html",
+      "sha256": "9d22403098d50c01bd209da16ae911c395ea4fb2dba95d0c98e045784fa9f305"
+    },
+    {
+      "path": "Help/api/members/system-string-tostring-b75a9f79.html",
+      "sha256": "eb741d457920a2f9d29253bb230bebdc108979dd1419368b4fafd7ccd9246147"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-asciiencoding-dd782d15.html",
+      "sha256": "0c936645622613f89e938fecd14635c8ef877eff22aa719f4e9ca655ab975e8b"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-encoding-ascii-9c0684a6.html",
+      "sha256": "38020c30b369030edb790c0e7b9a0929eb36b6b65a2237ccb951248f6aa1f4eb"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-encoding-getbytecount-string-ada3de9e.html",
+      "sha256": "4f32df1336752bab21c25940aa5e6cc13986b224c036ea6327ccdef8b55c7e58"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-encoding-getbytes-string-9a3c5ca3.html",
+      "sha256": "c7c8b9cfc30a613d81470e1c5669ca38569ac83eccb91d4f60decc68d5645c58"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-encoding-getstring-byte-9b28d674.html",
+      "sha256": "31a6eb415a357bf5febf02b3dbe50277f192994b8354b077f6e7435b3dffd9eb"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-encoding-utf8-c5bf1370.html",
+      "sha256": "1cbbb769669f2cf55c825131f4d07baaa2a1be0c0f5ed1c713123e66407b1c27"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-stringbuilder-0c0682dc.html",
+      "sha256": "fb9c9134ae2c9c8a0acfdde5f87660eb665680b683b7143ac910ab5d0f2b3195"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-stringbuilder-append-bool-8214b7b4.html",
+      "sha256": "16f09de24310343ee6d0177d812260994f8ec9bde3a9c0e54a9b32310490b85c"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-stringbuilder-append-char-8aa25d8e.html",
+      "sha256": "1db32f34ed8b37313c25daaed49f38390dc939dcabb23a4e4c70943f8c0ff366"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-stringbuilder-append-int-uint-long-ulong-879c7986.html",
+      "sha256": "d7a4a0fcc861699b2fb7bee1d017928c21c932fcd6dcf6cbcf90a8a6f9c28f2e"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-stringbuilder-append-string-4795e339.html",
+      "sha256": "3fea7a4e83fa2ef31b9abcd2aaf79b4e35f94d4948e44d4a8950f4aa92bf6c7f"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-stringbuilder-appendline-7dd80138.html",
+      "sha256": "6c5bee448ca7c68942cb73eb58efb02c31db33a364c4a5292ec12095a6dede67"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-stringbuilder-appendline-string-b46b7ea2.html",
+      "sha256": "c7592a5f8920a1dc71a6e0a3b7817cea61a820b3b18f21f4b865c6fb6aa1c4bc"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-stringbuilder-clear-01998fb2.html",
+      "sha256": "c3f2fe23494a4aac9009f2eaa64e7556edf4829b3d72c8fa4a2a7fa3a9db7d67"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-stringbuilder-tostring-256e7711.html",
+      "sha256": "aef643d8d60316426d7f3f7ef8ecae84e46cb65149f905f92d42b068650251aa"
+    },
+    {
+      "path": "Help/api/members/system-text-text-construction-and-encoding-utf8encoding-8cb1b74c.html",
+      "sha256": "625fb6561e7c0da094ea607a1d619609ec018752d9925aaba6fdea70a566ad82"
+    },
+    {
+      "path": "Help/api/members/system-threading-current-thread-coordination-thread-sleep-int-fd835e24.html",
+      "sha256": "6af15ab18f1032a0dfe98b01d99139a1f55034f84b2cf496121827ae6f916895"
+    },
+    {
+      "path": "Help/api/members/system-threading-current-thread-coordination-thread-yield-a7fca86a.html",
+      "sha256": "9b297c2d1070256ba62135eeb56c6c09c66cadcab1ea9f7f62a2353753a5c3e9"
+    },
+    {
+      "path": "Help/api/members/system-threading-current-thread-coordination-timeout-infinite-8b43e592.html",
+      "sha256": "74f3e2327afd6484060520b7c98f3e30b363568a3225d9e39ed5c505a511bde8"
+    },
+    {
+      "path": "Help/api/system-array-f046a771.html",
+      "sha256": "3bf8a1b0f5218ea5fc1cb1c4427c32777510814499b6103c7c781d7a6876e42a"
+    },
+    {
+      "path": "Help/api/system-collections-collection-contracts-7b20aaeb.html",
+      "sha256": "5e2082fe5fc13db658ef2fb2ff08adce8f9e006ab6c39ed0ce138ed4b6445427"
+    },
+    {
+      "path": "Help/api/system-collections-generic-generic-collections-2657bab4.html",
+      "sha256": "f9a35556158b0d20d3193c45400da93997cfcf188345caded49eb16a953fd51f"
+    },
+    {
+      "path": "Help/api/system-console-eab96167.html",
+      "sha256": "fee1fde1e0df96a7a3a8d16efaf7dd434a466be4cac2eedd321150517eb6f319"
+    },
+    {
+      "path": "Help/api/system-io-whole-file-and-directory-i-o-e559466f.html",
+      "sha256": "a8cc08e6d49b1de564b08f246ff10a7b6ff24fb41630a62bfa9587c97dcb5d75"
+    },
+    {
+      "path": "Help/api/system-primitive-types-b5bd2e14.html",
+      "sha256": "af59f7f49d8483dc6cc61afd78f032d6d48d010ce7f93283b93e3f090b2f453b"
+    },
+    {
+      "path": "Help/api/system-string-995bf9ef.html",
+      "sha256": "cdd9358792a13a01bf865f8f6224d89026a2ba40d3d8182b88a70d8d26b01cd0"
+    },
+    {
+      "path": "Help/api/system-text-text-construction-and-encoding-f379af80.html",
+      "sha256": "b7080c674ea4a89774b16db7920d23e310f99f884bdb48464157adc8c5484aaa"
+    },
+    {
+      "path": "Help/api/system-threading-current-thread-coordination-15e79162.html",
+      "sha256": "b16ee7ee8206c6d72a64fad0218853bc2c6c3220581f176f69f756096e1b36db"
+    },
+    {
+      "path": "Help/assemblies/index.html",
+      "sha256": "def32110bad4fdf1c32a67e6892f8ff03b5807755409ba8364fe2bba99066b87"
+    },
+    {
+      "path": "Help/assemblies/inu-boot-contracts.html",
+      "sha256": "5256ce8bb18ab768176ddb84009ec12461a0af8a7232404b7ebbb25537d93fbd"
+    },
+    {
+      "path": "Help/assemblies/inu-boot-memory.html",
+      "sha256": "7dba50bcf16e9d7c86c6166b5fd1672806102fbd78e5e4b9d8d7394beec05bb3"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-audio.html",
+      "sha256": "ff1f2ea6627410420caafda7bba4a8b2826598d591fe8257af2900969f1d47f3"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-console.html",
+      "sha256": "85b0cccc82278f408eac43edcb7528ca75c521116b343bf8233cfcf6e07ef3c5"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-drivers.html",
+      "sha256": "b627887e01749fab3ca3fbec3c4001899f280e31daa220428a542076eb4839d6"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-entry-x64.html",
+      "sha256": "69853853f0485efffa5b7d919df1921db19ad79af07a8bdadc81442b71a60d71"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-graphics.html",
+      "sha256": "d02059bdd041375f3b6356f44c6fac38b6515e74f209be821e9fe6b4ff0f5ad1"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-input.html",
+      "sha256": "3049b707c9eb70f31b7a09e37c1a9cda45c693f87a2d06b6b813610c49e74a4b"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-interruptdispatch.html",
+      "sha256": "8a78b9c6ec7a3d963e5716b3c1a03e538e49cdcc0221a87666d1086659cf0667"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-memory.html",
+      "sha256": "ec4884047138410dd46c99adbe4387e18706a2394bc07b2d45903d462ca0c7eb"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-networking.html",
+      "sha256": "f2587258e98ea39c8b54c678259210f83ff6d22ade9ce380c7109793a787d47b"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-power.html",
+      "sha256": "143964f9783b55a6759e41b853467ec1c32482702e7988035d4d5e94aec494c3"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-processes.html",
+      "sha256": "207fa00f6e8ffbf9cde4fded57e3e299ec64dc9a6bad58c03933b1d3e36cad02"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-scheduler.html",
+      "sha256": "cef8be3a8eb53224325126227dccc98cf5392c6374403fd184d990fe76ed26fc"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-smp.html",
+      "sha256": "0f6937ed3b8ad305a4b7034426e4508a07b63b2f0350335572cdb2a394f46d29"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-storage.html",
+      "sha256": "b2937ac261edac8a8db2f4ef4ecbdb4811ac66b784cebf362e1499f8ba439009"
+    },
+    {
+      "path": "Help/assemblies/inu-kernel-time.html",
+      "sha256": "41db8e1e340199a8bb92dba860bb6c4affde6daef3c7299307eedc0c02c1fcc0"
+    },
+    {
+      "path": "Help/assemblies/inu-userland-runtime.html",
+      "sha256": "5ce735468ed0f2d86f58c257e3e715e5137ccab344c4585d91455454073851f3"
+    },
+    {
+      "path": "Help/assemblies/system-private-corelib.html",
+      "sha256": "4768ce23b7908a088ecd379875999efbe641f351565a06f9202294d22329752a"
+    },
+    {
+      "path": "Help/assets/search-index.js",
+      "sha256": "170842c1aa8a02f350796d8ab51c57d59323ce0f4a5b681703a19398fdb80589"
+    },
+    {
+      "path": "Help/assets/site.css",
+      "sha256": "f6e8e0966900493988951cb86e04373f5a1297807556b3159a1780e0062d8b5d"
+    },
+    {
+      "path": "Help/assets/site.js",
+      "sha256": "29e6012aafc6344c4f02cb433d1fdb9bfa12d42ffc0e8d61a1eff3445405d807"
+    },
+    {
+      "path": "Help/index.html",
+      "sha256": "adf55876c9fe810d45224968d0468659690aa14511017ee42b6ba3fd77ab3c4a"
+    },
+    {
+      "path": "Help/Inu.Documentation.json",
+      "sha256": "e4286a12129261c60898de8ab02780c468320b18c96f1377e3015a7f88b8eef9"
+    },
+    {
+      "path": "Help/search-index.json",
+      "sha256": "36a635cb1897164b3d17ca0f8400427def9412e75a6444c6250b0ee130ef4164"
+    },
+    {
       "path": "Install-InuCli.bat",
       "sha256": "2b83a22a5c50293d295d1739f6423423d84d725ef0ace50f620a6b99e12e6625"
     },
@@ -2991,7 +3259,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "bedc98fd169943ab8f1eb4570e8ae3a9eb55c7ba7434082aa9157a177cd9ccca"
+      "sha256": "d73aa6bb0f5dbce52aee9e8510304befba210241dc4adb61b5045456211e45da"
     },
     {
       "path": "Inu-Package.bat",
@@ -2999,7 +3267,7 @@
     },
     {
       "path": "Inu.ApiContract.json",
-      "sha256": "2c50afcd9066612205c8a20b162ccf3a5eba15aabe3a140d6f795bb727a046fc"
+      "sha256": "6a40624c048e386c8ec7f1c06e1fe41cacf01429f87bfdd0e0b7f2df8e8894af"
     },
     {
       "path": "Inu.ArchitectureBoundaries.json",
@@ -3027,7 +3295,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "2b5381a0cafff95b28ad592ed66f1c3029a330cd8aa252aa8ac0ce000876a491"
+      "sha256": "c39cf23a35fc05691dbb7842c37dc35dba31319d44e86dd79320f8407f9b48c8"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3539,7 +3807,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "efe3d9d467133d45177163d6780de9580103184ce6c48e78f626da8e81aa05cf"
+      "sha256": "eac6a350a7059a5a37c1fb4bbcbc269a4e3e17df482c907b9c269de00b055ccf"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3563,7 +3831,7 @@
     },
     {
       "path": "src/Inu.DocumentationGenerator/HtmlSiteWriter.cs",
-      "sha256": "c0bf15492aa446a5ae85a1d51d77b04300bffce0105364c50f23b808515246fb"
+      "sha256": "47dd159ac0a86d06fbaf1cec5c7905aa5f1a21b77b059c0a37b740bcfbd626a3"
     },
     {
       "path": "src/Inu.DocumentationGenerator/Inu.DocumentationGenerator.csproj",
@@ -3571,7 +3839,7 @@
     },
     {
       "path": "src/Inu.DocumentationGenerator/Program.cs",
-      "sha256": "2d1f31eb4c5811a8303ab92f7ea7eca2c0adfd3fa28f63258b6bd2483c48a4a1"
+      "sha256": "8153d4178f975a83b18fc9a454975a87c2007c001d301cdfd5f51a94e34071c9"
     },
     {
       "path": "src/Inu.DocumentationGenerator/PublicApiCollector.cs",

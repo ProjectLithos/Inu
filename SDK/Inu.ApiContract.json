@@ -49,6 +49,516 @@
     "description": "The coder-facing Inu API. SDK users program against these .NET-compatible and high-level Inu surfaces; native Get/Set/Event transport is an internal implementation detail.",
     "exports": [
       {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "BootProtocol",
+        "members": [
+          "Unknown",
+          "Uefi",
+          "Limine",
+          "Multiboot2"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Identifies the boot protocol only when a component genuinely needs protocol identity.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Enum",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "BootProtocol protocol = BootProtocol.Uefi;",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "Unknown": "BootProtocol protocol = BootProtocol.Uefi;",
+          "Uefi": "BootProtocol protocol = BootProtocol.Uefi;",
+          "Limine": "BootProtocol protocol = BootProtocol.Uefi;",
+          "Multiboot2": "BootProtocol protocol = BootProtocol.Uefi;"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "IBootContext",
+        "members": [],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Marker interface for one independently selectable boot capability.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Interface",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "IBootContext context = bootCapability;",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {}
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "IBootProtocol",
+        "members": [
+          "Protocol"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Provides the protocol identity selected by the boot provider.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Interface",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "BootProtocol protocol = boot.Protocol;",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "Protocol": "BootProtocol protocol = boot.Protocol;"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "BootProtocolContext",
+        "members": [
+          "BootProtocolContext(BootProtocol)",
+          "Protocol"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Stores a boot-protocol capability value.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Readonly struct",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "BootProtocolContext context = new(BootProtocol.Uefi);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "BootProtocolContext(BootProtocol)": "BootProtocolContext context = new(BootProtocol.Uefi);",
+          "Protocol": "BootProtocolContext context = new(BootProtocol.Uefi);"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "FramebufferPixelFormat",
+        "members": [
+          "RedGreenBlueReserved8BitPerColor",
+          "BlueGreenRedReserved8BitPerColor",
+          "BitMask",
+          "BltOnly"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Describes the pixel layout of a boot-provided framebuffer.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Enum",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "FramebufferPixelFormat format = FramebufferPixelFormat.BlueGreenRedReserved8BitPerColor;",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "RedGreenBlueReserved8BitPerColor": "FramebufferPixelFormat format = FramebufferPixelFormat.BlueGreenRedReserved8BitPerColor;",
+          "BlueGreenRedReserved8BitPerColor": "FramebufferPixelFormat format = FramebufferPixelFormat.BlueGreenRedReserved8BitPerColor;",
+          "BitMask": "FramebufferPixelFormat format = FramebufferPixelFormat.BlueGreenRedReserved8BitPerColor;",
+          "BltOnly": "FramebufferPixelFormat format = FramebufferPixelFormat.BlueGreenRedReserved8BitPerColor;"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "PixelBitMask",
+        "members": [
+          "PixelBitMask(uint,uint,uint,uint)",
+          "Red",
+          "Green",
+          "Blue",
+          "Reserved",
+          "IsDirectColor()"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Describes direct-colour channel masks for a boot framebuffer.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Readonly struct",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "PixelBitMask mask = new(0x00FF0000U, 0x0000FF00U, 0x000000FFU, 0xFF000000U);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "PixelBitMask(uint,uint,uint,uint)": "PixelBitMask mask = new(0x00FF0000U, 0x0000FF00U, 0x000000FFU, 0xFF000000U);",
+          "Red": "PixelBitMask mask = new(0x00FF0000U, 0x0000FF00U, 0x000000FFU, 0xFF000000U);",
+          "Green": "PixelBitMask mask = new(0x00FF0000U, 0x0000FF00U, 0x000000FFU, 0xFF000000U);",
+          "Blue": "PixelBitMask mask = new(0x00FF0000U, 0x0000FF00U, 0x000000FFU, 0xFF000000U);",
+          "Reserved": "PixelBitMask mask = new(0x00FF0000U, 0x0000FF00U, 0x000000FFU, 0xFF000000U);",
+          "IsDirectColor()": "PixelBitMask mask = new(0x00FF0000U, 0x0000FF00U, 0x000000FFU, 0xFF000000U);"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "Framebuffer",
+        "members": [
+          "Framebuffer(PhysicalAddress,ulong,uint,uint,uint,FramebufferPixelFormat,PixelBitMask)",
+          "Address",
+          "SizeInBytes",
+          "Width",
+          "Height",
+          "PixelsPerScanLine",
+          "PixelFormat",
+          "PixelMask",
+          "IsAvailable()"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Carries a boot-provided framebuffer and validates whether it is usable.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Readonly struct",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "if (framebuffer.IsAvailable()) { /* hand it to the selected console/graphics bootstrap */ }",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "Framebuffer(PhysicalAddress,ulong,uint,uint,uint,FramebufferPixelFormat,PixelBitMask)": "if (framebuffer.IsAvailable()) { /* hand it to the selected console/graphics bootstrap */ }",
+          "Address": "if (framebuffer.IsAvailable()) { /* hand it to the selected console/graphics bootstrap */ }",
+          "SizeInBytes": "if (framebuffer.IsAvailable()) { /* hand it to the selected console/graphics bootstrap */ }",
+          "Width": "if (framebuffer.IsAvailable()) { /* hand it to the selected console/graphics bootstrap */ }",
+          "Height": "if (framebuffer.IsAvailable()) { /* hand it to the selected console/graphics bootstrap */ }",
+          "PixelsPerScanLine": "if (framebuffer.IsAvailable()) { /* hand it to the selected console/graphics bootstrap */ }",
+          "PixelFormat": "if (framebuffer.IsAvailable()) { /* hand it to the selected console/graphics bootstrap */ }",
+          "PixelMask": "if (framebuffer.IsAvailable()) { /* hand it to the selected console/graphics bootstrap */ }",
+          "IsAvailable()": "if (framebuffer.IsAvailable()) { /* hand it to the selected console/graphics bootstrap */ }"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "IBootFramebuffer",
+        "members": [
+          "TryGetFramebuffer(out Framebuffer)"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Provides a selected boot framebuffer without forcing other boot capabilities.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Interface",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "bool available = boot.TryGetFramebuffer(out Framebuffer framebuffer);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "TryGetFramebuffer(out Framebuffer)": "bool available = boot.TryGetFramebuffer(out Framebuffer framebuffer);"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "BootFramebufferContext",
+        "members": [
+          "BootFramebufferContext(Framebuffer)",
+          "TryGetFramebuffer(out Framebuffer)"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Stores one framebuffer boot capability.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Readonly struct",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "BootFramebufferContext context = new(framebuffer);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "BootFramebufferContext(Framebuffer)": "BootFramebufferContext context = new(framebuffer);",
+          "TryGetFramebuffer(out Framebuffer)": "BootFramebufferContext context = new(framebuffer);"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "IAcpiRootPointer",
+        "members": [
+          "AcpiRootPointerAddress"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Provides the ACPI root pointer captured by the boot environment.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Interface",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "PhysicalAddress rsdp = boot.AcpiRootPointerAddress;",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "AcpiRootPointerAddress": "PhysicalAddress rsdp = boot.AcpiRootPointerAddress;"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "AcpiRootPointerContext",
+        "members": [
+          "AcpiRootPointerContext(PhysicalAddress)",
+          "AcpiRootPointerAddress"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Stores the ACPI root-pointer capability.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Readonly struct",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "AcpiRootPointerContext context = new(rsdp);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "AcpiRootPointerContext(PhysicalAddress)": "AcpiRootPointerContext context = new(rsdp);",
+          "AcpiRootPointerAddress": "AcpiRootPointerContext context = new(rsdp);"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "IApplicationProcessorTrampoline",
+        "members": [
+          "ApplicationProcessorTrampolineAddress"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Provides the reserved application-processor startup trampoline when the selected architecture uses one.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Interface",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "PhysicalAddress trampoline = boot.ApplicationProcessorTrampolineAddress;",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "ApplicationProcessorTrampolineAddress": "PhysicalAddress trampoline = boot.ApplicationProcessorTrampolineAddress;"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "ApplicationProcessorTrampolineContext",
+        "members": [
+          "ApplicationProcessorTrampolineContext(PhysicalAddress)",
+          "ApplicationProcessorTrampolineAddress"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Stores an application-processor startup trampoline capability.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Readonly struct",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "ApplicationProcessorTrampolineContext context = new(trampolineAddress);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "ApplicationProcessorTrampolineContext(PhysicalAddress)": "ApplicationProcessorTrampolineContext context = new(trampolineAddress);",
+          "ApplicationProcessorTrampolineAddress": "ApplicationProcessorTrampolineContext context = new(trampolineAddress);"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "IBootMemoryMapBuffer",
+        "members": [
+          "MemoryMapAddress",
+          "MemoryMapLength"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Provides the captured firmware memory-map buffer.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Interface",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "PhysicalAddress address = boot.MemoryMapAddress;",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "MemoryMapAddress": "PhysicalAddress address = boot.MemoryMapAddress;",
+          "MemoryMapLength": "PhysicalAddress address = boot.MemoryMapAddress;"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "BootMemoryMapBufferContext",
+        "members": [
+          "BootMemoryMapBufferContext(PhysicalAddress,ulong)",
+          "MemoryMapAddress",
+          "MemoryMapLength"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Stores the captured firmware memory-map buffer capability.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Readonly struct",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "BootMemoryMapBufferContext context = new(address, length);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "BootMemoryMapBufferContext(PhysicalAddress,ulong)": "BootMemoryMapBufferContext context = new(address, length);",
+          "MemoryMapAddress": "BootMemoryMapBufferContext context = new(address, length);",
+          "MemoryMapLength": "BootMemoryMapBufferContext context = new(address, length);"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "IMemoryDescriptorLayout",
+        "members": [
+          "MemoryDescriptorSize",
+          "MemoryDescriptorVersion"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Describes the firmware memory-descriptor layout handed to the OS.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Interface",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "ulong size = boot.MemoryDescriptorSize;",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "MemoryDescriptorSize": "ulong size = boot.MemoryDescriptorSize;",
+          "MemoryDescriptorVersion": "ulong size = boot.MemoryDescriptorSize;"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "MemoryDescriptorLayoutContext",
+        "members": [
+          "MemoryDescriptorLayoutContext(ulong,uint)",
+          "MemoryDescriptorSize",
+          "MemoryDescriptorVersion"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Stores firmware memory-descriptor layout metadata.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Readonly struct",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "MemoryDescriptorLayoutContext context = new(size, version);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "MemoryDescriptorLayoutContext(ulong,uint)": "MemoryDescriptorLayoutContext context = new(size, version);",
+          "MemoryDescriptorSize": "MemoryDescriptorLayoutContext context = new(size, version);",
+          "MemoryDescriptorVersion": "MemoryDescriptorLayoutContext context = new(size, version);"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "IUefiMemoryMapKey",
+        "members": [
+          "MemoryMapKey"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Provides the UEFI memory-map key when UEFI ExitBootServices is the selected hand-off.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Interface",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "ulong key = boot.MemoryMapKey;",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "MemoryMapKey": "ulong key = boot.MemoryMapKey;"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Contracts",
+        "type": "UefiMemoryMapKeyContext",
+        "members": [
+          "UefiMemoryMapKeyContext(ulong)",
+          "MemoryMapKey"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Stores a UEFI memory-map key capability.",
+        "assembly": "Inu.Boot.Contracts",
+        "kind": "Readonly struct",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Contracts",
+        "example": "UefiMemoryMapKeyContext context = new(mapKey);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "UefiMemoryMapKeyContext(ulong)": "UefiMemoryMapKeyContext context = new(mapKey);",
+          "MemoryMapKey": "UefiMemoryMapKeyContext context = new(mapKey);"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Memory",
+        "type": "UefiMemoryMapWorkspace",
+        "members": [
+          "UefiMemoryMapWorkspace(int)",
+          "DescriptorCapacity"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Preallocates final UEFI memory-map storage so the final capture/ExitBootServices sequence does not allocate.",
+        "assembly": "Inu.Boot.Memory",
+        "kind": "Class",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Memory",
+        "example": "UefiMemoryMapWorkspace workspace = new(256);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "UefiMemoryMapWorkspace(int)": "UefiMemoryMapWorkspace workspace = new(256);",
+          "DescriptorCapacity": "UefiMemoryMapWorkspace workspace = new(256);"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Memory",
+        "type": "FinalUefiMemoryMapSnapshot",
+        "members": [
+          "IsFinal",
+          "Count",
+          "MapKey",
+          "DescriptorVersion",
+          "CaptureAttempts",
+          "TryGetDescriptor(int,out MemoryDescriptor)",
+          "TryGetUefiDescriptor(int,out UefiMemoryDescriptor)"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Retains the exact UEFI memory map whose key succeeded in ExitBootServices.",
+        "assembly": "Inu.Boot.Memory",
+        "kind": "Class",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Memory",
+        "example": "if (snapshot.IsFinal) { int count = snapshot.Count; }",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "IsFinal": "if (snapshot.IsFinal) { int count = snapshot.Count; }",
+          "Count": "if (snapshot.IsFinal) { int count = snapshot.Count; }",
+          "MapKey": "if (snapshot.IsFinal) { int count = snapshot.Count; }",
+          "DescriptorVersion": "if (snapshot.IsFinal) { int count = snapshot.Count; }",
+          "CaptureAttempts": "if (snapshot.IsFinal) { int count = snapshot.Count; }",
+          "TryGetDescriptor(int,out MemoryDescriptor)": "if (snapshot.IsFinal) { int count = snapshot.Count; }",
+          "TryGetUefiDescriptor(int,out UefiMemoryDescriptor)": "if (snapshot.IsFinal) { int count = snapshot.Count; }"
+        }
+      },
+      {
+        "namespace": "Inu.Boot.Memory",
+        "type": "FinalUefiMemoryMapAcquirer",
+        "members": [
+          "TryCaptureAndExit(IUefiMemoryMapProvider,ulong,UefiMemoryMapWorkspace,int,out FinalUefiMemoryMapSnapshot?,out UefiMemoryMapStatus,out UefiExitBootServicesStatus)"
+        ],
+        "availability": "coder-owned boot source and boot-to-kernel hand-off code",
+        "transport": "in-process boot capability/API",
+        "notes": "Performs the final GetMemoryMap/ExitBootServices retry sequence without allocating between firmware calls.",
+        "assembly": "Inu.Boot.Memory",
+        "kind": "Static class",
+        "category": "Boot",
+        "status": "recommended",
+        "compiledInto": "Inu.Boot.Memory",
+        "example": "bool exited = FinalUefiMemoryMapAcquirer.TryCaptureAndExit(provider, imageHandle, workspace, 8, out var snapshot, out var mapStatus, out var exitStatus);",
+        "implementation": "Provided by Inu boot capability contracts or the selected boot-memory implementation. The OS may replace the provider while keeping the contract.",
+        "memberExamples": {
+          "TryCaptureAndExit(IUefiMemoryMapProvider,ulong,UefiMemoryMapWorkspace,int,out FinalUefiMemoryMapSnapshot?,out UefiMemoryMapStatus,out UefiExitBootServicesStatus)": "bool exited = FinalUefiMemoryMapAcquirer.TryCaptureAndExit(provider, imageHandle, workspace, 8, out var snapshot, out var mapStatus, out var exitStatus);"
+        }
+      },
+      {
         "namespace": "System",
         "type": "Primitive types",
         "members": [

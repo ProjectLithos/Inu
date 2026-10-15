@@ -11,7 +11,7 @@ if (!string.Equals(args[0], "generate", StringComparison.OrdinalIgnoreCase))
 }
 
 string root = FindRepositoryRoot(GetOption(args, "--root") ?? Directory.GetCurrentDirectory());
-string configPath = GetOption(args, "--configuration") ?? Path.Combine(root, "docs", "Inu.Documentation.json");
+string configPath = GetOption(args, "--configuration") ?? Path.Combine(root, "Help", "Inu.Documentation.json");
 bool validate = args.Contains("--validate", StringComparer.OrdinalIgnoreCase);
 DocumentationConfiguration configuration = ConfigurationReader.Read(Path.GetFullPath(configPath));
 IReadOnlyList<ProjectDocumentation> projects = PublicApiCollector.Collect(root, configuration);
@@ -25,7 +25,7 @@ if (validate && configuration.RequireDocumentationForPublicItems)
     failures.AddRange(findings.Select(finding => finding.Message));
 }
 HtmlSiteWriter.Write(root, configuration, projects);
-Console.WriteLine("[ OK ] Generated Inu SDK current API site from Inu.ApiContract.json.");
+Console.WriteLine("[ OK ] Generated Inu SDK Help site from Inu.ApiContract.json.");
 Console.WriteLine($@"[INFO] Explicit API documentation audit: {findings.Count} finding(s). See Artifacts\Documentation\PublicApiAudit.json and Inu.ApiCompatibility.json.");
 if (failures.Count != 0) throw new InvalidOperationException(string.Join(Environment.NewLine, failures));
 
