@@ -14,5 +14,33 @@ public static unsafe partial class KernelAhci
  static Boolean Stop(KernelDriverDeviceContext* context){if(context==null)return false;Int32 ci=FindController(context->Device);if(ci<0)return true;Controller* c=_controllers+ci;if(c->InterruptHandle!=0UL&&!KernelDrivers.ReleaseInterrupt(new KernelDriverInterruptHandle(c->InterruptHandle)))return false;c->InterruptHandle=0UL;W32(c->Abar,0x04,R32(c->Abar,0x04)&~2U);for(UInt32 i=0;i<_diskCapacity;i++){Disk* d=_disks+i;if(d->Used==0||d->Controller!=(UInt32)ci)continue;if(d->StorageHandle!=0U&&!KernelStorage.UnregisterBlockDevice(new KernelStorageDeviceHandle(d->StorageHandle)))return false;if(d->DeviceHandle!=0U&&!KernelDrivers.RemoveDevice(new KernelDeviceHandle(d->DeviceHandle)))return false;StopPort(c->Abar+PxBase+(UInt32)d->Port*PxStride);ReleaseDiskResources(d);Clear((Byte*)d,(UInt64)sizeof(Disk));if(_diskCount>0U)_diskCount--;}Clear((Byte*)c,(UInt64)sizeof(Controller));if(_controllerCount>0U)_controllerCount--;return true;}
  static Boolean Remove(KernelDriverDeviceContext* context)=>context!=null&&Stop(context);
  static Boolean Interrupt(KernelDriverDeviceContext* context,UInt64 cookie){if(context==null)return false;Int32 ci=FindController(context->Device);if(ci<0)return false;Controller* c=_controllers+ci;UInt32 pending=R32(c->Abar,0x08);if(pending==0U)return true;for(Byte port=0;port<32;port++){UInt32 bit=1U<<port;if((pending&bit)==0U)continue;UInt64 pr=c->Abar+PxBase+(UInt32)port*PxStride;UInt32 portStatus=R32(pr,0x10);if(portStatus!=0U)W32(pr,0x10,portStatus);}W32(c->Abar,0x08,pending);c->InterruptEpoch++;return true;}
- static Boolean TryStartController(PciDeviceInfo pci){if(!KernelPci.TryMapBar(pci.Location,5,out PciBarInfo bar,out UInt64 abar)||bar.Type==PciBarType.Io||bar.Length<0x1100UL)return false;if(!KernelPci.TryRead16(pci.Location,4,out UInt16 cmd)||!KernelPci.TryWrite16(pci.Location,4,(UInt16)(cmd|0x0006U)))return false;Int32 slot=FreeController();if(slot<0){if(!GrowControllers())return false;slot=FreeController();if(slot<0)return false;}W32(abar,0x04,R32(abar,0x04)|(1U<<31));Controller* c=_controllers+slot;Clear((Byte*)c,(UInt64)sizeof(Controller));c->Used=1;c->Segment=pci.Location.Segment;c->Bus=pci.Location.Bus;c->Device=pci.Location.Device;c->Function=pci.Location.Function;c->DeviceHandle=pci.DeviceHandle.Value;c->Abar=abar;c->Implemented=R32(abar,0x0C);KernelDriverInterruptRequest interruptRequest=new(pci.DeviceHandle,0U,8,0U,true,false,(UInt64)(UInt32)slot+1UL);if(KernelDrivers.TryRequestInterrupt(interruptRequest,out KernelDriverInterruptHandle interrupt)){c->InterruptHandle=interrupt.Value;W32(abar,0x08,0xFFFFFFFFU);W32(abar,0x04,R32(abar,0x04)|2U);}UInt32 ci=(UInt32)slot;_controllerCount++;for(Byte port=0;port<32;port++){if((c->Implemented&(1U<<port))==0)continue;UInt64 pr=abar+PxBase+(UInt32)port*PxStride;if(!AhciMath.IsDevicePresent(R32(pr,0x28))||AhciMath.DecodeSignature(R32(pr,0x24))!=AhciPortType.Sata)continue;if(StartDisk(ci,c,port))c->DiskCount++;}return true;}
+ static Boolean TryStartController(PciDeviceInfo pci)
+ {
+  // AHCI controllers do not have to expose register space for all 32 theoretical
+  // ports. QEMU's ICH9 controller, for example, exposes only the ports it actually
+  // implements. Requiring the full 0x1100-byte maximum BAR rejected that valid
+  // controller before Inu could inspect its attached SATA disk.
+  if(!KernelPci.TryMapBar(pci.Location,5,out PciBarInfo bar,out UInt64 abar)||bar.Type==PciBarType.Io||bar.Length<PxBase+PxStride)return false;
+  if(!KernelPci.TryRead16(pci.Location,4,out UInt16 cmd)||!KernelPci.TryWrite16(pci.Location,4,(UInt16)(cmd|0x0006U)))return false;
+  W32(abar,0x04,R32(abar,0x04)|(1U<<31));
+  UInt32 implemented=R32(abar,0x0C);
+  if(implemented==0U)return false;
+  Byte highestImplemented=0;
+  for(Byte port=0;port<32;port++)if((implemented&(1U<<port))!=0U)highestImplemented=port;
+  UInt64 requiredLength=PxBase+((UInt64)highestImplemented+1UL)*PxStride;
+  if(bar.Length<requiredLength)return false;
+
+  Int32 slot=FreeController();if(slot<0){if(!GrowControllers())return false;slot=FreeController();if(slot<0)return false;}
+  Controller* c=_controllers+slot;Clear((Byte*)c,(UInt64)sizeof(Controller));c->Used=1;c->Segment=pci.Location.Segment;c->Bus=pci.Location.Bus;c->Device=pci.Location.Device;c->Function=pci.Location.Function;c->DeviceHandle=pci.DeviceHandle.Value;c->Abar=abar;c->Implemented=implemented;
+  KernelDriverInterruptRequest interruptRequest=new(pci.DeviceHandle,0U,8,0U,true,false,(UInt64)(UInt32)slot+1UL);if(KernelDrivers.TryRequestInterrupt(interruptRequest,out KernelDriverInterruptHandle interrupt)){c->InterruptHandle=interrupt.Value;W32(abar,0x08,0xFFFFFFFFU);W32(abar,0x04,R32(abar,0x04)|2U);}
+  UInt32 ci=(UInt32)slot;_controllerCount++;
+  for(Byte port=0;port<32;port++)
+  {
+   if((implemented&(1U<<port))==0U)continue;
+   UInt64 pr=abar+PxBase+(UInt32)port*PxStride;
+   if(!WaitForSataDevice(pr))continue;
+   if(StartDisk(ci,c,port))c->DiskCount++;
+  }
+  return true;
+ }
 }

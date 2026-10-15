@@ -37,9 +37,14 @@ public static class StorageHardwareStartup
 #endif
 #if INU_COMPONENT_STORAGE_AHCI_DRIVER
         if (!KernelAhci.Initialize()) return false;
-        if (KernelAhci.GetCapabilities().Disks == 0U)
+        AhciCapabilities ahci = KernelAhci.GetCapabilities();
+        if (ahci.Controllers == 0U)
         {
-            if (!KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","AHCI was selected, but no usable SATA disk was registered.")) return false;
+            if (!KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","AHCI was selected, but no AHCI PCI controller could be started.")) return false;
+        }
+        else if (ahci.Disks == 0U)
+        {
+            if (!KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","AHCI controller started, but no SATA disk completed discovery and IDENTIFY.")) return false;
         }
 #endif
         if (KernelStorage.GetCapabilities().Devices == 0U)
