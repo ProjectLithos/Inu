@@ -30,11 +30,23 @@ public static class StorageHardwareStartup
 #endif
 #if INU_COMPONENT_STORAGE_NVME_DRIVER
         if (!KernelNvme.Initialize()) return false;
+        if (KernelNvme.GetCapabilities().Namespaces == 0U)
+        {
+            if (!KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","NVMe was selected, but no usable NVMe namespace was registered.")) return false;
+        }
 #endif
 #if INU_COMPONENT_STORAGE_AHCI_DRIVER
         if (!KernelAhci.Initialize()) return false;
+        if (KernelAhci.GetCapabilities().Disks == 0U)
+        {
+            if (!KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","AHCI was selected, but no usable SATA disk was registered.")) return false;
+        }
 #endif
-        if (!KernelStructuredLogging.InfoLine("storage","StorageHardwareStartup.Initialize","Selected block devices are online; partition/format/mount policy is delegated to the OS-owned Kernel.cs.")) return false;
+        if (KernelStorage.GetCapabilities().Devices == 0U)
+        {
+            if (!KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","No block drives were registered. The OS-owned Kernel.cs will see an empty drive list.")) return false;
+        }
+        else if (!KernelStructuredLogging.InfoLine("storage","StorageHardwareStartup.Initialize","Detected block drives are registered; partition/format/mount policy is delegated to the OS-owned Kernel.cs.")) return false;
 #endif
         return true;
     }

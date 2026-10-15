@@ -1,25 +1,26 @@
 {
-  "baseVersion": "0.1.73",
-  "version": "0.1.74",
+  "baseVersion": "0.1.74",
+  "version": "0.1.75",
   "changedFiles": [
-    "CHANGED-0.1.74.txt",
+    "CHANGED-0.1.75.txt",
     "Inu/SDK/Directory.Build.props",
+    "Inu/SDK/Inu.ApiContract.json",
     "Inu/SDK/Inu-Changes.json",
     "Inu/SDK/Inu-SourceManifest.json",
     "Inu/SDK/Inu.SdkManifest.json",
-    "Inu/SDK/Verify-SourceOwnership.ps1",
     "Inu/SDK/docs/Inu.Documentation.json",
+    "Inu/SDK/docs/Storage-and-Filesystems.md",
     "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Filesystem.FatFs/FatFs.Format.cs",
-    "Inu/SDK/src/Inu.Kernel.Console/SystemAssetCatalog.cs",
-    "Inu/SDK/src/Inu.Kernel.Storage/KernelDiskProvisioning.cs",
+    "Inu/SDK/src/Inu.Kernel.Bootstrap/SourceComponents/HAL/StorageHardwareStartup.cs",
+    "Inu/SDK/src/Inu.Kernel.Storage/StorageConfiguration.cs",
     "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
     "Kath/JSON/package.json",
     "Kath/applications/electron/package.json",
     "Kath/packages/kath/package.json",
+    "Kath/packages/kath/src/node/inu-project-generation.ts",
     "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
     "TODO.md",
     "VERSION"
   ],
-  "summary": "Fix the FAT32/GPT Byte-pointer compile regressions while preserving coder-owned Kernel.cs storage policy, suppress misleading fixed-buffer warnings, and add a packaging-time regression check."
+  "summary": "Configure coder-owned filesystem path/folder policy before drive setup, enumerate every detected block drive, and report selected NVMe/AHCI devices that fail to register."
 }

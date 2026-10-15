@@ -5,6 +5,13 @@ namespace Inu.Kernel.Storage;
 /// <summary><inu.api>Coder-facing drive discovery and partition-layout policy used from the OS-owned Kernel.cs.</inu.api></summary>
 public static class Storage
 {
+    /// <summary><inu.api>Returns the number of block drives currently detected by the kernel.</inu.api></summary>
+    public static UInt32 GetDriveCount()=>KernelStorage.GetCapabilities().Devices;
+
+    /// <summary><inu.api>Gets a detected drive by zero-based ordinal, regardless of controller type.</inu.api></summary>
+    public static Boolean TryGetDrive(UInt32 driveOrdinal,out KernelStorageDeviceHandle drive,out KernelStorageDeviceKind kind,out KernelStorageGeometry geometry)
+        =>KernelStorage.TryGetDeviceByOrdinal(driveOrdinal,out drive,out kind,out geometry);
+
     /// <summary><inu.api>Gets a selected drive by controller kind and zero-based drive index.</inu.api></summary>
     public static Boolean TryGetDrive(KernelStorageDeviceKind kind,UInt32 driveIndex,out KernelStorageDeviceHandle drive)
         =>KernelStorage.TryGetDevice(kind,driveIndex,out drive);

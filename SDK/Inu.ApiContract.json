@@ -812,6 +812,36 @@
       },
       {
         "namespace": "Inu.Kernel.Storage",
+        "type": "Storage",
+        "members": [
+          "GetDriveCount()",
+          "TryGetDrive(uint, out KernelStorageDeviceHandle, out KernelStorageDeviceKind, out KernelStorageGeometry)",
+          "TryGetDrive(KernelStorageDeviceKind, uint, out KernelStorageDeviceHandle)",
+          "EnsureGptPartitions(KernelStorageDeviceHandle, uint)",
+          "RepartitionGpt(KernelStorageDeviceHandle, uint)",
+          "TryGetPartition(KernelStorageDeviceHandle, uint, out KernelStorageVolumeHandle)"
+        ],
+        "availability": "coder-owned kernel source when storage services are kernel-resident",
+        "transport": "in-process block-device registry and partition policy facade",
+        "notes": "Enumerates every detected block drive regardless of controller type. The OS-owned Kernel.cs decides which drives may be partitioned, formatted and mounted.",
+        "assembly": "Inu.Kernel.Storage",
+        "kind": "Static class",
+        "category": "Kernel",
+        "status": "recommended",
+        "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
+        "example": "uint count = Storage.GetDriveCount();\nfor (uint i = 0; i < count; i++)\n{\n    Storage.TryGetDrive(i, out var drive, out var kind, out var geometry);\n}",
+        "implementation": "Implemented by the selected Inu kernel storage source component and compiled into the generated kernel.",
+        "memberExamples": {
+          "GetDriveCount()": "uint count = Storage.GetDriveCount();",
+          "TryGetDrive(uint, out KernelStorageDeviceHandle, out KernelStorageDeviceKind, out KernelStorageGeometry)": "Storage.TryGetDrive(0U, out KernelStorageDeviceHandle drive, out KernelStorageDeviceKind kind, out KernelStorageGeometry geometry);",
+          "TryGetDrive(KernelStorageDeviceKind, uint, out KernelStorageDeviceHandle)": "Storage.TryGetDrive(KernelStorageDeviceKind.Nvme, 0U, out KernelStorageDeviceHandle drive);",
+          "EnsureGptPartitions(KernelStorageDeviceHandle, uint)": "Storage.EnsureGptPartitions(drive, 2U);",
+          "RepartitionGpt(KernelStorageDeviceHandle, uint)": "Storage.RepartitionGpt(drive, 2U);",
+          "TryGetPartition(KernelStorageDeviceHandle, uint, out KernelStorageVolumeHandle)": "Storage.TryGetPartition(drive, 1U, out KernelStorageVolumeHandle partition);"
+        }
+      },
+      {
+        "namespace": "Inu.Kernel.Storage",
         "type": "FileSystem",
         "members": [
           "Initialize()",

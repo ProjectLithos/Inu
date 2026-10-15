@@ -1,5 +1,5 @@
 {
-  "version": "0.1.74",
+  "version": "0.1.75",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "79e2db2f5687bf8c5fae9374c046e5538967f47f7ed100c5e456e8d88ccd4d65"
+      "sha256": "a231f0adb91bc211401b1fadf444a3f7e17918b241eebe0cb7f9274eca79d569"
     },
     {
       "path": "Directory.Build.targets",
@@ -931,7 +931,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "e3f2c1c19033b33fe3069e60b944adf5b4488b66579648a9b4b2f312ebc7dcd5"
+      "sha256": "89fe84390335220d08ee8489ad1baf55e6702981e2e6b5910fea813bbe6865ba"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2907,7 +2907,7 @@
     },
     {
       "path": "docs/Storage-and-Filesystems.md",
-      "sha256": "56ecd5d0d0856488a1df0c8a25bff1ca9b75b9ecbbc04c2b7f01c44f82f64f22"
+      "sha256": "d3ba1c6d0c2353595662ca8a2fc46da0328ba347c013f7b93240165711766d6e"
     },
     {
       "path": "docs/Structured-Kernel-Telemetry.md",
@@ -2991,7 +2991,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "bc75a32da832673197466abbf447495998be348dc134b22065e6b52bf9ac7ff5"
+      "sha256": "bedc98fd169943ab8f1eb4570e8ae3a9eb55c7ba7434082aa9157a177cd9ccca"
     },
     {
       "path": "Inu-Package.bat",
@@ -2999,7 +2999,7 @@
     },
     {
       "path": "Inu.ApiContract.json",
-      "sha256": "28c6394add863c77b4ce10c1a7c2c19da43ed1f952548222ddbcd2136647610b"
+      "sha256": "2c50afcd9066612205c8a20b162ccf3a5eba15aabe3a140d6f795bb727a046fc"
     },
     {
       "path": "Inu.ArchitectureBoundaries.json",
@@ -3027,7 +3027,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "67422fb83dc4145c7de9db06be1b31140e9e525b6b62a32283379c3267693538"
+      "sha256": "2b5381a0cafff95b28ad592ed66f1c3029a330cd8aa252aa8ac0ce000876a491"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3539,7 +3539,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "e735ba0701fa30a56e65dc7aa0d2f112bf1fbb69702ba8b3b16ae87f5f723fa5"
+      "sha256": "efe3d9d467133d45177163d6780de9580103184ce6c48e78f626da8e81aa05cf"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3967,7 +3967,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/StorageHardwareStartup.cs",
-      "sha256": "b09b678c59b28d3aa0ac93dd3cce0db4fa64aa854e81543f38b9af3f63e73894"
+      "sha256": "52be19e5ad5100d48d213f812991f5b849119a56766d374e4b27f59ba9da8363"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/UsbHardwareStartup.cs",
@@ -5219,7 +5219,7 @@
     },
     {
       "path": "src/Inu.Kernel.Storage/StorageConfiguration.cs",
-      "sha256": "a776c61a9f74ea4f432f74d2068cff1ff27437f6867ebe786a100a6a0e26b1b3"
+      "sha256": "d0cb7ed42a9e03f980c5dff27b9864fef67991f1752a9d91541b3d3da3abd7b1"
     },
     {
       "path": "src/Inu.Kernel.SubsystemContracts/Inu.Kernel.SubsystemContracts.csproj",
