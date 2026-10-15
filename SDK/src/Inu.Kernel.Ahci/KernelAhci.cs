@@ -9,7 +9,7 @@ namespace Inu.Kernel.Ahci;
 /// <summary>AHCI 1.x PCI driver with SATA discovery, DMA command lists, IDENTIFY, read/write and flush.</summary>
 public static unsafe partial class KernelAhci
 {
- const UInt32 SpinLimit=40000000U; const UInt32 PxBase=0x100U,PxStride=0x80U;
+ const UInt32 SpinLimit=1000000U; const UInt32 PxBase=0x100U,PxStride=0x80U;
  struct Controller{internal Byte Used;internal UInt16 Segment;internal Byte Bus,Device,Function;internal UInt32 DeviceHandle,Implemented,DiskCount;internal UInt64 Abar,InterruptHandle,InterruptEpoch;}
  struct Disk{internal Byte Used,Port,Lba48;internal UInt32 Controller,DeviceHandle,StorageHandle,SectorSize;internal UInt64 Sectors;internal KernelPhysicalAllocation CommandList,Fis,CommandTable,Bounce;}
  static Controller* _controllers;static Disk* _disks;static KernelHeapAllocation _controllerAllocation,_diskAllocation;static UInt32 _controllerCapacity,_diskCapacity,_controllerCount,_diskCount;static KernelDriverHandle _driver;static Boolean _initialized;

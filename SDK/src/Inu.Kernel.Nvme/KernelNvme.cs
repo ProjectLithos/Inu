@@ -9,7 +9,7 @@ namespace Inu.Kernel.Nvme;
 /// <summary>PCI NVMe 1.x controller driver with admin/I/O queues, namespace discovery and synchronous block I/O.</summary>
 public static unsafe partial class KernelNvme
 {
- const UInt16 RequestedAdminEntries=32,RequestedIoEntries=64; const UInt32 SpinLimit=40000000U;
+ const UInt16 RequestedAdminEntries=32,RequestedIoEntries=64; const UInt32 SpinLimit=1000000U;
  struct Controller { internal Byte Used,State,DbStride,InterruptMode,AdminPhase,IoPhase; internal UInt16 Segment,AdminTail,AdminHead,AdminCid,IoTail,IoHead,IoCid,AdminEntries,IoEntries; internal Byte Bus,Device,Function; internal UInt32 DeviceHandle,Version,NamespaceCount; internal UInt64 Mmio,InterruptHandle,InterruptEpoch; internal KernelPhysicalAllocation Asq,Acq,IoSq,IoCq,Identify; }
  struct Namespace { internal Byte Used; internal UInt32 Controller,Nsid,BlockSize,DeviceHandle,StorageHandle; internal UInt64 Blocks; }
  static Controller* _controllers; static Namespace* _namespaces; static KernelHeapAllocation _controllerAllocation,_namespaceAllocation; static UInt32 _controllerCapacity,_namespaceCapacity,_controllerCount,_namespaceCount; static KernelDriverHandle _driver; static Boolean _initialized;

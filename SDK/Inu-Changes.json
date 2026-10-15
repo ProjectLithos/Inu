@@ -1,27 +1,7 @@
 {
-  "baseVersion": "0.1.77",
-  "version": "0.1.78",
-  "changedFiles": [
-    "Build.bat",
-    "Build.ps1",
-    "CHANGED-0.1.78.txt",
-    "Inu/SDK/Directory.Build.props",
-    "Inu/SDK/Help/Inu.Documentation.json",
-    "Inu/SDK/Inu-Changes.json",
-    "Inu/SDK/Inu-SourceManifest.json",
-    "Inu/SDK/Inu.SdkManifest.json",
-    "Inu/SDK/src/Inu.Core/InuSdkContract.cs",
-    "Inu/SDK/src/Inu.Kernel.Ahci/KernelAhci.DriverLifecycle.cs",
-    "Inu/SDK/src/Inu.Kernel.Ahci/KernelAhci.Ports.cs",
-    "Inu/SDK/src/Inu.Kernel.Bootstrap/SourceComponents/HAL/StorageHardwareStartup.cs",
-    "Inu/src/Common/Inu.Cli/Inu.Cli.csproj",
-    "Kath/JSON/package.json",
-    "Kath/applications/electron/package.json",
-    "Kath/packages/kath/package.json",
-    "Kath/src/Kath.Launcher/Kath.Launcher.csproj",
-    "TODO.md",
-    "VERSION"
-  ],
-  "summary": "Fix AHCI discovery for QEMU ICH9 controllers by using the actual implemented-port MMIO span, bounded SATA readiness detection, and clearer controller-vs-disk startup diagnostics.",
-  "deletedFiles": []
+  "baseVersion": "0.1.78",
+  "version": "0.1.79",
+  "changedFiles": 22,
+  "summary": "Make New Test Kernel the complete SDK validation target: expose/compile every current SDK API/component, select the full implemented hardware profile, bound AHCI/NVMe probe waits, and use a separate bounded Test-OS acceptance window.",
+  "deletedFiles": 0
 }

@@ -911,9 +911,11 @@ Write-Host "[ OK ] qemu    : $qemu"
 Write-Host "[ OK ] OVMF code: $ovmfCode"
 Write-Host "[ OK ] OVMF vars: $ovmfVars"
 
-$effectiveBootTimeoutSeconds = if ($runtimeConformanceEnabled) { [Math]::Max($BootTimeoutSeconds, 90) } else { $BootTimeoutSeconds }
+$effectiveBootTimeoutSeconds = if ($runtimeConformanceEnabled) { [Math]::Max($BootTimeoutSeconds, 90) } elseif ($requestedTestOs) { [Math]::Max($BootTimeoutSeconds, 45) } else { $BootTimeoutSeconds }
 if ($runtimeConformanceEnabled -and $effectiveBootTimeoutSeconds -ne $BootTimeoutSeconds) {
     Write-Host ("[INFO] Explicit in-kernel runtime conformance uses a {0}s bounded boot window; normal OS runs keep the {1}s window." -f $effectiveBootTimeoutSeconds,$BootTimeoutSeconds)
+} elseif ($requestedTestOs -and $effectiveBootTimeoutSeconds -ne $BootTimeoutSeconds) {
+    Write-Host ("[INFO] Complete Test Kernel hardware probing uses a {0}s bounded boot window; normal OS runs keep the {1}s window." -f $effectiveBootTimeoutSeconds,$BootTimeoutSeconds)
 }
 $targetAccelerator = if ([string]::IsNullOrWhiteSpace($env:INU_TARGET_ACCELERATOR)) { "auto" } else { $env:INU_TARGET_ACCELERATOR }
 Write-Host ("[INFO] QEMU accelerator policy: {0}" -f $targetAccelerator)

@@ -1,5 +1,5 @@
 {
-  "version": "0.1.78",
+  "version": "0.1.79",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -399,7 +399,7 @@
     },
     {
       "path": "Build-Inu.ps1",
-      "sha256": "0baa687ad5f2efa2fd043d5ef426a09c372b39851c3038d00316249d49bb0e9e"
+      "sha256": "ea43c14e5da3962e52ed3ccf7b776610693e97ad3a0277405d97e69dc6d9dab5"
     },
     {
       "path": "Build-InuDocumentation.bat",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "1f1466633737d96a9769471bc069de23b2b291095a1015a3c03abb6083bace1f"
+      "sha256": "bc4cc5337a97a47bd923a018fa2a24b56b0b5db46b5b37fa719430de7ab6cfd5"
     },
     {
       "path": "Directory.Build.targets",
@@ -3227,7 +3227,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "1a2804e2ae4f9ede90fd9fea2cadd7631e4698a5fa320b62030b96d5fb665336"
+      "sha256": "11989cc58e0419f269598490d1dbf7a8915157427ab41a1147b21d476315fea1"
     },
     {
       "path": "Help/search-index.json",
@@ -3259,7 +3259,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "8bfa1123933ee0cc62c2bd047f46a7626bf73967934187fe6cfc145977031f2e"
+      "sha256": "e4a38ad050b49f39a0c9776f996e667a80cf043180f448c0377305e324da0cca"
     },
     {
       "path": "Inu-Package.bat",
@@ -3295,7 +3295,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "ff9d92a9b7621fc6edf2b7513be258916047c70df36fb4a3410331fbbcead74f"
+      "sha256": "44ab2fbe8e05f29294d2fa1fcb1d21897aa62836cabd31e62d9388e3ff1eb16a"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3807,7 +3807,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "79bb9e9651c866637fb46f891e2cbff0720d47038ab70cb22dfc58d62907b1d9"
+      "sha256": "660b04ede05f54ded249c7e8530fbadd3147c85e26578860a9c550b7ef5ad56a"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4087,7 +4087,7 @@
     },
     {
       "path": "src/Inu.Kernel.Ahci/KernelAhci.cs",
-      "sha256": "1e7f19e30b146c00867e3e469f43448eab4a597541fcbbd233f6b9485c501523"
+      "sha256": "1199abd290bab1a7df401601c7e629c30dade7113a77f274da516de64eebd465"
     },
     {
       "path": "src/Inu.Kernel.Ahci/KernelAhci.DiskDiscovery.cs",
@@ -4099,7 +4099,7 @@
     },
     {
       "path": "src/Inu.Kernel.Ahci/KernelAhci.Ports.cs",
-      "sha256": "d7acff7fa6fa7ffb92107e481a82b7729bef80aeedf788bda7f93bb36cdf58bc"
+      "sha256": "aeefc8340cd9eb665d7ab84954cb627ec2a66c33ec37fa0e29fc98f846612c8d"
     },
     {
       "path": "src/Inu.Kernel.Ahci/KernelAhci.Storage.cs",
@@ -4887,7 +4887,7 @@
     },
     {
       "path": "src/Inu.Kernel.Nvme/KernelNvme.cs",
-      "sha256": "c4433d371bd01440c76fb6266ce3ebfb444b4fd2bbbce752ee52345100032a3e"
+      "sha256": "5fe9be21103e953296039096932e24abf0a9268ab78942c26cf8bdcbc702bb3f"
     },
     {
       "path": "src/Inu.Kernel.Nvme/KernelNvme.DriverLifecycle.cs",
