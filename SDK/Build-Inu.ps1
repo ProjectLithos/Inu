@@ -622,19 +622,19 @@ foreach ($tool in @(
 
 $projectCreator = Join-Path $root "src\Inu.ProjectCreator\$requiredToolOutput\Inu.ProjectCreator.dll"
 if (-not (Test-Path -LiteralPath $projectCreator -PathType Leaf)) {
-    throw "Inu.ProjectCreator was not produced: $projectCreator"
+    throw "Inu.ProjectCreator host module was not produced: $projectCreator"
 }
-Write-Host "[ OK ] ManagedCompiler runtime: $compiler"
-Write-Host "[ OK ] Linker runtime         : $linker"
-Write-Host "[ OK ] ImageBuilder runtime   : $imageBuilder"
-Write-Host "[ OK ] QemuLauncher runtime   : $qemuLauncher"
-Write-Host "[ OK ] UserlandCompiler runtime: $userlandCompiler"
-Write-Host "[ OK ] ProjectCreator runtime : $projectCreator"
+$inuHost = Join-Path (Split-Path -Parent $root) 'Bin\inu.exe'
+if (-not (Test-Path -LiteralPath $inuHost -PathType Leaf)) {
+    throw "The consolidated Inu host was not produced: $inuHost"
+}
+Write-Host "[ OK ] Consolidated Inu host: $inuHost"
+Write-Host "[ OK ] Internal host modules: compiler, linker, image, QEMU, project creation and userland are ready."
 
 $externalKernelDirectory = Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)) "Source\Repos\InuKernel"
 if ((Test-Path -LiteralPath $externalKernelDirectory -PathType Container)) {
-    Invoke-InuBuildStage -Stage "Refresh external Inu kernel project" -FilePath $dotnet -Arguments @(
-        $projectCreator, "create", "--output", $externalKernelDirectory, "--sdk-root", $root
+    Invoke-InuBuildStage -Stage "Refresh external Inu kernel project" -FilePath $inuHost -Arguments @(
+        "project", "create", "--host-configuration", $Configuration, "--output", $externalKernelDirectory, "--sdk-root", $root
     ) -Inputs (@($externalKernelDirectory,(Join-Path $root 'templates'),(Join-Path $root 'src\Userland')) + @((Get-InuStageFiles -Paths @((Split-Path -Parent $projectCreator)) -Outputs).FullName)) -Outputs (@((Get-InuStageFiles -Paths @($externalKernelDirectory)).FullName) + @((Join-Path $externalKernelDirectory 'InuProject.json')))
 
     $legacyRootKernel = Join-Path $externalKernelDirectory "Kernel.cs"
@@ -715,8 +715,8 @@ if (-not (Test-Path -LiteralPath $projectManifest -PathType Leaf)) {
 
 if (-not [string]::Equals([IO.Path]::GetFullPath($projectManifest), [IO.Path]::GetFullPath($defaultProjectManifest), [StringComparison]::OrdinalIgnoreCase)) {
     $selectedProjectDirectory = Split-Path -Parent $projectManifest
-    Invoke-InuBuildStage -Stage "Refresh selected Inu project" -FilePath $dotnet -Arguments @(
-        $projectCreator, "create", "--output", $selectedProjectDirectory, "--sdk-root", $root
+    Invoke-InuBuildStage -Stage "Refresh selected Inu project" -FilePath $inuHost -Arguments @(
+        "project", "create", "--host-configuration", $Configuration, "--output", $selectedProjectDirectory, "--sdk-root", $root
     ) -Inputs (@($selectedProjectDirectory,(Join-Path $root 'templates'),(Join-Path $root 'src\Userland')) + @((Get-InuStageFiles -Paths @((Split-Path -Parent $projectCreator)) -Outputs).FullName)) -Outputs @(
         (Join-Path $selectedProjectDirectory 'InuProject.json'),
         (Join-Path $selectedProjectDirectory 'InuKernel.csproj')
@@ -812,17 +812,17 @@ $compileOutputs = @($nativeAotObject,$compileManifestPath,(Join-Path $outputDire
 $linkOutputs = @($kernelBin,$loaderBin,(Join-Path $outputDirectory (([string]$projectData.Name) + '.map')))
 if ($Configuration -eq 'Debug') { $linkOutputs += @((Join-Path $outputDirectory (([string]$projectData.Name) + '.pdb'))) }
 if ($debugRendezvousRequested) { $linkOutputs += @((Join-Path $outputDirectory 'Inu.DebugSymbols.json')) }
-    $compileArgs = @($compiler, "compile", $projectManifest, "--dotnet", $dotnet, "--ilc", $ilc, "--configuration", $Configuration, "--sdk-root", $root) + $dry
+    $compileArgs = @("compile", "--host-configuration", $Configuration, $projectManifest, "--dotnet", $dotnet, "--ilc", $ilc, "--configuration", $Configuration, "--sdk-root", $root) + $dry
     if ($runtimeConformanceEnabled) { $compileArgs += '--runtime-conformance' }
     if ($requestedTestOs) { $compileArgs += '--test-os' }
     if ($debugRendezvousRequested) { $compileArgs += '--source-debug-rendezvous' }
-    Invoke-InuBuildStage -Stage "Managed IL + NativeAOT ILC" -FilePath $dotnet -Arguments $compileArgs -Inputs ($kernelInputs + $dotnetStageInputs + $ilcStageInputs + @((Get-InuStageFiles -Paths @((Split-Path -Parent $compiler)) -Outputs).FullName)) -Outputs $compileOutputs -CleanDirectories @((Join-Path $outputDirectory 'ManagedIL'),(Join-Path $outputDirectory 'NativeAot'))
+    Invoke-InuBuildStage -Stage "Managed IL + NativeAOT ILC" -FilePath $inuHost -Arguments $compileArgs -Inputs ($kernelInputs + $dotnetStageInputs + $ilcStageInputs + @((Get-InuStageFiles -Paths @((Split-Path -Parent $compiler)) -Outputs).FullName)) -Outputs $compileOutputs -CleanDirectories @((Join-Path $outputDirectory 'ManagedIL'),(Join-Path $outputDirectory 'NativeAot'))
 
-    $linkArgs = @($linker, "link", $projectManifest, "--lld-link", $lldLink, "--llvm-nm", $llvmNm, "--nasm", $nasm, "--native-root", $nativeOutput) + $dry
-    Invoke-InuBuildStage -Stage "Native link" -FilePath $dotnet -Arguments $linkArgs -Inputs (@($projectManifest,$compileManifestPath,$nativeAotObject,$lldLink,$llvmNm,$nasm) + @((Get-InuStageFiles -Paths @((Split-Path -Parent $linker)) -Outputs).FullName) + @((Get-InuStageFiles -Paths @((Join-Path $outputDirectory 'NativeAot'),(Join-Path $outputDirectory 'ManagedIL')) -Outputs).FullName) + @(Get-ChildItem -LiteralPath $nativeOutput -Filter "*.obj" | Where-Object { $_.Name -notin @("UserEntry.obj","UserExceptionHandling.obj") } | ForEach-Object { $_.FullName })) -Outputs $linkOutputs
+    $linkArgs = @("link", "--host-configuration", $Configuration, $projectManifest, "--lld-link", $lldLink, "--llvm-nm", $llvmNm, "--nasm", $nasm, "--native-root", $nativeOutput) + $dry
+    Invoke-InuBuildStage -Stage "Native link" -FilePath $inuHost -Arguments $linkArgs -Inputs (@($projectManifest,$compileManifestPath,$nativeAotObject,$lldLink,$llvmNm,$nasm) + @((Get-InuStageFiles -Paths @((Split-Path -Parent $linker)) -Outputs).FullName) + @((Get-InuStageFiles -Paths @((Join-Path $outputDirectory 'NativeAot'),(Join-Path $outputDirectory 'ManagedIL')) -Outputs).FullName) + @(Get-ChildItem -LiteralPath $nativeOutput -Filter "*.obj" | Where-Object { $_.Name -notin @("UserEntry.obj","UserExceptionHandling.obj") } | ForEach-Object { $_.FullName })) -Outputs $linkOutputs
 
     $userlandArgs = @(
-        $userlandCompiler, "compile", $projectManifest,
+        "userland", "--host-configuration", $Configuration, $projectManifest,
         "--dotnet", $dotnet,
         "--ilc", $ilc,
         "--lld-link", $lldLink,
@@ -846,7 +846,7 @@ if ($debugRendezvousRequested) { $linkOutputs += @((Join-Path $outputDirectory '
         if (@(Get-ChildItem -LiteralPath (Join-Path $coderDirectory.FullName 'Commands') -Filter '*.cs' -File -ErrorAction SilentlyContinue).Count) { $userlandOutputs += (Join-Path $outputDirectory 'UserlandApps\Commands') }
     }
     if ($ForceRebuild) { $userlandArgs += '--force-rebuild' }
-    Invoke-InuBuildStage -Stage "Ring-3 userland executables" -FilePath $dotnet -Arguments $userlandArgs -Inputs $userlandInputs -Outputs $userlandOutputs
+    Invoke-InuBuildStage -Stage "Ring-3 userland executables" -FilePath $inuHost -Arguments $userlandArgs -Inputs $userlandInputs -Outputs $userlandOutputs
 
     if (-not $DryRun -and $guiEnabled) {
         $userlandApps = Join-Path $outputDirectory "UserlandApps"
@@ -882,9 +882,9 @@ if ($debugRendezvousRequested) { $linkOutputs += @((Join-Path $outputDirectory '
         Write-Host "[ OK ] CLI-only startup selected; graphical userland applications were not built."
     }
 
-    $imageArgs = @($imageBuilder, "create", $projectManifest, "--output", $imagePath, "--sdk-root", $root, "--ide-root", $ideRoot) + $dry
+    $imageArgs = @("image", "--host-configuration", $Configuration, "create", $projectManifest, "--output", $imagePath, "--sdk-root", $root, "--ide-root", $ideRoot) + $dry
     $imageInputs = $projectMetadata + $linkOutputs + @($consoleTtf, (Join-Path $root 'Assets\System')) + @((Get-InuStageFiles -Paths @((Split-Path -Parent $imageBuilder)) -Outputs).FullName) + @(Get-ChildItem -LiteralPath (Join-Path $outputDirectory 'UserlandApps') -Recurse -File -Filter '*.EXE' | ForEach-Object { $_.FullName })
-    Invoke-InuBuildStage -Stage "FAT32 system image" -FilePath $dotnet -Arguments $imageArgs -Inputs $imageInputs -Outputs @($imagePath,(Join-Path $outputDirectory 'Inu.Image.json')) -MutableOutputs
+    Invoke-InuBuildStage -Stage "FAT32 system image" -FilePath $inuHost -Arguments $imageArgs -Inputs $imageInputs -Outputs @($imagePath,(Join-Path $outputDirectory 'Inu.Image.json')) -MutableOutputs
 
 
 if ($NoRun -or -not $Run) {
@@ -919,9 +919,9 @@ if ($runtimeConformanceEnabled -and $effectiveBootTimeoutSeconds -ne $BootTimeou
 }
 $targetAccelerator = if ([string]::IsNullOrWhiteSpace($env:INU_TARGET_ACCELERATOR)) { "auto" } else { $env:INU_TARGET_ACCELERATOR }
 Write-Host ("[INFO] QEMU accelerator policy: {0}" -f $targetAccelerator)
-$qemuArgs = @($qemuLauncher, "run", $projectManifest, "--qemu", $qemu, "--image", $imagePath, "--ovmf-code", $ovmfCode, "--ovmf-vars", $ovmfVars, "--timeout-seconds", [string]$effectiveBootTimeoutSeconds, "--accelerator", $targetAccelerator) + $dry
+$qemuArgs = @("qemu", "--host-configuration", $Configuration, "run", $projectManifest, "--qemu", $qemu, "--image", $imagePath, "--ovmf-code", $ovmfCode, "--ovmf-vars", $ovmfVars, "--timeout-seconds", [string]$effectiveBootTimeoutSeconds, "--accelerator", $targetAccelerator) + $dry
 $qemuStageHardTimeout = ($effectiveBootTimeoutSeconds * 2) + 65
-$null = Invoke-InuCapturedStage -Stage "QEMU runtime acceptance" -FilePath $dotnet -Arguments $qemuArgs -TimeoutSeconds $qemuStageHardTimeout
+$null = Invoke-InuCapturedStage -Stage "QEMU runtime acceptance" -FilePath $inuHost -Arguments $qemuArgs -TimeoutSeconds $qemuStageHardTimeout
 
 # Surface the exact accepted run identity to Kath. Successful captured stages normally keep
 # child stdout in the per-stage log, so without these session-local lines the IDE would have

@@ -7,7 +7,8 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <RootNamespace>Inu.QemuLauncher</RootNamespace>
     <AssemblyName>Inu.QemuLauncher</AssemblyName>
-  </PropertyGroup>
+    <UseAppHost>false</UseAppHost>
+</PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Inu.ProjectModel\Inu.ProjectModel.csproj" />
   </ItemGroup>

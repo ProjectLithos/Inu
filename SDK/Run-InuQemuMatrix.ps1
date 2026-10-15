@@ -14,10 +14,8 @@ param(
 $ErrorActionPreference='Stop'
 $root=$PSScriptRoot
 $releaseVersion=([IO.File]::ReadAllText((Join-Path (Split-Path -Parent (Split-Path -Parent $root)) 'VERSION'))).Trim()
-$dotnet=Join-Path $root '.toolchain\DotNet\dotnet.exe'
-$launcher=Join-Path $root 'src\Inu.QemuLauncher\bin\x64\Release\net10.0\Inu.QemuLauncher.dll'
-if(!(Test-Path -LiteralPath $dotnet -PathType Leaf)){throw "Private Inu .NET host not found: $dotnet"}
-if(!(Test-Path -LiteralPath $launcher -PathType Leaf)){throw "Inu.QemuLauncher has not been built: $launcher"}
+$inuHost=Join-Path (Split-Path -Parent $root) 'Bin\inu.exe'
+if(!(Test-Path -LiteralPath $inuHost -PathType Leaf)){throw "Consolidated Inu host not found: $inuHost"}
 foreach($path in @($Project,$Image,$Matrix)){if(!(Test-Path -LiteralPath $path -PathType Leaf)){throw "Required file not found: $path"}}
 if([string]::IsNullOrWhiteSpace($Qemu)){throw 'QEMU path is required. Pass -Qemu or set INU_QEMU_X64.'}
 if(!(Test-Path -LiteralPath $Qemu -PathType Leaf)){throw "QEMU executable not found: $Qemu"}
@@ -79,12 +77,12 @@ foreach($c in $cases){
   $caseDir=Join-Path $OutputDirectory $caseId;$null=New-Item -ItemType Directory -Force -Path $caseDir
   $caseImage=Join-Path $caseDir 'boot.img';Copy-Item -LiteralPath $Image -Destination $caseImage -Force
   $stdout=Join-Path $caseDir 'matrix.stdout.log';$stderr=Join-Path $caseDir 'matrix.stderr.log'
-  $arguments=@($launcher,'run',$Project,'--qemu',$Qemu,'--image',$caseImage,'--timeout-seconds',[string]$TimeoutSeconds,'--cpus',[string]$c.cpus,'--memory-mib',[string]$c.memoryMiB,'--storage',[string]$c.storage,'--network',[string]$c.network,'--graphics',[string]$c.graphics,'--usb',[string]$c.usb,'--run-directory',$caseDir,'--accept-and-stop')
+  $arguments=@('qemu','--host-configuration','Release','run',$Project,'--qemu',$Qemu,'--image',$caseImage,'--timeout-seconds',[string]$TimeoutSeconds,'--cpus',[string]$c.cpus,'--memory-mib',[string]$c.memoryMiB,'--storage',[string]$c.storage,'--network',[string]$c.network,'--graphics',[string]$c.graphics,'--usb',[string]$c.usb,'--run-directory',$caseDir,'--accept-and-stop')
   if($OvmfCode){$arguments+=@('--ovmf-code',$OvmfCode)};if($OvmfVars){$arguments+=@('--ovmf-vars',$OvmfVars)}
   foreach($marker in @($matrixDoc.requiredMarkers)){$arguments+=@('--require-marker',[string]$marker)}
   Write-Host "[CASE] $caseId"
   $sw=[Diagnostics.Stopwatch]::StartNew()
-  & $dotnet @arguments 1> $stdout 2> $stderr
+  & $inuHost @arguments 1> $stdout 2> $stderr
   $exitCode=$LASTEXITCODE;$sw.Stop()
   $ok=$exitCode -eq 0;if(!$ok){$failed++}
   $results+=[ordered]@{id=$caseId;result=if($ok){'passed'}else{'failed'};exitCode=$exitCode;durationMilliseconds=$sw.ElapsedMilliseconds;cpus=[int]$c.cpus;memoryMiB=[int]$c.memoryMiB;storage=[string]$c.storage;network=[string]$c.network;graphics=[string]$c.graphics;usb=[string]$c.usb;artifactDirectory=$caseDir;stdout=$stdout;stderr=$stderr}

@@ -47,6 +47,18 @@ foreach ($relative in @('src\Inu.Filesystem.FatFs\FatFs.Format.cs','src\Inu.Kern
     if ($text -match '\[[^\]]+\]\s*=\s*0U\s*;') { Fail "UInt32 zero assigned directly through an indexed Byte target in $relative; use an explicit (Byte) cast" }
 }
 
+
+# Kath/Inu has one host executable contract.  SDK host implementations remain modular
+# source projects but must not emit their own Windows apphost executables.
+foreach ($module in @('Inu.ManagedCompiler','Inu.Linker','Inu.ImageBuilder','Inu.QemuLauncher','Inu.ProjectCreator','Inu.UserlandCompiler')) {
+    $project = Join-Path $SdkRoot ("src\$module\$module.csproj")
+    if (-not (Test-Path -LiteralPath $project -PathType Leaf)) { Fail "host module project is missing: $project" }
+    $projectText = [IO.File]::ReadAllText($project)
+    if ($projectText -notmatch '<UseAppHost>\s*false\s*</UseAppHost>') { Fail "$module must be hosted through Inu\Bin\inu.exe and must not emit a separate apphost executable" }
+}
+$buildScript = [IO.File]::ReadAllText((Join-Path $SdkRoot 'Build-Inu.ps1'))
+if ($buildScript -notmatch 'Consolidated Inu host') { Fail 'Build-Inu.ps1 must route SDK host operations through the consolidated Inu host.' }
+
 $rootVersion = Join-Path $ProductRoot 'VERSION'
 if (-not (Test-Path -LiteralPath $rootVersion -PathType Leaf)) { Fail "authoritative root VERSION is missing: $rootVersion" }
 foreach ($mirror in @((Join-Path $InuRoot 'VERSION'), (Join-Path (Join-Path $ProductRoot 'Kath') 'VERSION'))) {

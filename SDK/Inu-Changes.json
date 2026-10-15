@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.78",
-  "version": "0.1.79",
-  "changedFiles": 22,
-  "summary": "Make New Test Kernel the complete SDK validation target: expose/compile every current SDK API/component, select the full implemented hardware profile, bound AHCI/NVMe probe waits, and use a separate bounded Test-OS acceptance window.",
+  "baseVersion": "0.1.79",
+  "version": "0.1.80",
+  "changedFiles": 30,
+  "summary": "Consolidate host-side SDK operations behind Inu/Bin/inu.exe, stop producing separate apphost executables for SDK host modules, and make New OS creation verify/materialise required files then open the exact generated workspace directly.",
   "deletedFiles": 0
 }
