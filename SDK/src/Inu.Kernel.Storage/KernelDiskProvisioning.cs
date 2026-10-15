@@ -108,7 +108,7 @@ public static unsafe class KernelDiskProvisioning
     private static Boolean IsInuManagedHeader(Byte* sector)=>IsGptHeader(sector)&&Read32(sector+68)==0x47505431U;
     private static UInt32 Read32(Byte* p)=>(UInt32)(p[0]|((UInt32)p[1]<<8)|((UInt32)p[2]<<16)|((UInt32)p[3]<<24));
     private static Boolean IsBlank(Byte* buffer,UInt32 bytes){for(UInt32 i=0U;i<bytes;i++)if(buffer[i]!=0U)return false;return true;}
-    private static void Zero(Byte* buffer,UInt32 bytes){for(UInt32 i=0U;i<bytes;i++)buffer[i]=0U;}
+    private static void Zero(Byte* buffer,UInt32 bytes){for(UInt32 i=0U;i<bytes;i++)buffer[i]=(Byte)0U;}
     private static void Write16(Byte* p,UInt16 value){p[0]=(Byte)value;p[1]=(Byte)(value>>8);}
     private static void Write32(Byte* p,UInt32 value){p[0]=(Byte)value;p[1]=(Byte)(value>>8);p[2]=(Byte)(value>>16);p[3]=(Byte)(value>>24);}
     private static void Write64(Byte* p,UInt64 value){Write32(p,(UInt32)value);Write32(p+4,(UInt32)(value>>32));}

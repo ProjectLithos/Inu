@@ -9,8 +9,10 @@ public static unsafe class SystemAssetCatalog
     private const UInt32 AssetEntrySlots = 2048U;
     private struct AssetHashIndex { internal fixed UInt32 Offsets[(Int32)AssetHashSlots]; }
     private struct AssetEntryIndex { internal fixed UInt32 Offsets[(Int32)AssetEntrySlots]; }
+    #pragma warning disable CS0169 // Fixed-buffer backing fields are accessed through fixed pointers below.
     private static AssetHashIndex _hashIndex;
     private static AssetEntryIndex _entryIndex;
+    #pragma warning restore CS0169
     private static Boolean _hashReady,_entryIndexReady;
     private static Byte* _base;
     private static UInt64 _length;

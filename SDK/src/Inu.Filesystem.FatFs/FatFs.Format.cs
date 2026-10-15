@@ -138,5 +138,5 @@ public static unsafe partial class FatFs
     }
 
     private static void WriteAscii(Byte* destination,String value,UInt32 count){for(UInt32 i=0U;i<count;i++)destination[i]=(Byte)value[(Int32)i];}
-    private static void Zero(Byte* buffer,UInt32 bytes){for(UInt32 i=0U;i<bytes;i++)buffer[i]=0U;}
+    private static void Zero(Byte* buffer,UInt32 bytes){for(UInt32 i=0U;i<bytes;i++)buffer[i]=(Byte)0U;}
 }

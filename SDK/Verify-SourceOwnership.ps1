@@ -39,6 +39,14 @@ foreach ($file in @(Get-ChildItem -LiteralPath $SdkRoot -Recurse -File -Filter '
     $hashOwners[$hash] = $file.FullName
 }
 
+# Storage format/provisioning Byte* zero-fill regressions must be explicit Byte writes.
+foreach ($relative in @('src\Inu.Filesystem.FatFs\FatFs.Format.cs','src\Inu.Kernel.Storage\KernelDiskProvisioning.cs')) {
+    $path = Join-Path $SdkRoot $relative
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { Fail "storage validation source is missing: $relative" }
+    $text = [IO.File]::ReadAllText($path)
+    if ($text -match '\[[^\]]+\]\s*=\s*0U\s*;') { Fail "UInt32 zero assigned directly through an indexed Byte target in $relative; use an explicit (Byte) cast" }
+}
+
 $rootVersion = Join-Path $ProductRoot 'VERSION'
 if (-not (Test-Path -LiteralPath $rootVersion -PathType Leaf)) { Fail "authoritative root VERSION is missing: $rootVersion" }
 foreach ($mirror in @((Join-Path $InuRoot 'VERSION'), (Join-Path (Join-Path $ProductRoot 'Kath') 'VERSION'))) {
