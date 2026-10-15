@@ -10,14 +10,27 @@ public static unsafe partial class FatFs
     private const UInt32 FormatFatCount=2U;
     private const UInt32 FormatRootCluster=2U;
 
+    /// <summary><inu.api>Ensures a partition is FAT32 without erasing an existing FAT32 filesystem.</inu.api></summary>
+    public static Boolean EnsureFat32(KernelStorageVolumeHandle volume)=>EnsureFat32Formatted(volume,false,out _);
+
+    /// <summary><inu.api>Explicitly reformats a partition as FAT32. This destroys existing filesystem data.</inu.api></summary>
+    public static Boolean FormatFat32(KernelStorageVolumeHandle volume)
+    {
+        if(KernelVfs.IsVolumeMounted(volume))return false;
+        return FormatFat32Core(volume,false,false,out _);
+    }
+
     /// <summary>
     /// Formats an unformatted writable volume as FAT32. Existing recognized FAT volumes are preserved.
     /// The first Inu data partition may be seeded with USERS, WORK and TEMP directories.
     /// </summary>
     public static Boolean EnsureFat32Formatted(KernelStorageVolumeHandle volume,Boolean seedDirectories,out Boolean formatted)
+        =>FormatFat32Core(volume,seedDirectories,true,out formatted);
+
+    private static Boolean FormatFat32Core(KernelStorageVolumeHandle volume,Boolean seedDirectories,Boolean preserveExisting,out Boolean formatted)
     {
         formatted=false;
-        if(TryReadBoot(volume,out VolumeInfo existing,out KernelHeapAllocation existingScratch))
+        if(preserveExisting&&TryReadBoot(volume,out VolumeInfo existing,out KernelHeapAllocation existingScratch))
         {
             KernelHeap.TryRelease(existingScratch);
             return existing.Format==(Byte)FatFsFormat.Fat32;

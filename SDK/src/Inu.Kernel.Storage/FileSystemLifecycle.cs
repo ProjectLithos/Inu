@@ -58,9 +58,26 @@ public static class FileSystem
     /// <summary><inu.api>Replaces the command search path list. Paths are searched in the supplied order.</inu.api></summary>
     public static Boolean SetCommandsPaths(String[] paths)=>FileSystemLogicalPaths.TrySetCommands(paths);
 
+    /// <summary><inu.api>Mounts a discovered partition at an OS path using a selected filesystem provider.</inu.api></summary>
+    public static Boolean Mount(KernelStorageVolumeHandle volume,KernelFileSystemType type,String path)
+    {
+        if(!FileSystemPathPolicyRuntime.TryNormalizeUserPath(path,out String canonical)||canonical.Length==0)return false;
+        return KernelVfs.Mount(KernelVfs.DefaultNamespace,volume,type,canonical,out _);
+    }
+
+    /// <summary><inu.api>Creates a directory when it does not already exist.</inu.api></summary>
+    public static unsafe Boolean EnsureDirectory(String path)
+    {
+        if(!FileSystemPathPolicyRuntime.TryNormalizeUserPath(path,out String canonical)||canonical.Length==0||canonical.Length>1024)return false;
+        if(KernelVfs.OpenDirectory(KernelVfs.DefaultNamespace,canonical,out KernelDirectoryHandle existing)){KernelVfs.CloseDirectory(existing);return true;}
+        Byte* ascii=stackalloc Byte[canonical.Length];
+        for(Int32 i=0;i<canonical.Length;i++){Char c=canonical[i];if(c>0x7F)return false;ascii[i]=(Byte)c;}
+        return KernelVfs.CreateDirectoryAscii(KernelVfs.DefaultNamespace,ascii,(UInt32)canonical.Length);
+    }
+
 }
 /// <summary><inu.api>Spelling-compatible alias for the coder-facing FileSystem lifecycle facade.</inu.api></summary>
 public static class Filesystem
 {
-    public static Boolean Initialize()=>FileSystem.Initialize(); public static Byte GetLifecycleState()=>FileSystem.GetLifecycleState(); public static Boolean Start()=>FileSystem.Start(); public static Boolean Run()=>FileSystem.Run(); public static Boolean Pause()=>FileSystem.Pause(); public static Boolean Resume()=>FileSystem.Resume(); public static Boolean Stop()=>FileSystem.Stop(); public static Boolean Unload()=>FileSystem.Unload(); public static FileSystemPathPolicy GetPathPolicy()=>FileSystem.GetPathPolicy(); public static Boolean SetPathPolicy(FileSystemPathPolicy policy)=>FileSystem.SetPathPolicy(policy); public static Boolean SetLogicalPath(FileSystemLogicalPath kind,String path)=>FileSystem.SetLogicalPath(kind,path); public static String GetLogicalPath(FileSystemLogicalPath kind)=>FileSystem.GetLogicalPath(kind); public static Boolean ClearLogicalPath(FileSystemLogicalPath kind)=>FileSystem.ClearLogicalPath(kind); public static Char GetPathSeparator()=>FileSystem.GetPathSeparator(); public static Boolean SetPathSeparator(Char separator)=>FileSystem.SetPathSeparator(separator); public static String GetCommandsPath()=>FileSystem.GetCommandsPath(); public static String[] GetCommandsPaths()=>FileSystem.GetCommandsPaths(); public static Boolean SetCommandsPath(String path)=>FileSystem.SetCommandsPath(path); public static Boolean SetCommandsPaths(String[] paths)=>FileSystem.SetCommandsPaths(paths);
+    public static Boolean Initialize()=>FileSystem.Initialize(); public static Byte GetLifecycleState()=>FileSystem.GetLifecycleState(); public static Boolean Start()=>FileSystem.Start(); public static Boolean Run()=>FileSystem.Run(); public static Boolean Pause()=>FileSystem.Pause(); public static Boolean Resume()=>FileSystem.Resume(); public static Boolean Stop()=>FileSystem.Stop(); public static Boolean Unload()=>FileSystem.Unload(); public static FileSystemPathPolicy GetPathPolicy()=>FileSystem.GetPathPolicy(); public static Boolean SetPathPolicy(FileSystemPathPolicy policy)=>FileSystem.SetPathPolicy(policy); public static Boolean SetLogicalPath(FileSystemLogicalPath kind,String path)=>FileSystem.SetLogicalPath(kind,path); public static String GetLogicalPath(FileSystemLogicalPath kind)=>FileSystem.GetLogicalPath(kind); public static Boolean ClearLogicalPath(FileSystemLogicalPath kind)=>FileSystem.ClearLogicalPath(kind); public static Char GetPathSeparator()=>FileSystem.GetPathSeparator(); public static Boolean SetPathSeparator(Char separator)=>FileSystem.SetPathSeparator(separator); public static String GetCommandsPath()=>FileSystem.GetCommandsPath(); public static String[] GetCommandsPaths()=>FileSystem.GetCommandsPaths(); public static Boolean SetCommandsPath(String path)=>FileSystem.SetCommandsPath(path); public static Boolean SetCommandsPaths(String[] paths)=>FileSystem.SetCommandsPaths(paths); public static Boolean Mount(KernelStorageVolumeHandle volume,KernelFileSystemType type,String path)=>FileSystem.Mount(volume,type,path); public static Boolean EnsureDirectory(String path)=>FileSystem.EnsureDirectory(path);
 }

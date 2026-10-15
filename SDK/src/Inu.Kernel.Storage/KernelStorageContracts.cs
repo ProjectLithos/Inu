@@ -4,7 +4,17 @@ using Inu.Kernel.Drivers;
 namespace Inu.Kernel.Storage;
 
 public enum KernelStorageRegistryMode : Byte { Dynamic=0, Fixed=1 }
-public enum KernelStorageDeviceKind : Byte { Unknown=0, Physical=1, Virtual=2, RamDisk=3, Optical=4, UsbMassStorage=5 }
+public enum KernelStorageDeviceKind : Byte
+{
+    Unknown=0,
+    Physical=1,
+    Virtual=2,
+    RamDisk=3,
+    Optical=4,
+    UsbMassStorage=5,
+    Nvme=6,
+    Ahci=7
+}
 public enum KernelPartitionScheme : Byte { None=0, Raw=1, Mbr=2, Gpt=3 }
 public enum KernelFileSystemType : Byte { Unknown=0, Fat12=1, Fat16=2, Fat32=3, ExFat=4, Custom=255 }
 public enum KernelFileType : Byte { Unknown=0, File=1, Directory=2, Device=3 }

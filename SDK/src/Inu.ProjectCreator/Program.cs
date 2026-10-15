@@ -315,6 +315,27 @@ static bool RefreshCentralKernelConsoleSourcePlan(string sdkRoot, string output)
             files.Add((canonical, destination, "Inu.Kernel.Console", true));
         }
 
+        List<string> selectedCentralProjects = new();
+        string propsPath = Path.Combine(output, "Inu.Configuration.props");
+        string propsText = File.Exists(propsPath) ? File.ReadAllText(propsPath) : String.Empty;
+        if (propsText.Contains("INU_COMPONENT_STORAGE_NVME_DRIVER", StringComparison.Ordinal)) selectedCentralProjects.Add("Inu.Kernel.Nvme");
+        if (propsText.Contains("INU_COMPONENT_STORAGE_AHCI_DRIVER", StringComparison.Ordinal)) selectedCentralProjects.Add("Inu.Kernel.Ahci");
+        if (propsText.Contains("INU_COMPONENT_STORAGE_VIRTIO_BLOCK_DRIVER", StringComparison.Ordinal)) selectedCentralProjects.Add("Inu.Kernel.Virtio");
+        if (propsText.Contains("INU_COMPONENT_FILESYSTEM_FATFS", StringComparison.Ordinal)) selectedCentralProjects.Add("Inu.Filesystem.FatFs");
+        foreach (string selectedProject in selectedCentralProjects)
+        {
+            string selectedRoot = Path.Combine(sdkRoot, "src", selectedProject);
+            if (!Directory.Exists(selectedRoot)) return FailBool($"Selected SDK source project is missing: {selectedRoot}");
+            foreach (string sourcePath in Directory.EnumerateFiles(selectedRoot, "*.cs", SearchOption.AllDirectories).OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
+            {
+                string relative = Path.GetRelativePath(selectedRoot, sourcePath);
+                if (relative.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(part => string.Equals(part, "bin", StringComparison.OrdinalIgnoreCase) || string.Equals(part, "obj", StringComparison.OrdinalIgnoreCase))) continue;
+                string canonical = Path.Combine("src", selectedProject, relative).Replace('\\', '/');
+                string destination = Path.Combine("Kernel", "Provided", "Dependencies", selectedProject, relative).Replace('\\', '/');
+                files.Add((canonical, destination, selectedProject, true));
+            }
+        }
+
         files = files
             .GroupBy(file => file.Source, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
@@ -340,6 +361,9 @@ static bool RefreshCentralKernelConsoleSourcePlan(string sdkRoot, string output)
             : Array.Empty<string>();
         if (!dependencyProjects.Contains("Inu.Kernel.Console", StringComparer.OrdinalIgnoreCase))
             dependencyProjects = dependencyProjects.Append("Inu.Kernel.Console").OrderBy(value => value, StringComparer.OrdinalIgnoreCase).ToArray();
+        foreach (string selectedProject in selectedCentralProjects)
+            if (!dependencyProjects.Contains(selectedProject, StringComparer.OrdinalIgnoreCase))
+                dependencyProjects = dependencyProjects.Append(selectedProject).OrderBy(value => value, StringComparer.OrdinalIgnoreCase).ToArray();
         string note = root.TryGetProperty("note", out JsonElement noteElement) && noteElement.ValueKind == JsonValueKind.String
             ? noteElement.GetString() ?? string.Empty
             : "Selected architectural source is OS-owned. Unselected build-only support source is linked from the single authoritative Inu/SDK/src tree; no duplicate physical copies are generated.";

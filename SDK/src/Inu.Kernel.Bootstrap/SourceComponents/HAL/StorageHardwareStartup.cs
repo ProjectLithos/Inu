@@ -15,7 +15,7 @@ using Inu.Kernel.Ahci;
 
 namespace Inu.Kernel.Bootstrap.HAL;
 
-/// <summary>Starts selected storage drivers and provisions blank selected data drives inside the kernel.</summary>
+/// <summary>Starts selected block-device drivers. Disk layout policy belongs to the coder-owned Kernel.cs.</summary>
 public static class StorageHardwareStartup
 {
     public static Boolean Initialize()
@@ -30,31 +30,11 @@ public static class StorageHardwareStartup
 #endif
 #if INU_COMPONENT_STORAGE_NVME_DRIVER
         if (!KernelNvme.Initialize()) return false;
-        for (UInt32 index=0U; KernelNvme.TryGetNamespace(index,out NvmeNamespaceInfo info); index++)
-        {
-            if (!KernelDiskProvisioning.EnsureTwoGptPartitions(info.Storage,out Boolean created))
-            {
-                KernelConsole.WriteHostControl("NVME_PARTITION_FAIL");
-                KernelStructuredLogging.ErrorLine("storage","StorageHardwareStartup.Initialize","Selected NVMe disk could not be validated or provisioned with the requested two-partition GPT layout.");
-                return false;
-            }
-            if (created) KernelStructuredLogging.InfoLine("storage","StorageHardwareStartup.Initialize","Kernel created the requested two-partition GPT layout on a blank NVMe disk.");
-        }
 #endif
 #if INU_COMPONENT_STORAGE_AHCI_DRIVER
         if (!KernelAhci.Initialize()) return false;
-        for (UInt32 index=0U; KernelAhci.TryGetDisk(index,out AhciDiskInfo info); index++)
-        {
-            if (!KernelDiskProvisioning.EnsureTwoGptPartitions(info.Storage,out Boolean created))
-            {
-                KernelConsole.WriteHostControl("AHCI_PARTITION_FAIL");
-                KernelStructuredLogging.ErrorLine("storage","StorageHardwareStartup.Initialize","Selected AHCI disk could not be validated or provisioned with the requested two-partition GPT layout.");
-                return false;
-            }
-            if (created) KernelStructuredLogging.InfoLine("storage","StorageHardwareStartup.Initialize","Kernel created the requested two-partition GPT layout on a blank AHCI disk.");
-        }
 #endif
-        if (!KernelStructuredLogging.InfoLine("storage","StorageHardwareStartup.Initialize","Selected kernel-domain storage services online.")) return false;
+        if (!KernelStructuredLogging.InfoLine("storage","StorageHardwareStartup.Initialize","Selected block devices are online; partition/format/mount policy is delegated to the OS-owned Kernel.cs.")) return false;
 #endif
         return true;
     }

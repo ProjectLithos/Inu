@@ -40,4 +40,20 @@ public static unsafe partial class KernelStorage
     { if((KernelFaultInjection.ShouldInject(KernelFaultKind.IoTimeout,"storage",out _)||KernelFaultInjection.ShouldInject(KernelFaultKind.StorageError,"storage",out _)))return false;if(!TryDevice(handle,out DeviceRecord* r)||r->ReadOnly!=0||r->Write==0||buffer==null||blockCount==0||firstBlock>=r->BlockCount||blockCount>r->BlockCount-firstBlock||(UInt64)bufferBytes<(UInt64)blockCount*r->LogicalBlockSize)return false;if(r->Contextual!=0){delegate*<KernelDeviceHandle,UInt64,UInt32,Byte*,UInt32,Boolean> write=(delegate*<KernelDeviceHandle,UInt64,UInt32,Byte*,UInt32,Boolean>)(void*)r->Write;return write(new KernelDeviceHandle(r->DriverDevice),firstBlock,blockCount,buffer,bufferBytes);}delegate*<UInt64,UInt32,Byte*,UInt32,Boolean> writeLegacy=(delegate*<UInt64,UInt32,Byte*,UInt32,Boolean>)(void*)r->Write;return writeLegacy(firstBlock,blockCount,buffer,bufferBytes); }
     public static Boolean Flush(KernelStorageDeviceHandle handle)
     { if((KernelFaultInjection.ShouldInject(KernelFaultKind.IoTimeout,"storage",out _)||KernelFaultInjection.ShouldInject(KernelFaultKind.StorageError,"storage",out _)))return false;if(!TryDevice(handle,out DeviceRecord* r))return false;if(r->Flush==0)return true;if(r->Contextual!=0){delegate*<KernelDeviceHandle,Boolean> flush=(delegate*<KernelDeviceHandle,Boolean>)(void*)r->Flush;return flush(new KernelDeviceHandle(r->DriverDevice));}delegate*<Boolean> flushLegacy=(delegate*<Boolean>)(void*)r->Flush;return flushLegacy(); }
+
+    /// <summary><inu.api>Returns the Nth registered block device of the requested kind.</inu.api></summary>
+    public static Boolean TryGetDevice(KernelStorageDeviceKind kind,UInt32 ordinal,out KernelStorageDeviceHandle handle)
+    {
+        handle=default;if(!_initialized||kind==KernelStorageDeviceKind.Unknown)return false;UInt32 seen=0U;
+        for(UInt32 i=0U;i<_deviceCapacity;i++){DeviceRecord* r=_devices+i;if(r->Used==0||r->Kind!=(Byte)kind)continue;if(seen++!=ordinal)continue;handle=new KernelStorageDeviceHandle(i+1U);return true;}
+        return false;
+    }
+
+    /// <summary><inu.api>Returns the Nth registered block device regardless of controller type.</inu.api></summary>
+    public static Boolean TryGetDeviceByOrdinal(UInt32 ordinal,out KernelStorageDeviceHandle handle,out KernelStorageDeviceKind kind,out KernelStorageGeometry geometry)
+    {
+        handle=default;kind=KernelStorageDeviceKind.Unknown;geometry=default;if(!_initialized||ordinal>=_deviceCount)return false;UInt32 seen=0U;
+        for(UInt32 i=0U;i<_deviceCapacity;i++){DeviceRecord* r=_devices+i;if(r->Used==0)continue;if(seen++!=ordinal)continue;handle=new KernelStorageDeviceHandle(i+1U);kind=(KernelStorageDeviceKind)r->Kind;geometry=new KernelStorageGeometry(r->LogicalBlockSize,r->PhysicalBlockSize,r->BlockCount,r->ReadOnly!=0,r->Removable!=0);return true;}
+        return false;
+    }
 }

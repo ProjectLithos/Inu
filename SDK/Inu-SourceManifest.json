@@ -1,5 +1,5 @@
 {
-  "version": "0.1.72",
+  "version": "0.1.73",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "70b97b3e8799eec098661cf8d3af03685f18f6a762310f62367d26e8c181248e"
+      "sha256": "935a32df5f9eb75e2a42b4e397d288d2059b448f2f99b70b9679355bcf384032"
     },
     {
       "path": "Directory.Build.targets",
@@ -931,7 +931,7 @@
     },
     {
       "path": "docs/Inu.Documentation.json",
-      "sha256": "36bda09d8f229793a7db33010e1b415c6bb42bf48bebdcfb785776d7b541e281"
+      "sha256": "bc180108a87b562963b8c4e46e12181e71fee5905c8e54e15867e9879810832f"
     },
     {
       "path": "docs/Kernel-Address-Space-Design.md",
@@ -2907,7 +2907,7 @@
     },
     {
       "path": "docs/Storage-and-Filesystems.md",
-      "sha256": "61183f8b8c8a0124f7fc1dacbf5a3b6f7557564c90282ed87450f417f810815d"
+      "sha256": "56ecd5d0d0856488a1df0c8a25bff1ca9b75b9ecbbc04c2b7f01c44f82f64f22"
     },
     {
       "path": "docs/Structured-Kernel-Telemetry.md",
@@ -2991,7 +2991,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "2f9d24206618cd703c040d5b88b5e02f7ef6d0654951c3c4c6b521a8d68907ee"
+      "sha256": "791e76dab030476462891dd298733c769f1c5ea8c6fbb8d8efb6b8fb7ed0efcb"
     },
     {
       "path": "Inu-Package.bat",
@@ -3027,7 +3027,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "cba7d3f605b8548ed5e1786da1dbe4123dfbe6b9d0521b2b9ff0593e9705b5a3"
+      "sha256": "664184e1c7d98fbad16d7cbc8749b39ac905e179e31d38cbc68340493789dc55"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3539,7 +3539,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "c7d4b3cde64a75717620ebeae08cbe1039ad049e60ab5d47a91180e424e46198"
+      "sha256": "4defecc1cb2b3011c3f2fec9911024f2121526ca92407a333f8e3cfb421256d9"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3595,7 +3595,7 @@
     },
     {
       "path": "src/Inu.Filesystem.FatFs/FatFs.Format.cs",
-      "sha256": "62dc38adf4a95f6680d06597421c73db92e159f70304b1c45b45f9217e8720e4"
+      "sha256": "2bbec93e8f3cafbfabdea64fbe4f445f4ddaf6f451b78a24ddad61a9e95d2147"
     },
     {
       "path": "src/Inu.Filesystem.FatFs/FatFs.Lookup.cs",
@@ -3823,7 +3823,7 @@
     },
     {
       "path": "src/Inu.Kernel.Ahci/KernelAhci.DiskDiscovery.cs",
-      "sha256": "6478f1ff7e0fda15e508037e7beea8c5d1a8b0e9fa21b9bf45ff80dfb3f55c5f"
+      "sha256": "b9c1e8dc6dbbafd43c5457baea64dcabef992a737dbe411966becb57ca08d4fd"
     },
     {
       "path": "src/Inu.Kernel.Ahci/KernelAhci.DriverLifecycle.cs",
@@ -3951,7 +3951,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/FilesystemHardwareStartup.cs",
-      "sha256": "451b6dc28dbc5edd60d0fd817c2d8dbe238016cac01909d672d59c6963f771bd"
+      "sha256": "9de4d8e59f1c8092ff57c2c2e4e2e3034ac77670f208ba53feed53514f088945"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/GraphicsHardwareStartup.cs",
@@ -3967,7 +3967,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/StorageHardwareStartup.cs",
-      "sha256": "ad67ce43268a4896a6b11c427eb43ddf9c3f5ba2addb6e8f85421a456a63b9a6"
+      "sha256": "b09b678c59b28d3aa0ac93dd3cce0db4fa64aa854e81543f38b9af3f63e73894"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/UsbHardwareStartup.cs",
@@ -4627,7 +4627,7 @@
     },
     {
       "path": "src/Inu.Kernel.Nvme/KernelNvme.Namespaces.cs",
-      "sha256": "ca5c3d9f0c45ae351eee906e5e41b078eeebeb6b01f6803d96564be2d4b371e4"
+      "sha256": "fb5535f8cde18cc495d57ea38fefb6d139fc97137e1cbeae6ca6ec80160f2d00"
     },
     {
       "path": "src/Inu.Kernel.Nvme/KernelNvme.Queues.cs",
@@ -5131,7 +5131,7 @@
     },
     {
       "path": "src/Inu.Kernel.Storage/FileSystemLifecycle.cs",
-      "sha256": "58c06f715499f28ac64e5b7e3ffc1c2bc985b27bc08927c167eec2bcd9eb2265"
+      "sha256": "1d6ddb9a3800ef5969735160c8cda697ce847f195845c481743ccca3c026e9c3"
     },
     {
       "path": "src/Inu.Kernel.Storage/FileSystemLogicalPaths.cs",
@@ -5147,7 +5147,7 @@
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelDiskProvisioning.cs",
-      "sha256": "2dea4dc44a85aed1bdccacfeb0032673987cc2ec68ac8fda5864a04fdd1507e7"
+      "sha256": "52c55fd43be0042e63bda42a316fb861f3f89dc8ddd9edb1ab75ddbdc42a319d"
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelPartitionDiscovery.cs",
@@ -5163,7 +5163,7 @@
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelStorage.DeviceRegistry.cs",
-      "sha256": "ee998a999cc0623604ad0698a1163632c43f412f07482f8f65b5ea1c41cc118b"
+      "sha256": "7eced50f520f4b708a881d9c366250f12213afff3c74dccef890cf580f0fc759"
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelStorage.Partitions.cs",
@@ -5175,7 +5175,7 @@
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelStorageContracts.cs",
-      "sha256": "bb0a3ac9fc7bd4097da20d0ead5a4f7e66f2f4b8ca51a3c0bda0e29e12bb82ed"
+      "sha256": "ed169144edacda30efcbc964906d66aee134632af1acc8988f16f5947110827a"
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelStorageMath.cs",
@@ -5216,6 +5216,10 @@
     {
       "path": "src/Inu.Kernel.Storage/KernelVfs.Storage.cs",
       "sha256": "c416417dca9947d37200e51fea171f919d5f96352a092a5042c657714c6db347"
+    },
+    {
+      "path": "src/Inu.Kernel.Storage/StorageConfiguration.cs",
+      "sha256": "a776c61a9f74ea4f432f74d2068cff1ff27437f6867ebe786a100a6a0e26b1b3"
     },
     {
       "path": "src/Inu.Kernel.SubsystemContracts/Inu.Kernel.SubsystemContracts.csproj",
@@ -5699,7 +5703,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "d3b6e32e6e4671cb40c80f1670bb952e631f404e11c594e2666d0c31f7cd4bb3"
+      "sha256": "221f7ac802fd0ac856dc46ba9ceaa5490a0a4037e197836d99c9ee7c5a862808"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",

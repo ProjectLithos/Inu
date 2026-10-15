@@ -36,3 +36,11 @@ Mutation currently creates FAT 8.3 short names. Long-file-name mutation and exFA
 
 When an SDK user selects NVMe or AHCI for a QEMU target, QEMU supplies a persistent raw writable disk for that controller. Inu does not pre-partition or pre-format that image on the host. During kernel storage startup, a completely blank selected NVMe/AHCI disk is given a two-partition GPT layout. During filesystem startup, partitions created by that kernel boot are FAT32-formatted; partition 1 is seeded with `/USERS`, `/WORK`, and `/TEMP`, becomes the preferred writable root, and partition 2 is exposed as an additional mount. Existing GPT disks are preserved and are never reformatted merely because they are selected. Non-blank disks without a supported GPT are rejected rather than erased automatically.
 
+
+## Coder-owned drive layout policy
+
+Selected NVMe and AHCI controllers expose raw writable block devices to the OS. Inu's HAL starts the selected drivers and installs the selected filesystem provider, but it does not silently choose a partition table, format or mount layout.
+
+Kath writes the initial policy into `Kernel/<OSName>/Kernel.cs`, where the OS author can edit it directly. The generated example uses `Storage.TryGetDrive`, `Storage.EnsureGptPartitions`, `Storage.TryGetPartition`, `FatFs.EnsureFat32`, `FileSystem.Mount`, and `FileSystem.EnsureDirectory` to create two GPT partitions, format them as FAT32, mount them, and create the initial writable directories. `Storage.RepartitionGpt` and `FatFs.FormatFat32` are deliberately explicit destructive operations.
+
+The default generated policy preserves an existing partition table and an existing FAT32 filesystem. Changing the generated `2U` partition count before first boot changes the requested blank-disk layout. Existing coder-owned `Kernel.cs` files are never silently replaced during an SDK refresh.
