@@ -495,8 +495,14 @@ static int MainEntry(string[] args)
         }
         if (!serialText.Contains("[[INU:INTERACTIVE_READY]]", StringComparison.Ordinal))
         {
-            string stageDetail = lastBootStageMarker is null ? string.Empty : $" Last completed kernel startup stage: {lastBootStageMarker}.";
-            throw Fail($"Timed out before Inu emitted the interactive-ready marker after the bounded boot/GC acceptance windows.{stageDetail} Serial log: {serialLog}");
+            string[] bootStageHistory = GetBootStageMarkerHistory(serialText);
+            if (bootStageHistory.Length != 0)
+                Console.Error.WriteLine($"[INFO] Kernel startup marker history: {string.Join(" -> ", bootStageHistory)}");
+            string stageDetail = lastBootStageMarker is null ? string.Empty : $" Last observed kernel startup marker: {lastBootStageMarker}.";
+            string stallDetail = lastBootStageMarker is not null && lastBootStageMarker.EndsWith("_ENTER", StringComparison.Ordinal)
+                ? $" The kernel entered {lastBootStageMarker.Substring(0, lastBootStageMarker.Length - "_ENTER".Length)} but never emitted its matching _OK marker."
+                : string.Empty;
+            throw Fail($"Timed out before Inu emitted the interactive-ready marker after the bounded boot/GC acceptance windows.{stageDetail}{stallDetail} Observed {bootStageHistory.Length} kernel startup marker(s). Serial log: {serialLog}");
         }
         throw Fail($"Inu readiness markers were observed, but runtime acceptance did not complete within the bounded boot/GC acceptance windows. Serial log: {serialLog}");
     }
@@ -1664,6 +1670,24 @@ static string? GetLatestBootStageMarker(string serialText)
     int end = serialText.IndexOf("]]", start + prefix.Length, StringComparison.Ordinal);
     if (end < 0) return null;
     return serialText.Substring(start + "[[INU:".Length, end - (start + "[[INU:".Length));
+}
+
+static string[] GetBootStageMarkerHistory(string serialText)
+{
+    const string prefix = "[[INU:BOOT_STAGE_";
+    List<string> history = [];
+    int search = 0;
+    while (search < serialText.Length)
+    {
+        int start = serialText.IndexOf(prefix, search, StringComparison.Ordinal);
+        if (start < 0) break;
+        int end = serialText.IndexOf("]]", start + prefix.Length, StringComparison.Ordinal);
+        if (end < 0) break;
+        string marker = serialText.Substring(start + "[[INU:".Length, end - (start + "[[INU:".Length));
+        if (history.Count == 0 || !string.Equals(history[^1], marker, StringComparison.Ordinal)) history.Add(marker);
+        search = end + 2;
+    }
+    return [.. history];
 }
 
 static string? GetLiveManagedConformanceStage(string serialText)

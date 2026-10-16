@@ -6,11 +6,17 @@ using System.Xml.Linq;
 internal static class UserlandStageCache
 {
     private sealed record CacheEntry(int Schema, string Inputs, string Outputs);
+    private static string FileSha256(string path)
+    {
+        using SHA256 sha = SHA256.Create();
+        using FileStream stream = File.OpenRead(path);
+        return Convert.ToHexString(sha.ComputeHash(stream));
+    }
     internal static string Fingerprint(IEnumerable<string> paths, IEnumerable<string> values)
     {
         using IncrementalHash hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         void Add(string value) => hash.AppendData(Encoding.UTF8.GetBytes(value + "\0"));
-        Add("InuUserlandStageCache:1");
+        Add("InuUserlandStageCache:2");
         foreach (string value in values) Add(value);
         foreach (string input in paths.Select(Path.GetFullPath).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(p => p, StringComparer.OrdinalIgnoreCase))
         {
@@ -19,9 +25,10 @@ internal static class UserlandStageCache
             foreach (string file in files.OrderBy(p => p, StringComparer.OrdinalIgnoreCase))
             {
                 Add(file); Add(new FileInfo(file).Length.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                using FileStream stream = File.OpenRead(file);
-                byte[] buffer = new byte[65536]; int count;
-                while ((count = stream.Read(buffer)) != 0) hash.AppendData(buffer.AsSpan(0, count));
+                // Hash each code/build input independently before composing the stage
+                // fingerprint. Unchanged commands/libraries therefore retain their own
+                // content identity even when another source unit changes.
+                Add(FileSha256(file));
             }
         }
         return Convert.ToHexString(hash.GetHashAndReset());
@@ -60,13 +67,14 @@ internal static class UserlandStageCache
         string key = Fingerprint([], new[] { name }.Concat(outputs));
         string cachePath = Path.Combine(cacheDirectory, key + ".json");
         string before = Fingerprint(inputPaths, args);
+        int hashedInputFiles = inputPaths.Select(Path.GetFullPath).Distinct(StringComparer.OrdinalIgnoreCase).Sum(input => File.Exists(input) ? 1 : Directory.Exists(input) ? SourceFiles(input).Count() : 0);
         bool Ready() => outputs.All(p => File.Exists(p) || Directory.Exists(p) && SourceFiles(p).Any());
         try
         {
             if (!force && Ready() && File.Exists(cachePath))
             {
                 CacheEntry? entry = JsonSerializer.Deserialize<CacheEntry>(File.ReadAllText(cachePath));
-                if (entry is { Schema: 1 } && entry.Inputs == before && entry.Outputs == Fingerprint(outputs, []))
+                if (entry is { Schema: 2 } && entry.Inputs == before && entry.Outputs == Fingerprint(outputs, []))
                 { Console.WriteLine($"[ OK ] {name}: cached; inputs and outputs are current."); return; }
             }
         }
@@ -75,12 +83,13 @@ internal static class UserlandStageCache
         // Initialise the cache on the first run before invalidating a record.
         Directory.CreateDirectory(cacheDirectory);
         File.Delete(cachePath);
+        Console.WriteLine($"[INFO] {name}: SHA-256 checked {hashedInputFiles} source/build input file(s) before recompilation decision; cache miss requires this stage to run.");
         int result = action(); if (result != 0) throw new InvalidOperationException($"{name} failed with exit code {result}.");
         if (!Ready()) throw new InvalidOperationException($"{name} did not produce its cache outputs.");
         if (before != Fingerprint(inputPaths, args)) { Console.WriteLine($"[INFO] {name}: inputs changed during execution; cache not saved."); return; }
         Directory.CreateDirectory(cacheDirectory);
         string temporary = cachePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
-        try { File.WriteAllText(temporary, JsonSerializer.Serialize(new CacheEntry(1, before, Fingerprint(outputs, [])))); File.Move(temporary, cachePath, true); }
+        try { File.WriteAllText(temporary, JsonSerializer.Serialize(new CacheEntry(2, before, Fingerprint(outputs, [])))); File.Move(temporary, cachePath, true); }
         finally { File.Delete(temporary); }
         return;
     }

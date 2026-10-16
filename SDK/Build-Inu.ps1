@@ -541,7 +541,10 @@ Write-Host '[ OK ] Graphics console font payload is ready for image staging.'
 # Each stage owns a separate cache; QEMU acceptance always executes.
 . (Join-Path $root 'scripts\StageCache.ps1')
 $stageCacheDirectory = Join-Path $root 'Artifacts\StageCache'
-$commonStageInputs = @((Join-Path $root 'Build-Inu.ps1'), (Join-Path $root 'scripts\StageCache.ps1'), (Join-Path $root 'toolchain\Inu.Toolchain.json'))
+$commonStageInputs = @((Join-Path $root 'scripts\StageCache.ps1'), (Join-Path $root 'toolchain\Inu.Toolchain.json'))
+# Build-Inu.ps1 itself is orchestration, not an input to every compiler. Stage arguments
+# and the exact source/tool hashes below are authoritative. Changing unrelated build
+# orchestration must not force every unchanged host tool, kernel, and command to rebuild.
 $dotnetStageInputs = @($dotnet) + @((Get-InuStageFiles -Paths @((Join-Path (Split-Path -Parent $dotnet) 'sdk'),(Join-Path (Split-Path -Parent $dotnet) 'host'),(Join-Path (Split-Path -Parent $dotnet) 'shared')) -Outputs).FullName)
 $ilcStageInputs = @((Get-InuStageFiles -Paths @((Split-Path -Parent $ilc)) -Outputs).FullName)
 $dotnetIdentity = Get-InuStageHash -Paths $dotnetStageInputs

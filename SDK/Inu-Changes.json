@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.90",
-  "version": "0.1.91",
-  "changedFiles": 18,
-  "summary": "Fix generated Microkernel startup so selected USB/HID and other selected hardware stages are actually initialized, defer device IRQ arming until synchronous startup completes, add per-stage QEMU progress windows for slow TCG boots, and make Microkernel the ProjectCreator default/fallback.",
+  "baseVersion": "0.1.92",
+  "version": "0.1.93",
+  "changedFiles": 15,
+  "summary": "Fix Kath npm workspace resolution so the private @kath/extension always resolves locally, and SHA-256 cache each SDK central reference project before recompilation.",
   "deletedFiles": 0
 }

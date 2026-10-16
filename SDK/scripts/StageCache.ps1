@@ -12,46 +12,46 @@ function Get-InuStageFiles {
     }
 }
 
+function Get-InuFileContentHash {
+    param([string]$Path, [switch]$NormalizeBuildVersion)
+    if ($NormalizeBuildVersion -and ([IO.Path]::GetFileName($Path) -eq 'Directory.Build.props')) {
+        $text = Get-Content -LiteralPath $Path -Raw
+        foreach ($element in @('Version','AssemblyVersion','FileVersion','PackageVersion')) {
+            $text = [Text.RegularExpressions.Regex]::Replace(
+                $text,
+                ('(<' + $element + '>)[^<]*(</' + $element + '>)'),
+                '$1<release-version>$2',
+                [Text.RegularExpressions.RegexOptions]::CultureInvariant)
+        }
+        $bytes = [Text.Encoding]::UTF8.GetBytes($text)
+        $local = [Security.Cryptography.SHA256]::Create()
+        try { return ([BitConverter]::ToString($local.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant() } finally { $local.Dispose() }
+    }
+    $local = [Security.Cryptography.SHA256]::Create()
+    try {
+        $stream = [IO.File]::OpenRead($Path)
+        try { return ([BitConverter]::ToString($local.ComputeHash($stream))).Replace('-', '').ToLowerInvariant() } finally { $stream.Dispose() }
+    } finally { $local.Dispose() }
+}
+
 function Get-InuStageHash {
     param([string[]]$Paths, [string[]]$Values = @(), [switch]$Outputs)
     $sha = [Security.Cryptography.SHA256]::Create()
     try {
         # Encode boundaries and missing paths, not just file bytes. Directory listings
         # detect additions/removals, including removed commands and deleted outputs.
-        foreach ($value in @('InuStageCache:2') + @($Values) + @($Paths | Sort-Object -Unique)) {
+        foreach ($value in @('InuStageCache:3') + @($Values) + @($Paths | Sort-Object -Unique)) {
             $bytes = [Text.Encoding]::UTF8.GetBytes(([string]$value + "`0"))
             [void]$sha.TransformBlock($bytes, 0, $bytes.Length, $bytes, 0)
         }
         foreach ($file in @(Get-InuStageFiles -Paths $Paths -Outputs:$Outputs | Sort-Object FullName -Unique)) {
-            # Release identity in Directory.Build.props does not change generated
-            # machine code. Normalise only those properties for input fingerprints
-            # so a release-number bump does not rebuild every unchanged host tool,
-            # kernel, or userland project. All other build-policy content remains
-            # part of the cache key. Output hashing always uses the exact bytes.
-            if (-not $Outputs -and $file.Name -eq 'Directory.Build.props') {
-                $text = Get-Content -LiteralPath $file.FullName -Raw
-                foreach ($element in @('Version','AssemblyVersion','FileVersion','PackageVersion')) {
-                    $text = [Text.RegularExpressions.Regex]::Replace(
-                        $text,
-                        ('(<' + $element + '>)[^<]*(</' + $element + '>)'),
-                        '$1<release-version>$2',
-                        [Text.RegularExpressions.RegexOptions]::CultureInvariant)
-                }
-                $content = [Text.Encoding]::UTF8.GetBytes($text)
-                $bytes = [Text.Encoding]::UTF8.GetBytes(($file.FullName + "`0" + $content.Length + "`0"))
-                [void]$sha.TransformBlock($bytes, 0, $bytes.Length, $bytes, 0)
-                [void]$sha.TransformBlock($content, 0, $content.Length, $content, 0)
-                continue
-            }
-            $bytes = [Text.Encoding]::UTF8.GetBytes(($file.FullName + "`0" + $file.Length + "`0"))
+            # Every source/build input is hashed independently first. The stage key is
+            # then composed from the ordered path + per-file SHA-256 pairs. This makes
+            # the cache explicitly content-addressed at file granularity rather than
+            # treating a directory or timestamp as evidence that code changed.
+            $fileHash = Get-InuFileContentHash -Path $file.FullName -NormalizeBuildVersion:(-not $Outputs)
+            $bytes = [Text.Encoding]::UTF8.GetBytes(($file.FullName + "`0" + $file.Length + "`0" + $fileHash + "`0"))
             [void]$sha.TransformBlock($bytes, 0, $bytes.Length, $bytes, 0)
-            $stream = [IO.File]::OpenRead($file.FullName)
-            try {
-                $buffer = New-Object byte[] 65536
-                while (($count = $stream.Read($buffer, 0, $buffer.Length)) -gt 0) {
-                    [void]$sha.TransformBlock($buffer, 0, $count, $buffer, 0)
-                }
-            } finally { $stream.Dispose() }
         }
         $empty = New-Object byte[] 0
         [void]$sha.TransformFinalBlock($empty, 0, 0)
@@ -81,6 +81,7 @@ function Invoke-InuCachedAction {
     )
     $key = Get-InuStageHash -Paths @() -Values (@($Stage, $Configuration) + $Outputs)
     $cacheFile = Join-Path $CacheDirectory ($key + '.json')
+    $inputFiles = @(Get-InuStageFiles -Paths $Inputs | Sort-Object FullName -Unique)
     $inputHash = Get-InuStageHash -Paths $Inputs -Values (@($Stage, $Configuration) + $KeyArguments)
     $ready = $Outputs.Count -gt 0
     foreach ($output in $Outputs) {
@@ -96,7 +97,7 @@ function Invoke-InuCachedAction {
             }
         } catch { $cache = $null }
     }
-    if ($null -ne $cache -and $cache.schema -eq 2 -and $cache.inputs -eq $inputHash -and
+    if ($null -ne $cache -and $cache.schema -eq 3 -and $cache.inputs -eq $inputHash -and
         $cache.mutable -eq [bool]$MutableOutputs -and
         ($cache.outputs -eq (Get-InuStageOutputHash -Paths $Outputs -MutableOutputs:$MutableOutputs))) {
         Write-Host "[ OK ] ${Stage}: cached; inputs and outputs are current."
@@ -104,6 +105,7 @@ function Invoke-InuCachedAction {
     }
     # Invalidate before running: a failed/interrupted stage can never retain a hit.
     if (Test-Path -LiteralPath $cacheFile -PathType Leaf) { Remove-Item -LiteralPath $cacheFile -Force }
+    Write-Host ("[INFO] ${Stage}: SHA-256 checked {0} source/build input file(s) before recompilation decision; cache miss requires this stage to run." -f $inputFiles.Count)
     & $Action
     if ($Dry) { return }
     foreach ($output in $Outputs) {
@@ -120,7 +122,7 @@ function Invoke-InuCachedAction {
     New-Item -ItemType Directory -Path $CacheDirectory -Force | Out-Null
     $temporary = $cacheFile + '.' + [Guid]::NewGuid().ToString('N') + '.tmp'
     try {
-        [pscustomobject]@{ schema=2; inputs=$inputHash; mutable=[bool]$MutableOutputs;
+        [pscustomobject]@{ schema=3; inputs=$inputHash; mutable=[bool]$MutableOutputs;
             outputs=Get-InuStageOutputHash -Paths $Outputs -MutableOutputs:$MutableOutputs
         } | ConvertTo-Json | Set-Content -LiteralPath $temporary -Encoding UTF8
         Move-Item -LiteralPath $temporary -Destination $cacheFile -Force
