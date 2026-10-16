@@ -1,5 +1,5 @@
 {
-  "version": "0.1.85",
+  "version": "0.1.86",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "ee3cc81a7d0805aa79cfd0bb2a0bb77594a0acdab76f75eea673ec9e396eefd0"
+      "sha256": "79e69f4b632e1f4d87647dd0e2d425eb3dd19e869a7ceda01249e80e075e9503"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "74409ef2548dd89c0475cd13817c35e25c860119fcce74a4d9f3f28b32843762"
+      "sha256": "f4897a8d913a4bf311df36444c3774f33b9cf66153fb1d0eb6b0f23fa388f9bf"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "3295c188947c1c6adfb9ea3ca5c419b423079854dad1a200c4d0ef5c3a003b63"
+      "sha256": "54acd4fa8f873a326d04c0389c649150199fa800a24fbbb346d8a3252c0f27c9"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "e9a42e0213420dad8053f941a56ea56a10a0e28ade0497ac1d0ca531894dfdc7"
+      "sha256": "77730a1a5e29d37dd2b6421d95ed447af3959d3db4c9035c4f54b9ee394b8097"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "21e46297a2f49c0fcc90c12513374849ad7dd621faf94f315d929c351b2b3f87"
+      "sha256": "f590b96ca1406c0252cb1a104a7bb5315f4a9b57363af3ca5e333979a6f774ce"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4243,7 +4243,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/GraphicsHardwareStartup.cs",
-      "sha256": "7a3e1916f1f0fd25b8c4300a71a2dc4b9a3cfc838368715c6bc2c774aa21c0ae"
+      "sha256": "8f5e82b8d192b1d1f32591ccb95a4c150ffa083f391c2f47fe854a207964e89f"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/InputHardwareStartup.cs",

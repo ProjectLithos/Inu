@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.84",
-  "version": "0.1.85",
-  "changedFiles": 23,
-  "summary": "Mount every detected usable filesystem volume while keeping only the bootable drive as the system drive; improve QEMU AHCI SATA link reset/IDENTIFY readiness; keep absent optional hardware non-fatal; expose system-drive and volume-discovery APIs.",
+  "baseVersion": "0.1.85",
+  "version": "0.1.86",
+  "changedFiles": 15,
+  "summary": "Prevent CLI/Test-kernel boot from blocking while promoting VirtIO-GPU: validate the GPU but retain the working UEFI GOP console unless the kernel GUI area is actually selected; keep storage and userland startup reachable.",
   "deletedFiles": 0
 }

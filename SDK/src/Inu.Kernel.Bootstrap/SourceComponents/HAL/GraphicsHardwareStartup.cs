@@ -18,6 +18,10 @@ public static unsafe class GraphicsHardwareStartup
         if (!KernelVirtioGpu.Initialize()) return false;
         if (KernelVirtioGpu.GetCapabilities().Displays != 0U)
         {
+#if INU_KERNELAREA_GUI
+            // Only a graphical kernel/session needs to replace the working bootstrap console during boot.
+            // CLI/Test kernels still initialise and validate VirtIO-GPU, but retain UEFI GOP so a full-frame
+            // synchronous transfer cannot block unrelated storage/userland startup.
             if (TryUsePreferredGraphicsDisplay())
             {
                 FramebufferBufferCapabilities preferredBuffers = KernelConsole.GetFramebufferBufferCapabilities();
@@ -40,6 +44,9 @@ public static unsafe class GraphicsHardwareStartup
                 if (!KernelStructuredLogging.InfoLine("graphics","GraphicsHardwareStartup.Initialize","Selected graphics device promoted; bootstrap framebuffer remains available as fallback metadata.")) return false;
             }
             else if (!KernelStructuredLogging.WarningLine("graphics","GraphicsHardwareStartup.Initialize","Selected graphics device could not be promoted; retaining the bootstrap framebuffer.")) return false;
+#else
+            if (!KernelStructuredLogging.InfoLine("graphics","GraphicsHardwareStartup.Initialize","VirtIO-GPU is available; CLI startup retains the working bootstrap framebuffer.")) return false;
+#endif
         }
         VirtioGpuCapabilities virtioGpu = KernelVirtioGpu.GetCapabilities();
         KernelGraphicsCapabilities graphics = KernelGraphics.GetCapabilities();
