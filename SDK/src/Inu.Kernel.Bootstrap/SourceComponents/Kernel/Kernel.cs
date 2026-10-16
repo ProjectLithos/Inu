@@ -35,7 +35,7 @@ public static class Kernel
         if (!BootstrapGraphicsTransportStartup.Initialize()) return false;
         if (!InputHardwareStartup.Initialize()) return false;
         if (!DriverInfrastructureStartup.Initialize()) return false;
-        if (!InputHardwareStartup.EnableHardwareInterrupts()) return false;
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_GRAPHICS_HW")) return false;
         if (!GraphicsHardwareStartup.Initialize()) return false;
         if (!StorageHardwareStartup.Initialize()) return false;
         if (!NetworkingHardwareStartup.Initialize()) return false;
@@ -44,8 +44,15 @@ public static class Kernel
         if (!FilesystemHardwareStartup.Initialize()) return false;
 
         // Userland/session policy is also selected source, not a mandatory kernel behaviour.
+        // Do not arm PS/2 hardware IRQ delivery until all synchronous hardware/service startup
+        // has completed. Earlier arming allows device callbacks to re-enter the still-running
+        // boot path and can stall CLI/Test kernels before the shell can publish INTERACTIVE_READY.
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_USERLAND")) return false;
         if (!UserlandCommandStartup.Initialize(boot)) return false;
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_INTERRUPTS")) return false;
         if (!InterruptRuntimeStartup.Enable()) return false;
+        if (!InputHardwareStartup.EnableHardwareInterrupts()) return false;
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_SESSION")) return false;
 
         // Default Inu policy: prefer the graphical session, then fall back to text.
         // An OS author may replace this with TextConsoleSessionStartup.Run(), a custom

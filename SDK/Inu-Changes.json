@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.85",
-  "version": "0.1.86",
-  "changedFiles": 15,
-  "summary": "Prevent CLI/Test-kernel boot from blocking while promoting VirtIO-GPU: validate the GPU but retain the working UEFI GOP console unless the kernel GUI area is actually selected; keep storage and userland startup reachable.",
+  "baseVersion": "0.1.87",
+  "version": "0.1.88",
+  "changedFiles": 14,
+  "summary": "Repair ChangedFiles release packaging so every incremental archive carries the required root Build.bat and Build.ps1 bootstrap companions before metadata validation.",
   "deletedFiles": 0
 }

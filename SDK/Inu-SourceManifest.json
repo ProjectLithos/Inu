@@ -1,5 +1,5 @@
 {
-  "version": "0.1.86",
+  "version": "0.1.88",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "79e69f4b632e1f4d87647dd0e2d425eb3dd19e869a7ceda01249e80e075e9503"
+      "sha256": "131bb7ea31ed05884850f93707b383d9b2eaf8eae55ab2c2ead30b545dbced1e"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "f4897a8d913a4bf311df36444c3774f33b9cf66153fb1d0eb6b0f23fa388f9bf"
+      "sha256": "cf4a1d47cd0703a4969e707db897324c23fedfe6e0e4a1105b1d04fc0f35c429"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "54acd4fa8f873a326d04c0389c649150199fa800a24fbbb346d8a3252c0f27c9"
+      "sha256": "3e39013d8123b486d946f3705b581255cd509349bb3690b55e6f81c9f10b0935"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "77730a1a5e29d37dd2b6421d95ed447af3959d3db4c9035c4f54b9ee394b8097"
+      "sha256": "0d63b6cb0ee3782ef52744a6d2c6aca0cf4e41b35e50bb7582a5ec957b4e0e90"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "f590b96ca1406c0252cb1a104a7bb5315f4a9b57363af3ca5e333979a6f774ce"
+      "sha256": "42278d0539457f6545d5503611c257ec51b28dfc1a54ad36646fe7f486c212ba"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4263,7 +4263,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Kernel/Kernel.cs",
-      "sha256": "d445c42e04b397bc52dd31a41d8ab7b5a24726fb1c40ef9d4e72ac1dde4f96f6"
+      "sha256": "31fb6ebebf89b487c1311cea888afa4e1769af7641e7f74bf981ec951655426c"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Startup/DesktopOrTextSessionStartup.cs",
