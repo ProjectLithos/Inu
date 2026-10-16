@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.88",
-  "version": "0.1.89",
+  "baseVersion": "0.1.89",
+  "version": "0.1.90",
   "changedFiles": 17,
-  "summary": "Honor Kath hardware selections end-to-end: derive normal QEMU USB/network/graphics devices from Inu.json and prevent Test-OS work-area inclusion from starting unselected PS/2 input.",
+  "summary": "Make hardware selection authoritative at composition time: compile PS/2 only when explicitly selected, keep USB HID independent, and make Microkernel the default kernel model for new normal and Test OS projects.",
   "deletedFiles": 0
 }

@@ -7,13 +7,13 @@ using Inu.Kernel.Gui;
 #endif
 using Inu.Kernel.TimerDispatch;
 using Inu.Kernel.Time;
-#if INU_KERNELAREA_INPUT
+#if INU_INPUT_PS2
 using Inu.Kernel.Ps2;
 #endif
 #if INU_KERNELAREA_DRIVERS
 using Inu.Kernel.InterruptBroker;
 #endif
-#if INU_KERNELAREA_USB
+#if INU_INPUT_USB_HID
 using Inu.Usb.Hid;
 #endif
 
@@ -27,17 +27,19 @@ public static unsafe class InputHardwareStartup
     private static UInt32 _inputTimerHandle;
     private const UInt64 KeyboardRepeatInitialDelayNanoseconds = 500000000UL;
     private const UInt64 KeyboardRepeatIntervalNanoseconds = 40000000UL;
+#if INU_INPUT_PS2
     private static Boolean _ps2RepeatActive;
     private static Ps2Key _ps2RepeatKey;
     private static Char _ps2RepeatCharacter;
     private static UInt64 _ps2RepeatDeadline;
-#if INU_KERNELAREA_USB
+#endif
+#if INU_INPUT_USB_HID
     private static Boolean _usbRepeatActive;
     private static Byte _usbRepeatUsage;
     private static Char _usbRepeatCharacter;
     private static UInt64 _usbRepeatDeadline;
 #endif
-#if INU_KERNELAREA_DRIVERS
+#if INU_INPUT_PS2 && INU_KERNELAREA_DRIVERS
     private static UInt64 _keyboardIrqHandle;
     private static UInt64 _mouseIrqHandle;
 #endif
@@ -47,6 +49,7 @@ public static unsafe class InputHardwareStartup
     {
         if (_initialized) return true;
 #if INU_KERNELAREA_INPUT
+#if INU_INPUT_PS2
         Boolean ps2KeyboardSelected = HasConfiguredInput("ps2-keyboard");
         Boolean ps2MouseSelected = HasConfiguredInput("ps2-mouse");
         Boolean ps2Selected = ps2KeyboardSelected || ps2MouseSelected;
@@ -65,6 +68,7 @@ public static unsafe class InputHardwareStartup
             if (ps2KeyboardSelected && !KernelPs2.SetKeyboardEventHandler(&HandlePs2KeyboardEvent)) return false;
             if (ps2MouseSelected && !KernelPs2.SetMouseEventHandler(&HandlePs2MouseEvent)) return false;
         }
+#endif
         if (!KernelTimerDispatch.Register(1000000UL, &ServiceInput, 0UL, out _inputTimerHandle)) return false;
 #endif
         _initialized = true;
@@ -77,7 +81,7 @@ public static unsafe class InputHardwareStartup
     /// <summary>Attaches hardware IRQ delivery after the selected interrupt broker is online.</summary>
     public static Boolean EnableHardwareInterrupts()
     {
-#if INU_KERNELAREA_INPUT && INU_KERNELAREA_DRIVERS
+#if INU_INPUT_PS2 && INU_KERNELAREA_DRIVERS
         Boolean ps2KeyboardSelected = HasConfiguredInput("ps2-keyboard");
         Boolean ps2MouseSelected = HasConfiguredInput("ps2-mouse");
         if (ps2KeyboardSelected || ps2MouseSelected)
@@ -96,7 +100,7 @@ public static unsafe class InputHardwareStartup
     public static Boolean EnsureGraphicalInputProviders()
     {
         if (!Initialize()) return false;
-#if INU_KERNELAREA_INPUT
+#if INU_INPUT_PS2
         Boolean ps2KeyboardSelected = HasConfiguredInput("ps2-keyboard");
         Boolean ps2MouseSelected = HasConfiguredInput("ps2-mouse");
         if (ps2KeyboardSelected || ps2MouseSelected)
@@ -117,13 +121,13 @@ public static unsafe class InputHardwareStartup
             KernelConsole.WriteLine((ps2KeyboardSelected && graphicalPs2.Keyboard) || (ps2MouseSelected && graphicalPs2.Mouse) ? "NOKMAIN:GUI-INPUT:PS2:OK" : "NOKMAIN:GUI-INPUT:PS2:NO-DEVICE");
         }
 #endif
-#if INU_KERNELAREA_USB
+#if INU_INPUT_USB_HID
         if (!UsbHid.IsInitialized())
         {
             KernelConsole.WriteLine("NOKMAIN:GUI-INPUT:USB:FAIL");
             return false;
         }
-#if INU_KERNELAREA_INPUT
+#if INU_INPUT_USB_HID
         if (!UsbHid.SetKeyboardEventHandler(&HandleUsbKeyboardEvent) || !UsbHid.SetMouseEventHandler(&HandleUsbMouseEvent))
         {
             KernelConsole.WriteLine("NOKMAIN:GUI-INPUT:USB:FAIL");
@@ -147,14 +151,18 @@ public static unsafe class InputHardwareStartup
 
     private static Boolean ServiceInput(UInt64 cookie)
     {
-        Boolean ok = !(HasConfiguredInput("ps2-keyboard") || HasConfiguredInput("ps2-mouse")) || KernelPs2.Service();
-#if INU_KERNELAREA_USB
+        Boolean ok = true;
+#if INU_INPUT_PS2
+        ok = KernelPs2.Service();
+#endif
+#if INU_INPUT_USB_HID
         if (UsbHid.IsInitialized()) ok = UsbHid.Service() & ok;
 #endif
         ok = ServiceKeyboardRepeat() & ok;
         return ok;
     }
 
+#if INU_INPUT_PS2
     private static Boolean HandlePs2Interrupt(Byte vector, UInt64 cookie) => KernelPs2.Service();
     private static Boolean HandlePs2MouseEvent(Ps2MouseState input)
     {
@@ -164,7 +172,8 @@ public static unsafe class InputHardwareStartup
         return true;
 #endif
     }
-#if INU_KERNELAREA_USB
+#endif
+#if INU_INPUT_USB_HID
     private static Boolean HandleUsbMouseEvent(UsbHidMouseState input)
     {
 #if INU_KERNELAREA_GUI
@@ -175,6 +184,7 @@ public static unsafe class InputHardwareStartup
     }
 #endif
 
+#if INU_INPUT_PS2
     private static Boolean HandlePs2KeyboardEvent(Ps2KeyboardEvent input)
     {
 #if INU_KERNELAREA_GUI
@@ -221,8 +231,9 @@ public static unsafe class InputHardwareStartup
         else if(key==Ps2Key.Home)code=0x84;else if(key==Ps2Key.End)code=0x85;else if(key==Ps2Key.Delete)code=0x86;else if(key==Ps2Key.PageUp)code=0x87;else if(key==Ps2Key.PageDown)code=0x88;
         return code!=0U;
     }
+#endif
 
-#if INU_KERNELAREA_USB
+#if INU_INPUT_USB_HID
     private static Boolean HandleUsbKeyboardEvent(UsbHidKeyboardEvent input)
     {
 #if INU_KERNELAREA_GUI
@@ -274,14 +285,16 @@ public static unsafe class InputHardwareStartup
     }
 #endif
 
+#if INU_INPUT_PS2
     private static Boolean IsPs2Repeatable(Ps2KeyboardEvent input)
     {
         if (input.Control || input.Alt) return false;
         return input.Key == Ps2Key.Up || input.Key == Ps2Key.Down || input.Key == Ps2Key.Left || input.Key == Ps2Key.Right ||
                input.Key == Ps2Key.PageUp || input.Key == Ps2Key.PageDown || IsRepeatableCharacter(input.Character);
     }
+#endif
 
-#if INU_KERNELAREA_USB
+#if INU_INPUT_USB_HID
     private static Boolean IsUsbRepeatable(UsbHidKeyboardEvent input)
     {
         if ((input.Modifiers & 0x55U) != 0U) return false;
@@ -302,6 +315,7 @@ public static unsafe class InputHardwareStartup
     {
         UInt64 now = KernelTime.GetMonotonicNanoseconds();
         Boolean ok = true;
+#if INU_INPUT_PS2
         if (_ps2RepeatActive && now >= _ps2RepeatDeadline)
         {
             _ps2RepeatDeadline = NextRepeatDeadline(KeyboardRepeatIntervalNanoseconds);
@@ -309,7 +323,8 @@ public static unsafe class InputHardwareStartup
                 UserlandRuntimeStartup.QueueInputCode(code) : UserlandRuntimeStartup.QueueCharacter(_ps2RepeatCharacter);
             if (!repeated) { _ps2RepeatActive = false; ok = false; }
         }
-#if INU_KERNELAREA_USB
+#endif
+#if INU_INPUT_USB_HID
         if (_usbRepeatActive && now >= _usbRepeatDeadline)
         {
             _usbRepeatDeadline = NextRepeatDeadline(KeyboardRepeatIntervalNanoseconds);

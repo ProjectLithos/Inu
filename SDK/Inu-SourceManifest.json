@@ -1,5 +1,5 @@
 {
-  "version": "0.1.89",
+  "version": "0.1.90",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "333bb18b623446e676570aba184c93aab1b64094f64fd2c627ec2a1ee78b6ecc"
+      "sha256": "5fa56b71fbcc9a9d0f5afd467c67f5cd9281f3ee759d53ae6943de7d8a67a814"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "faad1b4483316c7def7a3de9a65ceec5b2326251677c817d0b13fdb202e630de"
+      "sha256": "af8e3d96ae8d517aeb5f0e298f9da3f749d84f9e4c00f3614080803229c16b54"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "ac5c0a5879e170145176e8838271cec66c79f893f6743b44835bc3089ad563fc"
+      "sha256": "8c10b9d44286f7a08be14b971dc64ec35fc525499f99c2088bb2999aab331066"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "75fe3c1ec9f9537b5d392db34062db7460afc7223f33b8a10bb6692b5bd473c3"
+      "sha256": "1ec4b88284fa7e5728bef1d378f67353586c3a99635910668ac5e12c9dc4ce11"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "1d5758cf9092b70a06b2cb890021e649063da42521ac74b92979d2eb5b3a1675"
+      "sha256": "ee86c3862a802a9c53660d1b5bd5715d05a316a6747e3cfa7fc9c4071a53d3e1"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4247,7 +4247,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/InputHardwareStartup.cs",
-      "sha256": "66eee65f30dbdc5bd80fda84765d313f6c0b5f0bf57bbef16a619542bd8d55d4"
+      "sha256": "f9caed493a67a7573a2fb97ddf50f43899172467bb8d23757a19b3d3fe5ef852"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/NetworkingHardwareStartup.cs",
