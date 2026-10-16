@@ -1,3 +1,6 @@
+using Inu.Host.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -34,6 +37,7 @@ internal static class Program
             string root = ResolveRoot(args);
             string command = args[0].ToLowerInvariant();
             string[] tail = args.Skip(1).ToArray();
+            using IHost host = CreateHost(root);
 
             switch (command)
             {
@@ -50,17 +54,30 @@ internal static class Program
                 // modules remain separately maintainable inside SDK/src, but Kath and SDK build
                 // scripts invoke only inu.exe.  Users therefore have one stable host contract.
                 case "project":
-                    return RunHostModule(root, "Inu.ProjectCreator", tail);
+                    return RunHostModule(host.Services, "Inu.ProjectCreator", tail);
                 case "compile":
-                    return RunHostModule(root, "Inu.ManagedCompiler", Prepend("compile", tail));
+                    return RunHostModule(host.Services, "Inu.ManagedCompiler", Prepend("compile", tail));
                 case "link":
-                    return RunHostModule(root, "Inu.Linker", Prepend("link", tail));
+                    return RunHostModule(host.Services, "Inu.Linker", Prepend("link", tail));
                 case "image":
-                    return RunHostModule(root, "Inu.ImageBuilder", tail);
+                    return RunHostModule(host.Services, "Inu.ImageBuilder", tail);
                 case "userland":
-                    return RunHostModule(root, "Inu.UserlandCompiler", Prepend("compile", tail));
+                    return RunHostModule(host.Services, "Inu.UserlandCompiler", Prepend("compile", tail));
                 case "qemu":
-                    return RunHostModule(root, "Inu.QemuLauncher", tail);
+                    return RunHostModule(host.Services, "Inu.QemuLauncher", tail);
+                case "sdk" when tail.Length > 0 && tail[0].Equals("api", StringComparison.OrdinalIgnoreCase):
+                    Console.WriteLine(JsonSerializer.Serialize(host.Services.GetRequiredService<SdkApiCatalogService>().Read(), new JsonSerializerOptions { WriteIndented = true }));
+                    return 0;
+                case "analyze":
+                    return Analyze(host.Services, tail);
+                case "host" when tail.Length > 1 && tail[0].Equals("disk", StringComparison.OrdinalIgnoreCase) && tail[1].Equals("list", StringComparison.OrdinalIgnoreCase):
+                    if (tail.Length < 3) throw new ArgumentException("Usage: inu host disk list <OS project path>");
+                    Console.WriteLine(JsonSerializer.Serialize(host.Services.GetRequiredService<DiskImageService>().List(tail[2]), new JsonSerializerOptions { WriteIndented = true }));
+                    return 0;
+                case "host" when tail.Length > 0 && tail[0].Equals("validate", StringComparison.OrdinalIgnoreCase):
+                    var validation = host.Services.GetRequiredService<SdkValidationService>().Validate();
+                    Console.WriteLine(JsonSerializer.Serialize(validation, new JsonSerializerOptions { WriteIndented = true }));
+                    return validation.Success ? 0 : 1;
                 default:
                     throw new ArgumentException($"Unknown Inu command: {args[0]}", nameof(args));
             }
@@ -135,6 +152,10 @@ internal static class Program
         Console.WriteLine("  inu image create <InuProject.json> [options]");
         Console.WriteLine("  inu userland <InuProject.json> [options]");
         Console.WriteLine("  inu qemu run <InuProject.json> [options]");
+        Console.WriteLine("  inu sdk api                 (typed SDK API model as JSON)");
+        Console.WriteLine("  inu analyze <source.cs> [--path-separator /]");
+        Console.WriteLine("  inu host disk list <OS project path>");
+        Console.WriteLine("  inu host validate            (SDK manifest/API validation)");
         Console.WriteLine("  inu toolchain ensure [--root <path>]");
         Console.WriteLine("  inu version        (aliases: --version, -v)");
         Console.WriteLine("  inu help           (aliases: --help, -h)");
@@ -160,7 +181,14 @@ internal static class Program
         return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".."));
     }
 
-    private static int RunHostModule(string inuRoot, string moduleName, string[] originalArgs)
+    private static IHost CreateHost(string root)
+    {
+        HostApplicationBuilder builder = Microsoft.Extensions.Hosting.Host.CreateApplicationBuilder();
+        builder.Services.AddInuHostServices(root);
+        return builder.Build();
+    }
+
+    private static int RunHostModule(IServiceProvider services, string moduleName, string[] originalArgs)
     {
         string configuration = "Release";
         List<string> forwarded = new();
@@ -173,21 +201,23 @@ internal static class Program
                 if (configuration is not ("Debug" or "Release")) throw new ArgumentException("--host-configuration must be Debug or Release.");
                 continue;
             }
-            if (originalArgs[i].Equals("--root", StringComparison.OrdinalIgnoreCase))
-            {
-                i++; // root is a host-only option and is not forwarded to SDK modules.
-                continue;
-            }
+            if (originalArgs[i].Equals("--root", StringComparison.OrdinalIgnoreCase)) { i++; continue; }
             forwarded.Add(originalArgs[i]);
         }
+        return services.GetRequiredService<HostModuleService>().Run(moduleName, forwarded, configuration);
+    }
 
-        string sdkRoot = Path.Combine(inuRoot, "SDK");
-        string dotnet = Path.Combine(inuRoot, ".toolchain", "DotNet", "dotnet.exe");
-        string module = Path.Combine(sdkRoot, "src", moduleName, "bin", "x64", configuration, "net10.0", moduleName + ".dll");
-        if (!File.Exists(dotnet)) throw new FileNotFoundException("Inu private .NET host is missing.", dotnet);
-        if (!File.Exists(module)) throw new FileNotFoundException($"Inu host module '{moduleName}' has not been built for {configuration}.", module);
-
-        return RunProcess(dotnet, new[] { module }.Concat(forwarded), sdkRoot);
+    private static int Analyze(IServiceProvider services, string[] args)
+    {
+        if (args.Length < 1) throw new ArgumentException("Usage: inu analyze <source.cs> [--path-separator <char>]");
+        string path = Path.GetFullPath(args[0]);
+        char? separator = null;
+        for (int i = 1; i < args.Length; i++)
+            if (args[i].Equals("--path-separator", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length) separator = args[++i][0];
+        string source = File.ReadAllText(path);
+        var diagnostics = services.GetRequiredService<RoslynAnalysisService>().Analyze(source, separator);
+        Console.WriteLine(JsonSerializer.Serialize(diagnostics, new JsonSerializerOptions { WriteIndented = true }));
+        return diagnostics.Any(d => d.Severity.Equals("Error", StringComparison.OrdinalIgnoreCase)) ? 1 : 0;
     }
 
     private static int RunProcess(string fileName, IEnumerable<string> arguments, string workingDirectory)

@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.79",
-  "version": "0.1.81",
-  "changedFiles": 30,
-  "summary": "Consolidate host-side SDK operations behind Inu/Bin/inu.exe, stop producing separate apphost executables for SDK host modules, and make New OS creation verify/materialise required files then open the exact generated workspace directly.",
+  "baseVersion": "0.1.83",
+  "version": "0.1.84",
+  "changedFiles": 15,
+  "summary": "Normalize Inu CLI bootstrap version verification so invisible external-process output artefacts cannot produce a false mismatch; report execution, parse, and genuine version failures separately.",
   "deletedFiles": 0
 }

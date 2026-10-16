@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <InuSdkRoot Condition="'$(InuSdkRoot)' == ''">$(MSBuildThisFileDirectory)</InuSdkRoot>
+    <InuTargetArchitecture Condition="'$(InuTargetArchitecture)' == ''">x64</InuTargetArchitecture>
+    <InuKernelModel Condition="'$(InuKernelModel)' == ''">Microkernel</InuKernelModel>
+    <InuBootTarget Condition="'$(InuBootTarget)' == ''">UEFI</InuBootTarget>
+    <InuConfiguration Condition="'$(InuConfiguration)' == ''">$(Configuration)</InuConfiguration>
+    <InuHostExecutable Condition="'$(InuHostExecutable)' == ''">$(InuSdkRoot)..\Bin\inu.exe</InuHostExecutable>
+  </PropertyGroup>
+</Project>

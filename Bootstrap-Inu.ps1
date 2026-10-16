@@ -41,8 +41,17 @@ try {
         $built=Join-Path $out 'inu.exe'; if(-not(Test-Path -LiteralPath $built)){Fail 'Bootstrap publish did not produce inu.exe.'}
         Copy-Item -LiteralPath $built -Destination $stable -Force
     }
-    $reported=(& $stable --version | Select-Object -First 1).Trim()
-    if($LASTEXITCODE -ne 0 -or $reported -ne $Version){Fail "inu.exe version mismatch. Expected $Version, got '$reported'."}
+    # Capture the process status immediately and compare a normalized semantic version.
+    # External command output can carry formatting/stream artefacts that are invisible in
+    # the failure message, so never compare the raw pipeline object directly.
+    $reportedOutput = @(& $stable --version)
+    $versionExitCode = $LASTEXITCODE
+    if($versionExitCode -ne 0){Fail "inu.exe --version failed with exit code $versionExitCode."}
+    $reportedText = (($reportedOutput | ForEach-Object { [string]$_ }) -join "`n").Trim()
+    $versionMatch = [Text.RegularExpressions.Regex]::Match($reportedText, '(?<!\d)\d+\.\d+\.\d+(?!\d)')
+    if(-not $versionMatch.Success){Fail "inu.exe did not report a semantic x.y.z version. Raw output: '$reportedText'."}
+    $reported = $versionMatch.Value
+    if($reported -ne $Version){Fail "inu.exe version mismatch. Expected $Version, got $reported."}
     Ok "Bin\inu.exe reports $reported."
     Info 'Running the Inu build for normal products...'
     $buildArguments=@('build','--root',$Root)

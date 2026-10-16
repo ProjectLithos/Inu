@@ -156,7 +156,7 @@ static bool IsSeparatorLike(char value)
 {
     if(value==0||value>0x7F)return false;
     if((value>='A'&&value<='Z')||(value>='a'&&value<='z')||(value>='0'&&value<='9'))return false;
-    return value!='.'&&value!='_'&&value!='-'&&value!=' ';
+    return value!='.'&&value!='_'&&value!='-'&&value!=' '&&value!='{'&&value!='}';
 }
 
 static void ReportInvalidSeparator(string sourcePath,string text,int index,char separator,char invalid,ref bool valid)

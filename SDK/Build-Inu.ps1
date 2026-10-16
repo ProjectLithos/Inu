@@ -20,6 +20,11 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $productRoot = Split-Path -Parent (Split-Path -Parent $root)
 $releaseVersion = ([IO.File]::ReadAllText((Join-Path $productRoot 'VERSION'))).Trim()
 & (Join-Path $root 'Verify-SourceOwnership.ps1')
+$inuHostValidator = Join-Path $productRoot 'Bin\inu.exe'
+if (Test-Path -LiteralPath $inuHostValidator -PathType Leaf) {
+    & $inuHostValidator host validate
+    if ($LASTEXITCODE -ne 0) { throw "Inu hosted SDK validation failed with exit code $LASTEXITCODE." }
+}
 
 function Get-InuSdkCodeFingerprint {
     param([Parameter(Mandatory = $true)][string]$SdkRoot)

@@ -2,6 +2,7 @@
   <Import Project="Inu.Configuration.props" Condition="Exists('Inu.Configuration.props')" />
   <Import Project="Inu.Configuration.targets" Condition="Exists('Inu.Configuration.targets')" />
   <Import Project="Inu.SdkReferences.props" Condition="Exists('Inu.SdkReferences.props')" />
+  <Import Project="$(InuSdkRoot)\Inu.Sdk.props" Condition="Exists('$(InuSdkRoot)\Inu.Sdk.props')" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net10.0</TargetFramework>
@@ -67,4 +68,5 @@
   <Target Name="RequireKernelSourcePlan" BeforeTargets="PrepareForBuild">
     <Error Condition="!Exists('Inu.KernelSources.targets')" Text="Kath kernel source plan is missing. Open the OS in Kath to compose its selected source dependencies before building." />
   </Target>
+  <Import Project="$(InuSdkRoot)\Inu.Sdk.targets" Condition="Exists('$(InuSdkRoot)\Inu.Sdk.targets')" />
 </Project>

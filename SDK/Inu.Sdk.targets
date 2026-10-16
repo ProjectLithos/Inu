@@ -1,0 +1,9 @@
+<Project>
+  <Target Name="InuValidateProject" BeforeTargets="CoreCompile" Condition="'$(InuProject)' == 'true'">
+    <Error Condition="'$(InuTargetArchitecture)' == ''" Text="InuTargetArchitecture is required." />
+    <Message Importance="Low" Text="Inu SDK: target=$(InuTargetArchitecture), kernel=$(InuKernelModel), boot=$(InuBootTarget), configuration=$(InuConfiguration)" />
+  </Target>
+  <Target Name="InuBuildImage" DependsOnTargets="Build" Condition="'$(InuProjectManifest)' != '' and Exists('$(InuHostExecutable)')">
+    <Exec Command="&quot;$(InuHostExecutable)&quot; os build &quot;$(InuProjectManifest)&quot; --configuration $(Configuration)" />
+  </Target>
+</Project>
