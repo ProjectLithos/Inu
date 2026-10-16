@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.89",
-  "version": "0.1.90",
-  "changedFiles": 17,
-  "summary": "Make hardware selection authoritative at composition time: compile PS/2 only when explicitly selected, keep USB HID independent, and make Microkernel the default kernel model for new normal and Test OS projects.",
+  "baseVersion": "0.1.90",
+  "version": "0.1.91",
+  "changedFiles": 18,
+  "summary": "Fix generated Microkernel startup so selected USB/HID and other selected hardware stages are actually initialized, defer device IRQ arming until synchronous startup completes, add per-stage QEMU progress windows for slow TCG boots, and make Microkernel the ProjectCreator default/fallback.",
   "deletedFiles": 0
 }

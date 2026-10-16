@@ -234,6 +234,7 @@ static int MainEntry(string[] args)
         bool gcStressCompleted = false;
         bool managedProgressGraceActivated = false;
         string? lastManagedProgressMessage = null;
+        string? lastBootStageMarker = null;
         string serialText = string.Empty;
         while (true)
         {
@@ -244,8 +245,15 @@ static int MainEntry(string[] args)
             if (acceptanceClock.Elapsed >= acceptanceDeadline)
             {
                 serialText = ReadSharedText(serialLog);
+                string? boundaryBootStage = GetLatestBootStageMarker(serialText);
                 bool boundaryManagedProgress = serialText.Contains("EH:1890", StringComparison.Ordinal);
-                if (boundaryManagedProgress && !managedProgressGraceActivated)
+                if (boundaryBootStage is not null && !string.Equals(boundaryBootStage, lastBootStageMarker, StringComparison.Ordinal))
+                {
+                    lastBootStageMarker = boundaryBootStage;
+                    acceptanceDeadline = acceptanceClock.Elapsed + TimeSpan.FromSeconds(timeoutSeconds);
+                    Console.WriteLine($"[INFO] Kernel startup advanced to {boundaryBootStage} at the acceptance boundary; allowing the normal {timeoutSeconds}-second bounded window for the next startup stage.");
+                }
+                else if (boundaryManagedProgress && !managedProgressGraceActivated)
                 {
                     managedProgressGraceActivated = true;
                     acceptanceDeadline += TimeSpan.FromSeconds(managedProgressGraceSeconds);
@@ -270,6 +278,14 @@ static int MainEntry(string[] args)
             }
 
             serialText = ReadSharedText(serialLog);
+            string? bootStageMarker = GetLatestBootStageMarker(serialText);
+            if (bootStageMarker is not null && !string.Equals(bootStageMarker, lastBootStageMarker, StringComparison.Ordinal))
+            {
+                lastBootStageMarker = bootStageMarker;
+                TimeSpan stageDeadline = acceptanceClock.Elapsed + TimeSpan.FromSeconds(timeoutSeconds);
+                if (stageDeadline > acceptanceDeadline) acceptanceDeadline = stageDeadline;
+                Console.WriteLine($"[INFO] Kernel startup advanced to {bootStageMarker}; allowing the normal {timeoutSeconds}-second bounded window for the next startup stage.");
+            }
             string? managedProgressMessage = GetLiveManagedConformanceStage(serialText);
             if (managedProgressMessage is not null && !string.Equals(managedProgressMessage, lastManagedProgressMessage, StringComparison.Ordinal))
             {
@@ -479,7 +495,8 @@ static int MainEntry(string[] args)
         }
         if (!serialText.Contains("[[INU:INTERACTIVE_READY]]", StringComparison.Ordinal))
         {
-            throw Fail($"Timed out before Inu emitted the interactive-ready marker after the bounded boot/GC acceptance windows. Serial log: {serialLog}");
+            string stageDetail = lastBootStageMarker is null ? string.Empty : $" Last completed kernel startup stage: {lastBootStageMarker}.";
+            throw Fail($"Timed out before Inu emitted the interactive-ready marker after the bounded boot/GC acceptance windows.{stageDetail} Serial log: {serialLog}");
         }
         throw Fail($"Inu readiness markers were observed, but runtime acceptance did not complete within the bounded boot/GC acceptance windows. Serial log: {serialLog}");
     }
@@ -1636,6 +1653,17 @@ static void PrintManagedConformanceDiagnosticInterpretation(string serialText)
 
     if (furthestPosition >= 0)
         Console.Error.WriteLine($"[INFO] Managed conformance last stage: {furthestMarker} - {furthestDescription}.");
+}
+
+
+static string? GetLatestBootStageMarker(string serialText)
+{
+    const string prefix = "[[INU:BOOT_STAGE_";
+    int start = serialText.LastIndexOf(prefix, StringComparison.Ordinal);
+    if (start < 0) return null;
+    int end = serialText.IndexOf("]]", start + prefix.Length, StringComparison.Ordinal);
+    if (end < 0) return null;
+    return serialText.Substring(start + "[[INU:".Length, end - (start + "[[INU:".Length));
 }
 
 static string? GetLiveManagedConformanceStage(string serialText)

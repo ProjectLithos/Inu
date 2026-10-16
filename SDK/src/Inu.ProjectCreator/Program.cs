@@ -79,7 +79,7 @@ static int MainEntry(string[] args)
     string projectName = "MinimalKernel";
     string author = "The DCL Group";
     string targetArchitecture = "x64";
-    string kernelModel = "Monolithic";
+    string kernelModel = "Microkernel";
     string bootProtocol = "Uefi";
     string runtimePack = "Inu.RuntimePack.X64.NativeAot";
     string projectFile = "InuKernel.csproj";
@@ -176,10 +176,10 @@ static int MainEntry(string[] args)
             if (ideRoot.TryGetProperty("kernelArchitecture", out JsonElement modelElement) && !string.IsNullOrWhiteSpace(modelElement.GetString()))
             {
                 string configured = modelElement.GetString()!;
-                kernelModel = string.Equals(configured, "microkernel", StringComparison.OrdinalIgnoreCase) ? "Microkernel"
+                kernelModel = string.Equals(configured, "monolithic", StringComparison.OrdinalIgnoreCase) ? "Monolithic"
                     : string.Equals(configured, "hybrid", StringComparison.OrdinalIgnoreCase) ? "Hybrid"
                     : string.Equals(configured, "custom", StringComparison.OrdinalIgnoreCase) ? "Custom"
-                    : "Monolithic";
+                    : "Microkernel";
             }
             if (ideRoot.TryGetProperty("bootArchitecture", out JsonElement bootElement) && !string.IsNullOrWhiteSpace(bootElement.GetString()))
             {

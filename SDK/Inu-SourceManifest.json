@@ -1,5 +1,5 @@
 {
-  "version": "0.1.90",
+  "version": "0.1.91",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "5fa56b71fbcc9a9d0f5afd467c67f5cd9281f3ee759d53ae6943de7d8a67a814"
+      "sha256": "7e5bfc65b9100d8765854aec13c9a109215ccecc16d9d607585b68999072eae0"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "af8e3d96ae8d517aeb5f0e298f9da3f749d84f9e4c00f3614080803229c16b54"
+      "sha256": "3c33d4416387f21368d689b0bce8fe17a78939ac361f678b2f205ada04ea8e7a"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "8c10b9d44286f7a08be14b971dc64ec35fc525499f99c2088bb2999aab331066"
+      "sha256": "2c0e39cba1b57f672bf2bbee5109fed40164020523db9e31ce15165bbdc0f375"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "1ec4b88284fa7e5728bef1d378f67353586c3a99635910668ac5e12c9dc4ce11"
+      "sha256": "007647d05cd6868591aa70f2c9669fa1ceb75b789cb4b3c68a7dda98175f702f"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "ee86c3862a802a9c53660d1b5bd5715d05a316a6747e3cfa7fc9c4071a53d3e1"
+      "sha256": "6ea13f6034867c915629579f6211f35738b20384baf1c237f7483370e9d9bb6c"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4263,7 +4263,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Kernel/Kernel.cs",
-      "sha256": "31fb6ebebf89b487c1311cea888afa4e1769af7641e7f74bf981ec951655426c"
+      "sha256": "7d1e0e121bca733df80d3c761935c5ff1b82d35bab08ea9737cd3ef7cd6be6a6"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Startup/DesktopOrTextSessionStartup.cs",
@@ -5991,7 +5991,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "e289d4179bebda8337ab240f3374a78293484e693d0340084fb07baecd21036f"
+      "sha256": "0dfc45c3e35ad6d024425bcd48e564e5a25955252bd6ca619c9e89f85a18b960"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",
@@ -6007,7 +6007,7 @@
     },
     {
       "path": "src/Inu.QemuLauncher/Program.cs",
-      "sha256": "a2adcf6bc72195ffea15fd6a6d4f94e4c0e4dba94056b01f1d120c05672b495f"
+      "sha256": "1cd5d10614ee61852ba3643fbed6a7474a369cd6f45724088576a88ee37a0f41"
     },
     {
       "path": "src/Inu.Runtime.Conformance/Inu.Runtime.Conformance.csproj",

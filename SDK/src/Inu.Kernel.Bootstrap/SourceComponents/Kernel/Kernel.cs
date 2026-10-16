@@ -37,10 +37,15 @@ public static class Kernel
         if (!DriverInfrastructureStartup.Initialize()) return false;
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_GRAPHICS_HW")) return false;
         if (!GraphicsHardwareStartup.Initialize()) return false;
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_STORAGE")) return false;
         if (!StorageHardwareStartup.Initialize()) return false;
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_NETWORK")) return false;
         if (!NetworkingHardwareStartup.Initialize()) return false;
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_USB")) return false;
         if (!UsbHardwareStartup.Initialize()) return false;
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_BINDING")) return false;
         if (!DriverBindingStartup.Initialize()) return false;
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_FILESYSTEM")) return false;
         if (!FilesystemHardwareStartup.Initialize()) return false;
 
         // Userland/session policy is also selected source, not a mandatory kernel behaviour.
