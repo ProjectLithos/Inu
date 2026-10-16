@@ -47,18 +47,24 @@ public static unsafe class InputHardwareStartup
     {
         if (_initialized) return true;
 #if INU_KERNELAREA_INPUT
-        // The transport consumes scan codes through the decoder contract. Register
-        // the supplied decoder only when the OS has not installed its own provider.
-        if (!KernelKeyboardDecoderServices.IsAvailable && !KernelKeyboardDecoder.Initialize()) return false;
-        if (!KernelPs2.Initialize()) return false;
-        Ps2Capabilities ps2 = KernelPs2.GetCapabilities();
-        if (!KernelStructuredLogging.Begin(KernelLogLevel.Info,"hal-detail","InputHardwareStartup.Initialize")) return false;
-        if (!KernelConsole.Write("PS/2 keyboard/mouse: ")) return false;
-        if (!KernelConsole.Write(ps2.Keyboard ? "keyboard" : "no keyboard")) return false;
-        if (!KernelConsole.Write(" / ")) return false;
-        if (!KernelConsole.WriteLine(ps2.Mouse ? "mouse" : "no mouse")) return false;
-        if (!KernelPs2.SetKeyboardEventHandler(&HandlePs2KeyboardEvent)) return false;
-        if (!KernelPs2.SetMouseEventHandler(&HandlePs2MouseEvent)) return false;
+        Boolean ps2KeyboardSelected = HasConfiguredInput("ps2-keyboard");
+        Boolean ps2MouseSelected = HasConfiguredInput("ps2-mouse");
+        Boolean ps2Selected = ps2KeyboardSelected || ps2MouseSelected;
+        if (ps2Selected)
+        {
+            // The transport consumes scan codes through the decoder contract. Register
+            // the supplied decoder only when the OS has not installed its own provider.
+            if (ps2KeyboardSelected && !KernelKeyboardDecoderServices.IsAvailable && !KernelKeyboardDecoder.Initialize()) return false;
+            if (!KernelPs2.Initialize()) return false;
+            Ps2Capabilities ps2 = KernelPs2.GetCapabilities();
+            if (!KernelStructuredLogging.Begin(KernelLogLevel.Info,"hal-detail","InputHardwareStartup.Initialize")) return false;
+            if (!KernelConsole.Write("Selected PS/2 keyboard/mouse: ")) return false;
+            if (!KernelConsole.Write(ps2KeyboardSelected && ps2.Keyboard ? "keyboard" : "not selected")) return false;
+            if (!KernelConsole.Write(" / ")) return false;
+            if (!KernelConsole.WriteLine(ps2MouseSelected && ps2.Mouse ? "mouse" : "not selected")) return false;
+            if (ps2KeyboardSelected && !KernelPs2.SetKeyboardEventHandler(&HandlePs2KeyboardEvent)) return false;
+            if (ps2MouseSelected && !KernelPs2.SetMouseEventHandler(&HandlePs2MouseEvent)) return false;
+        }
         if (!KernelTimerDispatch.Register(1000000UL, &ServiceInput, 0UL, out _inputTimerHandle)) return false;
 #endif
         _initialized = true;
@@ -72,10 +78,16 @@ public static unsafe class InputHardwareStartup
     public static Boolean EnableHardwareInterrupts()
     {
 #if INU_KERNELAREA_INPUT && INU_KERNELAREA_DRIVERS
-        Boolean keyboardIrq = KernelInterruptBroker.RegisterLegacyGsi(1U, false, false, &HandlePs2Interrupt, 0UL, out _keyboardIrqHandle);
-        Boolean mouseIrq = !KernelPs2.GetCapabilities().Mouse || KernelInterruptBroker.RegisterLegacyGsi(12U, false, false, &HandlePs2Interrupt, 0UL, out _mouseIrqHandle);
-        Boolean ps2Irqs = keyboardIrq && mouseIrq && KernelPs2.SetHardwareInterrupts(true);
-        if (!KernelConsole.WriteLine(ps2Irqs ? "PS/2 input: hardware IRQ delivery active (timer drain retained as safety net)." : "PS/2 input: timer-dispatch drain active.")) return false;
+        Boolean ps2KeyboardSelected = HasConfiguredInput("ps2-keyboard");
+        Boolean ps2MouseSelected = HasConfiguredInput("ps2-mouse");
+        if (ps2KeyboardSelected || ps2MouseSelected)
+        {
+            Boolean keyboardIrq = !ps2KeyboardSelected || KernelInterruptBroker.RegisterLegacyGsi(1U, false, false, &HandlePs2Interrupt, 0UL, out _keyboardIrqHandle);
+            Boolean mouseIrq = !ps2MouseSelected || KernelInterruptBroker.RegisterLegacyGsi(12U, false, false, &HandlePs2Interrupt, 0UL, out _mouseIrqHandle);
+            Boolean ps2Irqs = keyboardIrq && mouseIrq && KernelPs2.SetHardwareInterrupts(true);
+            if (!KernelConsole.WriteLine(ps2Irqs ? "PS/2 input: selected hardware IRQ delivery active (timer drain retained as safety net)." : "PS/2 input: selected devices remain on timer-dispatch drain.")) return false;
+        }
+        else if (!KernelConsole.WriteLine("PS/2 input: not selected; hardware IRQ delivery skipped.")) return false;
 #endif
         return true;
     }
@@ -85,19 +97,25 @@ public static unsafe class InputHardwareStartup
     {
         if (!Initialize()) return false;
 #if INU_KERNELAREA_INPUT
-        if (!KernelKeyboardDecoderServices.IsAvailable && !KernelKeyboardDecoder.Initialize()) return false;
-        if (!KernelPs2.IsInitialized() && !KernelPs2.Initialize())
+        Boolean ps2KeyboardSelected = HasConfiguredInput("ps2-keyboard");
+        Boolean ps2MouseSelected = HasConfiguredInput("ps2-mouse");
+        if (ps2KeyboardSelected || ps2MouseSelected)
         {
-            KernelConsole.WriteLine("NOKMAIN:GUI-INPUT:PS2:FAIL");
-            return false;
+            if (ps2KeyboardSelected && !KernelKeyboardDecoderServices.IsAvailable && !KernelKeyboardDecoder.Initialize()) return false;
+            if (!KernelPs2.IsInitialized() && !KernelPs2.Initialize())
+            {
+                KernelConsole.WriteLine("NOKMAIN:GUI-INPUT:PS2:FAIL");
+                return false;
+            }
+            if ((ps2KeyboardSelected && !KernelPs2.SetKeyboardEventHandler(&HandlePs2KeyboardEvent)) ||
+                (ps2MouseSelected && !KernelPs2.SetMouseEventHandler(&HandlePs2MouseEvent)))
+            {
+                KernelConsole.WriteLine("NOKMAIN:GUI-INPUT:PS2:FAIL");
+                return false;
+            }
+            Ps2Capabilities graphicalPs2 = KernelPs2.GetCapabilities();
+            KernelConsole.WriteLine((ps2KeyboardSelected && graphicalPs2.Keyboard) || (ps2MouseSelected && graphicalPs2.Mouse) ? "NOKMAIN:GUI-INPUT:PS2:OK" : "NOKMAIN:GUI-INPUT:PS2:NO-DEVICE");
         }
-        if (!KernelPs2.SetKeyboardEventHandler(&HandlePs2KeyboardEvent) || !KernelPs2.SetMouseEventHandler(&HandlePs2MouseEvent))
-        {
-            KernelConsole.WriteLine("NOKMAIN:GUI-INPUT:PS2:FAIL");
-            return false;
-        }
-        Ps2Capabilities graphicalPs2 = KernelPs2.GetCapabilities();
-        KernelConsole.WriteLine(graphicalPs2.Keyboard || graphicalPs2.Mouse ? "NOKMAIN:GUI-INPUT:PS2:OK" : "NOKMAIN:GUI-INPUT:PS2:NO-DEVICE");
 #endif
 #if INU_KERNELAREA_USB
         if (!UsbHid.IsInitialized())
@@ -120,9 +138,16 @@ public static unsafe class InputHardwareStartup
     }
 
 #if INU_KERNELAREA_INPUT
+    private static Boolean HasConfiguredInput(String value)
+    {
+        String[] configured = Inu.Kernel.Bootstrap.GeneratedConfiguration.Input();
+        for (Int32 i = 0; i < configured.Length; i++) if (configured[i] == value) return true;
+        return false;
+    }
+
     private static Boolean ServiceInput(UInt64 cookie)
     {
-        Boolean ok = KernelPs2.Service();
+        Boolean ok = !(HasConfiguredInput("ps2-keyboard") || HasConfiguredInput("ps2-mouse")) || KernelPs2.Service();
 #if INU_KERNELAREA_USB
         if (UsbHid.IsInitialized()) ok = UsbHid.Service() & ok;
 #endif

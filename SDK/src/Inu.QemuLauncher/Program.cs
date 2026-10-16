@@ -62,9 +62,12 @@ static int MainEntry(string[] args)
         memoryMiB = ParseBoundedInt(GetOption(args, "--memory-mib"), 512, 128, 65536, "--memory-mib");
         string? storageOption = GetOption(args, "--storage");
         storageTarget = storageOption is null ? "project" : ParseChoice(storageOption, "virtio-block", ["virtio-block", "ahci", "nvme"], "--storage");
-        networkTarget = ParseChoice(GetOption(args, "--network"), "none", ["none", "virtio-net", "e1000"], "--network");
-        graphicsTarget = ParseChoice(GetOption(args, "--graphics"), "virtio-gpu", ["virtio-gpu", "gop"], "--graphics");
-        usbTarget = ParseChoice(GetOption(args, "--usb"), "none", ["none", "xhci"], "--usb");
+        string? networkOption = GetOption(args, "--network");
+        string? graphicsOption = GetOption(args, "--graphics");
+        string? usbOption = GetOption(args, "--usb");
+        networkTarget = networkOption is null ? ResolveConfiguredNetwork(args[1]) : ParseChoice(networkOption, "none", ["none", "virtio-net", "e1000"], "--network");
+        graphicsTarget = graphicsOption is null ? ResolveConfiguredGraphics(args[1]) : ParseChoice(graphicsOption, "virtio-gpu", ["virtio-gpu", "gop"], "--graphics");
+        usbTarget = usbOption is null ? ResolveConfiguredUsb(args[1]) : ParseChoice(usbOption, "none", ["none", "xhci"], "--usb");
     }
     catch (ArgumentOutOfRangeException exception)
     {
@@ -110,7 +113,9 @@ static int MainEntry(string[] args)
     }
 
     int hostLogicalProcessorCount = Environment.ProcessorCount;
-    string[] qemuArguments = BuildArguments(ovmfCode, variableStore, runImage, serialLog, qemuProcessorCount, memoryMiB, acceleratorTarget, storageTarget, projectDataDisks, networkTarget, graphicsTarget, usbTarget, qemuDebugLog, qemuDebugConLog, qmpPort);
+    bool configuredUsbKeyboard = HasConfiguredValue(args[1], "input", "usb-hid-keyboard");
+    bool configuredUsbMouse = HasConfiguredValue(args[1], "input", "usb-hid-mouse");
+    string[] qemuArguments = BuildArguments(ovmfCode, variableStore, runImage, serialLog, qemuProcessorCount, memoryMiB, acceleratorTarget, storageTarget, projectDataDisks, networkTarget, graphicsTarget, usbTarget, configuredUsbKeyboard, configuredUsbMouse, qemuDebugLog, qemuDebugConLog, qmpPort);
     Console.WriteLine($"[INFO] QEMU executable: {qemu}");
     Console.WriteLine($"[INFO] OVMF code     : {ovmfCode}");
     Console.WriteLine($"[INFO] OVMF variables: {ovmfVars}");
@@ -904,7 +909,43 @@ static List<DataDiskAttachment> ResolveProjectDataDisks(string projectManifestPa
     return result;
 }
 
-static string[] BuildArguments(string ovmfCode, string variableStore, string runImage, string serialLog, int qemuProcessorCount, int memoryMiB, string acceleratorTarget, string storageTarget, IReadOnlyList<DataDiskAttachment> projectDataDisks, string networkTarget, string graphicsTarget, string usbTarget, string qemuDebugLog, string qemuDebugConLog, int qmpPort)
+static string ResolveConfiguredNetwork(string projectManifestPath)
+{
+    if (HasConfiguredValue(projectManifestPath, "networkDrivers", "virtio-net")) return "virtio-net";
+    if (HasConfiguredValue(projectManifestPath, "networkDrivers", "e1000")) return "e1000";
+    return "none";
+}
+
+static string ResolveConfiguredGraphics(string projectManifestPath)
+    => HasConfiguredValue(projectManifestPath, "graphics", "virtio-gpu") ? "virtio-gpu" : "gop";
+
+static string ResolveConfiguredUsb(string projectManifestPath)
+    => HasConfiguredValue(projectManifestPath, "drivers", "usb-xhci") ||
+       HasConfiguredPrefix(projectManifestPath, "input", "usb-hid-") ? "xhci" : "none";
+
+static bool HasConfiguredValue(string projectManifestPath, string propertyName, string expected)
+    => ReadConfiguredValues(projectManifestPath, propertyName).Any(value => string.Equals(value, expected, StringComparison.OrdinalIgnoreCase));
+
+static bool HasConfiguredPrefix(string projectManifestPath, string propertyName, string prefix)
+    => ReadConfiguredValues(projectManifestPath, propertyName).Any(value => value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+
+static IEnumerable<string> ReadConfiguredValues(string projectManifestPath, string propertyName)
+{
+    string projectRoot = Path.GetDirectoryName(Path.GetFullPath(projectManifestPath)) ?? Environment.CurrentDirectory;
+    string configurationPath = Path.Combine(projectRoot, "Inu.json");
+    if (!File.Exists(configurationPath)) yield break;
+    JsonDocument document;
+    try { document = JsonDocument.Parse(File.ReadAllText(configurationPath)); }
+    catch (Exception exception) when (exception is IOException or JsonException) { yield break; }
+    using (document)
+    {
+        if (!document.RootElement.TryGetProperty(propertyName, out JsonElement values) || values.ValueKind != JsonValueKind.Array) yield break;
+        foreach (JsonElement value in values.EnumerateArray())
+            if (value.ValueKind == JsonValueKind.String && value.GetString() is string text && !string.IsNullOrWhiteSpace(text)) yield return text;
+    }
+}
+
+static string[] BuildArguments(string ovmfCode, string variableStore, string runImage, string serialLog, int qemuProcessorCount, int memoryMiB, string acceleratorTarget, string storageTarget, IReadOnlyList<DataDiskAttachment> projectDataDisks, string networkTarget, string graphicsTarget, string usbTarget, bool usbKeyboard, bool usbMouse, string qemuDebugLog, string qemuDebugConLog, int qmpPort)
 {
     List<string> arguments = new();
     if(string.Equals(acceleratorTarget,"auto",StringComparison.OrdinalIgnoreCase))
@@ -979,7 +1020,12 @@ static string[] BuildArguments(string ovmfCode, string variableStore, string run
 
     if (graphicsTarget == "virtio-gpu") arguments.AddRange(["-device", "virtio-vga"]);
     else arguments.AddRange(["-device", "VGA"]);
-    if (usbTarget == "xhci") arguments.AddRange(["-device", "qemu-xhci,id=xhci"]);
+    if (usbTarget == "xhci")
+    {
+        arguments.AddRange(["-device", "qemu-xhci,id=xhci"]);
+        if (usbKeyboard) arguments.AddRange(["-device", "usb-kbd,bus=xhci.0"]);
+        if (usbMouse) arguments.AddRange(["-device", "usb-mouse,bus=xhci.0"]);
+    }
 
     arguments.AddRange([
         "-boot", "order=c,menu=off,strict=on",

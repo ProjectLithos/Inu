@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.87",
-  "version": "0.1.88",
-  "changedFiles": 14,
-  "summary": "Repair ChangedFiles release packaging so every incremental archive carries the required root Build.bat and Build.ps1 bootstrap companions before metadata validation.",
+  "baseVersion": "0.1.88",
+  "version": "0.1.89",
+  "changedFiles": 17,
+  "summary": "Honor Kath hardware selections end-to-end: derive normal QEMU USB/network/graphics devices from Inu.json and prevent Test-OS work-area inclusion from starting unselected PS/2 input.",
   "deletedFiles": 0
 }

@@ -16,16 +16,20 @@ public static class UsbHardwareStartup
     public static Boolean Initialize()
     {
 #if INU_KERNELAREA_USB
+        Boolean usbKeyboardSelected = HasConfiguredInput("usb-hid-keyboard");
+        Boolean usbMouseSelected = HasConfiguredInput("usb-hid-mouse");
+        Boolean xhciSelected = HasConfiguredDriver("usb-xhci") || usbKeyboardSelected || usbMouseSelected;
+        if (!xhciSelected) return true;
         if (!KernelXhci.Initialize()) return false;
         if (!KernelXhci.ScanRootPorts()) return false;
         if (!UsbHub.Initialize()) return false;
         if (!UsbHub.EnumerateDownstream()) return false;
         if (!UsbHid.Initialize()) return false;
 #if INU_KERNELAREA_INPUT && INU_COMPONENT_USB_HID_KEYBOARD
-        if (!UsbHidKeyboard.Initialize()) return false;
+        if (usbKeyboardSelected && !UsbHidKeyboard.Initialize()) return false;
 #endif
 #if INU_KERNELAREA_INPUT && INU_COMPONENT_USB_HID_MOUSE
-        if (!UsbHidMouse.Initialize()) return false;
+        if (usbMouseSelected && !UsbHidMouse.Initialize()) return false;
 #endif
 #if INU_COMPONENT_USB_MASS_STORAGE
         if (!UsbMassStorage.Initialize()) return false;
@@ -34,4 +38,20 @@ public static class UsbHardwareStartup
 #endif
         return true;
     }
+#if INU_KERNELAREA_USB
+    private static Boolean HasConfiguredInput(String value)
+    {
+        String[] configured = Inu.Kernel.Bootstrap.GeneratedConfiguration.Input();
+        for (Int32 i = 0; i < configured.Length; i++) if (configured[i] == value) return true;
+        return false;
+    }
+
+    private static Boolean HasConfiguredDriver(String value)
+    {
+        String[] configured = Inu.Kernel.Bootstrap.GeneratedConfiguration.Drivers();
+        for (Int32 i = 0; i < configured.Length; i++) if (configured[i] == value) return true;
+        return false;
+    }
+#endif
+
 }
