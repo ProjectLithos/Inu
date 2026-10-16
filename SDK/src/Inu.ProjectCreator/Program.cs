@@ -195,6 +195,7 @@ static int MainEntry(string[] args)
 
     if (!RepairTestOsKernelStorageImport(output, projectName, testOs)) throw new InvalidOperationException("Could not repair the Test OS kernel storage import.");
     if (!RepairStockTestOsBootImports(output, projectName, testOs)) throw new InvalidOperationException("Could not repair the stock Test OS boot imports.");
+    if (!RepairStockTestOsStoragePolicy(output, projectName, testOs)) throw new InvalidOperationException("Could not refresh the stock Test OS storage policy.");
     if (!MaterializeCoderCommands(sdkRoot, output, projectName)) throw new InvalidOperationException("Could not materialize coder commands.");
     // Shell.cs is coder-owned. Never rewrite it during compile/run preparation, even when it
     // still contains markers from an older generated template. Existing shell source is preserved
@@ -294,6 +295,97 @@ static bool RepairStockTestOsBootImports(string output, string projectName, bool
     catch (Exception ex)
     {
         Console.Error.WriteLine($"[FAIL] Unable to repair stock Test OS boot imports: {ex.Message}");
+        return false;
+    }
+}
+
+
+static bool RepairStockTestOsStoragePolicy(string output, string projectName, bool testOs)
+{
+    if (!testOs) return true;
+    string kernelPath = Path.Combine(output, "Kernel", projectName, "Kernel.cs");
+    if (!File.Exists(kernelPath)) return true;
+    try
+    {
+        string source = File.ReadAllText(kernelPath);
+        const string oldStart = "        // Detect every block drive that the kernel has discovered. The default policy below";
+        const string oldEnd = "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Temporary))) return false;";
+        int start = source.IndexOf(oldStart, StringComparison.Ordinal);
+        if (start < 0) return true;
+        int end = source.IndexOf(oldEnd, start, StringComparison.Ordinal);
+        if (end < 0) return true;
+        end += oldEnd.Length;
+
+        // This marker identifies the untouched generated 0.1.75-0.1.84 storage policy.
+        // If the coder changed the policy comments or body, preserve it byte-for-byte.
+        if (!source.AsSpan(start, end - start).Contains("primaryDataDriveMounted", StringComparison.Ordinal) ||
+            !source.AsSpan(start, end - start).Contains("Storage.EnsureGptPartitions(drive, 2U)", StringComparison.Ordinal)) return true;
+
+        string replacement = """
+        // The bootable block drive is the system drive. All other detected drives remain
+        // additional mounted volumes and can never replace the system root implicitly.
+        if (!Storage.TryGetSystemDrive(out KernelStorageDeviceHandle systemDrive)) return false;
+
+        Boolean systemMounted = false;
+        KernelStorageVolumeHandle systemRootVolume = default;
+        UInt32 detectedVolumeCount = Storage.GetVolumeCount();
+        for (UInt32 volumeOrdinal = 0U; volumeOrdinal < detectedVolumeCount; volumeOrdinal++)
+        {
+            if (!Storage.TryGetVolume(volumeOrdinal, out KernelStorageVolumeHandle volume, out KernelStorageDeviceHandle owner, out KernelPartitionInfo partition)) continue;
+            if (owner.Value != systemDrive.Value) continue;
+            if (!FatFs.TryGetFileSystemType(volume, out KernelFileSystemType fileSystemType)) continue;
+            if (!FileSystem.Mount(volume, fileSystemType, "/")) return false;
+            systemRootVolume = volume;
+            systemMounted = true;
+            break;
+        }
+        if (!systemMounted) return false;
+        if (!FileSystem.EnsureDirectory("/Drives")) return false;
+
+        UInt32 detectedDriveCount = Storage.GetDriveCount();
+        for (UInt32 driveOrdinal = 0U; driveOrdinal < detectedDriveCount; driveOrdinal++)
+        {
+            if (!Storage.TryGetDrive(driveOrdinal, out KernelStorageDeviceHandle drive, out KernelStorageDeviceKind driveKind, out KernelStorageGeometry geometry)) continue;
+            Boolean createdLayout = false;
+            if (!geometry.ReadOnly && !Storage.IsSystemDrive(drive) && (driveKind == KernelStorageDeviceKind.Nvme || driveKind == KernelStorageDeviceKind.Ahci))
+            {
+                if (!Storage.EnsureGptPartitions(drive, 2U, out createdLayout)) continue;
+                if (createdLayout)
+                {
+                    if (Storage.TryGetPartition(drive, 1U, out KernelStorageVolumeHandle newPartition1) && !FatFs.EnsureFat32(newPartition1)) return false;
+                    if (Storage.TryGetPartition(drive, 2U, out KernelStorageVolumeHandle newPartition2) && !FatFs.EnsureFat32(newPartition2)) return false;
+                }
+            }
+            String drivePath = "/Drives/Drive" + driveOrdinal.ToString();
+            if (!FileSystem.EnsureDirectory(drivePath)) return false;
+            UInt32 volumeCount = Storage.GetVolumeCount();
+            for (UInt32 volumeOrdinal = 0U; volumeOrdinal < volumeCount; volumeOrdinal++)
+            {
+                if (!Storage.TryGetVolume(volumeOrdinal, out KernelStorageVolumeHandle volume, out KernelStorageDeviceHandle owner, out KernelPartitionInfo partition)) continue;
+                if (owner.Value != drive.Value) continue;
+                if (systemMounted && volume.Value == systemRootVolume.Value) continue;
+                if (!FatFs.TryGetFileSystemType(volume, out KernelFileSystemType fileSystemType)) continue;
+                String mountPath = drivePath + "/Partition" + (partition.Index + 1U).ToString();
+                if (!FileSystem.Mount(volume, fileSystemType, mountPath)) return false;
+            }
+        }
+
+        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.WritableUser))) return false;
+        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.ReadableFonts))) return false;
+        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Commands))) return false;
+        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Applications))) return false;
+        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Libraries))) return false;
+        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Temporary))) return false;
+        """;
+
+        source = source[..start] + replacement + source[end..];
+        File.WriteAllText(kernelPath, source);
+        Console.WriteLine($"[ OK ] Refreshed untouched stock Test OS storage policy: {kernelPath}");
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"[FAIL] Unable to refresh stock Test OS storage policy: {ex.Message}");
         return false;
     }
 }

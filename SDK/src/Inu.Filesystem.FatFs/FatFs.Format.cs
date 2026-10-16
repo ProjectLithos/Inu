@@ -10,6 +10,12 @@ public static unsafe partial class FatFs
     private const UInt32 FormatFatCount=2U;
     private const UInt32 FormatRootCluster=2U;
 
+    /// <summary><inu.api>Detects a supported FAT filesystem already present on a volume without modifying it.</inu.api></summary>
+    public static Boolean TryGetFileSystemType(KernelStorageVolumeHandle volume,out KernelFileSystemType type)
+    {
+        type=KernelFileSystemType.Unknown;if(!TryReadBoot(volume,out VolumeInfo info,out KernelHeapAllocation scratch))return false;KernelHeap.TryRelease(scratch);type=info.Format==(Byte)FatFsFormat.Fat12?KernelFileSystemType.Fat12:info.Format==(Byte)FatFsFormat.Fat16?KernelFileSystemType.Fat16:info.Format==(Byte)FatFsFormat.Fat32?KernelFileSystemType.Fat32:KernelFileSystemType.Unknown;return type!=KernelFileSystemType.Unknown;
+    }
+
     /// <summary><inu.api>Ensures a partition is FAT32 without erasing an existing FAT32 filesystem.</inu.api></summary>
     public static Boolean EnsureFat32(KernelStorageVolumeHandle volume)=>EnsureFat32Formatted(volume,false,out _);
 

@@ -38,6 +38,7 @@ public static unsafe partial class KernelAhci
   {
    if((implemented&(1U<<port))==0U)continue;
    UInt64 pr=abar+PxBase+(UInt32)port*PxStride;
+   if(!StopPort(pr))continue;
    if(!WaitForSataDevice(pr))continue;
    if(StartDisk(ci,c,port))c->DiskCount++;
   }

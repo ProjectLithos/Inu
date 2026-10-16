@@ -1327,19 +1327,25 @@
           "GetDriveCount()",
           "TryGetDrive(uint, out KernelStorageDeviceHandle, out KernelStorageDeviceKind, out KernelStorageGeometry)",
           "TryGetDrive(KernelStorageDeviceKind, uint, out KernelStorageDeviceHandle)",
+          "IsSystemDrive(KernelStorageDeviceHandle)",
+          "TryGetSystemDrive(out KernelStorageDeviceHandle)",
+          "SetSystemDrive(KernelStorageDeviceHandle)",
           "EnsureGptPartitions(KernelStorageDeviceHandle, uint)",
           "RepartitionGpt(KernelStorageDeviceHandle, uint)",
-          "TryGetPartition(KernelStorageDeviceHandle, uint, out KernelStorageVolumeHandle)"
+          "TryGetPartition(KernelStorageDeviceHandle, uint, out KernelStorageVolumeHandle)",
+          "GetVolumeCount()",
+          "TryGetVolume(uint, out KernelStorageVolumeHandle, out KernelStorageDeviceHandle, out KernelPartitionInfo)",
+          "EnsureGptPartitions(KernelStorageDeviceHandle, uint, out bool)"
         ],
         "availability": "coder-owned kernel source when storage services are kernel-resident",
         "transport": "in-process block-device registry and partition policy facade",
-        "notes": "Enumerates every detected block drive regardless of controller type. The OS-owned Kernel.cs decides which drives may be partitioned, formatted and mounted.",
+        "notes": "Enumerates every detected block drive regardless of controller type. The bootable drive is explicitly treated as the system drive; all other mountable volumes are additional drives. The OS-owned Kernel.cs decides whether blank writable data drives are partitioned or formatted.",
         "assembly": "Inu.Kernel.Storage",
         "kind": "Static class",
         "category": "Kernel",
         "status": "recommended",
         "compiledInto": "Inu.Kernel.Entry.X64 (source component is copied into the generated kernel compilation)",
-        "example": "uint count = Storage.GetDriveCount();\nfor (uint i = 0; i < count; i++)\n{\n    Storage.TryGetDrive(i, out var drive, out var kind, out var geometry);\n}",
+        "example": "Storage.TryGetSystemDrive(out KernelStorageDeviceHandle systemDrive);\nuint count = Storage.GetDriveCount();\nfor (uint i = 0; i < count; i++)\n{\n    Storage.TryGetDrive(i, out var drive, out var kind, out var geometry);\n    bool isSystem = Storage.IsSystemDrive(drive);\n}",
         "implementation": "Implemented by the selected Inu kernel storage source component and compiled into the generated kernel.",
         "memberExamples": {
           "GetDriveCount()": "uint count = Storage.GetDriveCount();",
@@ -1347,7 +1353,13 @@
           "TryGetDrive(KernelStorageDeviceKind, uint, out KernelStorageDeviceHandle)": "Storage.TryGetDrive(KernelStorageDeviceKind.Nvme, 0U, out KernelStorageDeviceHandle drive);",
           "EnsureGptPartitions(KernelStorageDeviceHandle, uint)": "Storage.EnsureGptPartitions(drive, 2U);",
           "RepartitionGpt(KernelStorageDeviceHandle, uint)": "Storage.RepartitionGpt(drive, 2U);",
-          "TryGetPartition(KernelStorageDeviceHandle, uint, out KernelStorageVolumeHandle)": "Storage.TryGetPartition(drive, 1U, out KernelStorageVolumeHandle partition);"
+          "TryGetPartition(KernelStorageDeviceHandle, uint, out KernelStorageVolumeHandle)": "Storage.TryGetPartition(drive, 1U, out KernelStorageVolumeHandle partition);",
+          "SetSystemDrive(KernelStorageDeviceHandle)": "Storage.SetSystemDrive(drive);",
+          "TryGetSystemDrive(out KernelStorageDeviceHandle)": "Storage.TryGetSystemDrive(out KernelStorageDeviceHandle systemDrive);",
+          "IsSystemDrive(KernelStorageDeviceHandle)": "bool isSystem = Storage.IsSystemDrive(drive);",
+          "GetVolumeCount()": "uint volumes = Storage.GetVolumeCount();",
+          "TryGetVolume(uint, out KernelStorageVolumeHandle, out KernelStorageDeviceHandle, out KernelPartitionInfo)": "Storage.TryGetVolume(0U, out KernelStorageVolumeHandle volume, out KernelStorageDeviceHandle owner, out KernelPartitionInfo partition);",
+          "EnsureGptPartitions(KernelStorageDeviceHandle, uint, out bool)": "Storage.EnsureGptPartitions(drive, 2U, out bool created);"
         }
       },
       {

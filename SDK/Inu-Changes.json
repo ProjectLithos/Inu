@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.83",
-  "version": "0.1.84",
-  "changedFiles": 15,
-  "summary": "Normalize Inu CLI bootstrap version verification so invisible external-process output artefacts cannot produce a false mismatch; report execution, parse, and genuine version failures separately.",
+  "baseVersion": "0.1.84",
+  "version": "0.1.85",
+  "changedFiles": 23,
+  "summary": "Mount every detected usable filesystem volume while keeping only the bootable drive as the system drive; improve QEMU AHCI SATA link reset/IDENTIFY readiness; keep absent optional hardware non-fatal; expose system-drive and volume-discovery APIs.",
   "deletedFiles": 0
 }

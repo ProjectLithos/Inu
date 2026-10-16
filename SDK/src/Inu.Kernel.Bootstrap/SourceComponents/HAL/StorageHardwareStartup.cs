@@ -32,7 +32,7 @@ public static class StorageHardwareStartup
         if (!KernelNvme.Initialize()) return false;
         if (KernelNvme.GetCapabilities().Namespaces == 0U)
         {
-            if (!KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","NVMe was selected, but no usable NVMe namespace was registered.")) return false;
+            KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","NVMe was selected, but no usable NVMe namespace was registered.");
         }
 #endif
 #if INU_COMPONENT_STORAGE_AHCI_DRIVER
@@ -40,16 +40,16 @@ public static class StorageHardwareStartup
         AhciCapabilities ahci = KernelAhci.GetCapabilities();
         if (ahci.Controllers == 0U)
         {
-            if (!KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","AHCI was selected, but no AHCI PCI controller could be started.")) return false;
+            KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","AHCI was selected, but no AHCI PCI controller could be started.");
         }
         else if (ahci.Disks == 0U)
         {
-            if (!KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","AHCI controller started, but no SATA disk completed discovery and IDENTIFY.")) return false;
+            KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","AHCI controller started, but no SATA disk completed discovery and IDENTIFY.");
         }
 #endif
         if (KernelStorage.GetCapabilities().Devices == 0U)
         {
-            if (!KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","No block drives were registered. The OS-owned Kernel.cs will see an empty drive list.")) return false;
+            KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","No block drives were registered. The OS-owned Kernel.cs will see an empty drive list.");
         }
         else if (!KernelStructuredLogging.InfoLine("storage","StorageHardwareStartup.Initialize","Detected block drives are registered; partition/format/mount policy is delegated to the OS-owned Kernel.cs.")) return false;
 #endif
