@@ -122,6 +122,93 @@ public static unsafe partial class FileSystemPathPolicyRuntime
         canonical=value.ToString();return ValidateCanonicalPath(canonical);
     }
 
+
+    internal static Boolean TryNormalizeLogicalPath(String input,out String canonical)
+    {
+        canonical=String.Empty;if(input==null||input.Length==0)return false;
+        Char separator=_separator;if(input[0]!=separator)return false;
+        StringBuilder value=new StringBuilder(input.Length);
+        UInt32 componentLength=0U;Boolean placeholder=false;UInt32 placeholderLength=0U;
+        for(Int32 i=0;i<input.Length;i++)
+        {
+            Char c=input[i];
+            if(c==separator)
+            {
+                if(placeholder)return false;
+                if(i==0){value.Append('/');continue;}
+                if(componentLength==0U||i+1==input.Length)return false;
+                componentLength=0U;value.Append('/');continue;
+            }
+            if(placeholder)
+            {
+                if(c=='}')
+                {
+                    if(placeholderLength==0U||++componentLength>_maximumComponentLength)return false;
+                    placeholder=false;value.Append(c);continue;
+                }
+                if(!IsPlaceholderChar(c)||++placeholderLength>_maximumComponentLength||++componentLength>_maximumComponentLength)return false;
+                value.Append(c);continue;
+            }
+            if(c=='{')
+            {
+                placeholder=true;placeholderLength=0U;
+                if(++componentLength>_maximumComponentLength)return false;
+                value.Append(c);continue;
+            }
+            if(c=='}')return false;
+            if(IsSeparatorLike(c)&&c!=separator)return false;
+            if(!ValidComponentChar(c)||++componentLength>_maximumComponentLength)return false;
+            value.Append(c);
+        }
+        if(placeholder)return false;
+        if(input.Length==1){canonical="/";return true;}
+        if(componentLength==0U)return false;
+        canonical=value.ToString();return ValidateCanonicalLogicalPath(canonical);
+    }
+
+    internal static Boolean ValidateCanonicalLogicalPath(String path)
+    {
+        if(path==null||path.Length==0||path[0]!='/')return false;
+        if(path.Length==1)return true;
+        UInt32 componentLength=0U;Boolean placeholder=false;UInt32 placeholderLength=0U;
+        for(Int32 i=1;i<path.Length;i++)
+        {
+            Char c=path[i];
+            if(c=='/')
+            {
+                if(placeholder||componentLength==0U)return false;
+                componentLength=0U;continue;
+            }
+            if(placeholder)
+            {
+                if(c=='}')
+                {
+                    if(placeholderLength==0U||++componentLength>_maximumComponentLength)return false;
+                    placeholder=false;continue;
+                }
+                if(!IsPlaceholderChar(c)||++placeholderLength>_maximumComponentLength||++componentLength>_maximumComponentLength)return false;
+                continue;
+            }
+            if(c=='{')
+            {
+                placeholder=true;placeholderLength=0U;
+                if(++componentLength>_maximumComponentLength)return false;
+                continue;
+            }
+            if(c=='}'||!ValidComponentChar(c)||++componentLength>_maximumComponentLength)return false;
+        }
+        return !placeholder&&componentLength!=0U;
+    }
+
+    internal static String ExternalizeCanonicalLogicalPath(String canonical)
+    {
+        if(canonical==null||canonical.Length==0||!ValidateCanonicalLogicalPath(canonical))return String.Empty;
+        if(_separator=='/')return canonical;
+        StringBuilder value=new StringBuilder(canonical.Length);
+        for(Int32 i=0;i<canonical.Length;i++)value.Append(canonical[i]=='/'?_separator:canonical[i]);
+        return value.ToString();
+    }
+
     internal static String ExternalizeCanonicalPath(String canonical)
     {
         if(canonical==null||canonical.Length==0||!ValidateCanonicalPath(canonical))return String.Empty;
@@ -180,6 +267,12 @@ public static unsafe partial class FileSystemPathPolicyRuntime
         if(value==0||value>0x7F)return false;
         if((value>='A'&&value<='Z')||(value>='a'&&value<='z')||(value>='0'&&value<='9'))return false;
         return value!='.'&&value!='_'&&value!='-'&&value!=' ';
+    }
+
+
+    private static Boolean IsPlaceholderChar(Char value)
+    {
+        return (value>='A'&&value<='Z')||(value>='a'&&value<='z')||(value>='0'&&value<='9')||value=='_'||value=='-';
     }
 
     private static Boolean ValidComponentChar(Char c)

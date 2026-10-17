@@ -38,7 +38,7 @@ internal static unsafe class FileSystemLogicalPaths
     internal static Boolean TrySet(FileSystemLogicalPath kind,String externalPath)
     {
         if(kind==FileSystemLogicalPath.Commands)return TrySetCommands(new[]{externalPath});
-        if(!FileSystemPathPolicyRuntime.TryNormalizeUserPath(externalPath,out String canonical)||canonical.Length==0)return false;
+        if(!FileSystemPathPolicyRuntime.TryNormalizeLogicalPath(externalPath,out String canonical)||canonical.Length==0)return false;
         switch(kind)
         {
             case FileSystemLogicalPath.ReadableUser:_readableUser=canonical;return true;
@@ -109,7 +109,7 @@ internal static unsafe class FileSystemLogicalPaths
     internal static String External(FileSystemLogicalPath kind)
     {
         String canonical=Canonical(kind);
-        return canonical.Length==0?String.Empty:FileSystemPathPolicyRuntime.ExternalizeCanonicalPath(canonical);
+        return canonical.Length==0?String.Empty:FileSystemPathPolicyRuntime.ExternalizeCanonicalLogicalPath(canonical);
     }
 
     internal static UInt32 CommandCount=>_commandCount;
@@ -132,7 +132,7 @@ internal static unsafe class FileSystemLogicalPaths
 
     private static Boolean Externalize(String canonical,Byte* output,UInt32 capacity,out UInt32 length)
     {
-        length=0U;if((UInt32)canonical.Length>capacity)return false;Char separator=FileSystemPathPolicyRuntime.Current.Separator;
+        length=0U;if((UInt32)canonical.Length>capacity||!FileSystemPathPolicyRuntime.ValidateCanonicalLogicalPath(canonical))return false;Char separator=FileSystemPathPolicyRuntime.Current.Separator;
         for(Int32 i=0;i<canonical.Length;i++){Char c=canonical[i]=='/'?separator:canonical[i];if(c>0x7F)return false;output[i]=(Byte)c;}
         length=(UInt32)canonical.Length;return true;
     }

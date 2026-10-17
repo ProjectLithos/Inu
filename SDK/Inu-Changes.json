@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.97",
-  "version": "0.1.98",
+  "baseVersion": "0.1.98",
+  "version": "0.1.99",
   "changedFiles": 16,
-  "summary": "Add statement-level OS policy diagnostics and safely migrate untouched stock Test OS Kernel.cs policy blocks so the exact false-return boundary is reported.",
+  "summary": "Fix logical-path template validation so VisibleUser mappings such as /User/{user} are accepted without weakening concrete VFS path validation.",
   "deletedFiles": 0
 }
