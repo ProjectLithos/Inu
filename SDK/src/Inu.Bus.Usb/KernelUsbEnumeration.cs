@@ -5,7 +5,11 @@ namespace Inu.Bus.Usb;
 /// <summary>Optional USB device-enumeration state machine.</summary>
 public static unsafe class KernelUsbEnumeration
 {
-    public static Boolean Initialize()=>KernelUsbEnumerationServices.Register(&EnumerateService);
+    public static Boolean Initialize()
+    {
+        if (KernelUsbEnumerationServices.IsAvailable) return true;
+        return KernelUsbEnumerationServices.Register(&EnumerateService);
+    }
     private static Boolean EnumerateService(UsbHostHandle host,Byte parentAddress,Byte port,UsbSpeed speed,UsbDeviceHandle* device){if(device==null)return false;UsbDeviceHandle value=default;if(!Enumerate(host,parentAddress,port,speed,out value))return false;*device=value;return true;}
     public static Boolean Enumerate(UsbHostHandle host,Byte parentAddress,Byte port,UsbSpeed speed,out UsbDeviceHandle device)
     {

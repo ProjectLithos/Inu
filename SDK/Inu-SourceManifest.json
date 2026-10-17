@@ -1,5 +1,5 @@
 {
-  "version": "0.1.106",
+  "version": "0.1.107",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "100cf193c93b7d3e59633102fc15d9c6ce71dca50c1a273a584b7ecb9b3cce9c"
+      "sha256": "14c50143676bf180b792b1d37c2767203d5c2ff1a83371fa45334162e0843f17"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "93f471da56922a9b0db8bffc8f6ede68d81ef83d200d63b96fa3660c21a6846a"
+      "sha256": "90feee2a84a3ed6cba7aeb2d88ccd3af5659f41dc33f04d8cef84cf9133ede26"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "b802301ac06236436fef48fcd1b08c342b104ddf209abb26692af33d59d56045"
+      "sha256": "d441fad8b9b2a081e160b3c38daa08d344d4692c658c56181448688b25a8564a"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "0dbab48d3ad19f03e2b5ad5bb8428a53b3584ac451bf76baf71245332cd6f382"
+      "sha256": "7f06ab95f8fb21f7bd2c02e8eb243b6422f90495e1e9bec0c79ec72577284da5"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3763,7 +3763,7 @@
     },
     {
       "path": "src/Inu.Bus.Usb/KernelUsbEnumeration.cs",
-      "sha256": "f6bf701029e7d4cb8d1f405c820cf7c4e8fba67b2c6c3bfb760275b6354e3b49"
+      "sha256": "4ef9ebe836965903c61067f8026d5ad04b7c06cf4851cc98a69e3d22178986bb"
     },
     {
       "path": "src/Inu.Bus.Usb/KernelUsbEnumerationBusContract.cs",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "1feb92287bcd890ed520d5c78351ac827133e1a4bb242d746411a310dd437b23"
+      "sha256": "49cccad1ec00487504b78c5cfd0fec66c7601915a458b99bd458e8de3be59119"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4259,7 +4259,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/UsbHardwareStartup.cs",
-      "sha256": "310fda52f036dab6b8992e6cab3964788c27be69f80ee4aa482f44ddc7d3ca5b"
+      "sha256": "cf565b5067a4e42ce2862726a13a8d214d53f36b71e9c17dd2f09d64544dfe7c"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Kernel/Kernel.cs",

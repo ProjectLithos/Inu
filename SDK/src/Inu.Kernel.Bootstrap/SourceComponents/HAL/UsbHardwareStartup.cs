@@ -21,6 +21,20 @@ public static class UsbHardwareStartup
         Boolean xhciSelected = HasConfiguredDriver("usb-xhci") || usbKeyboardSelected || usbMouseSelected;
         if (!xhciSelected) return true;
         if (!KernelXhci.Initialize()) return false;
+        // The USB bus owns the enumeration contract, while KernelUsbEnumeration is the
+        // replaceable stock implementation. Install that implementation before any host
+        // controller scans ports; without it every EnumeratePort request must fail.
+        if (!KernelUsbEnumeration.Initialize())
+        {
+            KernelStructuredLogging.ErrorLine("usb","UsbHardwareStartup.Initialize","USB enumeration service initialization failed.");
+            return false;
+        }
+        if (!KernelUsbEnumerationServices.IsAvailable)
+        {
+            KernelStructuredLogging.ErrorLine("usb","UsbHardwareStartup.Initialize","USB enumeration service is unavailable before xHCI root-port discovery.");
+            return false;
+        }
+        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.Initialize","USB enumeration service installed before xHCI root-port discovery.")) return false;
         XhciCapabilities xhciCapabilities = KernelXhci.GetCapabilities();
         if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.Initialize",xhciCapabilities.InterruptConfiguredControllers == xhciCapabilities.RunningControllers ? "xHCI runtime interrupt routes are configured; bootstrap enumeration remains synchronous until runtime interrupt delivery is enabled." : "xHCI explicit polling fallback is active for at least one controller.")) return false;
 

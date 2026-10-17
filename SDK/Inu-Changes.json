@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.105",
-  "version": "0.1.106",
-  "changedFiles": 18,
-  "summary": "Correct USB startup ordering so selected USB class drivers register before the single xHCI root-port enumeration pass; selected HID input must enumerate before an interactive session can start.",
+  "baseVersion": "0.1.106",
+  "version": "0.1.107",
+  "changedFiles": 16,
+  "summary": "Install the replaceable stock USB enumeration service before xHCI root-port discovery so selected USB HID devices can actually enumerate and bind.",
   "deletedFiles": 0
 }
