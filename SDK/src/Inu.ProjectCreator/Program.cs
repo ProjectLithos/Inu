@@ -196,6 +196,7 @@ static int MainEntry(string[] args)
     if (!RepairTestOsKernelStorageImport(output, projectName, testOs)) throw new InvalidOperationException("Could not repair the Test OS kernel storage import.");
     if (!RepairStockTestOsBootImports(output, projectName, testOs)) throw new InvalidOperationException("Could not repair the stock Test OS boot imports.");
     if (!RepairStockTestOsStoragePolicy(output, projectName, testOs)) throw new InvalidOperationException("Could not refresh the stock Test OS storage policy.");
+    if (!InstrumentStockTestOsPolicyDiagnostics(output, projectName, testOs)) throw new InvalidOperationException("Could not instrument the stock Test OS policy diagnostics.");
     if (!MaterializeCoderCommands(sdkRoot, output, projectName)) throw new InvalidOperationException("Could not materialize coder commands.");
     // Shell.cs is coder-owned. Never rewrite it during compile/run preparation, even when it
     // still contains markers from an older generated template. Existing shell source is preserved
@@ -295,6 +296,95 @@ static bool RepairStockTestOsBootImports(string output, string projectName, bool
     catch (Exception ex)
     {
         Console.Error.WriteLine($"[FAIL] Unable to repair stock Test OS boot imports: {ex.Message}");
+        return false;
+    }
+}
+
+
+static bool InstrumentStockTestOsPolicyDiagnostics(string output, string projectName, bool testOs)
+{
+    if (!testOs) return true;
+    string kernelPath = Path.Combine(output, "Kernel", projectName, "Kernel.cs");
+    if (!File.Exists(kernelPath)) return true;
+    try
+    {
+        string source = File.ReadAllText(kernelPath);
+        if (source.Contains("OS_POLICY_PATH_POLICY_ENTER", StringComparison.Ordinal)) return true;
+
+        // Only touch the exact stock Test OS policy shape. Any coder edit to these anchor lines
+        // makes the migration opt out, preserving the coder-owned file byte-for-byte.
+        string[] anchors =
+        [
+            "        // Path/folder policy is established before any disk is partitioned, formatted or mounted.",
+            "        if (!FileSystem.SetPathPolicy(new FileSystemPathPolicy('/', false, 20, false, true, \"*?<>|\"))) return false;",
+            "        if (!Storage.TryGetSystemDrive(out KernelStorageDeviceHandle systemDrive)) return false;",
+            "        if (!systemMounted) return false;",
+            "        if (!FileSystem.EnsureDirectory(\"/Drives\")) return false;",
+            "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Temporary))) return false;",
+            "        return TextSession.Run();"
+        ];
+        foreach (string anchor in anchors) if (!source.Contains(anchor, StringComparison.Ordinal)) return true;
+
+        source = source.Replace(
+            "        if (!FileSystem.SetPathPolicy(new FileSystemPathPolicy('/', false, 20, false, true, \"*?<>|\"))) return false;\r\n        if (!FileSystem.SetPathSeparator('/')) return false;",
+            "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_PATH_POLICY_ENTER\")) return false;\r\n        if (!FileSystem.SetPathPolicy(new FileSystemPathPolicy('/', false, 20, false, true, \"*?<>|\"))) { KernelConsole.WriteHostControl(\"OS_POLICY_PATH_POLICY_FAIL\"); return false; }\r\n        if (!FileSystem.SetPathSeparator('/')) { KernelConsole.WriteHostControl(\"OS_POLICY_PATH_SEPARATOR_FAIL\"); return false; }\r\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_PATH_POLICY_OK\")) return false;\r\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_PATHS_ENTER\")) return false;",
+            StringComparison.Ordinal);
+        source = source.Replace(
+            "        if (!FileSystem.SetPathPolicy(new FileSystemPathPolicy('/', false, 20, false, true, \"*?<>|\"))) return false;\n        if (!FileSystem.SetPathSeparator('/')) return false;",
+            "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_PATH_POLICY_ENTER\")) return false;\n        if (!FileSystem.SetPathPolicy(new FileSystemPathPolicy('/', false, 20, false, true, \"*?<>|\"))) { KernelConsole.WriteHostControl(\"OS_POLICY_PATH_POLICY_FAIL\"); return false; }\n        if (!FileSystem.SetPathSeparator('/')) { KernelConsole.WriteHostControl(\"OS_POLICY_PATH_SEPARATOR_FAIL\"); return false; }\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_PATH_POLICY_OK\")) return false;\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_PATHS_ENTER\")) return false;",
+            StringComparison.Ordinal);
+
+        var logicalPathReplacements = new (string Old, string New)[]
+        {
+            ("        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.ReadableUser, \"/User\")) return false;", "        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.ReadableUser, \"/User\")) { KernelConsole.WriteHostControl(\"OS_POLICY_READABLE_USER_PATH_FAIL\"); return false; }"),
+            ("        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.WritableUser, \"/User\")) return false;", "        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.WritableUser, \"/User\")) { KernelConsole.WriteHostControl(\"OS_POLICY_WRITABLE_USER_PATH_FAIL\"); return false; }"),
+            ("        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.VisibleUser, \"/User/{user}\")) return false;", "        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.VisibleUser, \"/User/{user}\")) { KernelConsole.WriteHostControl(\"OS_POLICY_VISIBLE_USER_PATH_FAIL\"); return false; }"),
+            ("        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.ReadableFonts, \"/System/Fonts\")) return false;", "        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.ReadableFonts, \"/System/Fonts\")) { KernelConsole.WriteHostControl(\"OS_POLICY_READABLE_FONTS_PATH_FAIL\"); return false; }"),
+            ("        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.WritableFonts, \"/System/Fonts\")) return false;", "        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.WritableFonts, \"/System/Fonts\")) { KernelConsole.WriteHostControl(\"OS_POLICY_WRITABLE_FONTS_PATH_FAIL\"); return false; }"),
+            ("        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.VisibleFonts, \"/System/Fonts\")) return false;", "        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.VisibleFonts, \"/System/Fonts\")) { KernelConsole.WriteHostControl(\"OS_POLICY_VISIBLE_FONTS_PATH_FAIL\"); return false; }"),
+            ("        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.Commands, \"/System/Commands\")) return false;", "        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.Commands, \"/System/Commands\")) { KernelConsole.WriteHostControl(\"OS_POLICY_COMMANDS_PATH_FAIL\"); return false; }"),
+            ("        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.Applications, \"/System/Applications\")) return false;", "        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.Applications, \"/System/Applications\")) { KernelConsole.WriteHostControl(\"OS_POLICY_APPLICATIONS_PATH_FAIL\"); return false; }"),
+            ("        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.Libraries, \"/System/Libraries\")) return false;", "        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.Libraries, \"/System/Libraries\")) { KernelConsole.WriteHostControl(\"OS_POLICY_LIBRARIES_PATH_FAIL\"); return false; }"),
+            ("        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.Temporary, \"/Temp\")) return false;", "        if (!FileSystem.SetLogicalPath(FileSystemLogicalPath.Temporary, \"/Temp\")) { KernelConsole.WriteHostControl(\"OS_POLICY_TEMP_PATH_FAIL\"); return false; }\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_PATHS_OK\")) return false;\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_STORAGE_ENTER\")) return false;")
+        };
+        foreach (var replacement in logicalPathReplacements) source = source.Replace(replacement.Old, replacement.New, StringComparison.Ordinal);
+
+        source = source.Replace(
+            "        if (!Storage.TryGetSystemDrive(out KernelStorageDeviceHandle systemDrive)) return false;",
+            "        if (!Storage.TryGetSystemDrive(out KernelStorageDeviceHandle systemDrive)) { KernelConsole.WriteHostControl(\"OS_POLICY_SYSTEM_DRIVE_FAIL\"); return false; }\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_SYSTEM_DRIVE_OK\")) return false;\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_SYSTEM_VOLUME_SCAN_ENTER\")) return false;",
+            StringComparison.Ordinal);
+        source = source.Replace(
+            "            if (!FatFs.TryGetFileSystemType(volume, out KernelFileSystemType fileSystemType)) continue;\n            if (!FileSystem.Mount(volume, fileSystemType, \"/\")) return false;",
+            "            if (!FatFs.TryGetFileSystemType(volume, out KernelFileSystemType fileSystemType)) continue;\n            if (!KernelConsole.WriteHostControl(\"OS_POLICY_SYSTEM_FS_FOUND\")) return false;\n            if (!KernelConsole.WriteHostControl(\"OS_POLICY_SYSTEM_MOUNT_ENTER\")) return false;\n            if (!FileSystem.Mount(volume, fileSystemType, \"/\")) { KernelConsole.WriteHostControl(\"OS_POLICY_SYSTEM_MOUNT_FAIL\"); return false; }\n            if (!KernelConsole.WriteHostControl(\"OS_POLICY_SYSTEM_MOUNT_OK\")) return false;",
+            StringComparison.Ordinal);
+        source = source.Replace("        if (!systemMounted) return false;", "        if (!systemMounted) { KernelConsole.WriteHostControl(\"OS_POLICY_SYSTEM_VOLUME_NOT_MOUNTABLE\"); return false; }", StringComparison.Ordinal);
+        source = source.Replace("        if (!FileSystem.EnsureDirectory(\"/Drives\")) return false;", "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_DRIVES_DIRECTORY_ENTER\")) return false;\n        if (!FileSystem.EnsureDirectory(\"/Drives\")) { KernelConsole.WriteHostControl(\"OS_POLICY_DRIVES_DIRECTORY_FAIL\"); return false; }\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_DRIVES_DIRECTORY_OK\")) return false;", StringComparison.Ordinal);
+        source = source.Replace("            if (!FileSystem.EnsureDirectory(drivePath)) return false;", "            if (!FileSystem.EnsureDirectory(drivePath)) { KernelConsole.WriteHostControl(\"OS_POLICY_DRIVE_DIRECTORY_FAIL\"); return false; }", StringComparison.Ordinal);
+        source = source.Replace("                if (!FileSystem.Mount(volume, fileSystemType, mountPath)) return false;", "                if (!FileSystem.Mount(volume, fileSystemType, mountPath)) { KernelConsole.WriteHostControl(\"OS_POLICY_DATA_MOUNT_FAIL\"); return false; }", StringComparison.Ordinal);
+
+        var logicalDirectoryReplacements = new (string Old, string New)[]
+        {
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.WritableUser))) return false;", "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_DIRECTORIES_ENTER\")) return false;\n        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.WritableUser))) { KernelConsole.WriteHostControl(\"OS_POLICY_WRITABLE_USER_DIRECTORY_FAIL\"); return false; }"),
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.ReadableFonts))) return false;", "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.ReadableFonts))) { KernelConsole.WriteHostControl(\"OS_POLICY_FONTS_DIRECTORY_FAIL\"); return false; }"),
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Commands))) return false;", "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Commands))) { KernelConsole.WriteHostControl(\"OS_POLICY_COMMANDS_DIRECTORY_FAIL\"); return false; }"),
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Applications))) return false;", "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Applications))) { KernelConsole.WriteHostControl(\"OS_POLICY_APPLICATIONS_DIRECTORY_FAIL\"); return false; }"),
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Libraries))) return false;", "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Libraries))) { KernelConsole.WriteHostControl(\"OS_POLICY_LIBRARIES_DIRECTORY_FAIL\"); return false; }"),
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Temporary))) return false;", "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Temporary))) { KernelConsole.WriteHostControl(\"OS_POLICY_TEMP_DIRECTORY_FAIL\"); return false; }\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_DIRECTORIES_OK\")) return false;")
+        };
+        foreach (var replacement in logicalDirectoryReplacements) source = source.Replace(replacement.Old, replacement.New, StringComparison.Ordinal);
+
+        source = source.Replace(
+            "        return TextSession.Run();",
+            "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_TEXT_SESSION_ENTER\")) return false;\n        Boolean textSessionResult = TextSession.Run();\n        KernelConsole.WriteHostControl(textSessionResult ? \"OS_POLICY_TEXT_SESSION_RETURNED_TRUE\" : \"OS_POLICY_TEXT_SESSION_RETURNED_FALSE\");\n        return textSessionResult;",
+            StringComparison.Ordinal);
+
+        File.WriteAllText(kernelPath, source);
+        Console.WriteLine($"[ OK ] Added statement-level diagnostics to untouched stock Test OS policy: {kernelPath}");
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"[FAIL] Unable to instrument stock Test OS policy diagnostics: {ex.Message}");
         return false;
     }
 }

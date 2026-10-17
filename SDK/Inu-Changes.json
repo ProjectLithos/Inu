@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.96",
-  "version": "0.1.97",
-  "changedFiles": 18,
-  "summary": "Honor explicit Networking/USB selections in generated Microkernel/Test OS composition, add OS-policy handoff diagnostics, and retry partition discovery after storage drivers are online.",
+  "baseVersion": "0.1.97",
+  "version": "0.1.98",
+  "changedFiles": 16,
+  "summary": "Add statement-level OS policy diagnostics and safely migrate untouched stock Test OS Kernel.cs policy blocks so the exact false-return boundary is reported.",
   "deletedFiles": 0
 }
