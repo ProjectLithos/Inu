@@ -11,8 +11,10 @@ public static class DesktopOrTextSessionStartup
 {
     public static Boolean Run()
     {
+        if (!KernelConsole.WriteHostControl("DESKTOP_SESSION_ENTER")) return false;
         KernelConsole.WriteLine("NOKMAIN:SESSION");
         Boolean graphicalSessionSelected = GeneratedConfiguration.Gui != "none";
+        if (!KernelConsole.WriteHostControl(graphicalSessionSelected ? "DESKTOP_SESSION_GRAPHICAL_SELECTED" : "DESKTOP_SESSION_TEXT_FALLBACK_SELECTED")) return false;
         Boolean sessionReady = true;
         if (graphicalSessionSelected && !InputHardwareStartup.EnsureGraphicalInputProviders())
         {
@@ -43,7 +45,10 @@ public static class DesktopOrTextSessionStartup
 
             KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:FALLBACK");
         }
-        return TextConsoleSessionStartup.Run();
+        if (!KernelConsole.WriteHostControl("DESKTOP_SESSION_TEXT_FALLBACK_ENTER")) return false;
+        Boolean textResult = TextConsoleSessionStartup.Run();
+        KernelConsole.WriteHostControl(textResult ? "DESKTOP_SESSION_TEXT_RETURNED_TRUE" : "DESKTOP_SESSION_TEXT_RETURNED_FALSE");
+        return textResult;
     }
 }
 }

@@ -97,15 +97,25 @@ function Invoke-InuCachedAction {
             }
         } catch { $cache = $null }
     }
+    $outputHashNow = if ($ready) { Get-InuStageOutputHash -Paths $Outputs -MutableOutputs:$MutableOutputs } else { '' }
     if ($null -ne $cache -and $cache.schema -eq 3 -and $cache.inputs -eq $inputHash -and
-        $cache.mutable -eq [bool]$MutableOutputs -and
-        ($cache.outputs -eq (Get-InuStageOutputHash -Paths $Outputs -MutableOutputs:$MutableOutputs))) {
+        $cache.mutable -eq [bool]$MutableOutputs -and $cache.outputs -eq $outputHashNow) {
         Write-Host "[ OK ] ${Stage}: cached; inputs and outputs are current."
         return
     }
+    $missReason = if ($Force) { 'forced rebuild requested' }
+        elseif ($Dry) { 'dry-run does not consume cache records' }
+        elseif (-not $ready) { 'one or more required outputs are missing or empty' }
+        elseif (-not (Test-Path -LiteralPath $cacheFile -PathType Leaf)) { 'no successful cache record exists for this stage' }
+        elseif ($null -eq $cache) { 'cache record is unreadable or incomplete' }
+        elseif ($cache.schema -ne 3) { 'cache schema changed' }
+        elseif ($cache.inputs -ne $inputHash) { 'one or more source/build inputs or build arguments changed' }
+        elseif ($cache.mutable -ne [bool]$MutableOutputs) { 'output mutability policy changed' }
+        elseif ($cache.outputs -ne $outputHashNow) { 'a previously built output changed, was replaced, or was truncated' }
+        else { 'cache identity changed' }
     # Invalidate before running: a failed/interrupted stage can never retain a hit.
     if (Test-Path -LiteralPath $cacheFile -PathType Leaf) { Remove-Item -LiteralPath $cacheFile -Force }
-    Write-Host ("[INFO] ${Stage}: SHA-256 checked {0} source/build input file(s) before recompilation decision; cache miss requires this stage to run." -f $inputFiles.Count)
+    Write-Host ("[INFO] ${Stage}: SHA-256 checked {0} source/build input file(s) before recompilation decision; cache miss reason: {1}." -f $inputFiles.Count, $missReason)
     & $Action
     if ($Dry) { return }
     foreach ($output in $Outputs) {

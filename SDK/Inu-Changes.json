@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.94",
-  "version": "0.1.95",
-  "changedFiles": 18,
-  "summary": "Fix CLI shell/session startup to use canonical kernel asset paths and text-input provider startup; stop project refresh from invalidating its own content-hash cache; add shell-stage failure diagnostics.",
+  "baseVersion": "0.1.95",
+  "version": "0.1.96",
+  "changedFiles": 21,
+  "summary": "Fix CLI session dispatch so text-only Microkernel boots enter the text session directly; add end-to-end session/input/shell diagnostics and cache-miss reason diagnostics.",
   "deletedFiles": 0
 }

@@ -9,12 +9,18 @@ namespace Inu.Kernel.Bootstrap.Startup
     {
         public static Boolean Run()
         {
+            if (!KernelConsole.WriteHostControl("TEXT_SESSION_ENTER")) return false;
+            if (!KernelConsole.WriteHostControl("TEXT_SESSION_INPUT_ENTER")) return false;
             if (!InputHardwareStartup.EnsureTextInputProviders())
             {
                 KernelConsole.WriteHostControl("TEXT_SESSION_INPUT_STARTUP_FAIL");
                 return false;
             }
-            return UserlandRuntimeStartup.RunShellSession();
+            if (!KernelConsole.WriteHostControl("TEXT_SESSION_INPUT_OK")) return false;
+            if (!KernelConsole.WriteHostControl("TEXT_SESSION_SHELL_ENTER")) return false;
+            Boolean shellResult = UserlandRuntimeStartup.RunShellSession();
+            KernelConsole.WriteHostControl(shellResult ? "TEXT_SESSION_SHELL_RETURNED_TRUE" : "TEXT_SESSION_SHELL_RETURNED_FALSE");
+            return shellResult;
         }
     }
 }

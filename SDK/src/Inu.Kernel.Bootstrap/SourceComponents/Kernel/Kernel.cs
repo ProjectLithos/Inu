@@ -58,10 +58,22 @@ public static class Kernel
         if (!InterruptRuntimeStartup.Enable()) return false;
         if (!InputHardwareStartup.EnableHardwareInterrupts()) return false;
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_SESSION")) return false;
+        if (!KernelConsole.WriteHostControl("SESSION_DISPATCH_ENTER")) return false;
 
-        // Default Inu policy: prefer the graphical session, then fall back to text.
-        // An OS author may replace this with TextConsoleSessionStartup.Run(), a custom
-        // session component, or no interactive session at all.
-        return DesktopOrTextSessionStartup.Run();
+        // Do not route a CLI-only OS through the graphical policy wrapper.  Dispatch
+        // directly to the selected session so failures before shell entry are visible
+        // and so a graphical component can never influence a text-only boot.
+        if (Inu.Kernel.Bootstrap.GeneratedConfiguration.Gui == "none")
+        {
+            if (!KernelConsole.WriteHostControl("SESSION_TEXT_SELECTED")) return false;
+            Boolean textResult = TextConsoleSessionStartup.Run();
+            KernelConsole.WriteHostControl(textResult ? "SESSION_TEXT_RETURNED_TRUE" : "SESSION_TEXT_RETURNED_FALSE");
+            return textResult;
+        }
+
+        if (!KernelConsole.WriteHostControl("SESSION_GRAPHICAL_SELECTED")) return false;
+        Boolean desktopResult = DesktopOrTextSessionStartup.Run();
+        KernelConsole.WriteHostControl(desktopResult ? "SESSION_GRAPHICAL_RETURNED_TRUE" : "SESSION_GRAPHICAL_RETURNED_FALSE");
+        return desktopResult;
     }
 }

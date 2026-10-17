@@ -208,6 +208,7 @@ public static unsafe class UserlandRuntimeStartup
     {
         if(!_initialized){KernelConsole.WriteHostControl("SHELL_RUNTIME_NOT_INITIALIZED");return false;}
         if(!KernelConsole.WriteHostControl("SHELL_SESSION_ENTER"))return false;
+        if(!KernelConsole.WriteHostControl("SHELL_PATH_BUILD_ENTER"))return false;
 
         // This is a kernel-internal asset path, so it must use Inu's canonical '/' namespace
         // directly. It must not be interpreted through the OS-selected external path separator
@@ -215,12 +216,15 @@ public static unsafe class UserlandRuntimeStartup
         Byte* shellPath=stackalloc Byte[23];
         UInt32 shellLength=CopyLiteral("/SYSTEM/SHELL/SHELL.EXE",shellPath,23U);
         if(shellLength==0U){KernelConsole.WriteHostControl("SHELL_PATH_BUILD_FAIL");return false;}
+        if(!KernelConsole.WriteHostControl("SHELL_PATH_BUILD_OK"))return false;
+        if(!KernelConsole.WriteHostControl("SHELL_ASSET_LOOKUP_ENTER"))return false;
         if(!SystemAssetCatalog.TryFindAscii(shellPath+1,shellLength-1U,out Byte* shellImage,out UInt32 shellImageLength) || shellImage==null || shellImageLength==0U)
         {
             KernelConsole.WriteHostControl("SHELL_ASSET_NOT_FOUND");
             return false;
         }
         if(!KernelConsole.WriteHostControl("SHELL_ASSET_OK"))return false;
+        if(!KernelConsole.WriteHostControl("SHELL_PROCESS_CREATE_ENTER"))return false;
 
         // Load the interactive shell once and keep its address space resident. A command spawn
         // still leaves ring 3 so the child can run in its own isolated process, but returning to

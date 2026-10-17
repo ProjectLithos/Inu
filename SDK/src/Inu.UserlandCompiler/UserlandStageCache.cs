@@ -69,21 +69,31 @@ internal static class UserlandStageCache
         string before = Fingerprint(inputPaths, args);
         int hashedInputFiles = inputPaths.Select(Path.GetFullPath).Distinct(StringComparer.OrdinalIgnoreCase).Sum(input => File.Exists(input) ? 1 : Directory.Exists(input) ? SourceFiles(input).Count() : 0);
         bool Ready() => outputs.All(p => File.Exists(p) || Directory.Exists(p) && SourceFiles(p).Any());
+        string missReason = "no successful cache record exists for this stage";
         try
         {
-            if (!force && Ready() && File.Exists(cachePath))
+            if (force) missReason = "forced rebuild requested";
+            else if (!Ready()) missReason = "one or more required outputs are missing or empty";
+            else if (!File.Exists(cachePath)) missReason = "no successful cache record exists for this stage";
+            else
             {
                 CacheEntry? entry = JsonSerializer.Deserialize<CacheEntry>(File.ReadAllText(cachePath));
-                if (entry is { Schema: 2 } && entry.Inputs == before && entry.Outputs == Fingerprint(outputs, []))
+                string outputNow = Fingerprint(outputs, []);
+                if (entry is { Schema: 2 } && entry.Inputs == before && entry.Outputs == outputNow)
                 { Console.WriteLine($"[ OK ] {name}: cached; inputs and outputs are current."); return; }
+                missReason = entry is null ? "cache record is empty" :
+                    entry.Schema != 2 ? "cache schema changed" :
+                    entry.Inputs != before ? "one or more source/build inputs or build arguments changed" :
+                    entry.Outputs != outputNow ? "a previously built output changed, was replaced, or was truncated" :
+                    "cache identity changed";
             }
         }
-        catch (JsonException) { } // A damaged record is a miss.
+        catch (JsonException) { missReason = "cache record is unreadable"; }
         // File.Delete can throw when the parent directory is missing on Windows.
         // Initialise the cache on the first run before invalidating a record.
         Directory.CreateDirectory(cacheDirectory);
         File.Delete(cachePath);
-        Console.WriteLine($"[INFO] {name}: SHA-256 checked {hashedInputFiles} source/build input file(s) before recompilation decision; cache miss requires this stage to run.");
+        Console.WriteLine($"[INFO] {name}: SHA-256 checked {hashedInputFiles} source/build input file(s) before recompilation decision; cache miss reason: {missReason}.");
         int result = action(); if (result != 0) throw new InvalidOperationException($"{name} failed with exit code {result}.");
         if (!Ready()) throw new InvalidOperationException($"{name} did not produce its cache outputs.");
         if (before != Fingerprint(inputPaths, args)) { Console.WriteLine($"[INFO] {name}: inputs changed during execution; cache not saved."); return; }

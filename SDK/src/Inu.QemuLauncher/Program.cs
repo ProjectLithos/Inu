@@ -1703,19 +1703,26 @@ static string[] GetBootStageMarkerHistory(string serialText)
 
 static string[] GetSessionMarkerHistory(string serialText)
 {
-    const string prefix = "[[INU:SHELL_";
-    List<string> history = [];
-    int search = 0;
-    while (search < serialText.Length)
+    string[] prefixes = ["SESSION_", "TEXT_SESSION_", "DESKTOP_SESSION_", "SHELL_"];
+    List<(int Position, string Marker)> markers = [];
+    foreach (string markerPrefix in prefixes)
     {
-        int start = serialText.IndexOf(prefix, search, StringComparison.Ordinal);
-        if (start < 0) break;
-        int end = serialText.IndexOf("]]", start + prefix.Length, StringComparison.Ordinal);
-        if (end < 0) break;
-        string marker = serialText.Substring(start + "[[INU:".Length, end - (start + "[[INU:".Length));
-        if (history.Count == 0 || !string.Equals(history[^1], marker, StringComparison.Ordinal)) history.Add(marker);
-        search = end + 2;
+        string prefix = "[[INU:" + markerPrefix;
+        int search = 0;
+        while (search < serialText.Length)
+        {
+            int start = serialText.IndexOf(prefix, search, StringComparison.Ordinal);
+            if (start < 0) break;
+            int end = serialText.IndexOf("]]", start + prefix.Length, StringComparison.Ordinal);
+            if (end < 0) break;
+            string marker = serialText.Substring(start + "[[INU:".Length, end - (start + "[[INU:".Length));
+            markers.Add((start, marker));
+            search = end + 2;
+        }
     }
+    List<string> history = [];
+    foreach ((int _, string marker) in markers.OrderBy(item => item.Position))
+        if (history.Count == 0 || !string.Equals(history[^1], marker, StringComparison.Ordinal)) history.Add(marker);
     return [.. history];
 }
 
