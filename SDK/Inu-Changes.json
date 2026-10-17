@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.95",
-  "version": "0.1.96",
-  "changedFiles": 21,
-  "summary": "Fix CLI session dispatch so text-only Microkernel boots enter the text session directly; add end-to-end session/input/shell diagnostics and cache-miss reason diagnostics.",
+  "baseVersion": "0.1.96",
+  "version": "0.1.97",
+  "changedFiles": 18,
+  "summary": "Honor explicit Networking/USB selections in generated Microkernel/Test OS composition, add OS-policy handoff diagnostics, and retry partition discovery after storage drivers are online.",
   "deletedFiles": 0
 }

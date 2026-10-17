@@ -26,6 +26,56 @@ public static class StorageHardwareStartup
         return KernelConsole.WriteLine(String.Empty);
     }
 
+
+    private static Boolean HasVolumeForDevice(KernelStorageDeviceHandle device)
+    {
+#if INU_KERNELAREA_STORAGE
+        UInt32 volumeCount = KernelStorage.GetCapabilities().Volumes;
+        for (UInt32 i = 0U; i < volumeCount; i++)
+        {
+            if (!KernelStorage.TryGetVolumeByOrdinal(i, out KernelStorageVolumeHandle volume)) continue;
+            if (!KernelStorage.TryGetVolume(volume, out KernelStorageDeviceHandle owner, out _)) continue;
+            if (owner.Value == device.Value) return true;
+        }
+#endif
+        return false;
+    }
+
+    private static Boolean RediscoverMissingVolumes()
+    {
+#if INU_KERNELAREA_STORAGE && INU_COMPONENT_STORAGE_PARTITION_DISCOVERY
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_STORAGE_POST_DISCOVERY_ENTER")) return false;
+        UInt32 driveCount = KernelStorage.GetCapabilities().Devices;
+        UInt32 retried = 0U;
+        UInt32 recovered = 0U;
+        UInt32 failed = 0U;
+        for (UInt32 i = 0U; i < driveCount; i++)
+        {
+            if (!KernelStorage.TryGetDeviceByOrdinal(i, out KernelStorageDeviceHandle drive, out KernelStorageDeviceKind kind, out KernelStorageGeometry geometry)) continue;
+            if (HasVolumeForDevice(drive)) continue;
+            retried++;
+            if (!DiagnosticCount("Partition rediscovery drive ordinal: ", i)) return false;
+            if (!DiagnosticCount("Partition rediscovery device kind: ", (UInt64)kind)) return false;
+            if (!DiagnosticCount("Partition rediscovery logical block size: ", geometry.LogicalBlockSize)) return false;
+            if (KernelStorage.RefreshPartitions(drive))
+            {
+                recovered++;
+                if (!KernelStructuredLogging.InfoLine("storage-detail", "StorageHardwareStartup.Initialize", "Post-driver partition rediscovery registered at least one volume for this drive.")) return false;
+            }
+            else
+            {
+                failed++;
+                KernelStructuredLogging.WarningLine("storage", "StorageHardwareStartup.Initialize", "Post-driver partition rediscovery could not register a volume for this drive; the OS policy may not be able to mount it.");
+            }
+        }
+        if (!DiagnosticCount("Partition rediscovery drives retried: ", retried)) return false;
+        if (!DiagnosticCount("Partition rediscovery drives recovered: ", recovered)) return false;
+        if (!DiagnosticCount("Partition rediscovery drives still without volumes: ", failed)) return false;
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_STORAGE_POST_DISCOVERY_OK")) return false;
+#endif
+        return true;
+    }
+
     public static Boolean Initialize()
     {
 #if INU_KERNELAREA_STORAGE
@@ -94,6 +144,7 @@ public static class StorageHardwareStartup
             KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","AHCI controller started, but no SATA disk completed discovery and IDENTIFY.");
         }
 #endif
+        if (!RediscoverMissingVolumes()) return false;
         if (KernelStorage.GetCapabilities().Devices == 0U)
         {
             KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","No block drives were registered. The OS-owned Kernel.cs will see an empty drive list.");

@@ -39,10 +39,14 @@ public static class Kernel
         if (!GraphicsHardwareStartup.Initialize()) return false;
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_STORAGE")) return false;
         if (!StorageHardwareStartup.Initialize()) return false;
+#if INU_KERNELAREA_NETWORKING
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_NETWORK")) return false;
         if (!NetworkingHardwareStartup.Initialize()) return false;
+#endif
+#if INU_KERNELAREA_USB
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_USB")) return false;
         if (!UsbHardwareStartup.Initialize()) return false;
+#endif
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_BINDING")) return false;
         if (!DriverBindingStartup.Initialize()) return false;
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_FILESYSTEM")) return false;

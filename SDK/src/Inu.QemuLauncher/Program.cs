@@ -1703,7 +1703,7 @@ static string[] GetBootStageMarkerHistory(string serialText)
 
 static string[] GetSessionMarkerHistory(string serialText)
 {
-    string[] prefixes = ["SESSION_", "TEXT_SESSION_", "DESKTOP_SESSION_", "SHELL_"];
+    string[] prefixes = ["OS_POLICY_", "SESSION_", "TEXT_SESSION_", "DESKTOP_SESSION_", "SHELL_"];
     List<(int Position, string Marker)> markers = [];
     foreach (string markerPrefix in prefixes)
     {
