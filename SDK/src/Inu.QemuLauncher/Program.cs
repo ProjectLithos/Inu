@@ -314,7 +314,9 @@ static int MainEntry(string[] args)
                 PersistLatestSerial(outputDirectory, serialText);
                 PrintSerialTail(serialText);
                 TryStop(qemuPid);
-                throw Fail($"Inu reported an explicit kernel startup failure during QEMU runtime acceptance. See the serial tail for the failing stage. Serial log: {serialLog}");
+                string[] sessionHistory = GetSessionMarkerHistory(serialText);
+                string sessionDetail = sessionHistory.Length == 0 ? string.Empty : $" Session marker history: {string.Join(" -> ", sessionHistory)}.";
+                throw Fail($"Inu reported an explicit kernel startup failure during QEMU runtime acceptance.{sessionDetail} See the serial tail for the failing stage. Serial log: {serialLog}");
             }
             const string ttfReadyMarker = "[[INU:TTF_READY]]";
             const string interactiveReadyMarker = "[[INU:INTERACTIVE_READY]]";
@@ -1683,6 +1685,25 @@ static string? GetLatestBootStageMarker(string serialText)
 static string[] GetBootStageMarkerHistory(string serialText)
 {
     const string prefix = "[[INU:BOOT_STAGE_";
+    List<string> history = [];
+    int search = 0;
+    while (search < serialText.Length)
+    {
+        int start = serialText.IndexOf(prefix, search, StringComparison.Ordinal);
+        if (start < 0) break;
+        int end = serialText.IndexOf("]]", start + prefix.Length, StringComparison.Ordinal);
+        if (end < 0) break;
+        string marker = serialText.Substring(start + "[[INU:".Length, end - (start + "[[INU:".Length));
+        if (history.Count == 0 || !string.Equals(history[^1], marker, StringComparison.Ordinal)) history.Add(marker);
+        search = end + 2;
+    }
+    return [.. history];
+}
+
+
+static string[] GetSessionMarkerHistory(string serialText)
+{
+    const string prefix = "[[INU:SHELL_";
     List<string> history = [];
     int search = 0;
     while (search < serialText.Length)

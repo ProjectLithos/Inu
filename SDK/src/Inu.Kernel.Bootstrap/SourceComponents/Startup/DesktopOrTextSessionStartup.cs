@@ -43,7 +43,7 @@ public static class DesktopOrTextSessionStartup
 
             KernelConsole.WriteLine("NOKMAIN:GUI-AUTOSTART:FALLBACK");
         }
-        return UserlandRuntimeStartup.RunShellSession();
+        return TextConsoleSessionStartup.Run();
     }
 }
 }

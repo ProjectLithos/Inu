@@ -723,9 +723,19 @@ if (-not (Test-Path -LiteralPath $projectManifest -PathType Leaf)) {
 
 if (-not [string]::Equals([IO.Path]::GetFullPath($projectManifest), [IO.Path]::GetFullPath($defaultProjectManifest), [StringComparison]::OrdinalIgnoreCase)) {
     $selectedProjectDirectory = Split-Path -Parent $projectManifest
+    # Project refresh is a generator. Never hash its entire output directory as an input: that
+    # makes the stage invalidate itself every time it rewrites generated files. Only the
+    # coder/IDE-authoritative configuration plus generator/template inputs control refresh.
+    $selectedProjectRefreshInputs = @(
+        (Join-Path $selectedProjectDirectory 'Inu.json'),
+        (Join-Path $selectedProjectDirectory 'Inu.Configuration.json'),
+        (Join-Path $root 'templates'),
+        (Join-Path $root 'src\Userland'),
+        (Join-Path $root 'src\Inu.Kernel.Bootstrap\SourceComponents')
+    ) + @((Get-InuStageFiles -Paths @((Split-Path -Parent $projectCreator)) -Outputs).FullName)
     Invoke-InuBuildStage -Stage "Refresh selected Inu project" -FilePath $inuHost -Arguments @(
         "project", "create", "--host-configuration", $Configuration, "--output", $selectedProjectDirectory, "--sdk-root", $root
-    ) -Inputs (@($selectedProjectDirectory,(Join-Path $root 'templates'),(Join-Path $root 'src\Userland')) + @((Get-InuStageFiles -Paths @((Split-Path -Parent $projectCreator)) -Outputs).FullName)) -Outputs @(
+    ) -Inputs $selectedProjectRefreshInputs -Outputs @(
         (Join-Path $selectedProjectDirectory 'InuProject.json'),
         (Join-Path $selectedProjectDirectory 'InuKernel.csproj')
     )

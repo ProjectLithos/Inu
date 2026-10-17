@@ -206,31 +206,49 @@ public static unsafe class UserlandRuntimeStartup
     /// </summary>
     public static Boolean RunShellSession()
     {
-        if(!_initialized)return false;
+        if(!_initialized){KernelConsole.WriteHostControl("SHELL_RUNTIME_NOT_INITIALIZED");return false;}
+        if(!KernelConsole.WriteHostControl("SHELL_SESSION_ENTER"))return false;
+
+        // This is a kernel-internal asset path, so it must use Inu's canonical '/' namespace
+        // directly. It must not be interpreted through the OS-selected external path separator
+        // (which may legitimately be ':', '\\' or another character).
         Byte* shellPath=stackalloc Byte[23];
         UInt32 shellLength=CopyLiteral("/SYSTEM/SHELL/SHELL.EXE",shellPath,23U);
-        if(shellLength==0U)return false;
+        if(shellLength==0U){KernelConsole.WriteHostControl("SHELL_PATH_BUILD_FAIL");return false;}
+        if(!SystemAssetCatalog.TryFindAscii(shellPath+1,shellLength-1U,out Byte* shellImage,out UInt32 shellImageLength) || shellImage==null || shellImageLength==0U)
+        {
+            KernelConsole.WriteHostControl("SHELL_ASSET_NOT_FOUND");
+            return false;
+        }
+        if(!KernelConsole.WriteHostControl("SHELL_ASSET_OK"))return false;
 
         // Load the interactive shell once and keep its address space resident. A command spawn
         // still leaves ring 3 so the child can run in its own isolated process, but returning to
         // the prompt no longer reparses and remaps SHELL.EXE after every command.
-        if(!TryCreateExecutable(shellPath,shellLength,KernelProcessOwnership.Foreground,out KernelProcessInfo shell))
+        if(!KernelProcesses.TryCreateFromImage((UInt64)(nuint)shellImage,shellImageLength,KernelProcessOwnership.Foreground,out KernelProcessInfo shell))
         {
             KernelConsole.WriteHostControl("SHELL_CREATE_FAIL");
             return false;
         }
         _shellProcessId=shell.Id;
+        if(!KernelConsole.WriteHostControl("SHELL_CREATE_OK"))return false;
 
         for(;;)
         {
             SetCurrentContext(null,0U,null,0U);
             _shellOutputWritten=false;
+            if(!KernelConsole.WriteHostControl("SHELL_START_ENTER"))return false;
             if(!KernelProcesses.TryStart(shell.Id,0UL))
             {
-                KernelConsole.WriteHostControl("SHELL_START_FAIL");
+                if(KernelProcesses.TryGetProcess(shell.Id,out KernelProcessInfo failedShell))
+                {
+                    KernelConsole.WriteHostControl(failedShell.State==KernelProcessState.Faulted?"SHELL_START_FAULTED":"SHELL_START_FAIL");
+                }
+                else KernelConsole.WriteHostControl("SHELL_START_STATE_UNKNOWN");
                 KernelProcesses.TryTerminate(shell.Id,-1L);
                 return false;
             }
+            if(!KernelConsole.WriteHostControl("SHELL_START_RETURNED"))return false;
 
             UInt64 childId=_pendingProcessId;
             if(childId==0UL)
@@ -238,13 +256,25 @@ public static unsafe class UserlandRuntimeStartup
                 // A microkernel shell may return cleanly to its supervisor without having queued
                 // a child. Keep the already-loaded shell resident and resume it instead of treating
                 // that hand-off as a fatal kernel return. Faulted/non-completed shells still fail.
-                if(!KernelProcesses.TryGetProcess(shell.Id,out KernelProcessInfo shellDone) ||
-                   shellDone.State!=KernelProcessState.Completed ||
-                   !KernelProcessRecordStore.ReactivateCompleted(shell.Id))
+                if(!KernelProcesses.TryGetProcess(shell.Id,out KernelProcessInfo shellDone))
                 {
+                    KernelConsole.WriteHostControl("SHELL_STATE_LOOKUP_FAIL");
                     KernelProcesses.TryTerminate(shell.Id,-1L);
                     return false;
                 }
+                if(shellDone.State!=KernelProcessState.Completed)
+                {
+                    KernelConsole.WriteHostControl(shellDone.State==KernelProcessState.Faulted?"SHELL_FAULTED":"SHELL_UNEXPECTED_STATE");
+                    KernelProcesses.TryTerminate(shell.Id,-1L);
+                    return false;
+                }
+                if(!KernelProcessRecordStore.ReactivateCompleted(shell.Id))
+                {
+                    KernelConsole.WriteHostControl("SHELL_REACTIVATE_FAIL");
+                    KernelProcesses.TryTerminate(shell.Id,-1L);
+                    return false;
+                }
+                if(!KernelConsole.WriteHostControl("SHELL_REACTIVATED"))return false;
                 continue;
             }
 
