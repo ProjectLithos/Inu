@@ -167,7 +167,7 @@ public static unsafe class InputHardwareStartup
         if (!KernelConsole.WriteUInt64(capabilities.Mice)) return false;
         if (!KernelConsole.Write(" / ")) return false;
         if (!KernelConsole.WriteUInt64(capabilities.KeyboardReports + capabilities.MouseReports)) return false;
-        if (!KernelConsole.WriteLine()) return false;
+        if (!KernelConsole.WriteLine(String.Empty)) return false;
 
         if (usbKeyboardSelected)
         {

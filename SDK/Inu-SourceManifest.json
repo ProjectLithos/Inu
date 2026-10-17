@@ -1,5 +1,5 @@
 {
-  "version": "0.1.101",
+  "version": "0.1.103",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "cc24151e458aeaac9013e76c0b21917f8ed3fca607ccfd11e2d50b88466dd35a"
+      "sha256": "4554fc7a41a2f33621b0498bb878b085aa0d7b78ff0376b910d64cce6a631904"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "e6b7645637bb74d70679da2626b445a80b651b601470941a030215ed03ccc79e"
+      "sha256": "8436376babe0dd7685a687c1db424b65ea4bc974d05bb8a1b83542eee9cdacf2"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "e7d86c06cf38b5beb38dcd81971f43906c677c45cc8c513d369ab3e55e54e673"
+      "sha256": "96e9d97356536c6021302fe36e421089ce1363217502fad17b6c43aab759b05b"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "9b3362d6634476485106627664dcfce87af21d0035ffed6c2aa2b937e52d0258"
+      "sha256": "8e5ad34d74caa296c16a43e6e9c6099b811f146ffbb8eb4cb44b64aa26723e09"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "83bb24a8aa561f47cefc6cde8b647c72d656c0cd89e73b448f4a5d237357ded4"
+      "sha256": "194590dc296e20d00a13cad437f2b8271a3653c47acacfc5f3b02a7f0377c3ed"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4247,7 +4247,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/InputHardwareStartup.cs",
-      "sha256": "c4cb311ead02797e82bb745ad340d1cd9bac1bdfc21b852c4b89316ce7d8b59f"
+      "sha256": "bed6c35d97bfd2805c3997abccb21c9e0033737957a84df4f594d93ea6c83140"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/NetworkingHardwareStartup.cs",

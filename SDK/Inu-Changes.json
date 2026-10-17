@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.100",
-  "version": "0.1.101",
-  "changedFiles": 15,
-  "summary": "Bind selected USB HID handlers at text-session startup after USB enumeration and add end-to-end keyboard diagnostics so CLI input works with PS/2 disabled.",
+  "baseVersion": "0.1.102",
+  "version": "0.1.103",
+  "changedFiles": 0,
+  "summary": "Repair the 0.1.102 incremental release transport so ChangedFiles again carries the mandatory root Build.bat and Build.ps1 bootstrap companions required by the existing bootstrap contract.",
   "deletedFiles": 0
 }
