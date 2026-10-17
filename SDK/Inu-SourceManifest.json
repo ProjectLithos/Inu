@@ -1,5 +1,5 @@
 {
-  "version": "0.1.104",
+  "version": "0.1.105",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "f34a4869d6b4820f03030eaa5c3869aba53bb029dc737bbbc53ec3e86f5ae568"
+      "sha256": "7071476c6c8bf5df08232d291655d0d0d08fe3dfe3b7caa7d61eb46e331a399e"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "c09d7eae4b3ba2adde0c90481fd358aaf5ff259d179ba54812fd4154cd05ab4a"
+      "sha256": "44b6405656b0606022d7b4b5f524df97b383ee95cfd7bbee318073c50b3bb503"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "196851015836c1f9bf5ea197f2b6c2bc162573467c58c0515b22d6c0e9f6e7ec"
+      "sha256": "a5da5036d469a445267103066cf8a8fd34e9950772aebbdbdca43f4bbc156d05"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "53211e5d6593747ae20e25cefbadc6a3c597a5d1b9b7c5634fccdaeaf76386bf"
+      "sha256": "b62230f60df980c15e391636b6487f2e9252b26dfd1614fc0616893894681497"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "d33666af45fd0cdaf6c1985002c385741224a7582751da5a6d41dcf9281342ad"
+      "sha256": "f5512fcc1e2b15699f07099baf0549013073f8c3811ec86b1d8e53fe332684de"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4259,11 +4259,11 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/UsbHardwareStartup.cs",
-      "sha256": "fcf1a2ef1906be1c1f9bd2051edd9cecad51f697a0d940a1bad71a7b8e70ea5d"
+      "sha256": "79768ebfcdd9a5e3c80942a32ed61115ec4015c3e40fa45117502758cafd1c65"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Kernel/Kernel.cs",
-      "sha256": "1da41fc9a5300fb5fdca2cd87dcf08d99ed3f6405965d68f9799b3d00b5c9f26"
+      "sha256": "b88d48c589e42ac4b0a9000093d7c40c80e54a568604f2401294dde38bf5b483"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Startup/DesktopOrTextSessionStartup.cs",
@@ -6111,31 +6111,31 @@
     },
     {
       "path": "src/Inu.Usb.Xhci/Inu.Usb.Xhci.csproj",
-      "sha256": "8ec18b034c808e5faa85b476376d1e099b95d614b8a7a8ec1b21b30557c5cc1e"
+      "sha256": "ff6a5b14a745d58bdea745b16e6ba326d61881c71d23c223b22b437410913fb0"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.ControllerLifecycle.cs",
-      "sha256": "02e745466b4395485332f23fd0f4eaf1048b016b2292edc555db91100efd0b09"
+      "sha256": "7a17ef49a5dc100c953fc1d773a206825878ee5be673aaf3a9fbdc923fefc93e"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.cs",
-      "sha256": "5d36c8f1460df312409b9ff0d2c881420da52ca6988e7f7a525eed06c1a185ff"
+      "sha256": "cac60d0b1d03577773628297faa6d3d967ff994ca50e1a0abb8d5df80232041f"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.DeviceTransfers.cs",
-      "sha256": "c8b5452625913bae247d0d6c80b036a7532c0f612589837af7615e60b4830732"
+      "sha256": "a8d96e8ddb3daff8f10372e0983f563a7a64bed5ff506701fd8e94d6d71d380e"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.RingsAndEvents.cs",
-      "sha256": "33b13573bec79e76988498d53945ddac77d280a09b2b28888c33e642eaa46805"
+      "sha256": "41c58d50134454b53bf55a24c271f860ebac159d705f6fa18576fc113b846b62"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.Storage.cs",
-      "sha256": "68a25664d8a2db3c999d6931b5bd447b9d51bded9d54eca2858601ee2a8e67fd"
+      "sha256": "eaffda19b2de98788dc4c4ffff8b2cbf9964816f22503f14fb2a9cc344c8ef49"
     },
     {
       "path": "src/Inu.Usb.Xhci/XhciContracts.cs",
-      "sha256": "7f883e110793e0e53c72f3149c63ce1f46db966a464256037a574f50d659e85e"
+      "sha256": "997241f07495330e2f8d7bf81a3d4dbfd4ef05c828d6736852146270bc825516"
     },
     {
       "path": "src/Inu.Userland.Buffering/BufferingCommand.cs",

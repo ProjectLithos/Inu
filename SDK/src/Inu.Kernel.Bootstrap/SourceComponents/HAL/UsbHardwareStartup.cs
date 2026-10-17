@@ -21,6 +21,8 @@ public static class UsbHardwareStartup
         Boolean xhciSelected = HasConfiguredDriver("usb-xhci") || usbKeyboardSelected || usbMouseSelected;
         if (!xhciSelected) return true;
         if (!KernelXhci.Initialize()) return false;
+        XhciCapabilities xhciCapabilities = KernelXhci.GetCapabilities();
+        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.Initialize",xhciCapabilities.InterruptConfiguredControllers == xhciCapabilities.RunningControllers ? "xHCI runtime interrupt routes are configured; bootstrap enumeration remains synchronous until runtime interrupt delivery is enabled." : "xHCI explicit polling fallback is active for at least one controller.")) return false;
         if (!KernelXhci.ScanRootPorts()) return false;
         if (!UsbHub.Initialize()) return false;
         if (!UsbHub.EnumerateDownstream()) return false;
@@ -35,6 +37,17 @@ public static class UsbHardwareStartup
         if (!UsbMassStorage.Initialize()) return false;
 #endif
         if (!KernelStructuredLogging.InfoLine("usb","UsbHardwareStartup.Initialize","Selected kernel-domain USB services online.")) return false;
+#endif
+        return true;
+    }
+
+    /// <summary>Enables runtime xHCI interrupt delivery after the kernel interrupt dispatcher has enabled maskable interrupts.</summary>
+    public static Boolean EnableHardwareInterrupts()
+    {
+#if INU_KERNELAREA_USB
+        if (!KernelXhci.EnableInterruptDelivery()) return false;
+        XhciCapabilities xhci = KernelXhci.GetCapabilities();
+        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.EnableHardwareInterrupts",xhci.PollingFallbackControllers == 0U ? "xHCI broker-managed hardware interrupt delivery active." : "xHCI explicit polling fallback remains active.")) return false;
 #endif
         return true;
     }

@@ -8,5 +8,6 @@
     <ProjectReference Include="..\Inu.Kernel.AddressSpace\Inu.Kernel.AddressSpace.csproj" />
     <ProjectReference Include="..\Inu.Kernel.Drivers\Inu.Kernel.Drivers.csproj" />
     <ProjectReference Include="..\Inu.Kernel.Heap\Inu.Kernel.Heap.csproj" />
+    <ProjectReference Include="..\Inu.Kernel.Synchronization\Inu.Kernel.Synchronization.csproj" />
   </ItemGroup>
 </Project>

@@ -60,6 +60,9 @@ public static class Kernel
         if (!UserlandCommandStartup.Initialize(boot)) return false;
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_INTERRUPTS")) return false;
         if (!InterruptRuntimeStartup.Enable()) return false;
+#if INU_KERNELAREA_USB
+        if (!UsbHardwareStartup.EnableHardwareInterrupts()) return false;
+#endif
         if (!InputHardwareStartup.EnableHardwareInterrupts()) return false;
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_SESSION")) return false;
         if (!KernelConsole.WriteHostControl("SESSION_DISPATCH_ENTER")) return false;

@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.103",
-  "version": "0.1.104",
-  "changedFiles": 17,
-  "summary": "Repair xHCI event-ring acknowledgement and polling-mode interrupt handling so selected QEMU USB HID input can enumerate reliably; surface connected-port enumeration failures instead of silently launching an input-dead shell.",
+  "baseVersion": "0.1.104",
+  "version": "0.1.105",
+  "changedFiles": 23,
+  "summary": "Configure xHCI through the existing PCI interrupt broker, use synchronous completion draining only during the interrupt-masked bootstrap window, then switch to MSI-X/MSI/IOAPIC-driven completion delivery before the interactive session.",
   "deletedFiles": 0
 }
