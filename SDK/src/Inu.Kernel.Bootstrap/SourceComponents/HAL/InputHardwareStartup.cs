@@ -171,22 +171,32 @@ public static unsafe class InputHardwareStartup
 
         if (usbKeyboardSelected)
         {
+            if (capabilities.Keyboards == 0U)
+            {
+                KernelConsole.WriteHostControl(markerPrefix + "_KEYBOARD_NO_DEVICE");
+                return false;
+            }
             if (!UsbHid.SetKeyboardEventHandler(&HandleUsbKeyboardEvent))
             {
                 KernelConsole.WriteHostControl(markerPrefix + "_KEYBOARD_HANDLER_FAIL");
                 return false;
             }
-            if (!KernelConsole.WriteHostControl(capabilities.Keyboards != 0U ? markerPrefix + "_KEYBOARD_PRESENT" : markerPrefix + "_KEYBOARD_NO_DEVICE")) return false;
+            if (!KernelConsole.WriteHostControl(markerPrefix + "_KEYBOARD_PRESENT")) return false;
         }
 
         if (usbMouseSelected)
         {
+            if (capabilities.Mice == 0U)
+            {
+                KernelConsole.WriteHostControl(markerPrefix + "_MOUSE_NO_DEVICE");
+                return false;
+            }
             if (!UsbHid.SetMouseEventHandler(&HandleUsbMouseEvent))
             {
                 KernelConsole.WriteHostControl(markerPrefix + "_MOUSE_HANDLER_FAIL");
                 return false;
             }
-            if (!KernelConsole.WriteHostControl(capabilities.Mice != 0U ? markerPrefix + "_MOUSE_PRESENT" : markerPrefix + "_MOUSE_NO_DEVICE")) return false;
+            if (!KernelConsole.WriteHostControl(markerPrefix + "_MOUSE_PRESENT")) return false;
         }
 
         return KernelConsole.WriteHostControl(markerPrefix + "_BIND_OK");

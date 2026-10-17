@@ -23,9 +23,11 @@ public static class UsbHardwareStartup
         if (!KernelXhci.Initialize()) return false;
         XhciCapabilities xhciCapabilities = KernelXhci.GetCapabilities();
         if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.Initialize",xhciCapabilities.InterruptConfiguredControllers == xhciCapabilities.RunningControllers ? "xHCI runtime interrupt routes are configured; bootstrap enumeration remains synchronous until runtime interrupt delivery is enabled." : "xHCI explicit polling fallback is active for at least one controller.")) return false;
-        if (!KernelXhci.ScanRootPorts()) return false;
+
+        // Register every selected USB class/protocol driver before the host controller
+        // enumerates root ports. Dynamic USB interfaces are bound as they are created;
+        // enumeration must therefore never run ahead of the drivers that own them.
         if (!UsbHub.Initialize()) return false;
-        if (!UsbHub.EnumerateDownstream()) return false;
         if (!UsbHid.Initialize()) return false;
 #if INU_KERNELAREA_INPUT && INU_COMPONENT_USB_HID_KEYBOARD
         if (usbKeyboardSelected && !UsbHidKeyboard.Initialize()) return false;
@@ -36,6 +38,8 @@ public static class UsbHardwareStartup
 #if INU_COMPONENT_USB_MASS_STORAGE
         if (!UsbMassStorage.Initialize()) return false;
 #endif
+        if (!KernelXhci.ScanRootPorts()) return false;
+        if (!UsbHub.EnumerateDownstream()) return false;
         if (!KernelStructuredLogging.InfoLine("usb","UsbHardwareStartup.Initialize","Selected kernel-domain USB services online.")) return false;
 #endif
         return true;

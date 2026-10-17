@@ -9,7 +9,12 @@ public static class DriverBindingStartup
     public static Boolean Initialize()
     {
 #if INU_KERNELAREA_DRIVERS
-        return KernelDrivers.BindAndStartMatchingDevices();
+        if (!KernelDrivers.BindAndStartMatchingDevices())
+        {
+            global::Inu.Kernel.Console.KernelConsole.WriteHostControl("DRIVER_BINDING_FAILED");
+            return false;
+        }
+        return true;
 #else
         return true;
 #endif

@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.104",
-  "version": "0.1.105",
-  "changedFiles": 23,
-  "summary": "Configure xHCI through the existing PCI interrupt broker, use synchronous completion draining only during the interrupt-masked bootstrap window, then switch to MSI-X/MSI/IOAPIC-driven completion delivery before the interactive session.",
+  "baseVersion": "0.1.105",
+  "version": "0.1.106",
+  "changedFiles": 18,
+  "summary": "Correct USB startup ordering so selected USB class drivers register before the single xHCI root-port enumeration pass; selected HID input must enumerate before an interactive session can start.",
   "deletedFiles": 0
 }
