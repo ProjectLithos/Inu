@@ -135,6 +135,7 @@ static int MainEntry(string[] args)
     Console.WriteLine($"[INFO] QEMU network  : {networkTarget}");
     Console.WriteLine($"[INFO] QEMU graphics : {graphicsTarget}");
     Console.WriteLine($"[INFO] QEMU USB      : {usbTarget}");
+    Console.WriteLine($"[INFO] QEMU USB HID  : keyboard={(configuredUsbKeyboard ? "on" : "off")}; mouse={(configuredUsbMouse ? "on" : "off")}");
     Console.WriteLine($"[INFO] {Quote(qemu)} {string.Join(" ", qemuArguments.Select(Quote))}");
     if (HasOption(args, "--dry-run"))
     {
@@ -1056,8 +1057,8 @@ static string[] BuildArguments(string ovmfCode, string variableStore, string run
     if (usbTarget == "xhci")
     {
         arguments.AddRange(["-device", "qemu-xhci,id=xhci"]);
-        if (usbKeyboard) arguments.AddRange(["-device", "usb-kbd,bus=xhci.0"]);
-        if (usbMouse) arguments.AddRange(["-device", "usb-mouse,bus=xhci.0"]);
+        if (usbKeyboard) arguments.AddRange(["-device", "usb-kbd,bus=xhci.0,port=1"]);
+        if (usbMouse) arguments.AddRange(["-device", "usb-mouse,bus=xhci.0,port=2"]);
     }
 
     arguments.AddRange([

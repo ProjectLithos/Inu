@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.102",
-  "version": "0.1.103",
-  "changedFiles": 0,
-  "summary": "Repair the 0.1.102 incremental release transport so ChangedFiles again carries the mandatory root Build.bat and Build.ps1 bootstrap companions required by the existing bootstrap contract.",
+  "baseVersion": "0.1.103",
+  "version": "0.1.104",
+  "changedFiles": 17,
+  "summary": "Repair xHCI event-ring acknowledgement and polling-mode interrupt handling so selected QEMU USB HID input can enumerate reliably; surface connected-port enumeration failures instead of silently launching an input-dead shell.",
   "deletedFiles": 0
 }
