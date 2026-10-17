@@ -75,7 +75,12 @@ public static class StorageHardwareStartup
 #endif
 #if INU_COMPONENT_STORAGE_AHCI_DRIVER
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_STORAGE_AHCI_ENTER")) return false;
-        if (!KernelAhci.Initialize()) return false;
+        if (!KernelAhci.Initialize())
+        {
+            KernelStructuredLogging.ErrorLine("storage","StorageHardwareStartup.Initialize","AHCI initialization returned failure after its bounded controller/port/IDENTIFY waits.");
+            KernelConsole.WriteHostControl("BOOT_STAGE_STORAGE_AHCI_FAILED");
+            return false;
+        }
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_STORAGE_AHCI_OK")) return false;
         AhciCapabilities ahci = KernelAhci.GetCapabilities();
         if (!DiagnosticCount("AHCI controllers started: ", ahci.Controllers)) return false;

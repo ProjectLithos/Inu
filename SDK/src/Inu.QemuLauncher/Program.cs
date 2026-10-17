@@ -282,6 +282,14 @@ static int MainEntry(string[] args)
             if (bootStageMarker is not null && !string.Equals(bootStageMarker, lastBootStageMarker, StringComparison.Ordinal))
             {
                 lastBootStageMarker = bootStageMarker;
+                if (bootStageMarker.EndsWith("_FAILED", StringComparison.Ordinal))
+                {
+                    string[] failedHistory = GetBootStageMarkerHistory(serialText);
+                    PersistLatestSerial(outputDirectory, serialText);
+                    PrintSerialTail(serialText);
+                    TryStop(qemuPid);
+                    throw Fail($"Kernel startup explicitly reported {bootStageMarker}. Marker history: {string.Join(" -> ", failedHistory)}. Serial log: {serialLog}");
+                }
                 TimeSpan stageDeadline = acceptanceClock.Elapsed + TimeSpan.FromSeconds(timeoutSeconds);
                 if (stageDeadline > acceptanceDeadline) acceptanceDeadline = stageDeadline;
                 Console.WriteLine($"[INFO] Kernel startup advanced to {bootStageMarker}; allowing the normal {timeoutSeconds}-second bounded window for the next startup stage.");
