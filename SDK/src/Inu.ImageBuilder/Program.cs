@@ -36,6 +36,7 @@ static int MainEntry(string[] args)
     string stagedKernel = Path.Combine(novaRoot, "KERNEL", "KERNEL.BIN");
     string bundlePath = Path.Combine(novaRoot, "SYSTEM", "ASSETS.BIN");
     string compileManifestPath = Path.Combine(outputDirectory, "Inu.Compile.json");
+    string[] selectedStorageControllers = ReadSelectedStorageControllers(kathConfigurationPath);
     bool nativeDebugSymbols = false;
     bool sourceDebugRendezvous = false;
     if (File.Exists(compileManifestPath))
@@ -70,6 +71,36 @@ static int MainEntry(string[] args)
         Directory.CreateDirectory(Path.Combine(novaRoot, "SYSTEM", "HELP"));
         Directory.CreateDirectory(Path.Combine(novaRoot, "SYSTEM", "FONTS"));
         Directory.CreateDirectory(Path.Combine(novaRoot, "SYSTEM", "WALLPAPERS"));
+
+        // /INU is boot-private. The mounted OS namespace is rooted at the FAT32 partition
+        // itself, so stage the default coder-visible hierarchy at the real filesystem root.
+        string visibleSystemRoot = Path.Combine(stagingRoot, "SYSTEM");
+        string visibleDrivesRoot = Path.Combine(stagingRoot, "DRIVES");
+        string visibleUserRoot = Path.Combine(stagingRoot, "USER");
+        string visibleTempRoot = Path.Combine(stagingRoot, "TEMP");
+        Directory.CreateDirectory(visibleDrivesRoot);
+        Directory.CreateDirectory(visibleUserRoot);
+        Directory.CreateDirectory(visibleTempRoot);
+        Directory.CreateDirectory(Path.Combine(visibleSystemRoot, "COMMANDS"));
+        Directory.CreateDirectory(Path.Combine(visibleSystemRoot, "SHELL"));
+        Directory.CreateDirectory(Path.Combine(visibleSystemRoot, "HELP"));
+        Directory.CreateDirectory(Path.Combine(visibleSystemRoot, "FONTS"));
+        Directory.CreateDirectory(Path.Combine(visibleSystemRoot, "WALLPAPERS"));
+        Directory.CreateDirectory(Path.Combine(visibleSystemRoot, "APPLICATIONS"));
+        Directory.CreateDirectory(Path.Combine(visibleSystemRoot, "LIBRARIES"));
+
+        // Drive mount points are namespace structure, not user data. Pre-stage the system
+        // drive plus one slot for each selected persistent data controller so boot does not
+        // require a FAT mutation merely to construct the mount namespace.
+        int visibleDriveSlots = 1 + selectedStorageControllers.Where(value => value is "nvme" or "ahci").Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        for (int driveIndex = 0; driveIndex < visibleDriveSlots; driveIndex++)
+        {
+            string driveRoot = Path.Combine(visibleDrivesRoot, "DRIVE" + driveIndex.ToString());
+            Directory.CreateDirectory(driveRoot);
+            Directory.CreateDirectory(Path.Combine(driveRoot, "PARTITION1"));
+            Directory.CreateDirectory(Path.Combine(driveRoot, "PARTITION2"));
+        }
+
         File.Copy(bootLoaderPath, stagedLoader, true);
         File.WriteAllText(startupScript, "@echo -off\r\nfs0:\r\n\\EFI\\BOOT\\BOOTX64.EFI\r\n", Encoding.ASCII);
         File.Copy(kernelPath, stagedKernel, true);
@@ -89,9 +120,14 @@ static int MainEntry(string[] args)
                 throw Fail("Debug symbol map/kernel hash mismatch. Refusing to create a Debug image from stale native artifacts.");
         }
         if (File.Exists(shellSource))
+        {
             File.Copy(shellSource, Path.Combine(novaRoot, "SYSTEM", "SHELL", "SHELL.EXE"), true);
+            File.Copy(shellSource, Path.Combine(visibleSystemRoot, "SHELL", "SHELL.EXE"), true);
+        }
         if (!StageCommandsWithHelp(commandsSource, helpSource, Path.Combine(novaRoot, "SYSTEM", "COMMANDS"), Path.Combine(novaRoot, "SYSTEM", "HELP"), out error)) throw Fail(error);
+        if (!StageCommandsWithHelp(commandsSource, helpSource, Path.Combine(visibleSystemRoot, "COMMANDS"), Path.Combine(visibleSystemRoot, "HELP"), out error)) throw Fail(error);
         CopyDirectoryFiles(wallpapersSource, Path.Combine(novaRoot, "SYSTEM", "WALLPAPERS"));
+        CopyDirectoryFiles(wallpapersSource, Path.Combine(visibleSystemRoot, "WALLPAPERS"));
         if (guiEnabled)
         {
             if (!StageGuiApplication(userlandAppsSource, "INU-DESKTOP.EXE", stagingRoot, desktopVfsPath, out error)) throw Fail(error);
@@ -100,14 +136,15 @@ static int MainEntry(string[] args)
         if (string.IsNullOrWhiteSpace(fontSource) || !File.Exists(fontSource))
             throw Fail("The generated OS is missing its project-local TrueType console font.");
         File.Copy(fontSource, Path.Combine(novaRoot, "SYSTEM", "FONTS", "CONSOLE.TTF"), true);
+        File.Copy(fontSource, Path.Combine(visibleSystemRoot, "FONTS", "CONSOLE.TTF"), true);
         Console.WriteLine("[ OK ] Project TrueType console font staged into the OS image.");
+        Console.WriteLine("[ OK ] OS-visible filesystem hierarchy staged at /System, /Drives, /User and /Temp; /INU remains boot-private.");
         BuildAssetBundle(novaRoot, bundlePath);
 
         if (!EfiDiskImage.TryCreate(stagingRoot, imagePath, out bool preservedUserState, out error)) throw Fail(error);
         if (preservedUserState) Console.WriteLine("[ OK ] Existing /USERS account, Home and personal settings preserved from the previous image.");
 
         string dataDiskDirectory = Path.Combine(outputDirectory, "DataDisks", project.Name);
-        string[] selectedStorageControllers = ReadSelectedStorageControllers(kathConfigurationPath);
         List<object> dataDisks = new();
         foreach (string controller in selectedStorageControllers.Where(value => value is "nvme" or "ahci").Distinct(StringComparer.OrdinalIgnoreCase))
         {

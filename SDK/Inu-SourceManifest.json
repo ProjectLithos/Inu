@@ -1,5 +1,5 @@
 {
-  "version": "0.1.99",
+  "version": "0.1.100",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "ddbf3ca0b8c1f8ee74edd4c1ee41814a790e3754575fa82d07f54398421b4e7a"
+      "sha256": "65b111abf71638f2b79d6485a763695c1d96cdbc778ed77a26701924c46be1d3"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "b67bba9c3b3877b0e67d9db874f26c8cf0749fbacb3e3819075ee8e7e6ac8da0"
+      "sha256": "3fa4f6a04029fcfcaf08c9f061d2e3d2f5ebd4ef8371ed1882918c12608b36a1"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "00ae08cdadc66b44520efb8046a61ee15949cf03965dc9cac706ea2805380070"
+      "sha256": "31ce2d2b225650d7f6a41afbe6b515bdf1bb29fbe3e162d0690f2d70d074c9a9"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "16a22faf49101598aaecdc837a7358c92a9394041408def44cef5efef0343165"
+      "sha256": "17c82b2d37972cbf125365944fae534b32d7c3ff264120cc7512d31faa43a178"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "863a7df6c9624894b025de60226d7721b50e2f6cba48e7dfd15bbae5231387b8"
+      "sha256": "3a58861c94a4752809f80ad7a6be0116aa28929b9aaff3f5116f028c6c55f439"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3883,7 +3883,7 @@
     },
     {
       "path": "src/Inu.Filesystem.FatFs/FatFs.Mutations.cs",
-      "sha256": "d39ebc79bf19262fd5b504dab4d68d167d1e9c1dd057591ff6a70fd684beb2a3"
+      "sha256": "e831087b9a337f55b8e8cd9a7e9bb0902e52660b919d00c5df3efd84090ad85e"
     },
     {
       "path": "src/Inu.Filesystem.FatFs/FatFs.NamesAndDirectories.cs",
@@ -3935,7 +3935,7 @@
     },
     {
       "path": "src/Inu.ImageBuilder/Program.cs",
-      "sha256": "5b92cabe13c60b6e372b37c06df25005967570085b2552677f75d37e38287078"
+      "sha256": "5d54b5caceb0cd31d205fd681dd3022355bc332b0bc875d72be7cc6504c70341"
     },
     {
       "path": "src/Inu.InterruptControllers.Contracts/InterruptControllerContracts.cs",

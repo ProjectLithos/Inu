@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.98",
-  "version": "0.1.99",
+  "baseVersion": "0.1.99",
+  "version": "0.1.100",
   "changedFiles": 16,
-  "summary": "Fix logical-path template validation so VisibleUser mappings such as /User/{user} are accepted without weakening concrete VFS path validation.",
+  "summary": "Stage the OS-visible FAT32 namespace at the partition root and make FAT directory creation idempotent so stock Test OS boot no longer fails at /Drives.",
   "deletedFiles": 0
 }

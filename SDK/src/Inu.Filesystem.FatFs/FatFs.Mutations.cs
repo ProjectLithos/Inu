@@ -24,7 +24,7 @@ private static Boolean CreateDirectoryAscii(UInt64 mountCookie,Byte* path,UInt32
     {
         if(mountCookie==0||path==null)return false;MountContext* mount=(MountContext*)(nuint)mountCookie;if(mount->Info.ReadOnly)return false;
         if(!ResolveParentAscii(mount,path,pathLength,pathOffset,out UInt32 parent,out UInt32 nameStart,out UInt32 nameLength))return false;
-        if(FindEntryAscii(mount,parent,path,nameStart,nameLength,out _,out _,out _,out _,out _,out _))return false;Byte* entry=stackalloc Byte[32];Clear(entry,32);
+        if(FindEntryAscii(mount,parent,path,nameStart,nameLength,out _,out KernelFileType existingType,out _,out _,out _,out _))return existingType==KernelFileType.Directory;Byte* entry=stackalloc Byte[32];Clear(entry,32);
         if(!AllocateCluster(mount,out UInt32 cluster))return false;if(!InitializeDirectoryCluster(mount,cluster,parent)){FreeClusterChain(mount,cluster);return false;}
         entry[11]=0x10;SetEntryCluster(entry,cluster);if(!WriteNamedDirectoryEntryAscii(mount,parent,path,nameStart,nameLength,entry)){FreeClusterChain(mount,cluster);return false;}return true;
     }
