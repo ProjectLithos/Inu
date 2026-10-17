@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.99",
-  "version": "0.1.100",
-  "changedFiles": 16,
-  "summary": "Stage the OS-visible FAT32 namespace at the partition root and make FAT directory creation idempotent so stock Test OS boot no longer fails at /Drives.",
+  "baseVersion": "0.1.100",
+  "version": "0.1.101",
+  "changedFiles": 15,
+  "summary": "Bind selected USB HID handlers at text-session startup after USB enumeration and add end-to-end keyboard diagnostics so CLI input works with PS/2 disabled.",
   "deletedFiles": 0
 }

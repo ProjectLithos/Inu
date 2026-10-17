@@ -38,6 +38,9 @@ public static unsafe class InputHardwareStartup
     private static Byte _usbRepeatUsage;
     private static Char _usbRepeatCharacter;
     private static UInt64 _usbRepeatDeadline;
+    private static Boolean _usbFirstEventPublished;
+    private static Boolean _usbFirstPressPublished;
+    private static Boolean _usbFirstQueuedCharacterPublished;
 #endif
 #if INU_INPUT_PS2 && INU_KERNELAREA_DRIVERS
     private static UInt64 _keyboardIrqHandle;
@@ -76,7 +79,14 @@ public static unsafe class InputHardwareStartup
     }
 
     /// <summary>Ensures the selected text-input providers and timer-service drain are ready for an interactive shell.</summary>
-    public static Boolean EnsureTextInputProviders() => Initialize();
+    public static Boolean EnsureTextInputProviders()
+    {
+        if (!Initialize()) return false;
+#if INU_INPUT_USB_HID
+        if (!AttachSelectedUsbHandlers("TEXT_INPUT_USB")) return false;
+#endif
+        return true;
+    }
 
     /// <summary>Attaches hardware IRQ delivery after the selected interrupt broker is online.</summary>
     public static Boolean EnableHardwareInterrupts()
@@ -122,24 +132,66 @@ public static unsafe class InputHardwareStartup
         }
 #endif
 #if INU_INPUT_USB_HID
-        if (!UsbHid.IsInitialized())
+        if (!AttachSelectedUsbHandlers("GUI_INPUT_USB"))
         {
             KernelConsole.WriteLine("NOKMAIN:GUI-INPUT:USB:FAIL");
             return false;
         }
-#if INU_INPUT_USB_HID
-        if (!UsbHid.SetKeyboardEventHandler(&HandleUsbKeyboardEvent) || !UsbHid.SetMouseEventHandler(&HandleUsbMouseEvent))
-        {
-            KernelConsole.WriteLine("NOKMAIN:GUI-INPUT:USB:FAIL");
-            return false;
-        }
-#endif
         UsbHidCapabilities graphicalUsb = UsbHid.GetCapabilities();
         KernelConsole.WriteLine(graphicalUsb.Keyboards != 0U || graphicalUsb.Mice != 0U ? "NOKMAIN:GUI-INPUT:USB:OK" : "NOKMAIN:GUI-INPUT:USB:NO-DEVICE");
 #endif
         KernelConsole.WriteLine("NOKMAIN:GUI-INPUT:READY");
         return true;
     }
+
+
+#if INU_INPUT_USB_HID
+    private static Boolean AttachSelectedUsbHandlers(String markerPrefix)
+    {
+        Boolean usbKeyboardSelected = HasConfiguredInput("usb-hid-keyboard");
+        Boolean usbMouseSelected = HasConfiguredInput("usb-hid-mouse");
+        if (!usbKeyboardSelected && !usbMouseSelected) return true;
+
+        if (!KernelConsole.WriteHostControl(markerPrefix + "_BIND_ENTER")) return false;
+        if (!UsbHid.IsInitialized())
+        {
+            KernelConsole.WriteHostControl(markerPrefix + "_HID_NOT_INITIALIZED");
+            return false;
+        }
+
+        UsbHidCapabilities capabilities = UsbHid.GetCapabilities();
+        if (!KernelStructuredLogging.Begin(KernelLogLevel.Info,"input-detail","InputHardwareStartup.AttachSelectedUsbHandlers")) return false;
+        if (!KernelConsole.Write("USB HID keyboards/mice/reports: ")) return false;
+        if (!KernelConsole.WriteUInt64(capabilities.Keyboards)) return false;
+        if (!KernelConsole.Write(" / ")) return false;
+        if (!KernelConsole.WriteUInt64(capabilities.Mice)) return false;
+        if (!KernelConsole.Write(" / ")) return false;
+        if (!KernelConsole.WriteUInt64(capabilities.KeyboardReports + capabilities.MouseReports)) return false;
+        if (!KernelConsole.WriteLine()) return false;
+
+        if (usbKeyboardSelected)
+        {
+            if (!UsbHid.SetKeyboardEventHandler(&HandleUsbKeyboardEvent))
+            {
+                KernelConsole.WriteHostControl(markerPrefix + "_KEYBOARD_HANDLER_FAIL");
+                return false;
+            }
+            if (!KernelConsole.WriteHostControl(capabilities.Keyboards != 0U ? markerPrefix + "_KEYBOARD_PRESENT" : markerPrefix + "_KEYBOARD_NO_DEVICE")) return false;
+        }
+
+        if (usbMouseSelected)
+        {
+            if (!UsbHid.SetMouseEventHandler(&HandleUsbMouseEvent))
+            {
+                KernelConsole.WriteHostControl(markerPrefix + "_MOUSE_HANDLER_FAIL");
+                return false;
+            }
+            if (!KernelConsole.WriteHostControl(capabilities.Mice != 0U ? markerPrefix + "_MOUSE_PRESENT" : markerPrefix + "_MOUSE_NO_DEVICE")) return false;
+        }
+
+        return KernelConsole.WriteHostControl(markerPrefix + "_BIND_OK");
+    }
+#endif
 
 #if INU_KERNELAREA_INPUT
     private static Boolean HasConfiguredInput(String value)
@@ -236,6 +288,16 @@ public static unsafe class InputHardwareStartup
 #if INU_INPUT_USB_HID
     private static Boolean HandleUsbKeyboardEvent(UsbHidKeyboardEvent input)
     {
+        if (!_usbFirstEventPublished)
+        {
+            _usbFirstEventPublished = true;
+            KernelConsole.WriteHostControl("USB_KEYBOARD_FIRST_EVENT");
+        }
+        if (input.Pressed && !_usbFirstPressPublished)
+        {
+            _usbFirstPressPublished = true;
+            KernelConsole.WriteHostControl("USB_KEYBOARD_FIRST_PRESS");
+        }
 #if INU_KERNELAREA_GUI
         UInt32 guiModifiers=(UInt32)(((input.Modifiers&0x22U)!=0U?1U:0U)|((input.Modifiers&0x11U)!=0U?2U:0U)|((input.Modifiers&0x44U)!=0U?4U:0U));
         if (KernelGui.IsInitialized() && KernelGui.HandleKeyboard(input.Usage,input.Character,input.Pressed,guiModifiers))
@@ -273,7 +335,13 @@ public static unsafe class InputHardwareStartup
         if (alt && input.Usage == 30U) return KernelConsole.SetFontPreset(1U);
         if (alt && input.Usage == 31U) return KernelConsole.SetFontPreset(2U);
         if (alt && input.Usage == 32U) return KernelConsole.SetFontPreset(3U);
-        return UserlandRuntimeStartup.QueueCharacter(input.Character);
+        Boolean queued = UserlandRuntimeStartup.QueueCharacter(input.Character);
+        if (queued && input.Character != '\0' && !_usbFirstQueuedCharacterPublished)
+        {
+            _usbFirstQueuedCharacterPublished = true;
+            KernelConsole.WriteHostControl("USB_KEYBOARD_FIRST_CHARACTER_QUEUED");
+        }
+        return queued;
     }
 
     private static Boolean TryMapUsbNavigation(Byte usage, out Byte code)
