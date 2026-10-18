@@ -1,5 +1,5 @@
 {
-  "version": "0.1.118",
+  "version": "0.1.119",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "bc5338e70eb854e59f8d2b8ce3181369e33c836743df9309aab833c7b2ad5045"
+      "sha256": "1101e58eeb275c32984afa0a2524a8f60e6a98a5f873835ce5eebb91a03f16b5"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "4534fb715a4bcd1e8613b396c7f3e276f1aa2ceeafa5c070e7f104dc31c6f48d"
+      "sha256": "4add1beeaf3f8c94b557c932f19ebd852244fe5c2b67a25b8841b81a8e43c29d"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "31371ff49518056ca179326e182c18d7c9c538fda3ff67209500021c6dd04b4d"
+      "sha256": "65ebf1115053fdee381bd8fea9a4379495932db63e80e8201c50a7dac400f80a"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "dbbe88f8f6054493b6673328edc46cafc94fd1ff3e850fb2a0a2cd697c282695"
+      "sha256": "a900e97f7f14512d5c51cc1b57976e1d17ce9acbde9383f1ce9f20e3d835e24a"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "e72e1dde6d69e60e3a4645f6db1b1951c0894a8e203b62e80c3869ef07617469"
+      "sha256": "ef7ed51f54dc19d8888eb6f9c5d69bb2c78a0b5cf26c288316f843edeee7f855"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4255,7 +4255,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/StorageHardwareStartup.cs",
-      "sha256": "542d68752871cbfe705a4b73f52f992da1d4f3a6b142cedcd0865b01164100bb"
+      "sha256": "f64fa9f2879ad5fb2bd543a47ca13a6a2c75a0e015a6c2358e932d00d977635f"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/UsbHardwareStartup.cs",
@@ -4911,7 +4911,7 @@
     },
     {
       "path": "src/Inu.Kernel.Nvme/KernelNvme.DriverLifecycle.cs",
-      "sha256": "b5700ae2ffeb5379c878129780af975661880527c4f92ad0530f171d40bc2d3b"
+      "sha256": "c63214cc971b5d9b3233722acb22ff440e5e051b65da172235743d9dafba536f"
     },
     {
       "path": "src/Inu.Kernel.Nvme/KernelNvme.Namespaces.cs",
@@ -6007,7 +6007,7 @@
     },
     {
       "path": "src/Inu.QemuLauncher/Program.cs",
-      "sha256": "7da1b1fe371c3717bd64e91394da1f7368b7619e867ec432ea8b08c5a64e5221"
+      "sha256": "c4df77885ac64c5c63a4c7dfd5eb87975058bdf1828db278f98c97019f7728dd"
     },
     {
       "path": "src/Inu.Runtime.Conformance/Inu.Runtime.Conformance.csproj",

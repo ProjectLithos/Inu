@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.117",
-  "version": "0.1.118",
-  "changedFiles": 2,
-  "summary": "Fix the 0.1.117 xHCI diagnostic build break by importing the shared x64 Native interop namespace in the two xHCI partial files that emit low-level debug-port diagnostics.",
+  "baseVersion": "0.1.118",
+  "version": "0.1.119",
+  "changedFiles": 7,
+  "summary": "Keep the synchronous NVMe driver out of MSI/MSI-X until it owns interrupt-driven completions, add NVMe/stop-state diagnostics, mirror TODO.md into Kath, and remove the short GitHub push kill timers so large Inu pushes can complete.",
   "deletedFiles": 0
 }

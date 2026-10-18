@@ -838,11 +838,21 @@ static void CaptureDiagnosticReport(int qemuPid, int qmpPort, string observedSta
         report.AppendLine("=== QEMU exception/triple-fault chain (filtered from -d int,guest_errors,cpu_reset) ===");
         report.AppendLine(ReadQemuExceptionTail(qemuDebugLog, 256));
         report.AppendLine();
+        string qemuDiagnosticTail = ReadTextTail(qemuDebugLog, 262144);
+        string qemuStderrTail = ReadTextTail(stderrLog, 65536);
+        report.AppendLine("=== Automated stop-state diagnosis ===");
+        if (qemuDiagnosticTail.Contains("pci_nvme_ub_mmiowr_intmask_with_msix", StringComparison.OrdinalIgnoreCase))
+            report.AppendLine("NVMe: QEMU observed an invalid NVMe INTMC/interrupt-mask-clear MMIO write while MSI-X was enabled. Inu NVMe must not mix synchronous CQ polling with a half-enabled MSI-X route.");
+        if (qemuStderrTail.Contains("Ignoring request for interrupt vector 0", StringComparison.OrdinalIgnoreCase))
+            report.AppendLine("Interrupt routing: QEMU rejected interrupt vector 0. Inspect any device that enabled an interrupt queue before a non-zero broker vector was committed.");
+        if (observedStatus.Contains("guest-panicked", StringComparison.OrdinalIgnoreCase))
+            report.AppendLine("QMP reported guest-panicked; the register snapshot above is the stopped CPU state captured at that transition.");
+        report.AppendLine();
         report.AppendLine("=== QEMU diagnostic log tail (int,guest_errors,cpu_reset; last 256 KiB) ===");
-        report.AppendLine(ReadTextTail(qemuDebugLog, 262144));
+        report.AppendLine(qemuDiagnosticTail);
         report.AppendLine();
         report.AppendLine("=== QEMU stderr tail (last 64 KiB) ===");
-        report.AppendLine(ReadTextTail(stderrLog, 65536));
+        report.AppendLine(qemuStderrTail);
         report.AppendLine();
         report.AppendLine("=== isa-debugcon 0xE9 tail (hex, last 512 bytes) ===");
         report.AppendLine(ReadBinaryTailHex(debugConLog, 512));

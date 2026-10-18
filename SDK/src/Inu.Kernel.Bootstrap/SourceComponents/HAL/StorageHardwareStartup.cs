@@ -118,6 +118,18 @@ public static class StorageHardwareStartup
         NvmeCapabilities nvme = KernelNvme.GetCapabilities();
         if (!DiagnosticCount("NVMe controllers started: ", nvme.Controllers)) return false;
         if (!DiagnosticCount("NVMe namespaces registered: ", nvme.Namespaces)) return false;
+        if (!KernelStructuredLogging.InfoLine("storage-detail", "StorageHardwareStartup.Initialize", "NVMe completion mode: synchronous CQ polling; MSI/MSI-X remains disabled until the NVMe driver owns a genuine interrupt-driven completion path.")) return false;
+        for (UInt32 nvmeIndex = 0U; nvmeIndex < nvme.Controllers; nvmeIndex++)
+        {
+            if (!KernelNvme.TryGetController(nvmeIndex, out NvmeControllerInfo controller)) continue;
+            if (!DiagnosticCount("NVMe controller ordinal: ", nvmeIndex)) return false;
+            if (!DiagnosticCount("NVMe controller state: ", (UInt64)controller.State)) return false;
+            if (!DiagnosticCount("NVMe controller interrupt mode: ", (UInt64)controller.InterruptMode)) return false;
+            if (!DiagnosticCount("NVMe admin queue entries: ", controller.AdminQueueEntries)) return false;
+            if (!DiagnosticCount("NVMe I/O queue entries: ", controller.IoQueueEntries)) return false;
+            if (!DiagnosticCount("NVMe namespace count: ", controller.NamespaceCount)) return false;
+            if (!DiagnosticCount("NVMe version register: ", controller.Version)) return false;
+        }
         if (nvme.Namespaces == 0U)
         {
             KernelStructuredLogging.WarningLine("storage","StorageHardwareStartup.Initialize","NVMe was selected, but no usable NVMe namespace was registered.");
