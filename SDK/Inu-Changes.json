@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.107",
-  "version": "0.1.108",
-  "changedFiles": 17,
-  "summary": "Repair the xHCI STI-boundary interrupt handoff by preparing callbacks before global interrupt enable, activating device interrupters afterward, and add detailed transition diagnostics.",
+  "baseVersion": "0.1.108",
+  "version": "0.1.109",
+  "changedFiles": 15,
+  "summary": "Refresh stale Kath-generated KernelRuntime interrupt startup in existing projects, unify all architecture generators with the xHCI prepare/STI/activate handoff, and surface raw 0xE9 transition diagnostics on QEMU failures.",
   "deletedFiles": 0
 }

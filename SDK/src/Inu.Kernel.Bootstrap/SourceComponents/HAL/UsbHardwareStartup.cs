@@ -1,5 +1,6 @@
 using System;
 using Inu.Kernel.Console;
+using Inu.Kernel.Internal.X64;
 #if INU_KERNELAREA_USB
 using Inu.Bus.Usb;
 using Inu.Usb.Xhci;
@@ -63,15 +64,17 @@ public static class UsbHardwareStartup
     public static Boolean PrepareHardwareInterrupts()
     {
 #if INU_KERNELAREA_USB
-        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.PrepareHardwareInterrupts","Preparing xHCI interrupt callbacks before global STI; device interrupters remain masked.")) return false;
-        if (!KernelXhci.PrepareInterruptDelivery()) return false;
+        TraceInterruptTransition(0x20);
+        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.PrepareHardwareInterrupts","Preparing xHCI interrupt callbacks before global STI; device interrupters remain masked.")) { TraceInterruptTransition(0x2E); return false; }
+        if (!KernelXhci.PrepareInterruptDelivery()) { TraceInterruptTransition(0x2F); return false; }
         XhciCapabilities xhci = KernelXhci.GetCapabilities();
         if (xhci.InterruptConfiguredControllers != xhci.InterruptPreparedControllers)
         {
             KernelStructuredLogging.ErrorLine("usb","UsbHardwareStartup.PrepareHardwareInterrupts","Not every configured xHCI controller reached the prepared interrupt state.");
             return false;
         }
-        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.PrepareHardwareInterrupts","xHCI interrupt callbacks prepared; safe to enable CPU maskable interrupts.")) return false;
+        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.PrepareHardwareInterrupts","xHCI interrupt callbacks prepared; safe to enable CPU maskable interrupts.")) { TraceInterruptTransition(0x2E); return false; }
+        TraceInterruptTransition(0x21);
 #endif
         return true;
     }
@@ -80,18 +83,27 @@ public static class UsbHardwareStartup
     public static Boolean EnableHardwareInterrupts()
     {
 #if INU_KERNELAREA_USB
-        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.EnableHardwareInterrupts","Activating xHCI device interrupters after global STI.")) return false;
-        if (!KernelXhci.EnableInterruptDelivery()) return false;
+        TraceInterruptTransition(0x30);
+        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.EnableHardwareInterrupts","Activating xHCI device interrupters after global STI.")) { TraceInterruptTransition(0x3E); return false; }
+        if (!KernelXhci.EnableInterruptDelivery()) { TraceInterruptTransition(0x3F); return false; }
         XhciCapabilities xhci = KernelXhci.GetCapabilities();
         if (xhci.InterruptConfiguredControllers != xhci.InterruptDrivenControllers)
         {
             KernelStructuredLogging.ErrorLine("usb","UsbHardwareStartup.EnableHardwareInterrupts","Not every configured xHCI controller reached active interrupt-driven delivery.");
             return false;
         }
-        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.EnableHardwareInterrupts",xhci.PollingFallbackControllers == 0U ? "xHCI broker-managed hardware interrupt delivery active." : "xHCI explicit polling fallback remains active.")) return false;
+        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.EnableHardwareInterrupts",xhci.PollingFallbackControllers == 0U ? "xHCI broker-managed hardware interrupt delivery active." : "xHCI explicit polling fallback remains active.")) { TraceInterruptTransition(0x3E); return false; }
+        TraceInterruptTransition(0x31);
 #endif
         return true;
     }
+    private static void TraceInterruptTransition(Byte phase)
+    {
+        Native.WritePort8(0xE9, (Byte)'U');
+        Native.WritePort8(0xE9, phase);
+        Native.WritePort8(0xE9, (Byte)'\n');
+    }
+
 #if INU_KERNELAREA_USB
     private static Boolean HasConfiguredInput(String value)
     {

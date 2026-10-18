@@ -1,5 +1,5 @@
 {
-  "version": "0.1.108",
+  "version": "0.1.109",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "d4cf50e7ff80df3339974d22e9ce946b2af68682177dc3e9677f9eb6384e154b"
+      "sha256": "30122639fa1c7477a1380c422170257d36bd7a9ca95724864a5e630be609664b"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "b968059d8e4b302ea0f61777d4ee6400c188cd80390215816e0c79b40d85e2f1"
+      "sha256": "4ec8b6753cfc599598a9cda246b9e2bbd66e54f28f2abd38a8ecb5c47e6f4bab"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "1568538b4312fe252b27ac8aac2e3c24ffe0d807b0d982dbf2cee2f2d160de57"
+      "sha256": "98e5fb034fcf9835c4494cfc608ba9365daf87517e529d1ab84869041ed41298"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "1531e9058435920ecdad53297dcb5f5964c3c84ba6edbbfd428fe2c19635148e"
+      "sha256": "cd5558b9936d68a8827866eb01703004fc23c05ffd4200d49abfedca0083d3b1"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "fe1c32dec3d27e25006622c8596861ae55d507b52b7cf80b14a7be1c1edaa007"
+      "sha256": "a273ccf5ed613cf2284b16f531890998880d5b89c1d79ef6b57a2ad1dafe24fb"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4259,7 +4259,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/UsbHardwareStartup.cs",
-      "sha256": "273e9b5febb75e202e3d738e175ccaf911c234d03c152077188a3a83bb49ce5d"
+      "sha256": "2b1f44babe9f8eac3681de51ece3c3e2d39c6ddd1b7c089c80a4d70d589ddcf2"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Kernel/Kernel.cs",
@@ -4271,7 +4271,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Startup/InterruptRuntimeStartup.cs",
-      "sha256": "54345dc694f88c642fc240e1239383d28a8be29513a73463de6a1376019128e3"
+      "sha256": "3dbc5a088dbe588a465aa48a1975ef7dd58129d8cafce7a8002918ac40ee81b1"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Startup/ProcessRuntimeStartup.cs",
@@ -5991,7 +5991,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "8084c7eb6338b523f81d2dd50a6be84845154efed40432e7a3f0f82f43c9ea90"
+      "sha256": "f7789b44b04777a8fd35b389bf7512fb75259c2f92105de5c30bca2d718cf6cb"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",
@@ -6007,7 +6007,7 @@
     },
     {
       "path": "src/Inu.QemuLauncher/Program.cs",
-      "sha256": "2b8aefaf0d3589fa2c20d673a05b5e019e9727627610d24b1c16a5544648e50b"
+      "sha256": "5f0eab618b90426c33450e60e2be9e7d5083d10a2b03ac09e82d28518ff56f06"
     },
     {
       "path": "src/Inu.Runtime.Conformance/Inu.Runtime.Conformance.csproj",

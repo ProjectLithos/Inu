@@ -193,6 +193,7 @@ static int MainEntry(string[] args)
         }
     }
 
+    if (!RefreshGeneratedKernelInterruptHandoff(output)) throw new InvalidOperationException("Could not refresh the generated kernel interrupt handoff.");
     if (!RepairTestOsKernelStorageImport(output, projectName, testOs)) throw new InvalidOperationException("Could not repair the Test OS kernel storage import.");
     if (!RepairStockTestOsBootImports(output, projectName, testOs)) throw new InvalidOperationException("Could not repair the stock Test OS boot imports.");
     if (!RepairStockTestOsStoragePolicy(output, projectName, testOs)) throw new InvalidOperationException("Could not refresh the stock Test OS storage policy.");
@@ -227,6 +228,62 @@ static int MainEntry(string[] args)
     Console.WriteLine($"[ OK ] Kernel project  : {mainProjectPath}");
     Console.WriteLine($"[ OK ] Project manifest: {manifestPath}");
     return 0;
+}
+
+
+static bool RefreshGeneratedKernelInterruptHandoff(string output)
+{
+    string runtimePath = Path.Combine(output, "Kernel", "Provided", "Core", "KernelRuntime.cs");
+    if (!File.Exists(runtimePath)) return true;
+
+    try
+    {
+        string source = File.ReadAllText(runtimePath);
+        if (source.Contains("USB_IRQ_PREPARE_ENTER", StringComparison.Ordinal) &&
+            source.Contains("USB_IRQ_ACTIVATE_ENTER", StringComparison.Ordinal) &&
+            source.Contains("INPUT_IRQ_ENABLE_ENTER", StringComparison.Ordinal)) return true;
+
+        const string legacy = "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_INTERRUPTS\")) return false;\r\n" +
+            "        if (!InterruptRuntimeStartup.Enable()) return false;\r\n" +
+            "        if (!InputHardwareStartup.EnableHardwareInterrupts()) return false;\r\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
+        const string legacyLf = "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_INTERRUPTS\")) return false;\n" +
+            "        if (!InterruptRuntimeStartup.Enable()) return false;\n" +
+            "        if (!InputHardwareStartup.EnableHardwareInterrupts()) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
+        const string replacement = "        if (!KernelConsole.WriteHostControl(\"USB_IRQ_PREPARE_ENTER\")) return false;\n" +
+            "        if (!UsbHardwareStartup.PrepareHardwareInterrupts()) { KernelConsole.WriteHostControl(\"USB_IRQ_PREPARE_FAIL\"); return false; }\n" +
+            "        if (!KernelConsole.WriteHostControl(\"USB_IRQ_PREPARE_OK\")) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_INTERRUPTS\")) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"INTERRUPTS_ENABLE_ENTER\")) return false;\n" +
+            "        if (!InterruptRuntimeStartup.Enable()) { KernelConsole.WriteHostControl(\"INTERRUPTS_ENABLE_FAIL\"); return false; }\n" +
+            "        if (!KernelConsole.WriteHostControl(\"INTERRUPTS_ENABLE_OK\")) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"USB_IRQ_ACTIVATE_ENTER\")) return false;\n" +
+            "        if (!UsbHardwareStartup.EnableHardwareInterrupts()) { KernelConsole.WriteHostControl(\"USB_IRQ_ACTIVATE_FAIL\"); return false; }\n" +
+            "        if (!KernelConsole.WriteHostControl(\"USB_IRQ_ACTIVATE_OK\")) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"INPUT_IRQ_ENABLE_ENTER\")) return false;\n" +
+            "        if (!InputHardwareStartup.EnableHardwareInterrupts()) { KernelConsole.WriteHostControl(\"INPUT_IRQ_ENABLE_FAIL\"); return false; }\n" +
+            "        if (!KernelConsole.WriteHostControl(\"INPUT_IRQ_ENABLE_OK\")) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
+
+        string updated = source.Contains(legacy, StringComparison.Ordinal)
+            ? source.Replace(legacy, replacement.Replace("\n", Environment.NewLine), StringComparison.Ordinal)
+            : source.Replace(legacyLf, replacement, StringComparison.Ordinal);
+        if (updated == source)
+        {
+            Console.Error.WriteLine($"[FAIL] Generated kernel runtime uses an unrecognised interrupt handoff shape and cannot be migrated safely: {runtimePath}");
+            return false;
+        }
+
+        File.WriteAllText(runtimePath, updated);
+        Console.WriteLine($"[ OK ] Refreshed generated kernel interrupt handoff and diagnostics: {runtimePath}");
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"[FAIL] Unable to refresh generated kernel interrupt handoff: {ex.Message}");
+        return false;
+    }
 }
 
 

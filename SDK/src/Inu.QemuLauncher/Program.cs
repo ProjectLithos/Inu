@@ -275,6 +275,7 @@ static int MainEntry(string[] args)
                 serialText = ReadSharedText(serialLog);
                 string? crashDumpPath = TryMaterializeSerialCrashDump(serialText, runDirectory, project.Name, project.TargetArchitecture);
                 PrintSerialTail(serialText);
+                PrintDebugConTail(qemuDebugConLog);
                 throw Fail($"QEMU exited before runtime acceptance completed. PID: {qemuPid}. Serial log: {serialLog}; diagnostics: {qemuStderrLog}" + (crashDumpPath is null ? string.Empty : $"; crash dump: {crashDumpPath}"));
             }
 
@@ -288,6 +289,7 @@ static int MainEntry(string[] args)
                     string[] failedHistory = GetBootStageMarkerHistory(serialText);
                     PersistLatestSerial(outputDirectory, serialText);
                     PrintSerialTail(serialText);
+                    PrintDebugConTail(qemuDebugConLog);
                     TryStop(qemuPid);
                     throw Fail($"Kernel startup explicitly reported {bootStageMarker}. Marker history: {string.Join(" -> ", failedHistory)}. Serial log: {serialLog}");
                 }
@@ -305,6 +307,7 @@ static int MainEntry(string[] args)
             {
                 string? crashDumpPath = TryMaterializeSerialCrashDump(serialText, runDirectory, project.Name, project.TargetArchitecture);
                 PrintSerialTail(serialText);
+                PrintDebugConTail(qemuDebugConLog);
                 TryStop(qemuPid);
                 throw Fail("Inu reported a kernel panic during runtime acceptance." + (crashDumpPath is null ? $" Serial log: {serialLog}" : $" Crash dump: {crashDumpPath}"));
             }
@@ -314,6 +317,7 @@ static int MainEntry(string[] args)
             {
                 PersistLatestSerial(outputDirectory, serialText);
                 PrintSerialTail(serialText);
+                PrintDebugConTail(qemuDebugConLog);
                 TryStop(qemuPid);
                 string[] sessionHistory = GetSessionMarkerHistory(serialText);
                 string sessionDetail = sessionHistory.Length == 0 ? string.Empty : $" Session marker history: {string.Join(" -> ", sessionHistory)}.";
@@ -464,6 +468,7 @@ static int MainEntry(string[] args)
         PersistLatestSerial(outputDirectory, serialText);
         PrintSerialDiagnosticSummary(serialText);
         PrintSerialTail(serialText);
+        PrintDebugConTail(qemuDebugConLog);
         TryStop(qemuPid);
         if (string.IsNullOrEmpty(serialText))
         {
@@ -855,6 +860,13 @@ static void CaptureDiagnosticReport(int qemuPid, int qmpPort, string observedSta
     catch
     {
     }
+}
+
+static void PrintDebugConTail(string path)
+{
+    Console.WriteLine("[INFO] QEMU isa-debugcon 0xE9 tail (hex; interrupt transition breadcrumbs):");
+    Console.WriteLine(ReadBinaryTailHex(path, 512));
+    Console.WriteLine("[INFO] Interrupt breadcrumb legend: 49 10=Interrupts.Run enter; 49 11=returned true; 49 1F=returned false; 55 20/21=xHCI prepare enter/ok; 55 30/31=xHCI activate enter/ok; 2E/2F/3E/3F denote failure boundaries.");
 }
 
 static string ReadTextTail(string path, int maximumCharacters)
