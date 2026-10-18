@@ -4,6 +4,7 @@ using Inu.Kernel.Console;
 using Inu.Kernel.Internal.X64;
 using Inu.Kernel.Processes;
 using Inu.Kernel.Storage;
+using Inu.Kernel.Smp;
 #if INU_KERNELAREA_DRIVERS
 using Inu.Kernel.Drivers;
 #endif
@@ -64,6 +65,9 @@ public static unsafe class UserlandRuntimeStartup
     private static Boolean _initialized;
     private static UInt64 _shellProcessId;
     private static Boolean _shellOutputWritten,_interactiveReadyPublished;
+    // Zero means no ring-3 console reader is sleeping. Non-zero stores processorIndex+1 so CPU 0 is representable.
+    private static UInt64 _inputWaitProcessorPlusOne;
+    private static UInt64 _inputQueuedCount,_inputWakeCount,_inputReadCount,_inputWaitCount,_editableSyncCount;
     private static String[] _consoleHistory=new String[ConsoleHistoryCapacity];
     private static Int32 _consoleHistoryStart,_consoleHistoryCount;
     // Read-only handles over the bootloader-preloaded system asset catalogue. These make the
@@ -139,7 +143,10 @@ public static unsafe class UserlandRuntimeStartup
         UInt32 next=(_inputWrite+1U)%InputCapacity;
         if(next==_inputRead)return false;
         fixed(Byte* input=_state.Input)input[_inputWrite]=value;
-        _inputWrite=next;return true;
+        if(!Native.MemoryBarrier())return false;
+        _inputWrite=next;
+        TraceQueuedInput(value);
+        return WakeConsoleInputWaiter();
     }
 
     /// <summary>Queues one non-text console editing/navigation key using standard ANSI terminal escape sequences.</summary>
@@ -166,8 +173,35 @@ public static unsafe class UserlandRuntimeStartup
         if(values==null||length==0U||length>=InputCapacity)return false;
         UInt32 used=_inputWrite>=_inputRead?_inputWrite-_inputRead:InputCapacity-(_inputRead-_inputWrite);
         if(InputCapacity-1U-used<length)return false;
-        fixed(Byte* input=_state.Input)for(UInt32 i=0U;i<length;i++){input[_inputWrite]=values[i];_inputWrite=(_inputWrite+1U)%InputCapacity;}
-        return true;
+        UInt32 write=_inputWrite;
+        fixed(Byte* input=_state.Input)for(UInt32 i=0U;i<length;i++){input[write]=values[i];write=(write+1U)%InputCapacity;}
+        if(!Native.MemoryBarrier())return false;
+        _inputWrite=write;
+        for(UInt32 i=0U;i<length;i++)TraceQueuedInput(values[i]);
+        return WakeConsoleInputWaiter();
+    }
+
+    private static void TraceQueuedInput(Byte value)
+    {
+        UInt64 count=++_inputQueuedCount;
+        if(count<=64UL){Native.WritePort8(0xE9,(Byte)'I');Native.WritePort8(0xE9,(Byte)count);Native.WritePort8(0xE9,value);}
+        if(count==1UL)KernelConsole.WriteHostControl("CONSOLE_INPUT_FIRST_BYTE_QUEUED");
+    }
+
+    private static Boolean WakeConsoleInputWaiter()
+    {
+        UInt64 waiter=0UL;
+        fixed(UInt64* p=&_inputWaitProcessorPlusOne)
+        {
+            if(!Native.AtomicLoad64(p,&waiter))return false;
+        }
+        if(waiter==0UL)return true;
+        UInt32 cpu=(UInt32)(waiter-1UL);
+        Boolean woke=KernelSmp.TrySendIpi(cpu,KernelIpiPurpose.Reschedule);
+        UInt64 count=++_inputWakeCount;
+        if(count<=64UL){Native.WritePort8(0xE9,(Byte)'N');Native.WritePort8(0xE9,(Byte)count);Native.WritePort8(0xE9,(Byte)cpu);Native.WritePort8(0xE9,woke?(Byte)'w':(Byte)'!');}
+        if(count==1UL)KernelConsole.WriteHostControl(woke?"CONSOLE_INPUT_FIRST_WAKE_SENT":"CONSOLE_INPUT_FIRST_WAKE_FAIL");
+        return woke;
     }
 
     /// <summary>Cancels the current foreground ring-3 program. The shell is relaunched by the supervisor.</summary>
@@ -335,12 +369,31 @@ public static unsafe class UserlandRuntimeStartup
                 return KernelProcesses.RequestCurrentProcessExit(KernelProcesses.ForegroundCancellationExitCode,true)?
                     0L:(Int64)KernelSystemCallError.Fault;
             if(_inputRead!=_inputWrite)break;
+            if(!KernelSmp.TryGetCurrentProcessorIndex(out UInt32 waitCpu))return (Int64)KernelSystemCallError.Fault;
+            UInt64 waitNumber=++_inputWaitCount;
+            fixed(UInt64* p=&_inputWaitProcessorPlusOne)
+            {
+                if(!Native.AtomicStore64(p,(UInt64)waitCpu+1UL))return (Int64)KernelSystemCallError.Fault;
+            }
+            if(waitNumber<=64UL){Native.WritePort8(0xE9,(Byte)'L');Native.WritePort8(0xE9,(Byte)waitNumber);Native.WritePort8(0xE9,(Byte)waitCpu);}
+            // Close the lost-wakeup window: input may have arrived between the first empty check
+            // and publishing the waiter. Re-check before executing STI;HLT.
+            if(_inputRead!=_inputWrite)
+            {
+                fixed(UInt64* p=&_inputWaitProcessorPlusOne)Native.AtomicStore64(p,0UL);
+                break;
+            }
             Boolean woke=Native.WaitForInterrupt();
             Boolean masked=Native.DisableInterrupts();
+            fixed(UInt64* p=&_inputWaitProcessorPlusOne)Native.AtomicStore64(p,0UL);
             if(!woke||!masked)return (Int64)KernelSystemCallError.Fault;
         }
         Byte value;fixed(Byte* input=_state.Input)value=input[_inputRead];
-        _inputRead=(_inputRead+1U)%InputCapacity;return value;
+        _inputRead=(_inputRead+1U)%InputCapacity;
+        UInt64 readNumber=++_inputReadCount;
+        if(readNumber<=64UL){Native.WritePort8(0xE9,(Byte)'O');Native.WritePort8(0xE9,(Byte)readNumber);Native.WritePort8(0xE9,value);}
+        if(readNumber==1UL)KernelConsole.WriteHostControl("CONSOLE_INPUT_FIRST_BYTE_READ");
+        return value;
     }
 
     private static Int64 ConsoleOutputEvent(KernelSystemCallFrame* frame)
@@ -368,7 +421,12 @@ public static unsafe class UserlandRuntimeStartup
         if(frame==null||frame->NativeMessage.DataLength>1023UL||frame->NativeMessage.Value0>1023UL||frame->NativeMessage.Value1>frame->NativeMessage.DataLength)return (Int64)KernelSystemCallError.InvalidArgument;
         UInt32 length=(UInt32)frame->NativeMessage.DataLength;Byte* buffer=stackalloc Byte[1024];
         if(length!=0U&&!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)buffer,length))return (Int64)KernelSystemCallError.Fault;
-        return KernelConsole.ReplaceEditableInput(buffer,(UInt32)frame->NativeMessage.Value0,length,(UInt32)frame->NativeMessage.Value1)?0L:(Int64)KernelSystemCallError.Fault;
+        UInt64 sync=++_editableSyncCount;
+        if(sync<=64UL){Native.WritePort8(0xE9,(Byte)'A');Native.WritePort8(0xE9,(Byte)sync);Native.WritePort8(0xE9,(Byte)length);Native.WritePort8(0xE9,(Byte)frame->NativeMessage.Value1);}
+        Boolean ok=KernelConsole.ReplaceEditableInput(buffer,(UInt32)frame->NativeMessage.Value0,length,(UInt32)frame->NativeMessage.Value1);
+        if(sync<=64UL)Native.WritePort8(0xE9,ok?(Byte)'a':(Byte)'!');
+        if(sync==1UL)KernelConsole.WriteHostControl(ok?"CONSOLE_EDIT_FIRST_RENDER_OK":"CONSOLE_EDIT_FIRST_RENDER_FAIL");
+        return ok?0L:(Int64)KernelSystemCallError.Fault;
     }
 
     private static Int64 ConsoleEditableCursorSet(KernelSystemCallFrame* frame)

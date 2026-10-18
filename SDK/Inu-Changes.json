@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.112",
-  "version": "0.1.113",
-  "changedFiles": 7,
-  "summary": "Move USB HID servicing out of the Local APIC timer ISR into the scheduler-managed Drivers worker so interrupt-driven xHCI completion waits cannot deadlock inside a timer interrupt; add end-to-end input/HID/xHCI diagnostics.",
+  "baseVersion": "0.1.113",
+  "version": "0.1.114",
+  "changedFiles": 4,
+  "summary": "Fix the interactive shell input path by explicitly waking the CPU sleeping in console.input, closing the waiter publication lost-wakeup race, and preventing an idle USB mouse interrupt endpoint from serializing CLI keyboard service; add end-to-end key-to-render diagnostics.",
   "deletedFiles": 0
 }

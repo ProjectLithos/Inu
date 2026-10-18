@@ -56,34 +56,41 @@ public static unsafe partial class UsbHid
         return true;
     }
 
-    public static Boolean Service()
+    public static Boolean Service()=>ServiceProtocol(0U);
+    /// <summary>Services only boot-keyboard interrupt endpoints. Text sessions use this so an idle mouse endpoint cannot serialize and starve keyboard input.</summary>
+    public static Boolean ServiceKeyboard()=>ServiceProtocol(1U);
+    /// <summary>Services only boot-mouse interrupt endpoints.</summary>
+    public static Boolean ServiceMouse()=>ServiceProtocol(2U);
+
+    private static Boolean ServiceProtocol(Byte protocol)
     {
         if(!_initialized)return false;
         UInt64 pass=0UL;fixed(UInt64* p=&_servicePasses){UInt64 previous=0UL;Native.AtomicFetchAdd64(p,1UL,&previous);pass=previous+1UL;}
-        if(pass<=32UL){Native.WritePort8(0xE9,(Byte)'U');Native.WritePort8(0xE9,(Byte)pass);}
+        if(pass<=64UL){Native.WritePort8(0xE9,(Byte)'U');Native.WritePort8(0xE9,(Byte)pass);Native.WritePort8(0xE9,protocol);}
         Byte* report=stackalloc Byte[64];
+        Boolean found=false;
         for(Int32 i=0;i<Max;i++)
         {
-            HidRec* r=_r+i;if(r->Used==0)continue;
+            HidRec* r=_r+i;if(r->Used==0||(protocol!=0U&&r->Protocol!=protocol))continue;found=true;
             UInt64 attempt=0UL;fixed(UInt64* p=&_transferAttempts){UInt64 previous=0UL;Native.AtomicFetchAdd64(p,1UL,&previous);attempt=previous+1UL;}
-            if(attempt<=64UL){Native.WritePort8(0xE9,(Byte)'D');Native.WritePort8(0xE9,(Byte)i);Native.WritePort8(0xE9,r->Protocol);Native.WritePort8(0xE9,r->Endpoint);}
+            if(attempt<=128UL){Native.WritePort8(0xE9,(Byte)'D');Native.WritePort8(0xE9,(Byte)i);Native.WritePort8(0xE9,r->Protocol);Native.WritePort8(0xE9,r->Endpoint);}
             for(Int32 z=0;z<64;z++)report[z]=0;
             if(!KernelUsbBus.InterruptTransfer(new UsbDeviceHandle(r->Device),r->Endpoint,report,r->MaxPacket,out UInt32 got))
             {
                 fixed(UInt64* p=&_transferMisses){UInt64 ignored=0UL;Native.AtomicFetchAdd64(p,1UL,&ignored);}
-                if(attempt<=64UL)Native.WritePort8(0xE9,(Byte)'F');
+                if(attempt<=128UL)Native.WritePort8(0xE9,(Byte)'F');
                 continue;
             }
             fixed(UInt64* p=&_transferCompletions){UInt64 ignored=0UL;Native.AtomicFetchAdd64(p,1UL,&ignored);}
-            if(attempt<=64UL){Native.WritePort8(0xE9,(Byte)'d');Native.WritePort8(0xE9,(Byte)got);}
+            if(attempt<=128UL){Native.WritePort8(0xE9,(Byte)'d');Native.WritePort8(0xE9,(Byte)got);}
             if(r->Protocol==1&&got>=8)
             {
                 Byte* previous=r->Previous;UsbHidKeyboardServices.ProcessReport(previous,report,got);
             }
             else if(r->Protocol==2&&got>=3) UsbHidMouseServices.ProcessReport(report,got);
         }
-        if(pass<=32UL)Native.WritePort8(0xE9,(Byte)'u');
-        return true;
+        if(pass<=64UL){Native.WritePort8(0xE9,(Byte)'u');Native.WritePort8(0xE9,found?(Byte)1:(Byte)0);}
+        return found||protocol==0U;
     }
 
     public static Boolean IsInitialized()=>_initialized;

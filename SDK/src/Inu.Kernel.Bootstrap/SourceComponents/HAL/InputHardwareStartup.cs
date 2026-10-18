@@ -33,6 +33,10 @@ public static unsafe class InputHardwareStartup
     private static UInt64 _inputWorkerRuns;
     private static UInt64 _inputWorkerSuccesses;
     private static UInt64 _inputWorkerFailures;
+    private static Boolean _textInputActive;
+#if INU_INPUT_USB_HID
+    private static UInt64 _usbKeyboardEventTraceCount;
+#endif
     private const UInt64 KeyboardRepeatInitialDelayNanoseconds = 500000000UL;
     private const UInt64 KeyboardRepeatIntervalNanoseconds = 40000000UL;
 #if INU_INPUT_PS2
@@ -104,6 +108,8 @@ public static unsafe class InputHardwareStartup
 #if INU_INPUT_USB_HID
         if (!AttachSelectedUsbHandlers("TEXT_INPUT_USB")) return false;
 #endif
+        _textInputActive = true;
+        if (!KernelConsole.WriteHostControl("TEXT_INPUT_SERVICE_KEYBOARD_ONLY")) return false;
         return true;
     }
 
@@ -129,6 +135,7 @@ public static unsafe class InputHardwareStartup
     public static Boolean EnsureGraphicalInputProviders()
     {
         if (!Initialize()) return false;
+        _textInputActive = false;
 #if INU_INPUT_PS2
         Boolean ps2KeyboardSelected = HasConfiguredInput("ps2-keyboard");
         Boolean ps2MouseSelected = HasConfiguredInput("ps2-mouse");
@@ -273,7 +280,7 @@ public static unsafe class InputHardwareStartup
         if (UsbHid.IsInitialized())
         {
             if(run<=32UL)Native.WritePort8(0xE9,(Byte)'H');
-            Boolean usb=UsbHid.Service();
+            Boolean usb=_textInputActive ? UsbHid.ServiceKeyboard() : UsbHid.Service();
             if(run<=32UL)Native.WritePort8(0xE9,usb?(Byte)'h':(Byte)'!');
             ok = usb & ok;
         }
@@ -361,6 +368,15 @@ public static unsafe class InputHardwareStartup
 #if INU_INPUT_USB_HID
     private static Boolean HandleUsbKeyboardEvent(UsbHidKeyboardEvent input)
     {
+        UInt64 eventTrace=++_usbKeyboardEventTraceCount;
+        if(eventTrace<=64UL)
+        {
+            Native.WritePort8(0xE9,(Byte)'G');
+            Native.WritePort8(0xE9,(Byte)eventTrace);
+            Native.WritePort8(0xE9,input.Usage);
+            Native.WritePort8(0xE9,input.Pressed?(Byte)1:(Byte)0);
+            Native.WritePort8(0xE9,(Byte)(input.Character<=255?input.Character:'?'));
+        }
         if (!_usbFirstEventPublished)
         {
             _usbFirstEventPublished = true;
