@@ -1,5 +1,5 @@
 {
-  "version": "0.1.117",
+  "version": "0.1.118",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "b1890d3fa60db8dc44fa14845c0ff291089618429d6278c94473187f909120aa"
+      "sha256": "bc5338e70eb854e59f8d2b8ce3181369e33c836743df9309aab833c7b2ad5045"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "9434218b695caa5ea72a518a8efefeecb30dc4e63025078df2e1b5a41aa247df"
+      "sha256": "4534fb715a4bcd1e8613b396c7f3e276f1aa2ceeafa5c070e7f104dc31c6f48d"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "8952647b36c7e9ad9199d7f8ed13e4f9d6272e30bd405433c39e1d09e420e599"
+      "sha256": "31371ff49518056ca179326e182c18d7c9c538fda3ff67209500021c6dd04b4d"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "47da931bacd23d18af3887e8d5f19ae09bbcea7d4f96e90bbd7bf76e5f8c3870"
+      "sha256": "dbbe88f8f6054493b6673328edc46cafc94fd1ff3e850fb2a0a2cd697c282695"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "282d55d631f7ffbcb0cffc48c05150394cbf20fc84de0caea9546caa34293f0f"
+      "sha256": "e72e1dde6d69e60e3a4645f6db1b1951c0894a8e203b62e80c3869ef07617469"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -6119,7 +6119,7 @@
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.cs",
-      "sha256": "0e88ef4c1d0cb7931d01801554abd30d02b976ce0904ac8fd6b0a5a124cb4c8a"
+      "sha256": "efc42dd51c6c55b3326326eaf036dfd70d30cceb78efb124d2eed70951d4a14b"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.DeviceTransfers.cs",
@@ -6127,7 +6127,7 @@
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.RingsAndEvents.cs",
-      "sha256": "930afaf0a4fe9f2529d0709766553fc19e0eb35980d6a307de88f226c573a2ed"
+      "sha256": "942cabaaf807fb6a865289c56ef5b09395c7882bae2c0ccdd92e165afe8c1338"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.Storage.cs",

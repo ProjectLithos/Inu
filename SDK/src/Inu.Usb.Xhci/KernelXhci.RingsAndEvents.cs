@@ -3,6 +3,7 @@ using Inu.Bus.Usb;
 using Inu.Kernel.AddressSpace;
 using Inu.Kernel.Drivers;
 using Inu.Kernel.Heap;
+using Inu.Kernel.Internal.X64;
 using Inu.Kernel.Memory;
 using Inu.Kernel.Pci;
 namespace Inu.Usb.Xhci;
