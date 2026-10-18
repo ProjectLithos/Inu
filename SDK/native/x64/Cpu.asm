@@ -46,12 +46,9 @@ InuX64DisableInterrupts:
     ret
 InuX64EnableInterrupts:
     ; Set the return value before STI and make RET the architecturally guaranteed
-    ; post-STI instruction.  A pending IRQ therefore cannot trap this function
+    ; post-STI instruction. A pending IRQ therefore cannot trap this function
     ; between STI and RET and make Native.EnableInterrupts appear not to return.
-    mov al, 'N'
-    out 0xE9, al
-    mov al, 0x10
-    out 0xE9, al
+    ; Keep this primitive silent: AP scheduler idle loops call it frequently.
     mov al, 1
     sti
     ret

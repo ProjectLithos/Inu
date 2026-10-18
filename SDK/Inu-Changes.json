@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.109",
-  "version": "0.1.110",
-  "changedFiles": 23,
-  "summary": "Defer Local APIC periodic timer arming until after STI/device callback readiness, make RET the guaranteed post-STI instruction, and add native interrupt-vector/debugcon diagnostics plus reliable Windows debugcon capture.",
+  "baseVersion": "0.1.110",
+  "version": "0.1.111",
+  "changedFiles": 5,
+  "summary": "Make Local APIC periodic timer activation atomic, program the timer masked/unmask-last, remove noisy generic STI debugcon output, and add register-level plus first-tick timer diagnostics.",
   "deletedFiles": 0
 }

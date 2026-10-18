@@ -35,11 +35,31 @@ public static unsafe class KernelLocalApicTimerProvider
 
     private static Boolean Program(Byte vector, UInt64 nanoseconds, KernelTimerMode mode)
     {
-        if (_base == 0UL || vector < (Byte)32U || nanoseconds == 0UL) return false;
+        TraceTimer(0x40);
+        if (_base == 0UL || vector < (Byte)32U || nanoseconds == 0UL) { TraceTimer(0x4F); return false; }
         UInt64 ticks = KernelTimeMath.NanosecondsToTicksCeiling(nanoseconds, _frequency);
-        if (ticks == 0UL || ticks > 0xFFFFFFFFU) return false;
+        if (ticks == 0UL || ticks > 0xFFFFFFFFU) { TraceTimer(0x4E); return false; }
         UInt32 lvt = vector; if (mode == KernelTimerMode.Periodic) lvt |= LocalApicPeriodic;
-        return Native.WriteMmio32(_base+LocalApicDivide,DivideBy16) && Native.WriteMmio32(_base+LocalApicLvtTimer,lvt) && Native.WriteMmio32(_base+LocalApicInitialCount,(UInt32)ticks);
+
+        // Keep the timer masked while its divider/vector/count are rebuilt. This prevents
+        // an interrupt from observing a half-programmed LAPIC timer. Unmask only after the
+        // initial count is committed, while the caller still has CPU IF cleared.
+        TraceTimer(0x41);
+        if (!Native.WriteMmio32(_base + LocalApicLvtTimer, lvt | LocalApicMasked)) { TraceTimer(0x51); return false; }
+        TraceTimer(0x42);
+        if (!Native.WriteMmio32(_base + LocalApicDivide, DivideBy16)) { TraceTimer(0x52); return false; }
+        TraceTimer(0x43);
+        if (!Native.WriteMmio32(_base + LocalApicInitialCount, (UInt32)ticks)) { TraceTimer(0x53); return false; }
+        TraceTimer(0x44);
+        if (!Native.WriteMmio32(_base + LocalApicLvtTimer, lvt)) { TraceTimer(0x54); return false; }
+        TraceTimer(0x45);
+        return true;
+    }
+
+    private static void TraceTimer(Byte code)
+    {
+        Native.WritePort8(0xE9, (Byte)'T');
+        Native.WritePort8(0xE9, code);
     }
 
     private static Boolean CancelProvider() => _base != 0UL && Native.WriteMmio32(_base+LocalApicInitialCount,0U) && Native.WriteMmio32(_base+LocalApicLvtTimer,LocalApicMasked);

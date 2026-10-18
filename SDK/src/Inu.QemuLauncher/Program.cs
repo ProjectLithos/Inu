@@ -866,7 +866,7 @@ static void PrintDebugConTail(string path)
 {
     Console.WriteLine("[INFO] QEMU isa-debugcon 0xE9 tail (hex; interrupt transition breadcrumbs):");
     Console.WriteLine(ReadBinaryTailHex(path, 512));
-    Console.WriteLine("[INFO] Interrupt breadcrumb legend: 49 10=managed Interrupts.Run enter; 49 11=returned true; 49 1F=returned false; 4E 10=native STI helper entered; 56 vv=interrupt vector vv entered; 55 20/21=xHCI prepare enter/ok; 55 30/31=xHCI activate enter/ok.");
+    Console.WriteLine("[INFO] Interrupt breadcrumb legend: 49 10/11/1F=managed Interrupts.Run enter/ok/fail; 56 vv=interrupt vector vv entered; 55 20/21=xHCI prepare enter/ok; 55 30/31=xHCI activate enter/ok; 4D 40/41/4F=timer activation enter/ok/fail; 54 40..45=Local APIC timer programming progress; 54 4E/4F/51..54=timer programming failure; 4B vv nn / 6B vv nn=first timer callback entry/exit for tick nn.");
 }
 
 static string ReadTextTail(string path, int maximumCharacters)
