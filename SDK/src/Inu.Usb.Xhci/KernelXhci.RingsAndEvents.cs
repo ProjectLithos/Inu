@@ -30,8 +30,24 @@ public static unsafe partial class KernelXhci
   actual=0;
   if(c->InterruptDriven!=0)
   {
-   if(!c->TransferCompletionEvent.Wait(InterruptWaitTimeoutNanoseconds))return false;
-   if(c->TransferCompletionSlot!=slot||c->TransferCompletionDci!=dci)return false;UInt32 remain=c->TransferCompletionRemaining;actual=remain>requested?0:requested-remain;return c->TransferCompletionCode==1||c->TransferCompletionCode==13;
+   const UInt64 watchdogSliceNanoseconds=10000000UL;UInt64 waited=0UL;UInt32 recoveryChecks=0U;
+   while(waited<InterruptWaitTimeoutNanoseconds)
+   {
+    if(c->TransferCompletionEvent.Wait(watchdogSliceNanoseconds))
+    {
+     if(c->TransferCompletionSlot!=slot||c->TransferCompletionDci!=dci)return false;UInt32 remain=c->TransferCompletionRemaining;actual=remain>requested?0:requested-remain;return c->TransferCompletionCode==1||c->TransferCompletionCode==13;
+    }
+    waited+=watchdogSliceNanoseconds;recoveryChecks++;UInt32 status=R32(c->Operational+4);UInt32 iman=R32(c->Runtime+0x20);
+    if((status&(1U<<3))==0U&&(iman&1U)==0U)continue;
+    if(recoveryChecks<=32U){Native.WritePort8(0xE9,(Byte)'V');Native.WritePort8(0xE9,(Byte)recoveryChecks);Native.WritePort8(0xE9,(Byte)status);Native.WritePort8(0xE9,(Byte)iman);Native.WritePort8(0xE9,(Byte)c->EventIndex);Native.WritePort8(0xE9,c->EventCycle);}
+    Boolean recovered=ServiceHardwareEvents(c);AcknowledgeEventInterrupt(c);
+    if(recoveryChecks<=32U)Native.WritePort8(0xE9,recovered?(Byte)'v':(Byte)'-');
+    if(c->TransferCompletionEvent.TryWait())
+    {
+     if(c->TransferCompletionSlot!=slot||c->TransferCompletionDci!=dci)return false;UInt32 remain=c->TransferCompletionRemaining;actual=remain>requested?0:requested-remain;return c->TransferCompletionCode==1||c->TransferCompletionCode==13;
+    }
+   }
+   return false;
   }
   for(UInt32 spin=0;spin<SpinLimit;spin++){if(!ServiceHardwareEvents(c))continue;if(!c->TransferCompletionEvent.TryWait())continue;if(c->TransferCompletionSlot!=slot||c->TransferCompletionDci!=dci)continue;UInt32 remain=c->TransferCompletionRemaining;actual=remain>requested?0:requested-remain;return c->TransferCompletionCode==1||c->TransferCompletionCode==13;}return false;
  }
@@ -40,7 +56,7 @@ public static unsafe partial class KernelXhci
   Boolean serviced=false;
   while(TryReadHardwareEvent(c,out UInt32 d0,out UInt32 d1,out UInt32 d2,out UInt32 d3))
   {
-   serviced=true;Byte type=(Byte)((d3>>10)&63U);
+   serviced=true;Byte type=(Byte)((d3>>10)&63U);Native.WritePort8(0xE9,(Byte)'E');Native.WritePort8(0xE9,type);Native.WritePort8(0xE9,(Byte)(d2>>24));Native.WritePort8(0xE9,(Byte)(d3>>24));Native.WritePort8(0xE9,(Byte)((d3>>16)&31U));Native.WritePort8(0xE9,(Byte)(d2&0xFFU));
    if(type==33){c->CommandCompletionCode=(Byte)(d2>>24);c->CommandCompletionSlot=(Byte)(d3>>24);if(!c->CommandCompletionEvent.Set())return false;}
    else if(type==32){c->TransferCompletionCode=(Byte)(d2>>24);c->TransferCompletionRemaining=d2&0x00FFFFFFU;c->TransferCompletionSlot=(Byte)(d3>>24);c->TransferCompletionDci=(Byte)((d3>>16)&31U);if(!c->TransferCompletionEvent.Set())return false;}
   }

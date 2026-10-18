@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.115",
-  "version": "0.1.116",
-  "changedFiles": 2,
-  "summary": "Fix xHCI periodic USB HID endpoint contexts by programming Max ESIT Payload, and preserve post-interactive serial/debugcon diagnostics in Kath after accepted QEMU runs.",
+  "baseVersion": "0.1.116",
+  "version": "0.1.117",
+  "changedFiles": 6,
+  "summary": "Clear stale xHCI event-interrupt latches across the bootstrap-to-runtime handoff, acknowledge USBSTS.EINT plus IMAN.IP at runtime, add interrupt-loss recovery for HID transfers, and add deep xHCI transfer/event diagnostics.",
   "deletedFiles": 0
 }
