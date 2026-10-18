@@ -1,5 +1,5 @@
 {
-  "version": "0.1.107",
+  "version": "0.1.108",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "14c50143676bf180b792b1d37c2767203d5c2ff1a83371fa45334162e0843f17"
+      "sha256": "d4cf50e7ff80df3339974d22e9ce946b2af68682177dc3e9677f9eb6384e154b"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "90feee2a84a3ed6cba7aeb2d88ccd3af5659f41dc33f04d8cef84cf9133ede26"
+      "sha256": "b968059d8e4b302ea0f61777d4ee6400c188cd80390215816e0c79b40d85e2f1"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "d441fad8b9b2a081e160b3c38daa08d344d4692c658c56181448688b25a8564a"
+      "sha256": "1568538b4312fe252b27ac8aac2e3c24ffe0d807b0d982dbf2cee2f2d160de57"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "7f06ab95f8fb21f7bd2c02e8eb243b6422f90495e1e9bec0c79ec72577284da5"
+      "sha256": "1531e9058435920ecdad53297dcb5f5964c3c84ba6edbbfd428fe2c19635148e"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "49cccad1ec00487504b78c5cfd0fec66c7601915a458b99bd458e8de3be59119"
+      "sha256": "fe1c32dec3d27e25006622c8596861ae55d507b52b7cf80b14a7be1c1edaa007"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4259,11 +4259,11 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/UsbHardwareStartup.cs",
-      "sha256": "cf565b5067a4e42ce2862726a13a8d214d53f36b71e9c17dd2f09d64544dfe7c"
+      "sha256": "273e9b5febb75e202e3d738e175ccaf911c234d03c152077188a3a83bb49ce5d"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Kernel/Kernel.cs",
-      "sha256": "b88d48c589e42ac4b0a9000093d7c40c80e54a568604f2401294dde38bf5b483"
+      "sha256": "728f7ab0e66d22d4204fb8d433402d6447b8f44426c2dab1224d618209535592"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Startup/DesktopOrTextSessionStartup.cs",
@@ -6007,7 +6007,7 @@
     },
     {
       "path": "src/Inu.QemuLauncher/Program.cs",
-      "sha256": "c228baccef0dcb0426a9d67e2274129523437e65ce309744ae8dd7bbd1dcb754"
+      "sha256": "2b8aefaf0d3589fa2c20d673a05b5e019e9727627610d24b1c16a5544648e50b"
     },
     {
       "path": "src/Inu.Runtime.Conformance/Inu.Runtime.Conformance.csproj",
@@ -6115,11 +6115,11 @@
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.ControllerLifecycle.cs",
-      "sha256": "69019d7c2b47e7916e4b6f64658a88d80b97801d509fce37f6124853e0730129"
+      "sha256": "5b1da67d03ed0cf95feeb71b731a5258e08eb3fcef641ddf187c3a16130a2cdd"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.cs",
-      "sha256": "cac60d0b1d03577773628297faa6d3d967ff994ca50e1a0abb8d5df80232041f"
+      "sha256": "5006df698d6780781346aa7ca2174a065efbd84a6cda591a66d49961b597fd1b"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.DeviceTransfers.cs",
@@ -6131,11 +6131,11 @@
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.Storage.cs",
-      "sha256": "eaffda19b2de98788dc4c4ffff8b2cbf9964816f22503f14fb2a9cc344c8ef49"
+      "sha256": "60c9b11cace6d80ef7b529caf1d0e10b78505c250bc602e7417054cbc5625fbd"
     },
     {
       "path": "src/Inu.Usb.Xhci/XhciContracts.cs",
-      "sha256": "997241f07495330e2f8d7bf81a3d4dbfd4ef05c828d6736852146270bc825516"
+      "sha256": "74e52f5f35afbf77582326e48736d7873e906c21237374434e46343c3937c83d"
     },
     {
       "path": "src/Inu.Userland.Buffering/BufferingCommand.cs",

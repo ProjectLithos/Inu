@@ -59,12 +59,35 @@ public static class UsbHardwareStartup
         return true;
     }
 
-    /// <summary>Enables runtime xHCI interrupt delivery after the kernel interrupt dispatcher has enabled maskable interrupts.</summary>
+    /// <summary>Arms xHCI interrupt callbacks while CPU maskable interrupts are still disabled.</summary>
+    public static Boolean PrepareHardwareInterrupts()
+    {
+#if INU_KERNELAREA_USB
+        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.PrepareHardwareInterrupts","Preparing xHCI interrupt callbacks before global STI; device interrupters remain masked.")) return false;
+        if (!KernelXhci.PrepareInterruptDelivery()) return false;
+        XhciCapabilities xhci = KernelXhci.GetCapabilities();
+        if (xhci.InterruptConfiguredControllers != xhci.InterruptPreparedControllers)
+        {
+            KernelStructuredLogging.ErrorLine("usb","UsbHardwareStartup.PrepareHardwareInterrupts","Not every configured xHCI controller reached the prepared interrupt state.");
+            return false;
+        }
+        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.PrepareHardwareInterrupts","xHCI interrupt callbacks prepared; safe to enable CPU maskable interrupts.")) return false;
+#endif
+        return true;
+    }
+
+    /// <summary>Activates runtime xHCI interrupt delivery after the kernel interrupt dispatcher has enabled maskable interrupts.</summary>
     public static Boolean EnableHardwareInterrupts()
     {
 #if INU_KERNELAREA_USB
+        if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.EnableHardwareInterrupts","Activating xHCI device interrupters after global STI.")) return false;
         if (!KernelXhci.EnableInterruptDelivery()) return false;
         XhciCapabilities xhci = KernelXhci.GetCapabilities();
+        if (xhci.InterruptConfiguredControllers != xhci.InterruptDrivenControllers)
+        {
+            KernelStructuredLogging.ErrorLine("usb","UsbHardwareStartup.EnableHardwareInterrupts","Not every configured xHCI controller reached active interrupt-driven delivery.");
+            return false;
+        }
         if (!KernelStructuredLogging.InfoLine("usb-detail","UsbHardwareStartup.EnableHardwareInterrupts",xhci.PollingFallbackControllers == 0U ? "xHCI broker-managed hardware interrupt delivery active." : "xHCI explicit polling fallback remains active.")) return false;
 #endif
         return true;

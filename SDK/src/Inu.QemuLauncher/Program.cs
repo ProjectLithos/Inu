@@ -509,6 +509,9 @@ static int MainEntry(string[] args)
             string[] bootStageHistory = GetBootStageMarkerHistory(serialText);
             if (bootStageHistory.Length != 0)
                 Console.Error.WriteLine($"[INFO] Kernel startup marker history: {string.Join(" -> ", bootStageHistory)}");
+            string[] transitionHistory = GetSessionMarkerHistory(serialText);
+            if (transitionHistory.Length != 0)
+                Console.Error.WriteLine($"[INFO] Interrupt/session transition marker history: {string.Join(" -> ", transitionHistory)}");
             string stageDetail = lastBootStageMarker is null ? string.Empty : $" Last observed kernel startup marker: {lastBootStageMarker}.";
             string stallDetail = lastBootStageMarker is not null && lastBootStageMarker.EndsWith("_ENTER", StringComparison.Ordinal)
                 ? $" The kernel entered {lastBootStageMarker.Substring(0, lastBootStageMarker.Length - "_ENTER".Length)} but never emitted its matching _OK marker."
@@ -1704,7 +1707,7 @@ static string[] GetBootStageMarkerHistory(string serialText)
 
 static string[] GetSessionMarkerHistory(string serialText)
 {
-    string[] prefixes = ["OS_POLICY_", "SESSION_", "TEXT_SESSION_", "DESKTOP_SESSION_", "SHELL_"];
+    string[] prefixes = ["USB_IRQ_", "INTERRUPTS_", "INPUT_IRQ_", "OS_POLICY_", "SESSION_", "TEXT_SESSION_", "DESKTOP_SESSION_", "SHELL_"];
     List<(int Position, string Marker)> markers = [];
     foreach (string markerPrefix in prefixes)
     {

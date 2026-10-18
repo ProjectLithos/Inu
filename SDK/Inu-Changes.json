@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.106",
-  "version": "0.1.107",
-  "changedFiles": 16,
-  "summary": "Install the replaceable stock USB enumeration service before xHCI root-port discovery so selected USB HID devices can actually enumerate and bind.",
+  "baseVersion": "0.1.107",
+  "version": "0.1.108",
+  "changedFiles": 17,
+  "summary": "Repair the xHCI STI-boundary interrupt handoff by preparing callbacks before global interrupt enable, activating device interrupters afterward, and add detailed transition diagnostics.",
   "deletedFiles": 0
 }

@@ -58,12 +58,42 @@ public static class Kernel
         // boot path and can stall CLI/Test kernels before the shell can publish INTERACTIVE_READY.
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_USERLAND")) return false;
         if (!UserlandCommandStartup.Initialize(boot)) return false;
-        if (!KernelConsole.WriteHostControl("BOOT_STAGE_INTERRUPTS")) return false;
-        if (!InterruptRuntimeStartup.Enable()) return false;
 #if INU_KERNELAREA_USB
-        if (!UsbHardwareStartup.EnableHardwareInterrupts()) return false;
+        // Prepare the xHCI interrupt callbacks before STI.  The device interrupter remains
+        // disabled until after global maskable interrupts are live, but any already-routed
+        // interrupt delivered at the STI boundary can now be accepted safely.
+        if (!KernelConsole.WriteHostControl("USB_IRQ_PREPARE_ENTER")) return false;
+        if (!UsbHardwareStartup.PrepareHardwareInterrupts())
+        {
+            KernelConsole.WriteHostControl("USB_IRQ_PREPARE_FAIL");
+            return false;
+        }
+        if (!KernelConsole.WriteHostControl("USB_IRQ_PREPARE_OK")) return false;
 #endif
-        if (!InputHardwareStartup.EnableHardwareInterrupts()) return false;
+        if (!KernelConsole.WriteHostControl("BOOT_STAGE_INTERRUPTS")) return false;
+        if (!KernelConsole.WriteHostControl("INTERRUPTS_ENABLE_ENTER")) return false;
+        if (!InterruptRuntimeStartup.Enable())
+        {
+            KernelConsole.WriteHostControl("INTERRUPTS_ENABLE_FAIL");
+            return false;
+        }
+        if (!KernelConsole.WriteHostControl("INTERRUPTS_ENABLE_OK")) return false;
+#if INU_KERNELAREA_USB
+        if (!KernelConsole.WriteHostControl("USB_IRQ_ACTIVATE_ENTER")) return false;
+        if (!UsbHardwareStartup.EnableHardwareInterrupts())
+        {
+            KernelConsole.WriteHostControl("USB_IRQ_ACTIVATE_FAIL");
+            return false;
+        }
+        if (!KernelConsole.WriteHostControl("USB_IRQ_ACTIVATE_OK")) return false;
+#endif
+        if (!KernelConsole.WriteHostControl("INPUT_IRQ_ENABLE_ENTER")) return false;
+        if (!InputHardwareStartup.EnableHardwareInterrupts())
+        {
+            KernelConsole.WriteHostControl("INPUT_IRQ_ENABLE_FAIL");
+            return false;
+        }
+        if (!KernelConsole.WriteHostControl("INPUT_IRQ_ENABLE_OK")) return false;
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_SESSION")) return false;
         if (!KernelConsole.WriteHostControl("SESSION_DISPATCH_ENTER")) return false;
 

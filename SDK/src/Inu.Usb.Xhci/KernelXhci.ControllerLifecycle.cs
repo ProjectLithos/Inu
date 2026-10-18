@@ -11,16 +11,18 @@ public static unsafe partial class KernelXhci
 {
  static Boolean Probe(KernelDriverDeviceContext* context)=>context!=null&&context->Identifier.ClassCode==0x0C0330U&&KernelPci.TryGetDevice(context->Device,out _);
  static Boolean Start(KernelDriverDeviceContext* context){if(context==null||!KernelPci.TryGetDevice(context->Device,out PciDeviceInfo pci))return false;Int32 slot=FreeController();if(slot<0)return false;Controller* c=_controllers+slot;Clear((Byte*)c,(UInt64)sizeof(Controller));c->Used=1;c->Segment=pci.Location.Segment;c->Bus=pci.Location.Bus;c->Device=pci.Location.Device;c->Function=pci.Location.Function;c->DeviceHandle=context->Device.Value;c->State=(Byte)XhciControllerState.Discovered;c->CommandCompletionEvent.Initialize(false,false);c->TransferCompletionEvent.Initialize(false,false);if(!StartController(c)){ReleaseControllerResources(c);Clear((Byte*)c,(UInt64)sizeof(Controller));return false;}_controllerCount++;_running++;return true;}
- static Boolean Stop(KernelDriverDeviceContext* context){if(context==null)return false;Controller* c=FindController(context->Device);if(c==null)return true;if(c->Host!=0U&&!KernelUsbBus.UnregisterHost(new UsbHostHandle(c->Host)))return false;DisableInterruptDelivery(c);if(c->InterruptHandle!=0UL&&!KernelDrivers.ReleaseInterrupt(new KernelDriverInterruptHandle(c->InterruptHandle)))return false;c->InterruptHandle=0UL;c->InterruptConfigured=0;c->InterruptDriven=0;if(c->Operational!=0UL){W32(c->Operational,R32(c->Operational)&~1U);Wait32(c->Operational+4,1U,1U);}if(!ReleaseControllerResources(c))return false;Clear((Byte*)c,(UInt64)sizeof(Controller));if(_controllerCount>0U)_controllerCount--;if(_running>0U)_running--;return true;}
+ static Boolean Stop(KernelDriverDeviceContext* context){if(context==null)return false;Controller* c=FindController(context->Device);if(c==null)return true;if(c->Host!=0U&&!KernelUsbBus.UnregisterHost(new UsbHostHandle(c->Host)))return false;DisableInterruptDelivery(c);if(c->InterruptHandle!=0UL&&!KernelDrivers.ReleaseInterrupt(new KernelDriverInterruptHandle(c->InterruptHandle)))return false;c->InterruptHandle=0UL;c->InterruptConfigured=0;c->InterruptPrepared=0;c->InterruptDriven=0;if(c->Operational!=0UL){W32(c->Operational,R32(c->Operational)&~1U);Wait32(c->Operational+4,1U,1U);}if(!ReleaseControllerResources(c))return false;Clear((Byte*)c,(UInt64)sizeof(Controller));if(_controllerCount>0U)_controllerCount--;if(_running>0U)_running--;return true;}
  static Boolean Remove(KernelDriverDeviceContext* context)=>context!=null&&Stop(context);
  static Boolean Interrupt(KernelDriverDeviceContext* context,UInt64 cookie)
  {
-  if(context==null)return false;Controller* c=FindController(context->Device);if(c==null||c->Runtime==0UL||c->InterruptDriven==0)return false;
+  if(context==null)return false;Controller* c=FindController(context->Device);if(c==null||c->Runtime==0UL||c->InterruptPrepared==0)return false;
   UInt64 ir=c->Runtime+0x20;UInt32 iman=R32(ir);if((iman&1U)==0U)return true;
-  Boolean ok=ServiceHardwareEvents(c);
+  ServiceHardwareEvents(c);
   // IMAN.IP is write-1-to-clear; preserve the enable bit while acknowledging this interrupter.
+  // Once IP was observed, the interrupt belongs to this controller even if no command/transfer
+  // completion TRB was present (for example a port-status event at the STI boundary).
   W32(ir,(iman&2U)|1U);
-  return ok;
+  return true;
  }
  static Boolean ScanControllerPorts(Controller* c){if(c==null||c->State!=(Byte)XhciControllerState.Running)return false;for(Byte p=1;p<=c->Ports;p++){UInt32 ps=R32(Port(c,p));if((ps&1U)==0)continue;_connected++;UsbSpeed speed=SpeedFromId((Byte)((ps>>10)&15U));if(!KernelUsbBus.EnumeratePort(new UsbHostHandle(c->Host),p,speed,out _))return false;}return true;}
  static Boolean StartController(Controller* c)
@@ -43,7 +45,7 @@ public static unsafe partial class KernelXhci
   W32(c->Operational,R32(c->Operational)|1U);if(!Wait32(c->Operational+4,1U,0U))return false;
   UsbHostCallbacks callbacks=new((UInt64)(nuint)c,&PrepareDevice,&ControlTransfer,&BulkTransfer,&InterruptTransfer,&ConfigureEndpoint,&ConfigureHub);if(!KernelUsbBus.RegisterHost(new KernelDeviceHandle(c->DeviceHandle),callbacks,out UsbHostHandle host))return false;c->Host=host.Value;c->State=(Byte)XhciControllerState.Running;return true;
  }
- static void DisableInterruptDelivery(Controller* c){if(c==null||c->Operational==0UL||c->Runtime==0UL)return;UInt64 ir=c->Runtime+0x20;W32(ir,1U);W32(c->Operational,R32(c->Operational)&~(1U<<2));c->InterruptDriven=0;}
+ static void DisableInterruptDelivery(Controller* c){if(c==null||c->Operational==0UL||c->Runtime==0UL)return;UInt64 ir=c->Runtime+0x20;W32(ir,1U);W32(c->Operational,R32(c->Operational)&~(1U<<2));c->InterruptDriven=0;c->InterruptPrepared=0;}
  static Boolean AllocateControllerMemory(Controller* c,UInt32 hcs2){if(!Page(out c->Dcbaa)||!Page(out c->Command)||!Page(out c->Event)||!Page(out c->Erst))return false;Zero(c->Dcbaa);Zero(c->Command);Zero(c->Event);Zero(c->Erst);if(!KernelHeap.TryAllocate((UInt64)MaxSlots*(UInt64)sizeof(Slot),64,true,out c->SlotAllocation)||!KernelHeap.TryAllocate((UInt64)MaxEndpoints*(UInt64)sizeof(Endpoint),64,true,out c->EndpointAllocation))return false;c->SlotTable=c->SlotAllocation.Address;c->EndpointTable=c->EndpointAllocation.Address;UInt32 scratch=((hcs2>>27)&31U)<<5|((hcs2>>21)&31U);if(scratch!=0){UInt64 arrayPages=((UInt64)scratch*8UL+4095UL)/4096UL;if(!KernelPhysicalMemory.TryAllocate(arrayPages,1,out c->ScratchArray)||!KernelPhysicalMemory.TryAllocate(scratch,1,out c->ScratchPages))return false;Zero(c->ScratchArray);Zero(c->ScratchPages);UInt64* a=(UInt64*)Direct(c->ScratchArray);for(UInt32 i=0;i<scratch;i++)a[i]=c->ScratchPages.StartAddress+(UInt64)i*4096UL;((UInt64*)Direct(c->Dcbaa))[0]=c->ScratchArray.StartAddress;}return true;}
  static void SetupCommandRing(Controller* c){UInt32* trb=(UInt32*)Direct(c->Command);UInt64 p=c->Command.StartAddress;UInt32 i=255U*4U;trb[i]=(UInt32)p;trb[i+1]=(UInt32)(p>>32);trb[i+2]=0;trb[i+3]=(6U<<10)|(1U<<1)|1U;c->CommandEnqueue=0;c->CommandCycle=1;}
  static void SetupEventRing(Controller* c){UInt64* erst=(UInt64*)Direct(c->Erst);erst[0]=c->Event.StartAddress;erst[1]=256UL;c->EventIndex=0;c->EventCycle=1;}
