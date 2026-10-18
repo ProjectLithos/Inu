@@ -289,8 +289,8 @@ static int MainEntry(string[] args)
                     string[] failedHistory = GetBootStageMarkerHistory(serialText);
                     PersistLatestSerial(outputDirectory, serialText);
                     PrintSerialTail(serialText);
-                    PrintDebugConTail(qemuDebugConLog);
                     TryStop(qemuPid);
+                    PrintDebugConTail(qemuDebugConLog);
                     throw Fail($"Kernel startup explicitly reported {bootStageMarker}. Marker history: {string.Join(" -> ", failedHistory)}. Serial log: {serialLog}");
                 }
                 TimeSpan stageDeadline = acceptanceClock.Elapsed + TimeSpan.FromSeconds(timeoutSeconds);
@@ -307,8 +307,8 @@ static int MainEntry(string[] args)
             {
                 string? crashDumpPath = TryMaterializeSerialCrashDump(serialText, runDirectory, project.Name, project.TargetArchitecture);
                 PrintSerialTail(serialText);
-                PrintDebugConTail(qemuDebugConLog);
                 TryStop(qemuPid);
+                PrintDebugConTail(qemuDebugConLog);
                 throw Fail("Inu reported a kernel panic during runtime acceptance." + (crashDumpPath is null ? $" Serial log: {serialLog}" : $" Crash dump: {crashDumpPath}"));
             }
             if (serialText.Contains("NOMNG:RETURN:FAIL", StringComparison.Ordinal) ||
@@ -317,8 +317,8 @@ static int MainEntry(string[] args)
             {
                 PersistLatestSerial(outputDirectory, serialText);
                 PrintSerialTail(serialText);
-                PrintDebugConTail(qemuDebugConLog);
                 TryStop(qemuPid);
+                PrintDebugConTail(qemuDebugConLog);
                 string[] sessionHistory = GetSessionMarkerHistory(serialText);
                 string sessionDetail = sessionHistory.Length == 0 ? string.Empty : $" Session marker history: {string.Join(" -> ", sessionHistory)}.";
                 throw Fail($"Inu reported an explicit kernel startup failure during QEMU runtime acceptance.{sessionDetail} See the serial tail for the failing stage. Serial log: {serialLog}");
@@ -468,8 +468,8 @@ static int MainEntry(string[] args)
         PersistLatestSerial(outputDirectory, serialText);
         PrintSerialDiagnosticSummary(serialText);
         PrintSerialTail(serialText);
-        PrintDebugConTail(qemuDebugConLog);
         TryStop(qemuPid);
+        PrintDebugConTail(qemuDebugConLog);
         if (string.IsNullOrEmpty(serialText))
         {
             throw Fail($"Timed out before any Inu serial output appeared after {timeoutSeconds} seconds. Serial log: {serialLog}");
@@ -866,7 +866,7 @@ static void PrintDebugConTail(string path)
 {
     Console.WriteLine("[INFO] QEMU isa-debugcon 0xE9 tail (hex; interrupt transition breadcrumbs):");
     Console.WriteLine(ReadBinaryTailHex(path, 512));
-    Console.WriteLine("[INFO] Interrupt breadcrumb legend: 49 10=Interrupts.Run enter; 49 11=returned true; 49 1F=returned false; 55 20/21=xHCI prepare enter/ok; 55 30/31=xHCI activate enter/ok; 2E/2F/3E/3F denote failure boundaries.");
+    Console.WriteLine("[INFO] Interrupt breadcrumb legend: 49 10=managed Interrupts.Run enter; 49 11=returned true; 49 1F=returned false; 4E 10=native STI helper entered; 56 vv=interrupt vector vv entered; 55 20/21=xHCI prepare enter/ok; 55 30/31=xHCI activate enter/ok.");
 }
 
 static string ReadTextTail(string path, int maximumCharacters)
@@ -904,7 +904,13 @@ static string ReadBinaryTailHex(string path, int maximumBytes)
     try
     {
         if (!File.Exists(path)) return "<empty or unavailable>";
-        byte[] bytes = File.ReadAllBytes(path);
+        byte[]? bytes = null;
+        for (int attempt = 0; attempt < 20 && bytes is null; attempt++)
+        {
+            try { bytes = File.ReadAllBytes(path); }
+            catch (IOException) { if (attempt == 19) throw; Thread.Sleep(25); }
+        }
+        if (bytes is null) return "<unavailable>";
         int start = Math.Max(0, bytes.Length - maximumBytes);
         StringBuilder builder = new();
         for (int i = start; i < bytes.Length; i++)
@@ -1719,7 +1725,7 @@ static string[] GetBootStageMarkerHistory(string serialText)
 
 static string[] GetSessionMarkerHistory(string serialText)
 {
-    string[] prefixes = ["USB_IRQ_", "INTERRUPTS_", "INPUT_IRQ_", "OS_POLICY_", "SESSION_", "TEXT_SESSION_", "DESKTOP_SESSION_", "SHELL_"];
+    string[] prefixes = ["USB_IRQ_", "INTERRUPTS_", "INPUT_IRQ_", "TIMER_IRQ_", "OS_POLICY_", "SESSION_", "TEXT_SESSION_", "DESKTOP_SESSION_", "SHELL_"];
     List<(int Position, string Marker)> markers = [];
     foreach (string markerPrefix in prefixes)
     {

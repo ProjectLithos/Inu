@@ -13,4 +13,12 @@ public static class TimerDispatchStartup
         KernelConsole.WriteHostControl("TIMER_DISPATCH_STARTUP_FAIL");
         return false;
     }
+
+    /// <summary>Arms the periodic Local APIC timer after STI and device interrupt callbacks are ready.</summary>
+    public static Boolean EnableHardwareInterrupts()
+    {
+        if (KernelTimerDispatch.EnableInterruptDelivery()) return true;
+        KernelConsole.WriteHostControl("TIMER_IRQ_ENABLE_FAIL");
+        return false;
+    }
 }

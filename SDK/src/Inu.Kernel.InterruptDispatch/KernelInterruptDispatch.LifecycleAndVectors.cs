@@ -17,13 +17,13 @@ public static unsafe partial class KernelInterruptDispatch
     /// <summary>Gets the subsystem lifecycle state: 0 stopped, 1 ready, 2 running, 3 paused.</summary>
     public static Byte GetLifecycleState()=>_lifecycle;
     /// <summary>Starts interrupt delivery from the ready or stopped state.</summary>
-    public static Boolean Start(){if(!_initialized||(_lifecycle!=StateReady&&_lifecycle!=StateStopped))return false;_lifecycle=StateRunning;SetCurrentProcessorLifecycle(StateRunning);return Native.EnableInterrupts();}
+    public static Boolean Start(){if(!_initialized||(_lifecycle!=StateReady&&_lifecycle!=StateStopped))return false;Byte previous=_lifecycle;_lifecycle=StateRunning;SetCurrentProcessorLifecycle(StateRunning);if(Native.EnableInterrupts())return true;_lifecycle=previous;SetCurrentProcessorLifecycle(previous);return false;}
     /// <summary>Runs interrupt delivery. Starts it when ready/stopped and resumes it when paused.</summary>
     public static Boolean Run(){if(!_initialized)return false;if(_lifecycle==StatePaused)return Resume();if(_lifecycle==StateRunning)return true;return Start();}
     /// <summary>Pauses normal maskable interrupt delivery on the current processor while preserving registrations and vector ownership.</summary>
     public static Boolean Pause(){if(!_initialized||_lifecycle!=StateRunning)return false;if(!Native.DisableInterrupts())return false;_lifecycle=StatePaused;SetCurrentProcessorLifecycle(StatePaused);return true;}
     /// <summary>Resumes a paused interrupt runtime without rebuilding routes or registrations.</summary>
-    public static Boolean Resume(){if(!_initialized||_lifecycle!=StatePaused)return false;_lifecycle=StateRunning;SetCurrentProcessorLifecycle(StateRunning);return Native.EnableInterrupts();}
+    public static Boolean Resume(){if(!_initialized||_lifecycle!=StatePaused)return false;_lifecycle=StateRunning;SetCurrentProcessorLifecycle(StateRunning);if(Native.EnableInterrupts())return true;_lifecycle=StatePaused;SetCurrentProcessorLifecycle(StatePaused);return false;}
     /// <summary>Stops normal maskable interrupt delivery while retaining the initialized runtime for a later Start/Run.</summary>
     public static Boolean Stop(){if(!_initialized||_lifecycle==StateStopped)return false;if(!Native.DisableInterrupts())return false;_lifecycle=StateStopped;SetCurrentProcessorLifecycle(StateStopped);return true;}
     /// <summary>Gets a snapshot of one processor's interrupt runtime.</summary>

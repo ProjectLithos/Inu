@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.108",
-  "version": "0.1.109",
-  "changedFiles": 15,
-  "summary": "Refresh stale Kath-generated KernelRuntime interrupt startup in existing projects, unify all architecture generators with the xHCI prepare/STI/activate handoff, and surface raw 0xE9 transition diagnostics on QEMU failures.",
+  "baseVersion": "0.1.109",
+  "version": "0.1.110",
+  "changedFiles": 23,
+  "summary": "Defer Local APIC periodic timer arming until after STI/device callback readiness, make RET the guaranteed post-STI instruction, and add native interrupt-vector/debugcon diagnostics plus reliable Windows debugcon capture.",
   "deletedFiles": 0
 }

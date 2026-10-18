@@ -241,7 +241,30 @@ static bool RefreshGeneratedKernelInterruptHandoff(string output)
         string source = File.ReadAllText(runtimePath);
         if (source.Contains("USB_IRQ_PREPARE_ENTER", StringComparison.Ordinal) &&
             source.Contains("USB_IRQ_ACTIVATE_ENTER", StringComparison.Ordinal) &&
-            source.Contains("INPUT_IRQ_ENABLE_ENTER", StringComparison.Ordinal)) return true;
+            source.Contains("INPUT_IRQ_ENABLE_ENTER", StringComparison.Ordinal) &&
+            source.Contains("TIMER_IRQ_ENABLE_ENTER", StringComparison.Ordinal)) return true;
+
+        const string current109 = "        if (!KernelConsole.WriteHostControl(\"INPUT_IRQ_ENABLE_OK\")) return false;\r\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
+        const string current109Lf = "        if (!KernelConsole.WriteHostControl(\"INPUT_IRQ_ENABLE_OK\")) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
+        const string timerActivation = "        if (!KernelConsole.WriteHostControl(\"INPUT_IRQ_ENABLE_OK\")) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_ENTER\")) return false;\n" +
+            "        if (!TimerDispatchStartup.EnableHardwareInterrupts()) { KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_FAIL\"); return false; }\n" +
+            "        if (!KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_OK\")) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
+        if (source.Contains(current109, StringComparison.Ordinal))
+        {
+            File.WriteAllText(runtimePath, source.Replace(current109, timerActivation.Replace("\n", Environment.NewLine), StringComparison.Ordinal));
+            Console.WriteLine($"[ OK ] Refreshed generated kernel timer interrupt activation: {runtimePath}");
+            return true;
+        }
+        if (source.Contains(current109Lf, StringComparison.Ordinal))
+        {
+            File.WriteAllText(runtimePath, source.Replace(current109Lf, timerActivation, StringComparison.Ordinal));
+            Console.WriteLine($"[ OK ] Refreshed generated kernel timer interrupt activation: {runtimePath}");
+            return true;
+        }
 
         const string legacy = "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_INTERRUPTS\")) return false;\r\n" +
             "        if (!InterruptRuntimeStartup.Enable()) return false;\r\n" +
@@ -264,6 +287,13 @@ static bool RefreshGeneratedKernelInterruptHandoff(string output)
             "        if (!KernelConsole.WriteHostControl(\"INPUT_IRQ_ENABLE_ENTER\")) return false;\n" +
             "        if (!InputHardwareStartup.EnableHardwareInterrupts()) { KernelConsole.WriteHostControl(\"INPUT_IRQ_ENABLE_FAIL\"); return false; }\n" +
             "        if (!KernelConsole.WriteHostControl(\"INPUT_IRQ_ENABLE_OK\")) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_ENTER\")) return false;\n" +
+            "        if (!TimerDispatchStartup.EnableHardwareInterrupts())\n" +
+            "        {\n" +
+            "            KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_FAIL\");\n" +
+            "            return false;\n" +
+            "        }\n" +
+            "        if (!KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_OK\")) return false;\n" +
             "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
 
         string updated = source.Contains(legacy, StringComparison.Ordinal)

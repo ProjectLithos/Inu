@@ -9,8 +9,14 @@ InuX64DisableInterrupts:
 .global InuX64EnableInterrupts
 .type InuX64EnableInterrupts,@function
 InuX64EnableInterrupts:
-    sti
+    # Set AL before STI and make RET the guaranteed post-STI instruction so a
+    # pending IRQ cannot pre-empt this helper between STI and return.
+    movb $0x4E, %al
+    outb %al, $0xE9
+    movb $0x10, %al
+    outb %al, $0xE9
     movb $1, %al
+    sti
     ret
 
 .global InuX64AreInterruptsEnabled

@@ -45,8 +45,15 @@ InuX64DisableInterrupts:
     mov al, 1
     ret
 InuX64EnableInterrupts:
-    sti
+    ; Set the return value before STI and make RET the architecturally guaranteed
+    ; post-STI instruction.  A pending IRQ therefore cannot trap this function
+    ; between STI and RET and make Native.EnableInterrupts appear not to return.
+    mov al, 'N'
+    out 0xE9, al
+    mov al, 0x10
+    out 0xE9, al
     mov al, 1
+    sti
     ret
 InuX64AreInterruptsEnabled:
     pushfq

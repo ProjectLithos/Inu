@@ -94,6 +94,13 @@ public static class Kernel
             return false;
         }
         if (!KernelConsole.WriteHostControl("INPUT_IRQ_ENABLE_OK")) return false;
+        if (!KernelConsole.WriteHostControl("TIMER_IRQ_ENABLE_ENTER")) return false;
+        if (!TimerDispatchStartup.EnableHardwareInterrupts())
+        {
+            KernelConsole.WriteHostControl("TIMER_IRQ_ENABLE_FAIL");
+            return false;
+        }
+        if (!KernelConsole.WriteHostControl("TIMER_IRQ_ENABLE_OK")) return false;
         if (!KernelConsole.WriteHostControl("BOOT_STAGE_SESSION")) return false;
         if (!KernelConsole.WriteHostControl("SESSION_DISPATCH_ENTER")) return false;
 

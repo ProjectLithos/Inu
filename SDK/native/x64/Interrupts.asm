@@ -8,6 +8,8 @@ section .data align=8
 InuX64InterruptDispatcher: dq 0
 global InuX64InterruptStackSwitch
 InuX64InterruptStackSwitch: times 256 db 0
+; Keep runtime debugcon useful without turning every 1 kHz timer tick into permanent I/O.
+InuX64InterruptDebugBudget: db 64
 
 section .text
 global InuX64LoadInterruptDescriptorTable
@@ -2118,6 +2120,17 @@ InuX64InterruptCommon:
     mov [rsp + 0], rax
     mov rax, [r10 + 8]
     mov [rsp + 8], rax
+    ; Dependency-free interrupt-entry breadcrumb: 'V' followed by vector byte.
+    ; Limit this to the first 64 interrupt entries so normal timer operation does not
+    ; turn diagnostic I/O into a permanent runtime cost. Registers are already saved.
+    cmp byte [rel InuX64InterruptDebugBudget], 0
+    je .interrupt_debug_done
+    dec byte [rel InuX64InterruptDebugBudget]
+    mov al, 'V'
+    out 0xE9, al
+    mov al, byte [rsp + 0]
+    out 0xE9, al
+.interrupt_debug_done:
     mov rax, [r10 + 16]
     mov [rsp + 16], rax
     mov rax, [r10 + 24]
