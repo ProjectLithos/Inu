@@ -7,6 +7,9 @@ using Inu.Kernel.Gui;
 #endif
 using Inu.Kernel.TimerDispatch;
 using Inu.Kernel.Time;
+using Inu.Kernel.Scheduler;
+using Inu.Kernel.Smp;
+using Inu.Kernel.Internal.X64;
 #if INU_INPUT_PS2
 using Inu.Kernel.Ps2;
 #endif
@@ -25,6 +28,11 @@ public static unsafe class InputHardwareStartup
     private static Boolean _initialized;
 #if INU_KERNELAREA_INPUT
     private static UInt32 _inputTimerHandle;
+    private static UInt64 _inputServicePending;
+    private static UInt64 _inputTimerSignals;
+    private static UInt64 _inputWorkerRuns;
+    private static UInt64 _inputWorkerSuccesses;
+    private static UInt64 _inputWorkerFailures;
     private const UInt64 KeyboardRepeatInitialDelayNanoseconds = 500000000UL;
     private const UInt64 KeyboardRepeatIntervalNanoseconds = 40000000UL;
 #if INU_INPUT_PS2
@@ -72,7 +80,18 @@ public static unsafe class InputHardwareStartup
             if (ps2MouseSelected && !KernelPs2.SetMouseEventHandler(&HandlePs2MouseEvent)) return false;
         }
 #endif
-        if (!KernelTimerDispatch.Register(1000000UL, &ServiceInput, 0UL, out _inputTimerHandle)) return false;
+        // Timer IRQs must never execute blocking USB/xHCI transfers. The 1 ms timer only
+        // publishes input work; the Drivers role worker performs HID/PS2 service in normal
+        // scheduler context where xHCI completion interrupts can be delivered.
+        if (!KernelScheduler.IsInitialized()) return false;
+        if (!KernelScheduler.RegisterRoleWorker(KernelCpuRole.Drivers, &ServiceInputWorker, KernelThreadPriority.High)) return false;
+        if (!KernelTimerDispatch.Register(1000000UL, &QueueInputService, 0UL, out _inputTimerHandle)) return false;
+        if (!KernelStructuredLogging.Begin(KernelLogLevel.Info,"input-detail","InputHardwareStartup.Initialize")) return false;
+        if (!KernelConsole.Write("Input service worker thread / timer handle: ")) return false;
+        if (!KernelConsole.WriteUInt64(KernelScheduler.GetRoleWorkerThreadId(KernelCpuRole.Drivers))) return false;
+        if (!KernelConsole.Write(" / ")) return false;
+        if (!KernelConsole.WriteUInt64(_inputTimerHandle)) return false;
+        if (!KernelConsole.WriteLine(" (timer ISR only queues work; USB transfers run in Drivers worker)")) return false;
 #endif
         _initialized = true;
         return true;
@@ -211,18 +230,62 @@ public static unsafe class InputHardwareStartup
         return false;
     }
 
-    private static Boolean ServiceInput(UInt64 cookie)
+    private static Boolean QueueInputService(UInt64 cookie)
+    {
+        UInt64 signal=0UL;
+        fixed(UInt64* p=&_inputTimerSignals)
+        {
+            UInt64 previous=0UL;
+            Native.AtomicFetchAdd64(p,1UL,&previous);
+            signal=previous+1UL;
+        }
+        fixed(UInt64* p=&_inputServicePending) Native.AtomicStore64(p,1UL);
+        if(signal<=32UL){Native.WritePort8(0xE9,(Byte)'Q');Native.WritePort8(0xE9,(Byte)signal);}
+        Boolean woke=KernelScheduler.NotifyRoleWork(KernelCpuRole.Drivers);
+        if(signal<=32UL)Native.WritePort8(0xE9,woke?(Byte)'q':(Byte)'!');
+        return woke;
+    }
+
+    private static Boolean ServiceInputWorker()
+    {
+        UInt64 pending=0UL;
+        fixed(UInt64* p=&_inputServicePending)
+            if(!Native.AtomicExchange64(p,0UL,&pending)||pending==0UL)return false;
+        UInt64 run=0UL;
+        fixed(UInt64* p=&_inputWorkerRuns){UInt64 previous=0UL;Native.AtomicFetchAdd64(p,1UL,&previous);run=previous+1UL;}
+        if(run<=32UL){Native.WritePort8(0xE9,(Byte)'W');Native.WritePort8(0xE9,(Byte)run);}
+        Boolean ok = ServiceInputNow(run);
+        if(ok){fixed(UInt64* p=&_inputWorkerSuccesses){UInt64 ignored=0UL;Native.AtomicFetchAdd64(p,1UL,&ignored);}}
+        else{fixed(UInt64* p=&_inputWorkerFailures){UInt64 ignored=0UL;Native.AtomicFetchAdd64(p,1UL,&ignored);}}
+        if(run<=32UL)Native.WritePort8(0xE9,ok?(Byte)'w':(Byte)'X');
+        return true;
+    }
+
+    private static Boolean ServiceInputNow(UInt64 run)
     {
         Boolean ok = true;
 #if INU_INPUT_PS2
+        if(run<=16UL)Native.WritePort8(0xE9,(Byte)'P');
         ok = KernelPs2.Service();
+        if(run<=16UL)Native.WritePort8(0xE9,ok?(Byte)'p':(Byte)'!');
 #endif
 #if INU_INPUT_USB_HID
-        if (UsbHid.IsInitialized()) ok = UsbHid.Service() & ok;
+        if (UsbHid.IsInitialized())
+        {
+            if(run<=32UL)Native.WritePort8(0xE9,(Byte)'H');
+            Boolean usb=UsbHid.Service();
+            if(run<=32UL)Native.WritePort8(0xE9,usb?(Byte)'h':(Byte)'!');
+            ok = usb & ok;
+        }
 #endif
         ok = ServiceKeyboardRepeat() & ok;
         return ok;
     }
+
+    public static UInt64 GetInputTimerSignalCount()=>_inputTimerSignals;
+    public static UInt64 GetInputWorkerRunCount()=>_inputWorkerRuns;
+    public static UInt64 GetInputWorkerSuccessCount()=>_inputWorkerSuccesses;
+    public static UInt64 GetInputWorkerFailureCount()=>_inputWorkerFailures;
 
 #if INU_INPUT_PS2
     private static Boolean HandlePs2Interrupt(Byte vector, UInt64 cookie) => KernelPs2.Service();

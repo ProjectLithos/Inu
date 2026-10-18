@@ -5,6 +5,7 @@ using Inu.Kernel.Drivers;
 using Inu.Kernel.Heap;
 using Inu.Kernel.Memory;
 using Inu.Kernel.Pci;
+using Inu.Kernel.Internal.X64;
 namespace Inu.Usb.Xhci;
 /// <summary>PCI xHCI host-controller implementation with command, event and endpoint transfer rings.</summary>
 public static unsafe partial class KernelXhci
@@ -16,12 +17,15 @@ public static unsafe partial class KernelXhci
  static Boolean Interrupt(KernelDriverDeviceContext* context,UInt64 cookie)
  {
   if(context==null)return false;Controller* c=FindController(context->Device);if(c==null||c->Runtime==0UL||c->InterruptPrepared==0)return false;
-  UInt64 ir=c->Runtime+0x20;UInt32 iman=R32(ir);if((iman&1U)==0U)return true;
-  ServiceHardwareEvents(c);
+  UInt64 irq=0UL;fixed(UInt64* p=&_diagnosticInterrupts){UInt64 previous=0UL;Native.AtomicFetchAdd64(p,1UL,&previous);irq=previous+1UL;}
+  UInt64 ir=c->Runtime+0x20;UInt32 iman=R32(ir);if(irq<=64UL){Native.WritePort8(0xE9,(Byte)'J');Native.WritePort8(0xE9,(Byte)irq);Native.WritePort8(0xE9,(Byte)iman);}
+  if((iman&1U)==0U){if(irq<=64UL)Native.WritePort8(0xE9,(Byte)'0');return true;}
+  Boolean serviced=ServiceHardwareEvents(c);
   // IMAN.IP is write-1-to-clear; preserve the enable bit while acknowledging this interrupter.
   // Once IP was observed, the interrupt belongs to this controller even if no command/transfer
   // completion TRB was present (for example a port-status event at the STI boundary).
   W32(ir,(iman&2U)|1U);
+  if(irq<=64UL)Native.WritePort8(0xE9,serviced?(Byte)'j':(Byte)'s');
   return true;
  }
  static Boolean ScanControllerPorts(Controller* c){if(c==null||c->State!=(Byte)XhciControllerState.Running)return false;for(Byte p=1;p<=c->Ports;p++){UInt32 ps=R32(Port(c,p));if((ps&1U)==0)continue;_connected++;UsbSpeed speed=SpeedFromId((Byte)((ps>>10)&15U));if(!KernelUsbBus.EnumeratePort(new UsbHostHandle(c->Host),p,speed,out _))return false;}return true;}

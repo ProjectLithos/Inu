@@ -1,6 +1,7 @@
 using System;
 using Inu.Bus.Usb;
 using Inu.Kernel.Drivers;
+using Inu.Kernel.Internal.X64;
 namespace Inu.Usb.Hid;
 
 public readonly struct UsbHidKeyboardEvent
@@ -29,6 +30,7 @@ public static unsafe partial class UsbHid
     private static Boolean _initialized;
     private static KernelDriverHandle _driver;
     private static UInt32 _keyboards,_mice;
+    private static UInt64 _servicePasses,_transferAttempts,_transferCompletions,_transferMisses;
 
     public static Boolean Initialize()
     {
@@ -57,18 +59,30 @@ public static unsafe partial class UsbHid
     public static Boolean Service()
     {
         if(!_initialized)return false;
+        UInt64 pass=0UL;fixed(UInt64* p=&_servicePasses){UInt64 previous=0UL;Native.AtomicFetchAdd64(p,1UL,&previous);pass=previous+1UL;}
+        if(pass<=32UL){Native.WritePort8(0xE9,(Byte)'U');Native.WritePort8(0xE9,(Byte)pass);}
         Byte* report=stackalloc Byte[64];
         for(Int32 i=0;i<Max;i++)
         {
             HidRec* r=_r+i;if(r->Used==0)continue;
+            UInt64 attempt=0UL;fixed(UInt64* p=&_transferAttempts){UInt64 previous=0UL;Native.AtomicFetchAdd64(p,1UL,&previous);attempt=previous+1UL;}
+            if(attempt<=64UL){Native.WritePort8(0xE9,(Byte)'D');Native.WritePort8(0xE9,(Byte)i);Native.WritePort8(0xE9,r->Protocol);Native.WritePort8(0xE9,r->Endpoint);}
             for(Int32 z=0;z<64;z++)report[z]=0;
-            if(!KernelUsbBus.InterruptTransfer(new UsbDeviceHandle(r->Device),r->Endpoint,report,r->MaxPacket,out UInt32 got))continue;
+            if(!KernelUsbBus.InterruptTransfer(new UsbDeviceHandle(r->Device),r->Endpoint,report,r->MaxPacket,out UInt32 got))
+            {
+                fixed(UInt64* p=&_transferMisses){UInt64 ignored=0UL;Native.AtomicFetchAdd64(p,1UL,&ignored);}
+                if(attempt<=64UL)Native.WritePort8(0xE9,(Byte)'F');
+                continue;
+            }
+            fixed(UInt64* p=&_transferCompletions){UInt64 ignored=0UL;Native.AtomicFetchAdd64(p,1UL,&ignored);}
+            if(attempt<=64UL){Native.WritePort8(0xE9,(Byte)'d');Native.WritePort8(0xE9,(Byte)got);}
             if(r->Protocol==1&&got>=8)
             {
                 Byte* previous=r->Previous;UsbHidKeyboardServices.ProcessReport(previous,report,got);
             }
             else if(r->Protocol==2&&got>=3) UsbHidMouseServices.ProcessReport(report,got);
         }
+        if(pass<=32UL)Native.WritePort8(0xE9,(Byte)'u');
         return true;
     }
 
@@ -76,6 +90,10 @@ public static unsafe partial class UsbHid
     public static Boolean SetKeyboardEventHandler(delegate*<UsbHidKeyboardEvent,Boolean> handler)=>UsbHidKeyboardServices.SetEventHandler(handler);
     public static Boolean SetMouseEventHandler(delegate*<UsbHidMouseState,Boolean> handler)=>UsbHidMouseServices.SetEventHandler(handler);
     public static UsbHidCapabilities GetCapabilities()=>new(_initialized,_keyboards,_mice,UsbHidKeyboardServices.ReportCount,UsbHidMouseServices.ReportCount);
+    public static UInt64 GetServicePassCount()=>_servicePasses;
+    public static UInt64 GetTransferAttemptCount()=>_transferAttempts;
+    public static UInt64 GetTransferCompletionCount()=>_transferCompletions;
+    public static UInt64 GetTransferMissCount()=>_transferMisses;
     public static UsbHidMouseState GetMouseState()=>UsbHidMouseServices.GetState();
     public static Char TranslateBootUsage(Byte usage,Boolean shift)=>UsbHidKeyboardServices.TranslateUsage(usage,shift);
 

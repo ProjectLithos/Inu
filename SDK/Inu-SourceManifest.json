@@ -1,5 +1,5 @@
 {
-  "version": "0.1.112",
+  "version": "0.1.113",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "414717ca4ac28375ca23deb1ec1a479f62a114e5c29e09e5e60a22fe55b3bc97"
+      "sha256": "8fe0813ec07f642eea8fc24d1a66306a10a682b7cb0345d046b02aeac0ebb756"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "7702a38f716e9c63700acb21cb629e75577ec529e9932ae8583689e5b0dc7983"
+      "sha256": "9c49acc7aaf44936e6aab830f333a7cab6b7d59a9cc1c797fc2d7e2bb657a201"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "e4cefa2de06f8b5faa8dfb74d0e436dc8d5656c60ccb9c8f26341aa2b6e8f4fc"
+      "sha256": "fdba031cd93d3892364eb57102b4c88f03298f2bbf19640cfbc2693cd70f62d6"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "3943574aea7029cc678f2ca91035fc6b563b6cdb5925de713159243de1bb891d"
+      "sha256": "472a5871deed528ee838c004554e830238b4db0d4ef07e622d0f2c563dcce9a2"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "758af0ada2cf2624f6b6f10fd78e387c9bd6646c04d6878c3613d40b85fc0dde"
+      "sha256": "e837d5bc4f8a36098eafeda9ab991ba86fde9409fc9e459c2ca386f56cb2b038"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4247,7 +4247,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/InputHardwareStartup.cs",
-      "sha256": "3a5734561260d1188aea354d60b564d1999a1c308e01969171c68ab2b8c34193"
+      "sha256": "9c3a61b2062b497f1884b02f6d945393ddf265ac8a7a55e44c3a7a8c84f9c010"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/HAL/NetworkingHardwareStartup.cs",
@@ -5691,7 +5691,7 @@
     },
     {
       "path": "src/Inu.Kernel.TimerDispatch/KernelTimerDispatch.cs",
-      "sha256": "ab2a14357a8137dc776483d90610a965531bd0943ddb2bb6dd6ae4d80b793204"
+      "sha256": "8c1b3a6899b5c86479833add44067d2e04cf4145f0a328737b9a15b1ee48bafd"
     },
     {
       "path": "src/Inu.Kernel.TrueType/Inu.Kernel.TrueType.csproj",
@@ -6007,7 +6007,7 @@
     },
     {
       "path": "src/Inu.QemuLauncher/Program.cs",
-      "sha256": "63b28a069dc7c9edca715d626ef603522fdeec86e933e2c2e7e4558a0e3675e1"
+      "sha256": "b266ada3633aba3de1553f0b842ac0994ee7dd4806ffd2baa63778662c8e9988"
     },
     {
       "path": "src/Inu.Runtime.Conformance/Inu.Runtime.Conformance.csproj",
@@ -6079,7 +6079,7 @@
     },
     {
       "path": "src/Inu.Usb.Hid/UsbHid.cs",
-      "sha256": "b3940fdd6854820da395fc48e49a498e95977c37165e9408ce7a7a9a3757c580"
+      "sha256": "e40a2bfac541ec8ae6152aef1bb775287d8269ee94d0fea5be7ed3f9a3d91857"
     },
     {
       "path": "src/Inu.Usb.Hid/UsbHidKeyboard.cs",
@@ -6115,15 +6115,15 @@
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.ControllerLifecycle.cs",
-      "sha256": "5b1da67d03ed0cf95feeb71b731a5258e08eb3fcef641ddf187c3a16130a2cdd"
+      "sha256": "b9b41f488da7661a9cea023a3d3c01cb80a15bca9d99470f3dc131bf7de2386e"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.cs",
-      "sha256": "5006df698d6780781346aa7ca2174a065efbd84a6cda591a66d49961b597fd1b"
+      "sha256": "db8251c6ebe48c0fb675680a84afb2531aa2bf4face793e485bdec102ab1c16f"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.DeviceTransfers.cs",
-      "sha256": "a8d96e8ddb3daff8f10372e0983f563a7a64bed5ff506701fd8e94d6d71d380e"
+      "sha256": "690a95a8a6a0f26045294d9760f1b223a5ed376faf77cd0f1f49f4439b4b887b"
     },
     {
       "path": "src/Inu.Usb.Xhci/KernelXhci.RingsAndEvents.cs",

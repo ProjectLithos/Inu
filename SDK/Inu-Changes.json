@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.111",
-  "version": "0.1.112",
-  "changedFiles": 5,
-  "summary": "Remove unconditional timer-ISR role-worker wakeups that can race bootstrap/session handoff, and add 32-tick plus raw session-handoff diagnostics.",
+  "baseVersion": "0.1.112",
+  "version": "0.1.113",
+  "changedFiles": 7,
+  "summary": "Move USB HID servicing out of the Local APIC timer ISR into the scheduler-managed Drivers worker so interrupt-driven xHCI completion waits cannot deadlock inside a timer interrupt; add end-to-end input/HID/xHCI diagnostics.",
   "deletedFiles": 0
 }

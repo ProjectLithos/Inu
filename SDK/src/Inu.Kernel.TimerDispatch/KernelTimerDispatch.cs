@@ -61,8 +61,11 @@ public static unsafe class KernelTimerDispatch
         {
             Entry* e=_entries+i;if(e->Used==0||_tick<e->NextTick)continue;
             e->NextTick=_tick+e->PeriodTicks;
+            if(_tick<=32UL){Native.WritePort8(0xE9,(Byte)'C');Native.WritePort8(0xE9,(Byte)_tick);Native.WritePort8(0xE9,(Byte)i);}
             delegate*<UInt64,Boolean> cb=(delegate*<UInt64,Boolean>)(void*)e->Callback;
-            ok=cb(e->Cookie)&ok;
+            Boolean callbackOk=cb(e->Cookie);
+            if(_tick<=32UL)Native.WritePort8(0xE9,callbackOk?(Byte)'c':(Byte)'!');
+            ok=callbackOk&ok;
         }
         // Role workers are event-driven. Do not manufacture scheduler work from the timer ISR:
         // actual queue/enqueue paths wake their owning role. Periodic unconditional wakeups here
