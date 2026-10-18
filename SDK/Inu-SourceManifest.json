@@ -1,5 +1,5 @@
 {
-  "version": "0.1.111",
+  "version": "0.1.112",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "94bf357fcef6965cf39b9b5540ec227d854302d35ffa8346c9c47a5c436bc274"
+      "sha256": "414717ca4ac28375ca23deb1ec1a479f62a114e5c29e09e5e60a22fe55b3bc97"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "3f7af8b7108c6a88242349f0bd0821e688ce98c0b8e1fd25b6767d06b67b700d"
+      "sha256": "7702a38f716e9c63700acb21cb629e75577ec529e9932ae8583689e5b0dc7983"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "fc2899980cb89d19fccaef7ba24944556968c2db3de1a5557a3c4029dd04c91e"
+      "sha256": "e4cefa2de06f8b5faa8dfb74d0e436dc8d5656c60ccb9c8f26341aa2b6e8f4fc"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "d7779068dbe5594bca51048c7a0290fc9ef1379955bcca76b68a10bfb688b637"
+      "sha256": "3943574aea7029cc678f2ca91035fc6b563b6cdb5925de713159243de1bb891d"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "da39067fa17aa05c0bdf90d637eb15925c65883513c3325b5d3b5df46f723278"
+      "sha256": "758af0ada2cf2624f6b6f10fd78e387c9bd6646c04d6878c3613d40b85fc0dde"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -4263,7 +4263,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Kernel/Kernel.cs",
-      "sha256": "8a368b0fe8999f5dcefc10fbab3b696d878194ce455ff979ab78d00ca1e0af2f"
+      "sha256": "cbdbfd2d72615e21ec7183c2d88ca999b82b3bdb4e52e0f0adfe7c726e031ea7"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/SourceComponents/Startup/DesktopOrTextSessionStartup.cs",
@@ -5691,7 +5691,7 @@
     },
     {
       "path": "src/Inu.Kernel.TimerDispatch/KernelTimerDispatch.cs",
-      "sha256": "e396cb66ca409a1ba60cd86633c40dc66850cadd783dac439d95644fa2a1bf10"
+      "sha256": "ab2a14357a8137dc776483d90610a965531bd0943ddb2bb6dd6ae4d80b793204"
     },
     {
       "path": "src/Inu.Kernel.TrueType/Inu.Kernel.TrueType.csproj",
@@ -5991,7 +5991,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "2ec2de899e095351823a90170eeb6a6adda360f99769d522474a4e6f3dda8543"
+      "sha256": "966bef7e6b2212fcd3c7ee3807c53c242a400d58c6cfd2992ffe7e4f273a2ad6"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",
@@ -6007,7 +6007,7 @@
     },
     {
       "path": "src/Inu.QemuLauncher/Program.cs",
-      "sha256": "3d49df8a463e6159d13ed6b7e57b0b86d200c5ae507cb8ea0be8e02ceac6323f"
+      "sha256": "63b28a069dc7c9edca715d626ef603522fdeec86e933e2c2e7e4558a0e3675e1"
     },
     {
       "path": "src/Inu.Runtime.Conformance/Inu.Runtime.Conformance.csproj",

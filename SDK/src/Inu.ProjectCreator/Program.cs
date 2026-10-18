@@ -242,7 +242,33 @@ static bool RefreshGeneratedKernelInterruptHandoff(string output)
         if (source.Contains("USB_IRQ_PREPARE_ENTER", StringComparison.Ordinal) &&
             source.Contains("USB_IRQ_ACTIVATE_ENTER", StringComparison.Ordinal) &&
             source.Contains("INPUT_IRQ_ENABLE_ENTER", StringComparison.Ordinal) &&
-            source.Contains("TIMER_IRQ_ENABLE_ENTER", StringComparison.Ordinal)) return true;
+            source.Contains("TIMER_IRQ_ENABLE_ENTER", StringComparison.Ordinal) &&
+            source.Contains("SESSION_HANDOFF_ENTER", StringComparison.Ordinal)) return true;
+
+        const string current111 = "        if (!KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_OK\")) return false;\r\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
+        const string current111Lf = "        if (!KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_OK\")) return false;\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
+        const string sessionHandoff = "        if (!KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_OK\")) return false;\n" +
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x40);\n" +
+            "        if (!KernelConsole.WriteHostControl(\"SESSION_HANDOFF_ENTER\")) return false;\n" +
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x41);\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;\n" +
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x42);\n" +
+            "        if (!KernelConsole.WriteHostControl(\"SESSION_HANDOFF_OK\")) return false;\n" +
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x43);";
+        if (source.Contains(current111, StringComparison.Ordinal))
+        {
+            File.WriteAllText(runtimePath, source.Replace(current111, sessionHandoff.Replace("\n", Environment.NewLine), StringComparison.Ordinal));
+            Console.WriteLine($"[ OK ] Refreshed generated kernel session handoff diagnostics: {runtimePath}");
+            return true;
+        }
+        if (source.Contains(current111Lf, StringComparison.Ordinal))
+        {
+            File.WriteAllText(runtimePath, source.Replace(current111Lf, sessionHandoff, StringComparison.Ordinal));
+            Console.WriteLine($"[ OK ] Refreshed generated kernel session handoff diagnostics: {runtimePath}");
+            return true;
+        }
 
         const string current109 = "        if (!KernelConsole.WriteHostControl(\"INPUT_IRQ_ENABLE_OK\")) return false;\r\n" +
             "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
@@ -252,7 +278,13 @@ static bool RefreshGeneratedKernelInterruptHandoff(string output)
             "        if (!KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_ENTER\")) return false;\n" +
             "        if (!TimerDispatchStartup.EnableHardwareInterrupts()) { KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_FAIL\"); return false; }\n" +
             "        if (!KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_OK\")) return false;\n" +
-            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x40);\n" +
+            "        if (!KernelConsole.WriteHostControl(\"SESSION_HANDOFF_ENTER\")) return false;\n" +
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x41);\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;\n" +
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x42);\n" +
+            "        if (!KernelConsole.WriteHostControl(\"SESSION_HANDOFF_OK\")) return false;\n" +
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x43);";
         if (source.Contains(current109, StringComparison.Ordinal))
         {
             File.WriteAllText(runtimePath, source.Replace(current109, timerActivation.Replace("\n", Environment.NewLine), StringComparison.Ordinal));
@@ -294,7 +326,13 @@ static bool RefreshGeneratedKernelInterruptHandoff(string output)
             "            return false;\n" +
             "        }\n" +
             "        if (!KernelConsole.WriteHostControl(\"TIMER_IRQ_ENABLE_OK\")) return false;\n" +
-            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;";
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x40);\n" +
+            "        if (!KernelConsole.WriteHostControl(\"SESSION_HANDOFF_ENTER\")) return false;\n" +
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x41);\n" +
+            "        if (!KernelConsole.WriteHostControl(\"BOOT_STAGE_SESSION\")) return false;\n" +
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x42);\n" +
+            "        if (!KernelConsole.WriteHostControl(\"SESSION_HANDOFF_OK\")) return false;\n" +
+            "        Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, (Byte)'S'); Inu.Kernel.Internal.X64.Native.WritePort8(0xE9, 0x43);";
 
         string updated = source.Contains(legacy, StringComparison.Ordinal)
             ? source.Replace(legacy, replacement.Replace("\n", Environment.NewLine), StringComparison.Ordinal)

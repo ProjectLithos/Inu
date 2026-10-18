@@ -12,11 +12,11 @@ namespace Inu.Kernel.TimerDispatch;
 public static unsafe class KernelTimerDispatch
 {
     private struct Entry { internal Byte Used; internal UInt64 Callback,Cookie,PeriodTicks,NextTick; }
-    private static Entry* _entries; private static KernelHeapAllocation _allocation; private static UInt32 _capacity,_count; private static UInt64 _tickNanoseconds,_tick,_roleServicePeriodTicks; private static Byte _vector; private static Boolean _initialized,_interruptDeliveryEnabled,_interruptDeliveryEnabling;
+    private static Entry* _entries; private static KernelHeapAllocation _allocation; private static UInt32 _capacity,_count; private static UInt64 _tickNanoseconds,_tick; private static Byte _vector; private static Boolean _initialized,_interruptDeliveryEnabled,_interruptDeliveryEnabling;
     /// <summary>Initializes periodic timer dispatch. One millisecond is the default kernel service quantum.</summary>
     public static Boolean Initialize()=>Initialize(1000000UL);
     /// <summary>Initializes periodic timer dispatch with an explicit tick duration.</summary>
-    public static Boolean Initialize(UInt64 tickNanoseconds){if(_initialized)return true;if(tickNanoseconds==0UL||!KernelHeap.IsInitialized()||!KernelTime.IsInitialized||!KernelInterruptDispatch.IsInitialized())return false;if(!Allocate(16U,out _allocation,out _entries))return false;_capacity=16U;_tickNanoseconds=tickNanoseconds;_roleServicePeriodTicks=(10000000UL+tickNanoseconds-1UL)/tickNanoseconds;if(_roleServicePeriodTicks==0UL)_roleServicePeriodTicks=1UL;if(!KernelSchedulerTick.Configure(tickNanoseconds))return false;_vector=KernelInterruptDispatch.AllocateVector();if(_vector==0||!KernelInterruptDispatch.Register(_vector,&OnTimer,0UL))return false;_initialized=true;return true;}
+    public static Boolean Initialize(UInt64 tickNanoseconds){if(_initialized)return true;if(tickNanoseconds==0UL||!KernelHeap.IsInitialized()||!KernelTime.IsInitialized||!KernelInterruptDispatch.IsInitialized())return false;if(!Allocate(16U,out _allocation,out _entries))return false;_capacity=16U;_tickNanoseconds=tickNanoseconds;if(!KernelSchedulerTick.Configure(tickNanoseconds))return false;_vector=KernelInterruptDispatch.AllocateVector();if(_vector==0||!KernelInterruptDispatch.Register(_vector,&OnTimer,0UL))return false;_initialized=true;return true;}
     /// <summary>Arms the Local APIC periodic timer only after global interrupt delivery and device callbacks are ready.</summary>
     public static Boolean EnableInterruptDelivery()
     {
@@ -53,7 +53,7 @@ public static unsafe class KernelTimerDispatch
     private static Boolean OnTimer(Byte vector,UInt64 cookie)
     {
         UInt64 nextTick=_tick+1UL;
-        if(nextTick<=8UL){Native.WritePort8(0xE9,(Byte)'K');Native.WritePort8(0xE9,vector);Native.WritePort8(0xE9,(Byte)nextTick);}
+        if(nextTick<=32UL){Native.WritePort8(0xE9,(Byte)'K');Native.WritePort8(0xE9,vector);Native.WritePort8(0xE9,(Byte)nextTick);}
         _tick=nextTick;
         if(!KernelSchedulerTick.Advance())return false;
         Boolean ok=true;
@@ -64,12 +64,10 @@ public static unsafe class KernelTimerDispatch
             delegate*<UInt64,Boolean> cb=(delegate*<UInt64,Boolean>)(void*)e->Callback;
             ok=cb(e->Cookie)&ok;
         }
-        if(_roleServicePeriodTicks!=0UL&&(_tick%_roleServicePeriodTicks)==0UL)
-        {
-            KernelScheduler.NotifyRoleWork(KernelCpuRole.Userland);
-            KernelScheduler.NotifyRoleWork(KernelCpuRole.Interrupts);
-        }
-        if(_tick<=8UL){Native.WritePort8(0xE9,(Byte)'k');Native.WritePort8(0xE9,vector);Native.WritePort8(0xE9,(Byte)_tick);}
+        // Role workers are event-driven. Do not manufacture scheduler work from the timer ISR:
+        // actual queue/enqueue paths wake their owning role. Periodic unconditional wakeups here
+        // can send reschedule IPIs during bootstrap/session handoff and strand the bootstrap thread.
+        if(_tick<=32UL){Native.WritePort8(0xE9,(Byte)'k');Native.WritePort8(0xE9,vector);Native.WritePort8(0xE9,(Byte)_tick);}
         return ok;
     }
     private static Int32 Free(){for(UInt32 i=0;i<_capacity;i++)if((_entries+i)->Used==0)return (Int32)i;return -1;}

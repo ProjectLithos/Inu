@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.110",
-  "version": "0.1.111",
+  "baseVersion": "0.1.111",
+  "version": "0.1.112",
   "changedFiles": 5,
-  "summary": "Make Local APIC periodic timer activation atomic, program the timer masked/unmask-last, remove noisy generic STI debugcon output, and add register-level plus first-tick timer diagnostics.",
+  "summary": "Remove unconditional timer-ISR role-worker wakeups that can race bootstrap/session handoff, and add 32-tick plus raw session-handoff diagnostics.",
   "deletedFiles": 0
 }
