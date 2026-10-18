@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.114",
-  "version": "0.1.115",
-  "changedFiles": 1,
-  "summary": "Fix the USB HID service wrapper protocol literals introduced in 0.1.114 so the managed kernel compiles while preserving the interactive-input wake and keyboard-only CLI HID fixes.",
+  "baseVersion": "0.1.115",
+  "version": "0.1.116",
+  "changedFiles": 2,
+  "summary": "Fix xHCI periodic USB HID endpoint contexts by programming Max ESIT Payload, and preserve post-interactive serial/debugcon diagnostics in Kath after accepted QEMU runs.",
   "deletedFiles": 0
 }
