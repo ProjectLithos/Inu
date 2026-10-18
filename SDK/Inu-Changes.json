@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.113",
-  "version": "0.1.114",
-  "changedFiles": 4,
-  "summary": "Fix the interactive shell input path by explicitly waking the CPU sleeping in console.input, closing the waiter publication lost-wakeup race, and preventing an idle USB mouse interrupt endpoint from serializing CLI keyboard service; add end-to-end key-to-render diagnostics.",
+  "baseVersion": "0.1.114",
+  "version": "0.1.115",
+  "changedFiles": 1,
+  "summary": "Fix the USB HID service wrapper protocol literals introduced in 0.1.114 so the managed kernel compiles while preserving the interactive-input wake and keyboard-only CLI HID fixes.",
   "deletedFiles": 0
 }

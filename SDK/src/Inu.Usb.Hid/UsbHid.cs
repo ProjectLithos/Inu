@@ -56,11 +56,11 @@ public static unsafe partial class UsbHid
         return true;
     }
 
-    public static Boolean Service()=>ServiceProtocol(0U);
+    public static Boolean Service()=>ServiceProtocol((Byte)0);
     /// <summary>Services only boot-keyboard interrupt endpoints. Text sessions use this so an idle mouse endpoint cannot serialize and starve keyboard input.</summary>
-    public static Boolean ServiceKeyboard()=>ServiceProtocol(1U);
+    public static Boolean ServiceKeyboard()=>ServiceProtocol((Byte)1);
     /// <summary>Services only boot-mouse interrupt endpoints.</summary>
-    public static Boolean ServiceMouse()=>ServiceProtocol(2U);
+    public static Boolean ServiceMouse()=>ServiceProtocol((Byte)2);
 
     private static Boolean ServiceProtocol(Byte protocol)
     {

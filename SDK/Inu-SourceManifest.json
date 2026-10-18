@@ -1,5 +1,5 @@
 {
-  "version": "0.1.114",
+  "version": "0.1.115",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -823,7 +823,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "3bc73c4fcdf5f4dd5ff75556fda8c585c5d7a46c2bc6cfd4073fa6eb44c38507"
+      "sha256": "1809b1b89758eb8d6ef92d4feb3262ef69274130ffc188a2daec37b059a91600"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3231,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "1469a97f9b31d28e35df39c08b4ca61c96268639feab43035a5b7a63da21eadb"
+      "sha256": "afb5f825fd4833b47bc747a07fa2d3c3abcd72e1a9a77707c1b10aeed0cd4a28"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3263,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "5d18afc75b1947913c73f1d0f213900410fda9d0028dbc7e104c0908bc58cbc5"
+      "sha256": "621bd66e3bd08cf704c040764a3fe55b2c7e67b837b1e086b1625c250951c0eb"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3307,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "870a19292805716696c1ac31713e37ce470e3159b5b6f653cef6c654d77ee15b"
+      "sha256": "290a2fa8581205b4287be5a8b5e6a4c9ff5cb41d989bd9d173963ec063604e5f"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3819,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "f586279085deba7c01a5bab0282efea1e62344010d19d741659ee9f4c95ee431"
+      "sha256": "fced135083b12eb72303d5cbe5bceb224c3e346aef2f94713760a6feb82ecc45"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -6079,7 +6079,7 @@
     },
     {
       "path": "src/Inu.Usb.Hid/UsbHid.cs",
-      "sha256": "0d175edd746701b1bcb814393cd97f6fdf07458221b5913df7a97b9326b40fe2"
+      "sha256": "0707a19a58231e2e1232183b5388b0b3f8814220ca6c7abfee3d954a580b1e78"
     },
     {
       "path": "src/Inu.Usb.Hid/UsbHidKeyboard.cs",
