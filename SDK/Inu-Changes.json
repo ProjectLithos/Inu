@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.118",
-  "version": "0.1.119",
-  "changedFiles": 7,
-  "summary": "Keep the synchronous NVMe driver out of MSI/MSI-X until it owns interrupt-driven completions, add NVMe/stop-state diagnostics, mirror TODO.md into Kath, and remove the short GitHub push kill timers so large Inu pushes can complete.",
+  "baseVersion": "0.1.119",
+  "version": "0.1.120",
+  "changedFiles": 1,
+  "summary": "Make accepted QEMU session ownership state-aware so stale guest-panicked/non-running -no-shutdown processes are stopped and cleaned automatically while genuinely running VMs still protect the persistent image.",
   "deletedFiles": 0
 }

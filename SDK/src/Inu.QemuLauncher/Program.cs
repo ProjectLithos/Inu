@@ -154,13 +154,7 @@ static int MainEntry(string[] args)
         Directory.CreateDirectory(runDirectory);
         if (File.Exists(runManifest))
         {
-            try
-            {
-                using JsonDocument previousRunDocument=JsonDocument.Parse(File.ReadAllText(runManifest));
-                if(previousRunDocument.RootElement.TryGetProperty("qemuProcessId",out JsonElement previousPidElement)&&previousPidElement.TryGetInt32(out int previousPid)&&previousPid>0&&IsProcessAlive(previousPid))
-                    throw Fail($"A previous accepted Inu QEMU session is still running (PID {previousPid}). Close it before starting another run so both VMs cannot write the same persistent FAT32 image.");
-            }
-            catch(JsonException){ }
+            ValidatePreviousAcceptedRun(runManifest);
         }
         File.Copy(imagePath, preRunImageSnapshot, true);
         File.Copy(ovmfVars, variableStore, true);
@@ -1805,6 +1799,119 @@ static void PrintSerialTail(string serialText)
     Console.Error.WriteLine("[INFO] QEMU serial tail follows:");
     Console.Error.WriteLine(tail);
     Console.Error.WriteLine("[INFO] End QEMU serial tail.");
+}
+
+
+static void ValidatePreviousAcceptedRun(string runManifest)
+{
+    try
+    {
+        using JsonDocument previousRunDocument = JsonDocument.Parse(File.ReadAllText(runManifest));
+        JsonElement root = previousRunDocument.RootElement;
+        if (!root.TryGetProperty("qemuProcessId", out JsonElement previousPidElement) ||
+            !previousPidElement.TryGetInt32(out int previousPid) || previousPid <= 0)
+        {
+            Console.WriteLine("[WARN] Previous Inu.Run.json did not contain a valid QEMU PID; clearing stale run metadata.");
+            TryDeleteFile(runManifest);
+            return;
+        }
+
+        if (!IsProcessAlive(previousPid))
+        {
+            Console.WriteLine($"[INFO] Previous accepted QEMU PID {previousPid} is no longer alive; clearing stale run metadata.");
+            TryDeleteFile(runManifest);
+            return;
+        }
+
+        string previousExecutable = root.TryGetProperty("qemuExecutable", out JsonElement executableElement)
+            ? executableElement.GetString() ?? string.Empty
+            : string.Empty;
+        if (!string.IsNullOrWhiteSpace(previousExecutable) &&
+            TryGetProcessExecutable(previousPid, out string liveExecutable) &&
+            !PathsEqual(previousExecutable, liveExecutable))
+        {
+            Console.WriteLine($"[WARN] Inu.Run.json PID {previousPid} has been reused by a different executable; clearing stale run metadata.");
+            TryDeleteFile(runManifest);
+            return;
+        }
+
+        int previousQmpPort = 0;
+        if (root.TryGetProperty("qmpPort", out JsonElement qmpPortElement)) qmpPortElement.TryGetInt32(out previousQmpPort);
+        if (previousQmpPort > 0)
+        {
+            var previousQmp = QueryQmpSnapshot(previousQmpPort, false);
+            if (previousQmp.Success)
+            {
+                if (string.Equals(previousQmp.Status, "running", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw Fail($"A previous accepted Inu QEMU session is genuinely still running (PID {previousPid}, QMP status: {previousQmp.Status}). Close it before starting another run so both VMs cannot write the same persistent FAT32 image.");
+                }
+
+                Console.WriteLine($"[WARN] Previous accepted QEMU PID {previousPid} is alive but not running (QMP status: {previousQmp.Status}); stopping the stale VM and clearing its run metadata.");
+                TryStop(previousPid);
+                WaitForProcessExit(previousPid, 3000);
+                if (IsProcessAlive(previousPid))
+                    throw Fail($"Previous Inu QEMU session PID {previousPid} is in non-running QMP state '{previousQmp.Status}' but could not be stopped automatically. Close it before starting another run.");
+                TryDeleteFile(runManifest);
+                return;
+            }
+        }
+
+        // If QMP is unavailable, keep the conservative ownership guard for a live QEMU
+        // process. This protects the persistent FAT32 image without confusing a proven
+        // guest-panicked/stopped QMP state with a genuinely running VM.
+        throw Fail($"A previous accepted Inu QEMU process is still alive (PID {previousPid}), but its QMP state could not be verified. Close it before starting another run so both VMs cannot write the same persistent FAT32 image.");
+    }
+    catch (JsonException)
+    {
+        Console.WriteLine("[WARN] Previous Inu.Run.json is invalid JSON; clearing stale run metadata.");
+        TryDeleteFile(runManifest);
+    }
+}
+
+static void WaitForProcessExit(int processId, int timeoutMilliseconds)
+{
+    try
+    {
+        using Process process = Process.GetProcessById(processId);
+        process.WaitForExit(timeoutMilliseconds);
+    }
+    catch (ArgumentException) { }
+    catch (InvalidOperationException) { }
+    catch (System.ComponentModel.Win32Exception) { }
+}
+
+static bool TryGetProcessExecutable(int processId, out string executable)
+{
+    executable = string.Empty;
+    try
+    {
+        using Process process = Process.GetProcessById(processId);
+        executable = process.MainModule?.FileName ?? string.Empty;
+        return !string.IsNullOrWhiteSpace(executable);
+    }
+    catch (ArgumentException) { return false; }
+    catch (InvalidOperationException) { return false; }
+    catch (System.ComponentModel.Win32Exception) { return false; }
+}
+
+static bool PathsEqual(string left, string right)
+{
+    try
+    {
+        return string.Equals(Path.GetFullPath(left).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+            Path.GetFullPath(right).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+            OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+    }
+    catch
+    {
+        return string.Equals(left, right, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+    }
+}
+
+static void TryDeleteFile(string path)
+{
+    try { if (File.Exists(path)) File.Delete(path); } catch (IOException) { } catch (UnauthorizedAccessException) { }
 }
 
 static string ReadSharedText(string path)
