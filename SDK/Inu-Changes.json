@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.126",
-  "version": "0.1.127",
+  "baseVersion": "0.1.127",
+  "version": "0.1.128",
   "changedFiles": 1,
-  "summary": "Stage blobs from a single oversized unpublished Inu commit through small temporary GitHub refs before advancing main; detect and report individual blobs above GitHub normal file limits without rewriting history.",
+  "summary": "Automatically sanitize only unpublished Inu commits when forbidden blobs are confined to known generated/private paths, preserve origin/main unchanged, keep a local backup ref, publish the cleaned tail, then align local main without deleting ignored generated files.",
   "deletedFiles": 0
 }

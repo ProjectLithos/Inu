@@ -405,6 +405,107 @@ function Get-GitObjectInventory([string]$BaseCommit, [string]$TargetCommit){
     }
     return $inventory.ToArray()
 }
+function Test-IsGeneratedHistoryPath([string]$Path){
+    if([string]::IsNullOrWhiteSpace($Path)){ return $false }
+    $normalized=$Path.Replace('\\','/').TrimStart('/')
+    foreach($prefix in @('.toolchain/','SDK/Artifacts/','SDK/References/','Artifacts/','Bin/')){
+        if($normalized.StartsWith($prefix,[System.StringComparison]::OrdinalIgnoreCase)){ return $true }
+    }
+    return $false
+}
+function Get-OversizedUnpublishedBlobs([string]$BaseCommit, [string]$TargetCommit){
+    $githubBlobLimit=[Int64]100 * 1MB
+    return @(Get-GitObjectInventory -BaseCommit $BaseCommit -TargetCommit $TargetCommit | Where-Object { $_.Type -eq 'blob' -and $_.Bytes -gt $githubBlobLimit })
+}
+function Repair-UnpublishedGeneratedHistory([string]$RemoteCommit, [string]$LocalHead){
+    $noRepair=[pscustomobject]@{ Rewritten=$false; PublishHead=$LocalHead; BackupRef=''; TemporaryBranch=''; OriginalHead=$LocalHead }
+    if([string]::IsNullOrWhiteSpace($RemoteCommit)){ return $noRepair }
+
+    $oversized=@(Get-OversizedUnpublishedBlobs -BaseCommit $RemoteCommit -TargetCommit $LocalHead)
+    if($oversized.Count -eq 0){ return $noRepair }
+
+    $unsafe=@($oversized | Where-Object { -not (Test-IsGeneratedHistoryPath $_.Path) })
+    if($unsafe.Count -gt 0){
+        Write-Host "[FAIL] The unpublished Inu history contains $($unsafe.Count) oversized blob(s) outside Inu's known generated/private paths. These cannot be removed automatically without risking coder-owned source."
+        foreach($blob in @($unsafe | Sort-Object -Property Bytes -Descending | Select-Object -First 25)){
+            $displayPath=if([string]::IsNullOrWhiteSpace($blob.Path)){ '<path unavailable>' } else { $blob.Path }
+            Write-Host "[FAIL]   $(Format-ByteCount $blob.Bytes)  $displayPath  [$($blob.Id.Substring(0,12))]"
+        }
+        Fail 'Move these files to Git LFS or remove them deliberately before publishing. No history was rewritten.'
+    }
+
+    Write-Host "[WARN] The unpublished Inu tail contains $($oversized.Count) GitHub-forbidden blob(s), but every one is under a known generated/private path (.toolchain, SDK/Artifacts, SDK/References, Artifacts, or Bin)."
+    Write-Host '[INFO] Inu will rewrite only commits that GitHub does not have yet, stripping those generated/private paths while preserving origin/main unchanged.'
+
+    $branchResult=Invoke-GitResult -a @('branch','--show-current')
+    $currentBranch=($branchResult.Lines | Select-Object -First 1)
+    if($branchResult.ExitCode -ne 0 -or $currentBranch -ne 'main'){
+        Fail "Automatic unpublished-history repair requires the checked-out Inu branch to be main. Current branch: '$currentBranch'."
+    }
+    $status=Invoke-GitResult -a @('status','--porcelain','--untracked-files=no')
+    if($status.ExitCode -ne 0){
+        foreach($line in $status.Lines){ Write-Host $line }
+        Fail 'Could not verify the Inu working tree before unpublished-history repair.'
+    }
+    if(@($status.Lines | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }).Count -ne 0){
+        foreach($line in $status.Lines){ Write-Host $line }
+        Fail 'Refusing to rewrite unpublished Inu history while tracked working-tree changes are present. Commit or restore them first.'
+    }
+
+    $stamp=(Get-Date).ToUniversalTime().ToString('yyyyMMdd-HHmmss')
+    $backupRef="refs/inu/publish-backup/$stamp"
+    $temporaryBranch="inu-publish-sanitized-$stamp"
+    Git -a @('update-ref',$backupRef,$LocalHead)
+    Git -a @('branch',$temporaryBranch,$LocalHead)
+    Write-Host "[ OK ] Preserved the original unpublished Inu history at $backupRef before rewriting anything."
+
+    $filterCommand='git rm -r --cached --ignore-unmatch -- .toolchain SDK/Artifacts SDK/References Artifacts Bin'
+    $oldSquelch=$env:FILTER_BRANCH_SQUELCH_WARNING
+    $env:FILTER_BRANCH_SQUELCH_WARNING='1'
+    try {
+        $filtered=Invoke-GitResult -a @('filter-branch','-f','--index-filter',$filterCommand,'--prune-empty','--',$temporaryBranch,'--not',$RemoteCommit) -TimeoutSeconds 3600
+    } finally {
+        if($null -eq $oldSquelch){ Remove-Item Env:FILTER_BRANCH_SQUELCH_WARNING -ErrorAction SilentlyContinue }
+        else { $env:FILTER_BRANCH_SQUELCH_WARNING=$oldSquelch }
+    }
+    if($filtered.ExitCode -ne 0){
+        foreach($line in $filtered.Lines){ Write-Host $line }
+        Fail "Could not sanitize the unpublished Inu history. The original history remains preserved at $backupRef and main was not moved."
+    }
+
+    $sanitizedHead=Read-SingleGitLine -Arguments @('rev-parse',$temporaryBranch) -FailureMessage 'Could not resolve the sanitized Inu publish branch'
+    $originalFilterRef="refs/original/refs/heads/$temporaryBranch"
+    [void](Invoke-GitResult -a @('update-ref','-d',$originalFilterRef))
+
+    $ancestor=Invoke-GitResult -a @('merge-base','--is-ancestor',$RemoteCommit,$sanitizedHead)
+    if($ancestor.ExitCode -ne 0){
+        Fail "The sanitized Inu history no longer descends from origin/main. The original history is preserved at $backupRef and nothing was pushed."
+    }
+    $remainingOversized=@(Get-OversizedUnpublishedBlobs -BaseCommit $RemoteCommit -TargetCommit $sanitizedHead)
+    if($remainingOversized.Count -gt 0){
+        Write-Host "[FAIL] $($remainingOversized.Count) oversized blob(s) remain after generated-history sanitation:"
+        foreach($blob in @($remainingOversized | Sort-Object -Property Bytes -Descending | Select-Object -First 25)){
+            $displayPath=if([string]::IsNullOrWhiteSpace($blob.Path)){ '<path unavailable>' } else { $blob.Path }
+            Write-Host "[FAIL]   $(Format-ByteCount $blob.Bytes)  $displayPath  [$($blob.Id.Substring(0,12))]"
+        }
+        Fail "Automatic sanitation could not make the unpublished Inu history GitHub-compatible. The original history remains at $backupRef."
+    }
+
+    $before=Measure-GitObjectRange -BaseCommit $RemoteCommit -TargetCommit $LocalHead
+    $after=Measure-GitObjectRange -BaseCommit $RemoteCommit -TargetCommit $sanitizedHead
+    Write-Host "[ OK ] Sanitized only the unpublished Inu history: $(Format-ByteCount $before.Bytes) raw -> $(Format-ByteCount $after.Bytes) raw; generated/private paths removed."
+    return [pscustomobject]@{ Rewritten=$true; PublishHead=$sanitizedHead; BackupRef=$backupRef; TemporaryBranch=$temporaryBranch; OriginalHead=$LocalHead }
+}
+function Finalize-UnpublishedHistoryRepair($Repair){
+    if($null -eq $Repair -or -not $Repair.Rewritten){ return }
+    $currentBranch=Read-SingleGitLine -Arguments @('branch','--show-current') -FailureMessage 'Could not resolve the current Inu branch while finalizing history repair'
+    if($currentBranch -ne 'main'){ Fail "Expected Inu main while finalizing unpublished-history repair, but '$currentBranch' is checked out." }
+    Git -a @('reset','--mixed',$Repair.PublishHead)
+    [void](Invoke-GitResult -a @('update-ref','-d',("refs/heads/" + $Repair.TemporaryBranch)))
+    Git -a @('branch','--set-upstream-to=origin/main','main')
+    Write-Host "[ OK ] Local Inu main now matches the cleaned GitHub history. Generated files remain local/ignored rather than committed."
+    Write-Host "[INFO] Safety backup of the original unpublished history retained at $($Repair.BackupRef). Delete that ref later only after you are satisfied the cleaned history is correct."
+}
 function Get-RemoteRefCommit([string]$FullRef){
     $result=Invoke-GitResult -a @('ls-remote','origin',$FullRef) -TimeoutSeconds 60
     if($result.ExitCode -ne 0){ return $null }
@@ -686,32 +787,37 @@ function Push-MissingCommitsInBatches([string]$RemoteCommit, [string]$LocalHead)
 # Never force-push.  Publish backlog history through progressively newer
 # intermediate commits so GitHub never has to receive the whole multi-gigabyte
 # history in one pack. Each successful batch advances main by fast-forward only.
-$localHead=Read-SingleGitLine -Arguments @('rev-parse','HEAD') -FailureMessage "Could not resolve local HEAD for $RepositoryName"
+$originalLocalHead=Read-SingleGitLine -Arguments @('rev-parse','HEAD') -FailureMessage "Could not resolve local HEAD for $RepositoryName"
 $remoteMain=Get-RemoteMainCommitWithRetry
 if([string]::IsNullOrWhiteSpace($remoteMain)){
     Write-Host "[INFO] GitHub origin/main does not exist yet; incremental publication will begin from the oldest local commit."
 } else {
     Write-Host "[INFO] GitHub origin/main currently points to $remoteMain."
 }
+$historyRepair=Repair-UnpublishedGeneratedHistory -RemoteCommit $remoteMain -LocalHead $originalLocalHead
+$localHead=$historyRepair.PublishHead
 Write-Host "[INFO] Pushing $RepositoryName to GitHub in incremental commit batches (no force-push; 5-minute zero-progress transport guard)..."
 Push-MissingCommitsInBatches -RemoteCommit $remoteMain -LocalHead $localHead
 
-# The final push is normally a no-op. It records the upstream relationship and
-# verifies that GitHub main reaches the exact local HEAD after all batches.
-$push=Invoke-GitLiveResult -a @('-c','http.version=HTTP/1.1','-c','http.lowSpeedLimit=1','-c','http.lowSpeedTime=300','push','-u','origin','HEAD:main')
+# The final push is normally a no-op. Use the explicitly selected publish head
+# because a sanitized unpublished tail may live on a temporary local branch until
+# GitHub has confirmed it. Only then is checked-out main moved to the cleaned IDs.
+$push=Invoke-GitLiveResult -a @('-c','http.version=HTTP/1.1','-c','http.lowSpeedLimit=1','-c','http.lowSpeedTime=300','push','origin',("${localHead}:refs/heads/main"))
 if($push.ExitCode -ne 0){
     if(-not (Wait-GitHubConnectivity -Operation "verifying the final $RepositoryName HEAD push")){
         Fail "The incremental batches completed, but GitHub remained unreachable during the final HEAD verification. Rerun publication when connectivity returns."
     }
     $publishedAfterError=Get-RemoteMainCommitWithRetry
     if($publishedAfterError -ne $localHead){
-        Fail "The incremental batches completed, but the final $RepositoryName HEAD verification push failed (exit $($push.ExitCode)) and origin/main did not reach local HEAD."
+        Fail "The incremental batches completed, but the final $RepositoryName HEAD verification push failed (exit $($push.ExitCode)) and origin/main did not reach the selected publish head."
     }
-    Write-Host "[ OK ] GitHub reached local HEAD despite the client-side final push error."
+    Write-Host "[ OK ] GitHub reached the selected publish head despite the client-side final push error."
 }
 $publishedRemote=Get-RemoteMainCommitWithRetry
 if($publishedRemote -ne $localHead){
-    Fail "$RepositoryName GitHub publication ended at $publishedRemote instead of local HEAD $localHead."
+    Fail "$RepositoryName GitHub publication ended at $publishedRemote instead of selected publish head $localHead."
 }
+Finalize-UnpublishedHistoryRepair $historyRepair
+if(-not $historyRepair.Rewritten){ Git -a @('branch','--set-upstream-to=origin/main','main') }
 Remove-InuStagingRefs
 Write-Host "[ OK ] $RepositoryName $Version published to GitHub in incremental batches."

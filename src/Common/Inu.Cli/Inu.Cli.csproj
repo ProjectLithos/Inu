@@ -6,9 +6,9 @@
     <Nullable>enable</Nullable>
     <AssemblyName>inu</AssemblyName>
     <RootNamespace>Inu.Cli</RootNamespace>
-    <Version>0.1.127</Version>
-    <FileVersion>0.1.127.0</FileVersion>
-    <AssemblyVersion>0.1.127.0</AssemblyVersion>
+    <Version>0.1.128</Version>
+    <FileVersion>0.1.128.0</FileVersion>
+    <AssemblyVersion>0.1.128.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\SDK\src\Inu.Host.Services\Inu.Host.Services.csproj" />
