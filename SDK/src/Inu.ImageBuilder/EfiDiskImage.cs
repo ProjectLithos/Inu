@@ -110,15 +110,40 @@ internal static class EfiDiskImage
         }
         candidates.Add(0);
         foreach(uint candidate in candidates.Distinct())
+            if(TryReadFat32Bpb(image,candidate,out sectorsPerCluster,out reserved,out fats,out fatSectors,out rootCluster))
+            {volumeStartLba=candidate;return true;}
+
+        // Historical Inu images were not always described by a partition table that the
+        // current builder can trust. As a compatibility fallback, scan sector boundaries for
+        // a structurally valid FAT32 BPB. The BPB validator checks geometry, cluster count and
+        // image bounds, so a random 0x55AA signature is not accepted as a filesystem.
+        ulong sectorCount=(ulong)image.Length/SectorSize;
+        uint scanLimit=sectorCount>uint.MaxValue?uint.MaxValue:(uint)sectorCount;
+        for(uint candidate=1;candidate<scanLimit;candidate++)
         {
-            if((long)(candidate+1U)*SectorSize>image.Length)continue;
-            byte[] boot=new byte[SectorSize];ReadExactlyAtLba(image,candidate,boot);
-            ushort bps=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(11,2));byte spc=boot[13];ushort rsv=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(14,2));byte fc=boot[16];uint fs=BinaryPrimitives.ReadUInt32LittleEndian(boot.AsSpan(36,4));uint rc=BinaryPrimitives.ReadUInt32LittleEndian(boot.AsSpan(44,4));
-            bool signature=boot[510]==0x55&&boot[511]==0xAA;bool fat32Text=Encoding.ASCII.GetString(boot,82,8).StartsWith("FAT32",StringComparison.OrdinalIgnoreCase);
-            if(bps!=SectorSize||spc==0||rsv==0||fc==0||fs==0||rc<2U||!signature||!fat32Text)continue;
-            volumeStartLba=candidate;sectorsPerCluster=spc;reserved=rsv;fats=fc;fatSectors=fs;rootCluster=rc;return true;
+            if(candidates.Contains(candidate))continue;
+            if(TryReadFat32Bpb(image,candidate,out sectorsPerCluster,out reserved,out fats,out fatSectors,out rootCluster))
+            {volumeStartLba=candidate;return true;}
         }
-        error="No GPT/MBR/raw FAT32 boot sector with a valid BPB was found.";return false;
+        error="No GPT/MBR/raw or sector-scanned FAT32 volume with a structurally valid BPB was found.";return false;
+    }
+
+    private static bool TryReadFat32Bpb(Stream image,uint volumeStartLba,out byte sectorsPerCluster,out ushort reserved,out byte fats,out uint fatSectors,out uint rootCluster)
+    {
+        sectorsPerCluster=0;reserved=0;fats=0;fatSectors=0;rootCluster=0;
+        long bootOffset=checked((long)volumeStartLba*SectorSize);
+        if(bootOffset<0||bootOffset+SectorSize>image.Length)return false;
+        byte[] boot=new byte[SectorSize];ReadExactlyAtLba(image,volumeStartLba,boot);
+        if(boot[510]!=0x55||boot[511]!=0xAA)return false;
+        ushort bps=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(11,2));byte spc=boot[13];ushort rsv=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(14,2));byte fc=boot[16];ushort rootEntries=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(17,2));ushort total16=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(19,2));ushort fat16=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(22,2));uint total32=BinaryPrimitives.ReadUInt32LittleEndian(boot.AsSpan(32,4));uint fs=BinaryPrimitives.ReadUInt32LittleEndian(boot.AsSpan(36,4));uint rc=BinaryPrimitives.ReadUInt32LittleEndian(boot.AsSpan(44,4));
+        if(bps!=SectorSize||spc==0||(spc&(spc-1))!=0||spc>128||rsv==0||(fc!=1&&fc!=2)||rootEntries!=0||fat16!=0||fs==0||rc<2U)return false;
+        uint total=total16!=0?total16:total32;if(total==0)return false;
+        ulong volumeEnd=(ulong)volumeStartLba+total;if(volumeEnd>(ulong)image.Length/SectorSize)return false;
+        ulong firstData=(ulong)rsv+(ulong)fc*fs;if(firstData>=total)return false;
+        ulong dataSectors=(ulong)total-firstData;ulong clusterCount=dataSectors/spc;
+        if(clusterCount<65525UL)return false; // FAT32, not FAT12/FAT16 geometry.
+        ulong fatEntries=(ulong)fs*SectorSize/4UL;if(fatEntries<clusterCount+2UL||rc>=fatEntries)return false;
+        sectorsPerCluster=spc;reserved=rsv;fats=fc;fatSectors=fs;rootCluster=rc;return true;
     }
 
     private static void ReadExactly(Stream stream,Span<byte> buffer)

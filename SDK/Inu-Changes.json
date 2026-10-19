@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.133",
-  "version": "0.1.134",
-  "summary": "FAT32 existing-image preservation now discovers GPT/MBR/raw FAT volumes and migrates legacy /USERS state into /User safely.",
-  "changedFiles": 2,
+  "baseVersion": "0.1.134",
+  "version": "0.1.135",
+  "summary": "Existing-image preservation now recognises structurally valid FAT32 BPBs without relying on the optional FAT32 label and can safely scan historical sector-aligned layouts.",
+  "changedFiles": 1,
   "deletedFiles": 0
 }

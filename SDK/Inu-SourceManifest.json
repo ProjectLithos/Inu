@@ -1,5 +1,5 @@
 {
-  "version": "0.1.134",
+  "version": "0.1.135",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -839,7 +839,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "8909ec458ad7622c34314cdaca0129a8d579a662384568144a56e1ff2ff72880"
+      "sha256": "7769edaa48beb2c164fa8568b94f08d8ca985b661de3bceb9fe0a5180745f54b"
     },
     {
       "path": "Directory.Build.targets",
@@ -3247,7 +3247,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "2f7aeb06ca6b7f77a87d8e48fa638b948994aa6a0102ad1ba67b2b93e4cea597"
+      "sha256": "f52be59ba07b78799876fefa3a716870c0441196f1587e35183f1bcb678ccaa6"
     },
     {
       "path": "Help/search-index.json",
@@ -3279,7 +3279,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "7b3243efd5891521c0f2e483e3f634223c20aa4fc9c9fc76a2f680d6381480d2"
+      "sha256": "bc204d7025925b92d947855ca32458d31ef598778f877d59b599c71046ed7853"
     },
     {
       "path": "Inu-Package.bat",
@@ -3323,7 +3323,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "ef73efc90caf7043bc64b838a4acabaa66a135b14c6447f810747bab02fee1e7"
+      "sha256": "2e0eff811cc4c58ad59ff8dd76f8c0f1a427ca3eee320795a6438ffd13f269d4"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3835,7 +3835,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "db5753009268b9d39eb04d0fa45d0b2cd269d239d52394466470784b82be880e"
+      "sha256": "91cf8c52df1aa8b59c3c0b20bf448f3173bf0639a8a627afabb5f86bb581daa2"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3943,7 +3943,7 @@
     },
     {
       "path": "src/Inu.ImageBuilder/EfiDiskImage.cs",
-      "sha256": "ebb7eb866909b6db37cb08f834b6a9152b98e5e800c5a165b7524c299f4a6ebd"
+      "sha256": "d41129d2f228e26f29d57640bc1d4870b0c188ffaef1b69561e36a5f3c20b03f"
     },
     {
       "path": "src/Inu.ImageBuilder/Inu.ImageBuilder.csproj",
