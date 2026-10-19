@@ -25,7 +25,7 @@ Write-Host "[INFO] Building $($projects.Count) configured independent Inu projec
 foreach ($project in $projects) {
     Write-Host "[INFO] Configured project build: $project"
     & $dotnet build $project --configuration $Configuration --nologo
-    if ($LASTEXITCODE -ne 0) { throw "Configured workspace project build failed with exit code $LASTEXITCODE: $project" }
+    if ($LASTEXITCODE -ne 0) { throw "Configured workspace project build failed with exit code ${LASTEXITCODE}: $project" }
 }
 Write-Host "[ OK ] Configured Inu workspace projects built."
 exit 0

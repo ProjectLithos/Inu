@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.123",
-  "version": "0.1.124",
-  "changedFiles": 1,
-  "summary": "Publish large Inu GitHub backlogs in resumable fast-forward commit batches, automatically shrinking failed batches instead of sending the entire multi-gigabyte history in one push.",
+  "baseVersion": "0.1.125",
+  "version": "0.1.126",
+  "changedFiles": 2,
+  "summary": "Fix PowerShell parser-invalid variable/colon interpolation in the Inu GitHub object-size diagnostic and generated workspace-build template while preserving size-aware resilient publishing.",
   "deletedFiles": 0
 }
