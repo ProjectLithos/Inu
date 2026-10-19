@@ -46,6 +46,7 @@ public static unsafe class KernelDiskProvisioning
             if(!KernelStorage.ReadBlocks(device,1UL,1U,sector,SectorBytes))return false;
             if(IsGptHeader(sector)&&!overwriteExisting)
             {
+                if(!KernelStorage.RefreshPartitions(device))return false;
                 if(IsInuManagedHeader(sector)&&device.Value<=64U)_provisionedDeviceMask|=1UL<<(Int32)(device.Value-1U);
                 return true;
             }
@@ -61,10 +62,7 @@ public static unsafe class KernelDiskProvisioning
             UInt64 approximate=available/(UInt64)partitionCount;
             if(approximate<MinimumPartitionSectors)return false;
 
-            Zero(sector,SectorBytes);
-            WriteProtectiveMbr(sector,geometry.BlockCount);
-            if(!KernelStorage.WriteBlocks(device,0UL,1U,sector,SectorBytes))return false;
-
+            KernelPartitionInfo* knownPartitions=stackalloc KernelPartitionInfo[(Int32)partitionCount];
             UInt32 entriesBytes=GptEntrySectors*SectorBytes;
             if(!KernelHeap.TryAllocate(entriesBytes,16UL,true,out KernelHeapAllocation entriesAllocation))return false;
             try
@@ -78,24 +76,35 @@ public static unsafe class KernelDiskProvisioning
                     UInt64 last=index+1U==partitionCount?lastUsable:AlignUp(firstStart+(available*(UInt64)(index+1U))/(UInt64)partitionCount,AlignmentSectors)-1UL;
                     if(last>lastUsable)last=lastUsable;
                     if(last<start||last-start+1UL<MinimumPartitionSectors)return false;
-                    WritePartitionEntry(entries+index*GptEntryBytes,index,start,last,device.Value,index+1U,"Inu Data");
+                    Byte* entry=entries+index*GptEntryBytes;
+                    WritePartitionEntry(entry,index,start,last,device.Value,index+1U,"Inu Data");
+                    if(!KernelStorageMath.TryParseGptEntry(entry,GptEntryBytes,index,out knownPartitions[index]))return false;
                     nextStart=last+1UL;
                 }
                 UInt32 entriesCrc=Crc32(entries,entriesBytes);
                 UInt64 backupEntriesLba=geometry.BlockCount-33UL;
-                if(!KernelStorage.WriteBlocks(device,2UL,GptEntrySectors,entries,entriesBytes))return false;
-                if(!KernelStorage.WriteBlocks(device,backupEntriesLba,GptEntrySectors,entries,entriesBytes))return false;
 
-                Zero(sector,SectorBytes);
-                WriteGptHeader(sector,1UL,lastBlock,2UL,entriesCrc,device.Value,geometry.BlockCount);
-                if(!KernelStorage.WriteBlocks(device,1UL,1U,sector,SectorBytes))return false;
+                // Write the backup structures first, then the primary structures, and verify every write by reading it back.
+                if(!KernelStorage.WriteBlocks(device,backupEntriesLba,GptEntrySectors,entries,entriesBytes)||!VerifyBlocks(device,backupEntriesLba,GptEntrySectors,entries,entriesBytes,sector))return false;
                 Zero(sector,SectorBytes);
                 WriteGptHeader(sector,lastBlock,1UL,backupEntriesLba,entriesCrc,device.Value,geometry.BlockCount);
-                if(!KernelStorage.WriteBlocks(device,lastBlock,1U,sector,SectorBytes))return false;
+                if(!WriteAndVerifySector(device,lastBlock,sector))return false;
+
+                if(!KernelStorage.WriteBlocks(device,2UL,GptEntrySectors,entries,entriesBytes)||!VerifyBlocks(device,2UL,GptEntrySectors,entries,entriesBytes,sector))return false;
+                Zero(sector,SectorBytes);
+                WriteGptHeader(sector,1UL,lastBlock,2UL,entriesCrc,device.Value,geometry.BlockCount);
+                if(!WriteAndVerifySector(device,1UL,sector))return false;
+
+                Zero(sector,SectorBytes);
+                WriteProtectiveMbr(sector,geometry.BlockCount);
+                if(!WriteAndVerifySector(device,0UL,sector))return false;
             }
             finally { KernelHeap.TryRelease(entriesAllocation); }
 
-            if(!KernelStorage.Flush(device)||!KernelStorage.RefreshPartitions(device))return false;
+            // Some synchronous NVMe implementations can make completed writes visible even if an explicit Flush command is unsupported.
+            // Read-back verification above is authoritative for this transaction; Flush is therefore advisory, not a reason to discard a verified GPT.
+            KernelStorage.Flush(device);
+            if(!KernelStorage.RefreshPartitions(device)&&!KernelStorage.ReplacePartitions(device,knownPartitions,partitionCount))return false;
             if(device.Value<=64U)_provisionedDeviceMask|=1UL<<(Int32)(device.Value-1U);
             created=true;
             return true;
@@ -103,6 +112,26 @@ public static unsafe class KernelDiskProvisioning
         finally { KernelHeap.TryRelease(sectorAllocation); }
     }
 
+    private static Boolean WriteAndVerifySector(KernelStorageDeviceHandle device,UInt64 lba,Byte* expected)
+    {
+        if(!KernelStorage.WriteBlocks(device,lba,1U,expected,SectorBytes))return false;
+        Byte* verify=stackalloc Byte[(Int32)SectorBytes];
+        if(!KernelStorage.ReadBlocks(device,lba,1U,verify,SectorBytes))return false;
+        return Equal(expected,verify,SectorBytes);
+    }
+
+    private static Boolean VerifyBlocks(KernelStorageDeviceHandle device,UInt64 firstBlock,UInt32 blockCount,Byte* expected,UInt32 expectedBytes,Byte* scratch)
+    {
+        if(expected==null||scratch==null||expectedBytes<(UInt64)blockCount*SectorBytes)return false;
+        for(UInt32 i=0U;i<blockCount;i++)
+        {
+            if(!KernelStorage.ReadBlocks(device,firstBlock+i,1U,scratch,SectorBytes))return false;
+            if(!Equal(expected+(UInt64)i*SectorBytes,scratch,SectorBytes))return false;
+        }
+        return true;
+    }
+
+    private static Boolean Equal(Byte* left,Byte* right,UInt32 bytes){for(UInt32 i=0U;i<bytes;i++)if(left[i]!=right[i])return false;return true;}
     private static UInt64 AlignUp(UInt64 value,UInt64 alignment)=>(value+alignment-1UL)&~(alignment-1UL);
     private static Boolean IsGptHeader(Byte* sector)=>sector[0]=='E'&&sector[1]=='F'&&sector[2]=='I'&&sector[3]==' '&&sector[4]=='P'&&sector[5]=='A'&&sector[6]=='R'&&sector[7]=='T';
     private static Boolean IsInuManagedHeader(Byte* sector)=>IsGptHeader(sector)&&Read32(sector+68)==0x47505431U;

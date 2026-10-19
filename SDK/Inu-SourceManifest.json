@@ -1,5 +1,5 @@
 {
-  "version": "0.1.137",
+  "version": "0.1.138",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -839,7 +839,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "1c9a3c108aa3499a9fadede805fcecdf5aeec1b1cc623c17b2f4012dcde98d72"
+      "sha256": "7584c347de636638e203855924d05e7f308ef93369dbee79c0c53f686d47a9fd"
     },
     {
       "path": "Directory.Build.targets",
@@ -3247,7 +3247,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "16ff09758b60638a3b0cad10d576d9ea8fe7c0a5eafdf41564e71c46cb818759"
+      "sha256": "fc39dbe3c27fffdf2584c4b9e92b9352b4cd4f874d171951efe269a72f489ca1"
     },
     {
       "path": "Help/search-index.json",
@@ -3279,7 +3279,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "6a4be31c7c5c7538f4c790d2e2fe5fb52b501d1e1a179c4e2ca3af5594bd07ee"
+      "sha256": "c0d9dc1ea8f931a6773937315a38735285d4d5c41bb155484e525d37e60c3cc4"
     },
     {
       "path": "Inu-Package.bat",
@@ -3323,7 +3323,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "f8598968d9d4b2fb835e4146f16e6f4d9e6d377e041a07dcef26c5051fc9d40b"
+      "sha256": "985d06c4fd19bfbc495d70e93e123ad8f8feaa81db568346099128219b93fa25"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3835,7 +3835,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "addba93ff45b8a7d3851e3a7dd86341386c8372b8ec871e4e81f5d9a96de6256"
+      "sha256": "56b890167aa8cfc69f97eaa2b845924eb13f2cd01bd642c221d83c4e3d9a1943"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5451,7 +5451,7 @@
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelDiskProvisioning.cs",
-      "sha256": "ae6978a052dd8293e5eb7acae45e09bd931c5c227432c27745db63dc684685df"
+      "sha256": "5e4283facc74c4cb07d3cd6f1bb2f02b888ecd11bf3b137df40544a3ab2c9acb"
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelPartitionDiscovery.cs",
@@ -5471,7 +5471,7 @@
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelStorage.Partitions.cs",
-      "sha256": "1e4415766dec948e52734c8fa62400b58b24c7c7f5f939ad5a7cedbaf62196ea"
+      "sha256": "82ef2a9cfcc40da111aa47896c5f491d247557834d6337698a5c0555f7701a05"
     },
     {
       "path": "src/Inu.Kernel.Storage/KernelStorage.Storage.cs",
