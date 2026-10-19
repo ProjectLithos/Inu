@@ -23,7 +23,7 @@ public readonly struct UsbHidCapabilities
 /// <summary>Owns generic USB HID transport and delegates protocol interpretation to optional HID components.</summary>
 public static unsafe partial class UsbHid
 {
-    private struct HidRec{internal Byte Used,Device,Endpoint,Protocol,MaxPacket;internal UInt32 Generic;internal fixed Byte Previous[8];}
+    private struct HidRec{internal Byte Used,Device,Endpoint,Protocol,MaxPacket;internal UInt32 Generic;internal fixed Byte Previous[8];internal fixed Byte Report[64];}
     private const Int32 Max=32;
     private static HidRec* _r;
     private static Inu.Kernel.Heap.KernelHeapAllocation _a;
@@ -67,20 +67,20 @@ public static unsafe partial class UsbHid
         if(!_initialized)return false;
         UInt64 pass=0UL;fixed(UInt64* p=&_servicePasses){UInt64 previous=0UL;Native.AtomicFetchAdd64(p,1UL,&previous);pass=previous+1UL;}
         if(pass<=64UL){Native.WritePort8(0xE9,(Byte)'U');Native.WritePort8(0xE9,(Byte)pass);Native.WritePort8(0xE9,protocol);}
-        Byte* report=stackalloc Byte[64];
         Boolean found=false;
         for(Int32 i=0;i<Max;i++)
         {
             HidRec* r=_r+i;if(r->Used==0||(protocol!=0U&&r->Protocol!=protocol))continue;found=true;
             UInt64 attempt=0UL;fixed(UInt64* p=&_transferAttempts){UInt64 previous=0UL;Native.AtomicFetchAdd64(p,1UL,&previous);attempt=previous+1UL;}
             if(attempt<=128UL){Native.WritePort8(0xE9,(Byte)'D');Native.WritePort8(0xE9,(Byte)i);Native.WritePort8(0xE9,r->Protocol);Native.WritePort8(0xE9,r->Endpoint);}
-            for(Int32 z=0;z<64;z++)report[z]=0;
-            if(!KernelUsbBus.InterruptTransfer(new UsbDeviceHandle(r->Device),r->Endpoint,report,r->MaxPacket,out UInt32 got))
+            Byte* report=r->Report;
+            if(!KernelUsbBus.ServiceInterruptTransfer(new UsbDeviceHandle(r->Device),r->Endpoint,report,r->MaxPacket,out Boolean completed,out UInt32 got))
             {
                 fixed(UInt64* p=&_transferMisses){UInt64 ignored=0UL;Native.AtomicFetchAdd64(p,1UL,&ignored);}
                 if(attempt<=128UL)Native.WritePort8(0xE9,(Byte)'F');
                 continue;
             }
+            if(!completed)continue;
             fixed(UInt64* p=&_transferCompletions){UInt64 ignored=0UL;Native.AtomicFetchAdd64(p,1UL,&ignored);}
             if(attempt<=128UL){Native.WritePort8(0xE9,(Byte)'d');Native.WritePort8(0xE9,(Byte)got);}
             if(r->Protocol==1&&got>=8)
@@ -98,6 +98,7 @@ public static unsafe partial class UsbHid
     public static Boolean SetMouseEventHandler(delegate*<UsbHidMouseState,Boolean> handler)=>UsbHidMouseServices.SetEventHandler(handler);
     public static UsbHidCapabilities GetCapabilities()=>new(_initialized,_keyboards,_mice,UsbHidKeyboardServices.ReportCount,UsbHidMouseServices.ReportCount);
     public static UInt64 GetServicePassCount()=>_servicePasses;
+    public static UInt64 GetKeyboardReportCount()=>UsbHidKeyboardServices.ReportCount;
     public static UInt64 GetTransferAttemptCount()=>_transferAttempts;
     public static UInt64 GetTransferCompletionCount()=>_transferCompletions;
     public static UInt64 GetTransferMissCount()=>_transferMisses;
@@ -120,7 +121,7 @@ public static unsafe partial class UsbHid
         Int32 s=Free();if(s<0)return false;
         HidRec* r=_r+s;r->Used=1;r->Device=(Byte)inf.Device.Value;r->Endpoint=ep.Address;r->Protocol=inf.Descriptor.Protocol;r->MaxPacket=(Byte)(ep.MaximumPacketSize>64?64:ep.MaximumPacketSize);r->Generic=c->Device.Value;
         UsbSetupPacket setProtocol=new(0x21,11,0,inf.Descriptor.Number,0);KernelUsbBus.ControlTransfer(inf.Device,setProtocol,null,0,out _);
-        UsbSetupPacket setIdle=new(0x21,10,0,inf.Descriptor.Number,0);KernelUsbBus.ControlTransfer(inf.Device,setIdle,null,0,out _);
+        UsbSetupPacket setIdle=new(0x21,10,(UInt16)(125U<<8),inf.Descriptor.Number,0);KernelUsbBus.ControlTransfer(inf.Device,setIdle,null,0,out _);
         if(r->Protocol==1)_keyboards++;else if(r->Protocol==2)_mice++;
         return true;
     }

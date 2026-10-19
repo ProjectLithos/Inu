@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.128",
-  "version": "0.1.129",
-  "changedFiles": 1,
-  "summary": "Fix drive-management bootstrap compatibility by explicitly aliasing Inu.Kernel.Storage.Storage and keeping new storage Get/Set message names bootstrap-local so older/custom syscall contracts remain source-compatible.",
+  "baseVersion": "0.1.129",
+  "version": "0.1.130",
+  "changedFiles": 12,
+  "summary": "Replace blocking USB HID keyboard polling with continuously armed asynchronous xHCI interrupt-IN service, deterministic 0.5s/40ms repeat timing, stale-repeat protection, and expanded input diagnostics.",
   "deletedFiles": 0
 }

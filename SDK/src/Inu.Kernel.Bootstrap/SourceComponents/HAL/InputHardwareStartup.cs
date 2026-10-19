@@ -39,6 +39,7 @@ public static unsafe class InputHardwareStartup
 #endif
     private const UInt64 KeyboardRepeatInitialDelayNanoseconds = 500000000UL;
     private const UInt64 KeyboardRepeatIntervalNanoseconds = 40000000UL;
+    private const UInt64 UsbRepeatStaleGuardNanoseconds = 1500000000UL;
 #if INU_INPUT_PS2
     private static Boolean _ps2RepeatActive;
     private static Ps2Key _ps2RepeatKey;
@@ -53,6 +54,12 @@ public static unsafe class InputHardwareStartup
     private static Boolean _usbFirstEventPublished;
     private static Boolean _usbFirstPressPublished;
     private static Boolean _usbFirstQueuedCharacterPublished;
+    private static UInt64 _usbLastObservedReportCount;
+    private static UInt64 _usbLastReportObservedAt;
+    private static Boolean _usbFirstRepeatStartedPublished;
+    private static Boolean _usbFirstRepeatReleaseStopPublished;
+    private static Boolean _usbFirstRepeatStaleStopPublished;
+    private static UInt64 _usbRepeatTraceCount;
 #endif
 #if INU_INPUT_PS2 && INU_KERNELAREA_DRIVERS
     private static UInt64 _keyboardIrqHandle;
@@ -281,6 +288,8 @@ public static unsafe class InputHardwareStartup
         {
             if(run<=32UL)Native.WritePort8(0xE9,(Byte)'H');
             Boolean usb=_textInputActive ? UsbHid.ServiceKeyboard() : UsbHid.Service();
+            UInt64 reportCount=UsbHid.GetKeyboardReportCount();
+            if(reportCount!=_usbLastObservedReportCount){_usbLastObservedReportCount=reportCount;_usbLastReportObservedAt=KernelTime.GetMonotonicNanoseconds();}
             if(run<=32UL)Native.WritePort8(0xE9,usb?(Byte)'h':(Byte)'!');
             ok = usb & ok;
         }
@@ -397,7 +406,11 @@ public static unsafe class InputHardwareStartup
 #endif
         if (!input.Pressed)
         {
-            if (_usbRepeatActive && _usbRepeatUsage == input.Usage) _usbRepeatActive = false;
+            if (_usbRepeatActive && _usbRepeatUsage == input.Usage)
+            {
+                _usbRepeatActive = false;Native.WritePort8(0xE9,(Byte)'s');Native.WritePort8(0xE9,input.Usage);Native.WritePort8(0xE9,(Byte)1);
+                if(!_usbFirstRepeatReleaseStopPublished){_usbFirstRepeatReleaseStopPublished=true;KernelConsole.WriteHostControl("USB_KEYBOARD_REPEAT_RELEASE_STOP");}
+            }
             return true;
         }
 
@@ -408,6 +421,8 @@ public static unsafe class InputHardwareStartup
             _usbRepeatUsage = input.Usage;
             _usbRepeatCharacter = input.Character;
             _usbRepeatDeadline = NextRepeatDeadline(KeyboardRepeatInitialDelayNanoseconds);
+            _usbLastReportObservedAt = KernelTime.GetMonotonicNanoseconds();Native.WritePort8(0xE9,(Byte)'r');Native.WritePort8(0xE9,input.Usage);
+            if(!_usbFirstRepeatStartedPublished){_usbFirstRepeatStartedPublished=true;KernelConsole.WriteHostControl("USB_KEYBOARD_REPEAT_STARTED");}
         }
         return ok;
     }
@@ -482,12 +497,23 @@ public static unsafe class InputHardwareStartup
         }
 #endif
 #if INU_INPUT_USB_HID
-        if (_usbRepeatActive && now >= _usbRepeatDeadline)
+        if (_usbRepeatActive)
         {
-            _usbRepeatDeadline = NextRepeatDeadline(KeyboardRepeatIntervalNanoseconds);
-            Boolean repeated = TryMapUsbNavigation(_usbRepeatUsage, out Byte code) ?
-                UserlandRuntimeStartup.QueueInputCode(code) : UserlandRuntimeStartup.QueueCharacter(_usbRepeatCharacter);
-            if (!repeated) { _usbRepeatActive = false; ok = false; }
+            UInt64 sinceReport=now>=_usbLastReportObservedAt?now-_usbLastReportObservedAt:0UL;
+            if (_usbLastReportObservedAt!=0UL && sinceReport>=UsbRepeatStaleGuardNanoseconds)
+            {
+                Native.WritePort8(0xE9,(Byte)'s');Native.WritePort8(0xE9,_usbRepeatUsage);Native.WritePort8(0xE9,(Byte)2);
+                _usbRepeatActive=false;
+                if(!_usbFirstRepeatStaleStopPublished){_usbFirstRepeatStaleStopPublished=true;KernelConsole.WriteHostControl("USB_KEYBOARD_REPEAT_STALE_STOP");}
+            }
+            else if (now >= _usbRepeatDeadline)
+            {
+                _usbRepeatDeadline = NextRepeatDeadline(KeyboardRepeatIntervalNanoseconds);
+                UInt64 repeatTrace=++_usbRepeatTraceCount;if(repeatTrace<=64UL){Native.WritePort8(0xE9,(Byte)'R');Native.WritePort8(0xE9,_usbRepeatUsage);}
+                Boolean repeated = TryMapUsbNavigation(_usbRepeatUsage, out Byte code) ?
+                    UserlandRuntimeStartup.QueueInputCode(code) : UserlandRuntimeStartup.QueueCharacter(_usbRepeatCharacter);
+                if (!repeated) { _usbRepeatActive = false; ok = false; }
+            }
         }
 #endif
         return ok;

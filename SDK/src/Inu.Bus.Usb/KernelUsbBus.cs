@@ -5,7 +5,7 @@ namespace Inu.Bus.Usb;
 public static unsafe partial class KernelUsbBus
 {
  private const UInt32 MaxHosts=16,InitialDevices=64,InitialInterfaces=128,ScratchBytes=4096;
- private struct HostRec{internal Byte Used;internal UInt32 Generic;internal UInt64 Context,Prepare,Control,Bulk,Interrupt,ConfigureEndpoint,ConfigureHub;}
+ private struct HostRec{internal Byte Used;internal UInt32 Generic;internal UInt64 Context,Prepare,Control,Bulk,Interrupt,InterruptService,ConfigureEndpoint,ConfigureHub;}
  private struct DevRec{internal Byte Used;internal UInt32 Host,Generic;internal Byte Address,ParentAddress,Port,Speed,Configuration,Class,SubClass,Protocol,MaxPacket0,Configs;internal UInt16 Vendor,Product,UsbVersion,Release;}
  private struct IfRec{internal Byte Used;internal UInt32 Device,Generic;internal Byte Number,Alternate,EndpointCount,Class,SubClass,Protocol,StringIndex;internal fixed Byte EpAddress[4];internal fixed Byte EpAttributes[4];internal fixed UInt16 EpMaxPacket[4];internal fixed Byte EpInterval[4];}
  private static HostRec* _hosts;private static DevRec* _devices;private static IfRec* _interfaces;private static Byte* _scratch;private static KernelHeapAllocation _ha,_da,_ia,_sa;private static UInt32 _hostCount,_deviceCount,_interfaceCount,_deviceCapacity,_interfaceCapacity,_enumerations,_failures;private static Boolean _initialized;

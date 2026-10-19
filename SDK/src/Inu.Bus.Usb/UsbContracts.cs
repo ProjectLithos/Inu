@@ -22,8 +22,9 @@ public readonly unsafe struct UsbHostCallbacks
  public readonly delegate*<UInt64,Byte,Byte,UsbSetupPacket*,Byte*,UInt32,UInt32*,Boolean> Control;
  public readonly delegate*<UInt64,Byte,Byte,Byte*,UInt32,UInt32*,Boolean> Bulk;
  public readonly delegate*<UInt64,Byte,Byte,Byte*,UInt32,UInt32*,Boolean> Interrupt;
+ public readonly delegate*<UInt64,Byte,Byte,Byte*,UInt32,Byte*,UInt32*,Boolean> InterruptService;
  public readonly delegate*<UInt64,Byte,UsbEndpointDescriptor*,Boolean> ConfigureEndpoint;
  public readonly delegate*<UInt64,Byte,Byte,Boolean,Boolean> ConfigureHub;
- public UsbHostCallbacks(UInt64 context,delegate*<UInt64,Byte,Byte,UsbSpeed,Byte,Boolean> prepareDevice,delegate*<UInt64,Byte,Byte,UsbSetupPacket*,Byte*,UInt32,UInt32*,Boolean> control,delegate*<UInt64,Byte,Byte,Byte*,UInt32,UInt32*,Boolean> bulk,delegate*<UInt64,Byte,Byte,Byte*,UInt32,UInt32*,Boolean> interrupt,delegate*<UInt64,Byte,UsbEndpointDescriptor*,Boolean> configureEndpoint,delegate*<UInt64,Byte,Byte,Boolean,Boolean> configureHub)
- {Context=context;PrepareDevice=prepareDevice;Control=control;Bulk=bulk;Interrupt=interrupt;ConfigureEndpoint=configureEndpoint;ConfigureHub=configureHub;}
+ public UsbHostCallbacks(UInt64 context,delegate*<UInt64,Byte,Byte,UsbSpeed,Byte,Boolean> prepareDevice,delegate*<UInt64,Byte,Byte,UsbSetupPacket*,Byte*,UInt32,UInt32*,Boolean> control,delegate*<UInt64,Byte,Byte,Byte*,UInt32,UInt32*,Boolean> bulk,delegate*<UInt64,Byte,Byte,Byte*,UInt32,UInt32*,Boolean> interrupt,delegate*<UInt64,Byte,Byte,Byte*,UInt32,Byte*,UInt32*,Boolean> interruptService,delegate*<UInt64,Byte,UsbEndpointDescriptor*,Boolean> configureEndpoint,delegate*<UInt64,Byte,Byte,Boolean,Boolean> configureHub)
+ {Context=context;PrepareDevice=prepareDevice;Control=control;Bulk=bulk;Interrupt=interrupt;InterruptService=interruptService;ConfigureEndpoint=configureEndpoint;ConfigureHub=configureHub;}
 }
