@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.132",
-  "version": "0.1.133",
-  "summary": "Make stock Test OS logical-path setup non-mutating at boot and use one ASCII/VFAT path for EnsureDirectory existence/creation so long-name directories are handled consistently.",
+  "baseVersion": "0.1.133",
+  "version": "0.1.134",
+  "summary": "FAT32 existing-image preservation now discovers GPT/MBR/raw FAT volumes and migrates legacy /USERS state into /User safely.",
   "changedFiles": 2,
   "deletedFiles": 0
 }

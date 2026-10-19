@@ -23,12 +23,13 @@ internal static class EfiDiskImage
         string temporaryImage=imagePath+".new";
         try
         {
-            // /USERS is mutable OS state. Rebuilding the system files must not erase registered
-            // accounts, Home folders or personal settings from a previously run image.
+            // /USER is mutable OS state. Rebuilding system files must not erase registered
+            // accounts, Home folders or personal settings from a previously run image. Older
+            // Inu images used /USERS, so the preservation reader accepts both names and stages
+            // preserved state into the current /USER namespace.
             if(File.Exists(imagePath)&&!TryExtractUsersTree(imagePath,stagingRoot,out preservedUserState,out error))return false;
             // 0.0.168 and earlier booted a disposable image copy under Runs/<timestamp>.
-            // If the base image has no /USERS yet, import the newest usable run copy once so
-            // upgrading to persistent-image semantics does not force the user to register again.
+            // If the base image has no /USER or /USERS yet, import the newest usable run copy once.
             if(!preservedUserState)TryExtractUsersTreeFromLatestRun(imagePath,stagingRoot,out preservedUserState);
             FatNode root=BuildTree(stagingRoot,null,true);
             uint lastUsableLba=TotalSectors-34,partitionSectors=lastUsableLba-PartitionStartLba+1;
@@ -65,37 +66,80 @@ internal static class EfiDiskImage
         try
         {
             using FileStream image=new(imagePath,FileMode.Open,FileAccess.Read,FileShare.ReadWrite);
-            if(image.Length<(long)(PartitionStartLba+1U)*SectorSize){error="Existing Inu image is too small to preserve /USERS state.";return false;}
-            byte[] boot=new byte[SectorSize];ReadExactlyAtLba(image,PartitionStartLba,boot);
-            ushort bytesPerSector=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(11,2));byte sectorsPerCluster=boot[13];ushort reserved=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(14,2));byte fats=boot[16];uint fatSectors=BinaryPrimitives.ReadUInt32LittleEndian(boot.AsSpan(36,4));uint rootCluster=BinaryPrimitives.ReadUInt32LittleEndian(boot.AsSpan(44,4));
-            if(bytesPerSector!=SectorSize||sectorsPerCluster==0||reserved==0||fats==0||fatSectors==0||rootCluster<2U){error="Existing Inu image has an unsupported FAT32 layout; refusing to erase /USERS state.";return false;}
-            uint dataStart=(uint)reserved+(uint)fats*fatSectors;byte[] fat=new byte[checked((int)(fatSectors*(uint)SectorSize))];ReadExactlyAtLba(image,PartitionStartLba+(uint)reserved,fat);
-            foreach(FatDirectoryEntry entry in ReadDirectory(image,fat,dataStart,sectorsPerCluster,rootCluster))
+            if(image.Length<SectorSize){error="Existing Inu image is too small to contain a FAT32 volume.";return false;}
+            if(!TryLocateFat32Volume(image,out uint volumeStartLba,out byte sectorsPerCluster,out ushort reserved,out byte fats,out uint fatSectors,out uint rootCluster,out string locateError))
+            {error="Existing Inu image has no safely readable FAT32 system volume; refusing to erase /User state. "+locateError;return false;}
+            uint dataStart=(uint)reserved+(uint)fats*fatSectors;byte[] fat=new byte[checked((int)(fatSectors*(uint)SectorSize))];ReadExactlyAtLba(image,volumeStartLba+(uint)reserved,fat);
+            foreach(FatDirectoryEntry entry in ReadDirectory(image,fat,dataStart,sectorsPerCluster,rootCluster,volumeStartLba))
             {
-                if(!entry.IsDirectory||!string.Equals(entry.Name,"USERS",StringComparison.OrdinalIgnoreCase))continue;
-                string usersRoot=Path.Combine(stagingRoot,"USERS");if(Directory.Exists(usersRoot))Directory.Delete(usersRoot,true);Directory.CreateDirectory(usersRoot);
-                ExtractDirectory(image,fat,dataStart,sectorsPerCluster,entry.FirstCluster,usersRoot,0);preserved=true;return true;
+                if(!entry.IsDirectory||!(string.Equals(entry.Name,"USER",StringComparison.OrdinalIgnoreCase)||string.Equals(entry.Name,"USERS",StringComparison.OrdinalIgnoreCase)))continue;
+                string userRoot=Path.Combine(stagingRoot,"USER");if(Directory.Exists(userRoot))Directory.Delete(userRoot,true);Directory.CreateDirectory(userRoot);
+                ExtractDirectory(image,fat,dataStart,sectorsPerCluster,entry.FirstCluster,userRoot,0,volumeStartLba);preserved=true;return true;
             }
             return true;
         }
         catch(Exception ex) when(ex is IOException or InvalidOperationException or ArgumentException)
-        {error="Existing /USERS state could not be preserved: "+ex.Message;return false;}
+        {error="Existing /User state could not be preserved: "+ex.Message;return false;}
     }
 
-    private static void ExtractDirectory(Stream image,byte[] fat,uint dataStart,byte sectorsPerCluster,uint cluster,string destination,int depth)
+    private static bool TryLocateFat32Volume(Stream image,out uint volumeStartLba,out byte sectorsPerCluster,out ushort reserved,out byte fats,out uint fatSectors,out uint rootCluster,out string error)
     {
-        if(depth>16)throw new InvalidOperationException("/USERS directory nesting exceeds the preservation limit.");
-        foreach(FatDirectoryEntry entry in ReadDirectory(image,fat,dataStart,sectorsPerCluster,cluster))
+        volumeStartLba=0;sectorsPerCluster=0;reserved=0;fats=0;fatSectors=0;rootCluster=0;error=string.Empty;
+        var candidates=new List<uint>();
+        if(image.Length>=(long)(PartitionStartLba+1U)*SectorSize)candidates.Add(PartitionStartLba);
+        if(image.Length>=2L*SectorSize)
+        {
+            byte[] gptHeader=new byte[SectorSize];ReadExactlyAtLba(image,1,gptHeader);
+            if(Encoding.ASCII.GetString(gptHeader,0,8)=="EFI PART")
+            {
+                ulong entriesLba=BinaryPrimitives.ReadUInt64LittleEndian(gptHeader.AsSpan(72,8));uint entryCount=BinaryPrimitives.ReadUInt32LittleEndian(gptHeader.AsSpan(80,4));uint entrySize=BinaryPrimitives.ReadUInt32LittleEndian(gptHeader.AsSpan(84,4));
+                if(entriesLba>0&&entriesLba<=uint.MaxValue&&entrySize>=128&&entrySize<=4096&&entryCount>0&&entryCount<=1024)
+                {
+                    byte[] entry=new byte[entrySize];for(uint i=0;i<entryCount;i++)
+                    {
+                        long byteOffset=checked((long)entriesLba*SectorSize+(long)i*entrySize);if(byteOffset+entrySize>image.Length)break;image.Position=byteOffset;ReadExactly(image,entry);
+                        if(entry.AsSpan(0,16).SequenceEqual(new byte[16]))continue;ulong first=BinaryPrimitives.ReadUInt64LittleEndian(entry.AsSpan(32,8));if(first<=uint.MaxValue)candidates.Add((uint)first);
+                    }
+                }
+            }
+        }
+        byte[] mbr=new byte[SectorSize];ReadExactlyAtLba(image,0,mbr);
+        if(mbr[510]==0x55&&mbr[511]==0xAA)for(int i=0;i<4;i++)
+        {
+            int off=446+i*16;uint first=BinaryPrimitives.ReadUInt32LittleEndian(mbr.AsSpan(off+8,4));if(first!=0)candidates.Add(first);
+        }
+        candidates.Add(0);
+        foreach(uint candidate in candidates.Distinct())
+        {
+            if((long)(candidate+1U)*SectorSize>image.Length)continue;
+            byte[] boot=new byte[SectorSize];ReadExactlyAtLba(image,candidate,boot);
+            ushort bps=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(11,2));byte spc=boot[13];ushort rsv=BinaryPrimitives.ReadUInt16LittleEndian(boot.AsSpan(14,2));byte fc=boot[16];uint fs=BinaryPrimitives.ReadUInt32LittleEndian(boot.AsSpan(36,4));uint rc=BinaryPrimitives.ReadUInt32LittleEndian(boot.AsSpan(44,4));
+            bool signature=boot[510]==0x55&&boot[511]==0xAA;bool fat32Text=Encoding.ASCII.GetString(boot,82,8).StartsWith("FAT32",StringComparison.OrdinalIgnoreCase);
+            if(bps!=SectorSize||spc==0||rsv==0||fc==0||fs==0||rc<2U||!signature||!fat32Text)continue;
+            volumeStartLba=candidate;sectorsPerCluster=spc;reserved=rsv;fats=fc;fatSectors=fs;rootCluster=rc;return true;
+        }
+        error="No GPT/MBR/raw FAT32 boot sector with a valid BPB was found.";return false;
+    }
+
+    private static void ReadExactly(Stream stream,Span<byte> buffer)
+    {
+        int total=0;while(total<buffer.Length){int read=stream.Read(buffer[total..]);if(read<=0)throw new EndOfStreamException("Unexpected end of Inu disk image.");total+=read;}
+    }
+
+    private static void ExtractDirectory(Stream image,byte[] fat,uint dataStart,byte sectorsPerCluster,uint cluster,string destination,int depth,uint volumeStartLba)
+    {
+        if(depth>16)throw new InvalidOperationException("/User directory nesting exceeds the preservation limit.");
+        foreach(FatDirectoryEntry entry in ReadDirectory(image,fat,dataStart,sectorsPerCluster,cluster,volumeStartLba))
         {
             ValidateFatName(entry.Name);string target=Path.Combine(destination,entry.Name);
-            if(entry.IsDirectory){Directory.CreateDirectory(target);ExtractDirectory(image,fat,dataStart,sectorsPerCluster,entry.FirstCluster,target,depth+1);continue;}
-            using FileStream output=new(target,FileMode.Create,FileAccess.Write,FileShare.None);WriteFileFromImage(image,fat,dataStart,sectorsPerCluster,entry.FirstCluster,entry.Length,output);
+            if(entry.IsDirectory){Directory.CreateDirectory(target);ExtractDirectory(image,fat,dataStart,sectorsPerCluster,entry.FirstCluster,target,depth+1,volumeStartLba);continue;}
+            using FileStream output=new(target,FileMode.Create,FileAccess.Write,FileShare.None);WriteFileFromImage(image,fat,dataStart,sectorsPerCluster,entry.FirstCluster,entry.Length,output,volumeStartLba);
         }
     }
 
-    private static List<FatDirectoryEntry> ReadDirectory(Stream image,byte[] fat,uint dataStart,byte sectorsPerCluster,uint firstCluster)
+    private static List<FatDirectoryEntry> ReadDirectory(Stream image,byte[] fat,uint dataStart,byte sectorsPerCluster,uint firstCluster,uint volumeStartLba)
     {
-        byte[] data=ReadClusterChain(image,fat,dataStart,sectorsPerCluster,firstCluster);List<FatDirectoryEntry> entries=new();List<(int Ordinal,string Text,byte Checksum,bool Last)> lfn=new();
+        byte[] data=ReadClusterChain(image,fat,dataStart,sectorsPerCluster,firstCluster,volumeStartLba);List<FatDirectoryEntry> entries=new();List<(int Ordinal,string Text,byte Checksum,bool Last)> lfn=new();
         for(int offset=0;offset+32<=data.Length;offset+=32)
         {
             byte marker=data[offset];if(marker==0x00)break;if(marker==0xE5){lfn.Clear();continue;}byte attributes=data[offset+11];
@@ -122,21 +166,21 @@ internal static class EfiDiskImage
         string basis=Encoding.ASCII.GetString(entry[..8]).TrimEnd(' ');string ext=Encoding.ASCII.GetString(entry.Slice(8,3)).TrimEnd(' ');return ext.Length==0?basis:basis+"."+ext;
     }
 
-    private static byte[] ReadClusterChain(Stream image,byte[] fat,uint dataStart,byte sectorsPerCluster,uint firstCluster)
+    private static byte[] ReadClusterChain(Stream image,byte[] fat,uint dataStart,byte sectorsPerCluster,uint firstCluster,uint volumeStartLba)
     {
         if(firstCluster<2U)return Array.Empty<byte>();int clusterBytes=checked(sectorsPerCluster*SectorSize);using MemoryStream result=new();HashSet<uint> visited=new();uint cluster=firstCluster;
         while(cluster>=2U&&cluster<0x0FFFFFF8U)
         {
             if(!visited.Add(cluster))throw new InvalidOperationException("FAT32 cluster chain contains a loop.");uint fatOffset=checked(cluster*4U);if(fatOffset+4U>(uint)fat.Length)throw new InvalidOperationException("FAT32 cluster chain is outside the FAT.");
-            byte[] buffer=new byte[clusterBytes];uint relative=dataStart+(cluster-2U)*(uint)sectorsPerCluster;ReadExactlyAtLba(image,PartitionStartLba+relative,buffer);result.Write(buffer);cluster=BinaryPrimitives.ReadUInt32LittleEndian(fat.AsSpan(checked((int)fatOffset),4))&0x0FFFFFFFU;
+            byte[] buffer=new byte[clusterBytes];uint relative=dataStart+(cluster-2U)*(uint)sectorsPerCluster;ReadExactlyAtLba(image,volumeStartLba+relative,buffer);result.Write(buffer);cluster=BinaryPrimitives.ReadUInt32LittleEndian(fat.AsSpan(checked((int)fatOffset),4))&0x0FFFFFFFU;
             if(cluster==0U||cluster==1U||cluster==0x0FFFFFF7U)throw new InvalidOperationException("FAT32 cluster chain is corrupt.");
         }
         return result.ToArray();
     }
 
-    private static void WriteFileFromImage(Stream image,byte[] fat,uint dataStart,byte sectorsPerCluster,uint firstCluster,uint length,Stream output)
+    private static void WriteFileFromImage(Stream image,byte[] fat,uint dataStart,byte sectorsPerCluster,uint firstCluster,uint length,Stream output,uint volumeStartLba)
     {
-        if(length==0U)return;byte[] data=ReadClusterChain(image,fat,dataStart,sectorsPerCluster,firstCluster);if((ulong)data.Length<length)throw new InvalidOperationException("FAT32 file chain is shorter than its directory length.");output.Write(data,0,checked((int)length));
+        if(length==0U)return;byte[] data=ReadClusterChain(image,fat,dataStart,sectorsPerCluster,firstCluster,volumeStartLba);if((ulong)data.Length<length)throw new InvalidOperationException("FAT32 file chain is shorter than its directory length.");output.Write(data,0,checked((int)length));
     }
 
     private static void ReadExactlyAtLba(Stream image,uint lba,Span<byte> buffer)

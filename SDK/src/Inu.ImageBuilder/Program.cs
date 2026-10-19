@@ -134,7 +134,7 @@ static int MainEntry(string[] args)
         BuildAssetBundle(novaRoot, bundlePath);
 
         if (!EfiDiskImage.TryCreate(stagingRoot, imagePath, out bool preservedUserState, out error)) throw Fail(error);
-        if (preservedUserState) Console.WriteLine("[ OK ] Existing /USERS account, Home and personal settings preserved from the previous image.");
+        if (preservedUserState) Console.WriteLine("[ OK ] Existing /User account, Home and personal settings preserved from the previous image (legacy /USERS is migrated automatically).");
 
         string dataDiskDirectory = Path.Combine(outputDirectory, "DataDisks", project.Name);
         string manifestPath = Path.Combine(outputDirectory, "Inu.Image.json");
