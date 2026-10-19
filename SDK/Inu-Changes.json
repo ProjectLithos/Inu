@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.125",
-  "version": "0.1.126",
-  "changedFiles": 2,
-  "summary": "Fix PowerShell parser-invalid variable/colon interpolation in the Inu GitHub object-size diagnostic and generated workspace-build template while preserving size-aware resilient publishing.",
+  "baseVersion": "0.1.126",
+  "version": "0.1.127",
+  "changedFiles": 1,
+  "summary": "Stage blobs from a single oversized unpublished Inu commit through small temporary GitHub refs before advancing main; detect and report individual blobs above GitHub normal file limits without rewriting history.",
   "deletedFiles": 0
 }

@@ -333,6 +333,203 @@ function Format-ByteCount([Int64]$Bytes){
     if($Bytes -ge 1KB){ return ('{0:N1} KiB' -f ($Bytes / 1KB)) }
     return "$Bytes B"
 }
+function Invoke-GitInputResult([string[]]$Arguments, [string[]]$InputLines, [int]$TimeoutSeconds=300){
+    $psi=New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName=$script:GitExe
+    $psi.WorkingDirectory=$SourceRoot
+    $psi.UseShellExecute=$false
+    $psi.CreateNoWindow=$true
+    $psi.RedirectStandardInput=$true
+    $psi.RedirectStandardOutput=$true
+    $psi.RedirectStandardError=$true
+    $psi.Arguments=( @('-C',$SourceRoot) + $Arguments | ForEach-Object { Quote-NativeArgument ([string]$_) } ) -join ' '
+    $psi.EnvironmentVariables['GIT_TERMINAL_PROMPT']='0'
+    $psi.EnvironmentVariables['GCM_INTERACTIVE']='Never'
+    $process=New-Object System.Diagnostics.Process
+    $process.StartInfo=$psi
+    try {
+        if(-not $process.Start()){
+            return [pscustomobject]@{ ExitCode=-1; Lines=@('Could not start git.'); TimedOut=$false }
+        }
+        $stdoutTask=$process.StandardOutput.ReadToEndAsync()
+        $stderrTask=$process.StandardError.ReadToEndAsync()
+        foreach($line in $InputLines){ $process.StandardInput.WriteLine($line) }
+        $process.StandardInput.Close()
+        if(-not $process.WaitForExit($TimeoutSeconds * 1000)){
+            Stop-ProcessTree $process
+            return [pscustomobject]@{ ExitCode=124; Lines=@("Git timed out after $TimeoutSeconds second(s)."); TimedOut=$true }
+        }
+        $stdout=$stdoutTask.GetAwaiter().GetResult()
+        $stderr=$stderrTask.GetAwaiter().GetResult()
+        $lines=@(($stdout + "`n" + $stderr) -split "`r?`n" | Where-Object { $_ -ne '' })
+        return [pscustomobject]@{ ExitCode=[int]$process.ExitCode; Lines=$lines; TimedOut=$false }
+    } finally { $process.Dispose() }
+}
+function Get-GitObjectInventory([string]$BaseCommit, [string]$TargetCommit){
+    $range=if([string]::IsNullOrWhiteSpace($BaseCommit)){ $TargetCommit } else { "$BaseCommit..$TargetCommit" }
+    $listed=Invoke-GitResult -a @('rev-list','--objects',$range) -TimeoutSeconds 300
+    if($listed.ExitCode -ne 0){
+        foreach($line in $listed.Lines){ Write-Host $line }
+        Fail "Could not enumerate Git objects for staging range $range (exit $($listed.ExitCode))."
+    }
+    $ids=New-Object System.Collections.Generic.List[string]
+    $paths=@{}
+    $seen=@{}
+    foreach($line in $listed.Lines){
+        if([string]::IsNullOrWhiteSpace($line)){ continue }
+        $parts=@($line -split ' ',2)
+        $id=$parts[0]
+        if($id -notmatch '^[0-9a-fA-F]{40,64}$'){ continue }
+        if(-not $seen.ContainsKey($id)){
+            $seen[$id]=$true
+            [void]$ids.Add($id)
+        }
+        if($parts.Count -gt 1 -and -not [string]::IsNullOrWhiteSpace($parts[1]) -and -not $paths.ContainsKey($id)){
+            $paths[$id]=$parts[1]
+        }
+    }
+    if($ids.Count -eq 0){ return @() }
+    $typed=Invoke-GitInputResult -Arguments @('cat-file','--batch-check=%(objectname) %(objecttype) %(objectsize)') -InputLines $ids.ToArray() -TimeoutSeconds 300
+    if($typed.ExitCode -ne 0){
+        foreach($line in $typed.Lines){ Write-Host $line }
+        Fail "Could not inspect Git object types/sizes for staging range $range (exit $($typed.ExitCode))."
+    }
+    $inventory=New-Object System.Collections.Generic.List[object]
+    foreach($line in $typed.Lines){
+        if($line -notmatch '^([0-9a-fA-F]{40,64})\s+(\S+)\s+(\d+)$'){
+            Fail "Unexpected git cat-file object inventory output for ${range}: $line"
+        }
+        $id=$Matches[1]
+        $path=if($paths.ContainsKey($id)){ [string]$paths[$id] } else { '' }
+        [void]$inventory.Add([pscustomobject]@{ Id=$id; Type=$Matches[2]; Bytes=[Int64]$Matches[3]; Path=$path })
+    }
+    return $inventory.ToArray()
+}
+function Get-RemoteRefCommit([string]$FullRef){
+    $result=Invoke-GitResult -a @('ls-remote','origin',$FullRef) -TimeoutSeconds 60
+    if($result.ExitCode -ne 0){ return $null }
+    $line=($result.Lines | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1)
+    if([string]::IsNullOrWhiteSpace($line)){ return $null }
+    $parts=@($line -split '\s+')
+    if($parts.Count -lt 1 -or $parts[0] -notmatch '^[0-9a-fA-F]{40,64}$'){ return $null }
+    return $parts[0]
+}
+function Push-StagingRef([string]$Commit, [string]$FullRef, [string]$Description){
+    for($attempt=1; $attempt -le 4; $attempt++){
+        $push=Invoke-GitLiveResult -a @('-c','http.version=HTTP/1.1','-c','http.lowSpeedLimit=1','-c','http.lowSpeedTime=300','push','origin',("${Commit}:${FullRef}"))
+        if($push.ExitCode -eq 0){ return }
+        $remote=Get-RemoteRefCommit -FullRef $FullRef
+        if($remote -eq $Commit){
+            Write-Host "[ OK ] GitHub accepted $Description despite the client-side push error."
+            return
+        }
+        if(-not (Wait-GitHubConnectivity -Operation "publishing $Description")){
+            Fail "GitHub remained unreachable while publishing $Description. The already-uploaded staging refs remain reusable on the next run."
+        }
+        if($attempt -lt 4){
+            $delay=@(5,15,30)[$attempt-1]
+            Write-Host "[WARN] Retrying $Description in $delay second(s) without changing its object group."
+            Start-Sleep -Seconds $delay
+        }
+    }
+    Fail "GitHub repeatedly rejected $Description while connectivity was healthy. Earlier staging refs remain reusable on the next run."
+}
+function Stage-LargeCommitObjects([string]$BaseCommit, [string]$TargetCommit, [Int64]$StageMaximumBytes){
+    $inventory=@(Get-GitObjectInventory -BaseCommit $BaseCommit -TargetCommit $TargetCommit)
+    $blobs=@($inventory | Where-Object { $_.Type -eq 'blob' } | Sort-Object -Property Bytes -Descending)
+    if($blobs.Count -eq 0){ return @() }
+
+    $githubBlobLimit=[Int64]100 * 1MB
+    $oversized=@($blobs | Where-Object { $_.Bytes -gt $githubBlobLimit })
+    if($oversized.Count -gt 0){
+        Write-Host "[FAIL] The unpublished Inu history contains $($oversized.Count) individual Git blob(s) larger than GitHub's normal 100 MiB file limit. Object staging cannot split an individual blob."
+        foreach($item in ($oversized | Select-Object -First 25)){
+            $displayPath=if([string]::IsNullOrWhiteSpace($item.Path)){ '<path unavailable>' } else { $item.Path }
+            Write-Host "[FAIL]   $(Format-ByteCount $item.Bytes)  $displayPath  [$($item.Id.Substring(0,12))]"
+        }
+        if($oversized.Count -gt 25){ Write-Host "[FAIL]   ... and $($oversized.Count-25) more oversized blob(s)." }
+        Fail "At least one unpublished file is too large for ordinary GitHub Git storage. Move those files to Git LFS or remove them from the unpublished history before main can be published. No history was rewritten automatically."
+    }
+
+    $groups=New-Object System.Collections.Generic.List[object]
+    $current=New-Object System.Collections.Generic.List[object]
+    $currentBytes=[Int64]0
+    foreach($blob in $blobs){
+        if($current.Count -gt 0 -and ($currentBytes + $blob.Bytes) -gt $StageMaximumBytes){
+            [void]$groups.Add([pscustomobject]@{ Items=$current.ToArray(); Bytes=$currentBytes })
+            $current=New-Object System.Collections.Generic.List[object]
+            $currentBytes=[Int64]0
+        }
+        [void]$current.Add($blob)
+        $currentBytes += $blob.Bytes
+        if($blob.Bytes -gt $StageMaximumBytes){
+            [void]$groups.Add([pscustomobject]@{ Items=$current.ToArray(); Bytes=$currentBytes })
+            $current=New-Object System.Collections.Generic.List[object]
+            $currentBytes=[Int64]0
+        }
+    }
+    if($current.Count -gt 0){ [void]$groups.Add([pscustomobject]@{ Items=$current.ToArray(); Bytes=$currentBytes }) }
+
+    $shortTarget=if($TargetCommit.Length -gt 12){ $TargetCommit.Substring(0,12) } else { $TargetCommit }
+    Write-Host "[WARN] Commit $shortTarget is too large for one reliable push. Staging $($blobs.Count) blob(s), $(Format-ByteCount (($blobs | Measure-Object -Property Bytes -Sum).Sum)) total, through $($groups.Count) temporary GitHub object ref(s)."
+    $createdRefs=New-Object System.Collections.Generic.List[string]
+    for($g=0; $g -lt $groups.Count; $g++){
+        $group=$groups[$g]
+        $treeLines=New-Object System.Collections.Generic.List[string]
+        for($i=0; $i -lt $group.Items.Count; $i++){
+            $blob=$group.Items[$i]
+            $name=('object-{0:D6}' -f $i)
+            [void]$treeLines.Add("100644 blob $($blob.Id)`t$name")
+        }
+        $treeResult=Invoke-GitInputResult -Arguments @('mktree') -InputLines $treeLines.ToArray() -TimeoutSeconds 300
+        if($treeResult.ExitCode -ne 0){
+            foreach($line in $treeResult.Lines){ Write-Host $line }
+            Fail "Could not create temporary Git tree for object staging group $($g+1)."
+        }
+        $treeId=(($treeResult.Lines | Where-Object { $_ -match '^[0-9a-fA-F]{40,64}$' } | Select-Object -First 1) -as [string])
+        if([string]::IsNullOrWhiteSpace($treeId)){ Fail "git mktree did not return a tree id for staging group $($g+1)." }
+        $commitResult=Invoke-GitResult -a @('commit-tree',$treeId,'-m',("Inu temporary object staging for $shortTarget group $($g+1)/$($groups.Count)")) -TimeoutSeconds 60
+        if($commitResult.ExitCode -ne 0){
+            foreach($line in $commitResult.Lines){ Write-Host $line }
+            Fail "Could not create temporary Git commit for object staging group $($g+1)."
+        }
+        $stageCommit=(($commitResult.Lines | Where-Object { $_ -match '^[0-9a-fA-F]{40,64}$' } | Select-Object -First 1) -as [string])
+        if([string]::IsNullOrWhiteSpace($stageCommit)){ Fail "git commit-tree did not return a commit id for staging group $($g+1)." }
+        $fullRef="refs/heads/inu-publish-stage/$Version/$shortTarget-$($g+1)-$PID"
+        Write-Host "[INFO] Inu object stage $($g+1)/$($groups.Count): $($group.Items.Count) blob(s), approximately $(Format-ByteCount $group.Bytes) raw."
+        Push-StagingRef -Commit $stageCommit -FullRef $fullRef -Description "Inu object stage $($g+1)/$($groups.Count)"
+        [void]$createdRefs.Add($fullRef)
+    }
+    return $createdRefs.ToArray()
+}
+function Remove-InuStagingRefs {
+    $listed=Invoke-GitResult -a @('ls-remote','--heads','origin','refs/heads/inu-publish-stage/*') -TimeoutSeconds 60
+    if($listed.ExitCode -ne 0){
+        Write-Host "[WARN] Could not enumerate temporary Inu object-staging refs for cleanup; they are harmless and can be deleted on a later publish."
+        return
+    }
+    $branches=New-Object System.Collections.Generic.List[string]
+    foreach($line in $listed.Lines){
+        $parts=@($line -split '\s+')
+        if($parts.Count -lt 2){ continue }
+        $ref=$parts[1]
+        if($ref -like 'refs/heads/inu-publish-stage/*'){
+            [void]$branches.Add($ref.Substring('refs/heads/'.Length))
+        }
+    }
+    if($branches.Count -eq 0){ return }
+    Write-Host "[INFO] Removing $($branches.Count) temporary Inu object-staging ref(s) now that main contains the staged objects."
+    for($i=0; $i -lt $branches.Count; $i+=25){
+        $last=[Math]::Min($i+24,$branches.Count-1)
+        $chunk=@($branches[$i..$last])
+        $delete=Invoke-GitLiveResult -a (@('-c','http.version=HTTP/1.1','push','origin','--delete') + $chunk)
+        if($delete.ExitCode -ne 0){
+            Write-Host "[WARN] Some temporary Inu object-staging refs could not be deleted. They do not affect main and will be retried on a later publish."
+            return
+        }
+    }
+    Write-Host "[ OK ] Temporary Inu object-staging refs removed."
+}
 function Select-SizeAwareBatch([string]$BaseCommit, [string[]]$Missing, [int]$StartIndex, [int]$MaximumCount, [Int64]$MaximumBytes){
     $low=1
     $high=$MaximumCount
@@ -354,7 +551,7 @@ function Select-SizeAwareBatch([string]$BaseCommit, [string[]]$Missing, [int]$St
         $target=$Missing[$StartIndex]
         $bestMeasure=Measure-GitObjectRange -BaseCommit $BaseCommit -TargetCommit $target
         $bestCount=1
-        Write-Host "[WARN] The next single Inu commit requires approximately $(Format-ByteCount $bestMeasure.Bytes) of previously unpublished Git objects, above the configured batch target of $(Format-ByteCount $MaximumBytes). It will be attempted alone."
+        Write-Host "[WARN] The next single Inu commit requires approximately $(Format-ByteCount $bestMeasure.Bytes) of previously unpublished Git objects, above the configured batch target of $(Format-ByteCount $MaximumBytes). Its blobs will be staged through temporary GitHub refs before main is advanced."
     }
     return [pscustomobject]@{ Count=$bestCount; Measure=$bestMeasure }
 }
@@ -395,6 +592,16 @@ function Push-MissingCommitsInBatches([string]$RemoteCommit, [string]$LocalHead)
         }
     }
     $maximumBytes=[Int64]$maximumMiB * 1MB
+    $stageMiB=32
+    if(-not [string]::IsNullOrWhiteSpace($env:INU_GITHUB_OBJECT_STAGE_MIB)){
+        $parsedStageMiB=0
+        if([int]::TryParse($env:INU_GITHUB_OBJECT_STAGE_MIB,[ref]$parsedStageMiB) -and $parsedStageMiB -ge 8 -and $parsedStageMiB -le 96){
+            $stageMiB=$parsedStageMiB
+        } else {
+            Write-Host "[WARN] Ignoring invalid INU_GITHUB_OBJECT_STAGE_MIB='$($env:INU_GITHUB_OBJECT_STAGE_MIB)'; using $stageMiB MiB per temporary object-staging ref."
+        }
+    }
+    $stageMaximumBytes=[Int64]$stageMiB * 1MB
 
     Write-Host "[INFO] $($missing.Count) $RepositoryName commit(s) are missing from GitHub. Batches are limited to $maximumCommitCount commit(s) and approximately $maximumMiB MiB of previously unpublished raw Git objects."
     $published=0
@@ -410,6 +617,11 @@ function Push-MissingCommitsInBatches([string]$RemoteCommit, [string]$LocalHead)
         $firstDisplay=$published+1
         $lastDisplay=$lastIndex+1
         $shortTarget=if($target.Length -gt 12){ $target.Substring(0,12) } else { $target }
+        if($attemptSize -eq 1 -and [Int64]$selection.Measure.Bytes -gt $maximumBytes){
+            Write-Host "[WARN] The next commit is larger than the normal batch target. Inu will stage its blobs through temporary GitHub refs before advancing main."
+            [void](Stage-LargeCommitObjects -BaseCommit $baseCommit -TargetCommit $target -StageMaximumBytes $stageMaximumBytes)
+            $selection=[pscustomobject]@{ Count=1; Measure=(Measure-GitObjectRange -BaseCommit $baseCommit -TargetCommit $target) }
+        }
         $payloadText=Format-ByteCount ([Int64]$selection.Measure.Bytes)
         Write-Host "[INFO] $RepositoryName GitHub batch: commits $firstDisplay-$lastDisplay of $($missing.Count), target $shortTarget; $($selection.Measure.Objects) object(s), approximately $payloadText raw."
 
@@ -501,4 +713,5 @@ $publishedRemote=Get-RemoteMainCommitWithRetry
 if($publishedRemote -ne $localHead){
     Fail "$RepositoryName GitHub publication ended at $publishedRemote instead of local HEAD $localHead."
 }
+Remove-InuStagingRefs
 Write-Host "[ OK ] $RepositoryName $Version published to GitHub in incremental batches."
