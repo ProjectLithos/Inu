@@ -624,7 +624,7 @@ static bool RepairStockTestOsNonDestructiveStoragePolicy(string output, string p
         // Only migrate the untouched Kath-generated destructive default. Coder-owned storage
         // policy is preserved if these exact stock markers are no longer present.
         if (!candidate.Contains("Storage.EnsureGptPartitions(drive, 2U, out createdLayout)", StringComparison.Ordinal) ||
-            !candidate.Contains("String drivePath = "/Drives/Drive" + driveOrdinal.ToString();", StringComparison.Ordinal)) return true;
+            !candidate.Contains("String drivePath = \"/Drives/Drive\" + driveOrdinal.ToString();", StringComparison.Ordinal)) return true;
 
         string replacement = """
         UInt32 detectedDriveCount = Storage.GetDriveCount();

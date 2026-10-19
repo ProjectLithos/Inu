@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.121",
-  "version": "0.1.122",
-  "changedFiles": 12,
-  "summary": "Add ring-3 drive management commands for listing/naming data drives, explicit GPT partitioning/repartitioning, and FAT32 formatting with system-drive and mounted-volume safety guards.",
+  "baseVersion": "0.1.122",
+  "version": "0.1.123",
+  "changedFiles": 1,
+  "summary": "Fix the Inu.ProjectCreator stock storage-policy migration string literal so 0.1.122 drive-management projects compile and refresh correctly.",
   "deletedFiles": 0
 }
