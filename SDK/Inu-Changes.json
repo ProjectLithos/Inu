@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.130",
-  "version": "0.1.131",
-  "summary": "Make additional-drive filesystem directories lazy so blank drives do not abort Test OS startup; migrate untouched eager stock storage policy.",
-  "changedFiles": 2,
+  "baseVersion": "0.1.131",
+  "version": "0.1.132",
+  "summary": "Unify zero-based drive/partition command numbering with DRIVES output; harden interactive cursor editing and shorten stale USB key-repeat recovery.",
+  "changedFiles": 11,
   "deletedFiles": 0
 }

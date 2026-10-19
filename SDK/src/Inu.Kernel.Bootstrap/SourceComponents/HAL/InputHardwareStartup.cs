@@ -39,7 +39,8 @@ public static unsafe class InputHardwareStartup
 #endif
     private const UInt64 KeyboardRepeatInitialDelayNanoseconds = 500000000UL;
     private const UInt64 KeyboardRepeatIntervalNanoseconds = 40000000UL;
-    private const UInt64 UsbRepeatStaleGuardNanoseconds = 1500000000UL;
+    private const UInt64 UsbRepeatStaleGuardNanoseconds = 650000000UL;
+    private const UInt64 UsbNavigationRepeatStaleGuardNanoseconds = 550000000UL;
 #if INU_INPUT_PS2
     private static Boolean _ps2RepeatActive;
     private static Ps2Key _ps2RepeatKey;
@@ -500,7 +501,8 @@ public static unsafe class InputHardwareStartup
         if (_usbRepeatActive)
         {
             UInt64 sinceReport=now>=_usbLastReportObservedAt?now-_usbLastReportObservedAt:0UL;
-            if (_usbLastReportObservedAt!=0UL && sinceReport>=UsbRepeatStaleGuardNanoseconds)
+            UInt64 staleGuard=TryMapUsbNavigation(_usbRepeatUsage,out _)?UsbNavigationRepeatStaleGuardNanoseconds:UsbRepeatStaleGuardNanoseconds;
+            if (_usbLastReportObservedAt!=0UL && sinceReport>=staleGuard)
             {
                 Native.WritePort8(0xE9,(Byte)'s');Native.WritePort8(0xE9,_usbRepeatUsage);Native.WritePort8(0xE9,(Byte)2);
                 _usbRepeatActive=false;

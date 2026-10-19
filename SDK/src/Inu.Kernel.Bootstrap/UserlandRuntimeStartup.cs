@@ -77,7 +77,7 @@ public static unsafe class UserlandRuntimeStartup
     private static Boolean _shellOutputWritten,_interactiveReadyPublished;
     // Zero means no ring-3 console reader is sleeping. Non-zero stores processorIndex+1 so CPU 0 is representable.
     private static UInt64 _inputWaitProcessorPlusOne;
-    private static UInt64 _inputQueuedCount,_inputWakeCount,_inputReadCount,_inputWaitCount,_editableSyncCount;
+    private static UInt64 _inputQueuedCount,_inputWakeCount,_inputReadCount,_inputWaitCount,_editableSyncCount,_editableCursorSyncCount;
     private static String[] _managedDriveNames=new String[32];
     private static String[] _consoleHistory=new String[ConsoleHistoryCapacity];
     private static Int32 _consoleHistoryStart,_consoleHistoryCount;
@@ -447,7 +447,12 @@ public static unsafe class UserlandRuntimeStartup
     }
 
     private static Int64 ConsoleEditableCursorSet(KernelSystemCallFrame* frame)
-        => frame!=null&&frame->NativeMessage.Value0<=1023UL&&frame->NativeMessage.Value1<=frame->NativeMessage.Value0&&KernelConsole.SetEditableInputCursor((UInt32)frame->NativeMessage.Value0,(UInt32)frame->NativeMessage.Value1)?0L:(Int64)KernelSystemCallError.InvalidArgument;
+    {
+        if(frame==null||frame->NativeMessage.Value0>1023UL||frame->NativeMessage.Value1>frame->NativeMessage.Value0)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt64 sync=++_editableCursorSyncCount;Boolean ok=KernelConsole.SetEditableInputCursor((UInt32)frame->NativeMessage.Value0,(UInt32)frame->NativeMessage.Value1);
+        if(sync<=64UL){Native.WritePort8(0xE9,(Byte)'M');Native.WritePort8(0xE9,(Byte)sync);Native.WritePort8(0xE9,(Byte)frame->NativeMessage.Value0);Native.WritePort8(0xE9,(Byte)frame->NativeMessage.Value1);Native.WritePort8(0xE9,ok?(Byte)'m':(Byte)'!');}
+        return ok?0L:(Int64)KernelSystemCallError.Fault;
+    }
     private static Int64 ConsoleScrollPageUpEvent(KernelSystemCallFrame* frame)=>KernelConsole.ScrollPageUp()?0L:(Int64)KernelSystemCallError.Fault;
     private static Int64 ConsoleScrollPageDownEvent(KernelSystemCallFrame* frame)=>KernelConsole.ScrollPageDown()?0L:(Int64)KernelSystemCallError.Fault;
     private static Int64 ConsoleCaretModeGet(KernelSystemCallFrame* frame)=>(Int64)KernelConsole.GetCaretMode();
@@ -607,10 +612,10 @@ public static unsafe class UserlandRuntimeStartup
 
     private static Int64 StorageFormatFat32Set(KernelSystemCallFrame* frame)
     {
-        if(frame==null||frame->NativeMessage.Value0>UInt32.MaxValue||frame->NativeMessage.Value1==0UL||frame->NativeMessage.Value1>UInt32.MaxValue)return (Int64)KernelSystemCallError.InvalidArgument;
-        UInt32 ordinal=(UInt32)frame->NativeMessage.Value0,partition=(UInt32)frame->NativeMessage.Value1;
+        if(frame==null||frame->NativeMessage.Value0>UInt32.MaxValue||frame->NativeMessage.Value1>=UInt32.MaxValue)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt32 ordinal=(UInt32)frame->NativeMessage.Value0,partitionIndex=(UInt32)frame->NativeMessage.Value1,partitionNumber=partitionIndex+1U;
         if(!TryGetManagedDrive(ordinal,out KernelStorageDeviceHandle drive,out _,out KernelStorageGeometry geometry))return (Int64)KernelSystemCallError.NotFound;if(geometry.ReadOnly)return (Int64)KernelSystemCallError.NotPermitted;
-        if(!StorageApi.TryGetPartition(drive,partition,out KernelStorageVolumeHandle volume))return (Int64)KernelSystemCallError.NotFound;if(KernelVfs.IsVolumeMounted(volume))return (Int64)KernelSystemCallError.Busy;
+        if(!StorageApi.TryGetPartition(drive,partitionNumber,out KernelStorageVolumeHandle volume))return (Int64)KernelSystemCallError.NotFound;if(KernelVfs.IsVolumeMounted(volume))return (Int64)KernelSystemCallError.Busy;
         return FatFs.FormatFat32(volume)?0L:(Int64)KernelSystemCallError.Fault;
     }
 

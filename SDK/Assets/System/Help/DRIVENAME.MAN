@@ -5,5 +5,7 @@ Assigns a user-friendly logical name to an additional drive for the current boot
 Usage:
     drivename <drive-number> <name>
 
+Drive numbers are zero-based, matching DRIVES.
+
 Example:
     drivename 0 Data

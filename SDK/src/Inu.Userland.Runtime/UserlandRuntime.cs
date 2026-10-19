@@ -136,6 +136,11 @@ public static unsafe class UserlandConsole
 
     private static Boolean SyncCursor(UInt32 length,UInt32 cursor)=>UserlandSystem.Call(UserlandOperation.Set,"console.editable.cursor",null,0UL,null,0UL,length,cursor)>=0L;
 
+    private static Boolean MoveEditableCursor(StringBuilder line,UInt32 cursor)
+    {
+        UInt32 length=(UInt32)line.Length;return SyncCursor(length,cursor)||SyncEditable(line,length,cursor);
+    }
+
     private static void ReplaceBuilder(StringBuilder line,String value)
     {
         line.Clear();if(value!=null)line.Append(value);
@@ -179,10 +184,10 @@ public static unsafe class UserlandConsole
             {
                 if(historyOffset<0)continue;UInt32 old=renderedLength;if(historyOffset>0){historyOffset--;ReplaceBuilder(line,GetHistoryNewest(historyOffset));}else{historyOffset=-1;ReplaceBuilder(line,draft);}cursor=(UInt32)line.Length;renderedLength=(UInt32)line.Length;ResetCompletion(ref completionPrefix,ref completionMatches,ref completionIndex);SyncEditable(line,old,cursor);continue;
             }
-            if(value==NavigationLeft){if(cursor>0U)cursor--;SyncCursor((UInt32)line.Length,cursor);continue;}
-            if(value==NavigationRight){if(cursor<(UInt32)line.Length)cursor++;SyncCursor((UInt32)line.Length,cursor);continue;}
-            if(value==NavigationHome){cursor=0U;SyncCursor((UInt32)line.Length,cursor);continue;}
-            if(value==NavigationEnd){cursor=(UInt32)line.Length;SyncCursor((UInt32)line.Length,cursor);continue;}
+            if(value==NavigationLeft){if(cursor>0U)cursor--;if(!MoveEditableCursor(line,cursor)){SetCaretActive(false);throw new InvalidOperationException("Console cursor-left update failed.");}continue;}
+            if(value==NavigationRight){if(cursor<(UInt32)line.Length)cursor++;if(!MoveEditableCursor(line,cursor)){SetCaretActive(false);throw new InvalidOperationException("Console cursor-right update failed.");}continue;}
+            if(value==NavigationHome){cursor=0U;if(!MoveEditableCursor(line,cursor)){SetCaretActive(false);throw new InvalidOperationException("Console home-key update failed.");}continue;}
+            if(value==NavigationEnd){cursor=(UInt32)line.Length;if(!MoveEditableCursor(line,cursor)){SetCaretActive(false);throw new InvalidOperationException("Console end-key update failed.");}continue;}
             if(value==NavigationPageUp){ScrollPage(true);continue;}
             if(value==NavigationPageDown){ScrollPage(false);continue;}
             if(value=='\t'&&commandCompletion)

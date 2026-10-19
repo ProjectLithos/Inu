@@ -10,7 +10,7 @@ public static class Drives
         for(UInt32 i=0U;i<count;i++)
         {
             if(!StorageManagement.TryGetDrive(i,out DriveInfo d))continue;Console.Write("  Drive");Console.Write(i);if(!String.IsNullOrEmpty(d.Name)){Console.Write(" [");Console.Write(d.Name);Console.Write("]");}
-            Console.Write("  ");Console.Write(KindName(d.Kind));Console.Write("  ");WriteSize(d.BlockCount*(UInt64)d.LogicalBlockSize);Console.Write("  partitions=");Console.Write(d.PartitionCount);if(d.ReadOnly)Console.Write("  read-only");Console.WriteLine();
+            Console.Write("  ");Console.Write(KindName(d.Kind));Console.Write("  ");WriteSize(d.BlockCount*(UInt64)d.LogicalBlockSize);Console.Write("  partitions=");Console.Write(d.PartitionCount);if(d.PartitionCount!=0U){Console.Write("  indexes=0..");Console.Write(d.PartitionCount-1U);}if(d.ReadOnly)Console.Write("  read-only");Console.WriteLine();
         }
     }
     private static String KindName(UInt32 kind)=>kind==5U?"USB":kind==6U?"NVMe":kind==7U?"AHCI":kind==2U?"Virtual":kind==3U?"RAM disk":kind==4U?"Optical":"Physical";

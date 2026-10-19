@@ -6,4 +6,12 @@ Usage:
     partition <drive-number> <count>
     partition <drive-number> <count> --replace --yes
 
+Drive numbers are zero-based, matching DRIVES (Drive0 is entered as 0).
+The count is how many partitions to create, from 1 to 16. Newly created partitions are addressed by FORMAT as indexes 0 through count-1.
+
+Example:
+    partition 0 2
+    format 0 0 fat32 --yes
+    format 0 1 fat32 --yes
+
 The --replace form destroys the existing partition table and data.

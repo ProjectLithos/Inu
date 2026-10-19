@@ -6,4 +6,11 @@ The boot/system drive is intentionally excluded.
 Usage:
     drives
 
-Use the displayed Drive number with DRIVENAME, PARTITION and FORMAT.
+Drive numbering is zero-based: the first manageable drive is Drive0.
+If a drive has partitions, their FORMAT indexes are also zero-based (0 through partitions-1).
+
+Typical workflow:
+    drives
+    partition 0 1
+    format 0 0 fat32 --yes
+    drivename 0 Data

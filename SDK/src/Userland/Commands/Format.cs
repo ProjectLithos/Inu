@@ -5,7 +5,8 @@ public static class Format
 {
     public static void Main(String[] args)
     {
-        if(args.Length!=4||!Eq(args[2],"fat32")||!Eq(args[3],"--yes"))throw new ArgumentException("Usage: format <drive-number> <partition-number> fat32 --yes",nameof(args));if(!TryUInt(args[0],out UInt32 drive)||!TryUInt(args[1],out UInt32 partition)||partition==0U)throw new ArgumentException("Drive and partition numbers must be positive numeric values.",nameof(args));
+        if(args.Length!=4||!Eq(args[2],"fat32")||!Eq(args[3],"--yes"))throw new ArgumentException("Usage: format <drive-number> <partition-number> fat32 --yes",nameof(args));if(!TryUInt(args[0],out UInt32 drive)||!TryUInt(args[1],out UInt32 partition)||partition==UInt32.MaxValue)throw new ArgumentException("Drive and partition numbers must be non-negative numeric values.",nameof(args));
+        if(!StorageManagement.TryGetDrive(drive,out DriveInfo info))throw new InvalidOperationException("That drive does not exist. Use DRIVES to see valid zero-based drive numbers.");if(partition>=info.PartitionCount)throw new InvalidOperationException(info.PartitionCount==0U?"That drive has no partitions. Create one first, for example: partition 0 1":"That partition index does not exist. Use DRIVES to see the valid zero-based partition range.");
         Int64 result=StorageManagement.FormatFat32(drive,partition);if(result==UserlandError.Busy)throw new InvalidOperationException("That partition is mounted. Reboot with it unmounted before formatting.");if(result<0L)throw new InvalidOperationException("The partition could not be formatted as FAT32. Use DRIVES and PARTITION to verify the target.");
         Console.Write("Formatted Drive");Console.Write(drive);Console.Write(" partition ");Console.Write(partition);Console.WriteLine(" as FAT32. Reboot or remount it to expose the new filesystem.");
     }

@@ -3,6 +3,13 @@ FORMAT
 Formats one partition of an additional data drive as FAT32.
 
 Usage:
-    format <drive-number> <partition-number> fat32 --yes
+    format <drive-number> <partition-index> fat32 --yes
+
+Drive and partition indexes are zero-based. For example, the first partition on Drive0 is selected as:
+    format 0 0 fat32 --yes
+
+If DRIVES reports partitions=0, create a partition table first, for example:
+    partition 0 1
+    format 0 0 fat32 --yes
 
 Formatting destroys existing filesystem data on the selected partition. Mounted partitions are refused.
