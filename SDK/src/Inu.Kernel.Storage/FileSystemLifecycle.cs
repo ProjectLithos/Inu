@@ -69,10 +69,14 @@ public static class FileSystem
     public static unsafe Boolean EnsureDirectory(String path)
     {
         if(!FileSystemPathPolicyRuntime.TryNormalizeUserPath(path,out String canonical)||canonical.Length==0||canonical.Length>1024)return false;
-        if(KernelVfs.OpenDirectory(KernelVfs.DefaultNamespace,canonical,out KernelDirectoryHandle existing)){KernelVfs.CloseDirectory(existing);return true;}
         Byte* ascii=stackalloc Byte[canonical.Length];
         for(Int32 i=0;i<canonical.Length;i++){Char c=canonical[i];if(c>0x7F)return false;ascii[i]=(Byte)c;}
-        return KernelVfs.CreateDirectoryAscii(KernelVfs.DefaultNamespace,ascii,(UInt32)canonical.Length);
+        UInt32 length=(UInt32)canonical.Length;
+        // Existence and creation must use the same allocation-free ASCII/VFAT lookup path.
+        // Mixing the managed-string lookup with ASCII creation can miss an existing long-name
+        // directory (for example /System/Applications) and then incorrectly try to create it again.
+        if(KernelVfs.OpenDirectoryAscii(KernelVfs.DefaultNamespace,ascii,length,out KernelDirectoryHandle existing)){KernelVfs.CloseDirectory(existing);return true;}
+        return KernelVfs.CreateDirectoryAscii(KernelVfs.DefaultNamespace,ascii,length);
     }
 
 }

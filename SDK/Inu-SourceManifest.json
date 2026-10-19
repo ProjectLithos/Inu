@@ -1,5 +1,5 @@
 {
-  "version": "0.1.132",
+  "version": "0.1.133",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -839,7 +839,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "3d50115f9bd9208fb7d92c682f194bc16d980dd3dd60053d4c57195a7b6d5d9d"
+      "sha256": "552f2c77926715752a9bb636aca928513b36108db47a120f88be19e8ca18b3cc"
     },
     {
       "path": "Directory.Build.targets",
@@ -3247,7 +3247,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "c3adb660aa86ac443be30b5a4fc6419719c23b757bc2abacd90874ffc3ff41ed"
+      "sha256": "18833a1ba4a99ebd26a2eceeefe87cd77a53a9266a3778eb37e8b298b3c04981"
     },
     {
       "path": "Help/search-index.json",
@@ -3279,7 +3279,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "053d918049989156e92a2efc98ebde823853de886e7008aae7a9433b69623bda"
+      "sha256": "bb0b49717874da6cdf77aac60bf9e7bff84d6357bd5e49b0b89db66923f2791c"
     },
     {
       "path": "Inu-Package.bat",
@@ -3323,7 +3323,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "fab9763d66ef34e0da3ca2975f9c9d168c8035d742ad9f05cc32f2d7bab58b80"
+      "sha256": "b28cdff4a5edff150d617418b8a21808a7c1062a39e9286494ccde0852d63324"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3835,7 +3835,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "39d473421906b81d77043db1f1dbbf850b30ad895720ce0a25104b4c6d148651"
+      "sha256": "eea33a89056bf7ab0c1116fd52ab8b347db12bd4ee99ba2daa1b6212eff2f6cb"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -5435,7 +5435,7 @@
     },
     {
       "path": "src/Inu.Kernel.Storage/FileSystemLifecycle.cs",
-      "sha256": "1d6ddb9a3800ef5969735160c8cda697ce847f195845c481743ccca3c026e9c3"
+      "sha256": "f5d1def7a87e7d40b30f41edcaf306e886eb7622bf538319a3b63254f76b423c"
     },
     {
       "path": "src/Inu.Kernel.Storage/FileSystemLogicalPaths.cs",
@@ -6007,7 +6007,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "2a8cc28b74f4be040e61a7502f0ed38342d9ee7155cb891cb8e5415bb4971444"
+      "sha256": "d95c68b963727a3bac56a7acdfef5bbe58b69600b5f9d07ae72e16cd2aa03b01"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",

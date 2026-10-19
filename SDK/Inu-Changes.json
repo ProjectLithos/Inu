@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.131",
-  "version": "0.1.132",
-  "summary": "Unify zero-based drive/partition command numbering with DRIVES output; harden interactive cursor editing and shorten stale USB key-repeat recovery.",
-  "changedFiles": 11,
+  "baseVersion": "0.1.132",
+  "version": "0.1.133",
+  "summary": "Make stock Test OS logical-path setup non-mutating at boot and use one ASCII/VFAT path for EnsureDirectory existence/creation so long-name directories are handled consistently.",
+  "changedFiles": 2,
   "deletedFiles": 0
 }

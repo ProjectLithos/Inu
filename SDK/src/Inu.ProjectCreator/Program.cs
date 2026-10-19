@@ -198,6 +198,7 @@ static int MainEntry(string[] args)
     if (!RepairStockTestOsBootImports(output, projectName, testOs)) throw new InvalidOperationException("Could not repair the stock Test OS boot imports.");
     if (!RepairStockTestOsStoragePolicy(output, projectName, testOs)) throw new InvalidOperationException("Could not refresh the stock Test OS storage policy.");
     if (!RepairStockTestOsNonDestructiveStoragePolicy(output, projectName, testOs)) throw new InvalidOperationException("Could not migrate the stock Test OS storage policy to non-destructive drive discovery.");
+    if (!RepairStockTestOsLogicalDirectoryProvisioning(output, projectName, testOs)) throw new InvalidOperationException("Could not migrate the stock Test OS logical-directory provisioning policy.");
     if (!InstrumentStockTestOsPolicyDiagnostics(output, projectName, testOs)) throw new InvalidOperationException("Could not instrument the stock Test OS policy diagnostics.");
     if (!MaterializeCoderCommands(sdkRoot, output, projectName)) throw new InvalidOperationException("Could not materialize coder commands.");
     // Shell.cs is coder-owned. Never rewrite it during compile/run preparation, even when it
@@ -490,12 +491,12 @@ static bool InstrumentStockTestOsPolicyDiagnostics(string output, string project
 
         var logicalDirectoryReplacements = new (string Old, string New)[]
         {
-            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.WritableUser))) return false;", "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_DIRECTORIES_ENTER\")) return false;\n        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.WritableUser))) { KernelConsole.WriteHostControl(\"OS_POLICY_WRITABLE_USER_DIRECTORY_FAIL\"); return false; }"),
-            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.ReadableFonts))) return false;", "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.ReadableFonts))) { KernelConsole.WriteHostControl(\"OS_POLICY_FONTS_DIRECTORY_FAIL\"); return false; }"),
-            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Commands))) return false;", "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Commands))) { KernelConsole.WriteHostControl(\"OS_POLICY_COMMANDS_DIRECTORY_FAIL\"); return false; }"),
-            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Applications))) return false;", "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Applications))) { KernelConsole.WriteHostControl(\"OS_POLICY_APPLICATIONS_DIRECTORY_FAIL\"); return false; }"),
-            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Libraries))) return false;", "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Libraries))) { KernelConsole.WriteHostControl(\"OS_POLICY_LIBRARIES_DIRECTORY_FAIL\"); return false; }"),
-            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Temporary))) return false;", "        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Temporary))) { KernelConsole.WriteHostControl(\"OS_POLICY_TEMP_DIRECTORY_FAIL\"); return false; }\n        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_DIRECTORIES_OK\")) return false;")
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.WritableUser))) return false;", "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_DIRECTORIES_ENTER\")) return false;\n        // The stock image builder provisions default logical folders. SetLogicalPath maps policy; it does not make boot depend on mutating the mounted filesystem."),
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.ReadableFonts))) return false;", String.Empty),
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Commands))) return false;", String.Empty),
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Applications))) return false;", String.Empty),
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Libraries))) return false;", String.Empty),
+            ("        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Temporary))) return false;", "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_DIRECTORIES_OK\")) return false;")
         };
         foreach (var replacement in logicalDirectoryReplacements) source = source.Replace(replacement.Old, replacement.New, StringComparison.Ordinal);
 
@@ -586,12 +587,9 @@ static bool RepairStockTestOsStoragePolicy(string output, string projectName, bo
             }
         }
 
-        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.WritableUser))) return false;
-        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.ReadableFonts))) return false;
-        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Commands))) return false;
-        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Applications))) return false;
-        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Libraries))) return false;
-        if (!FileSystem.EnsureDirectory(FileSystem.GetLogicalPath(FileSystemLogicalPath.Temporary))) return false;
+        // The stock image builder provisions the default logical folders. Logical-path mapping
+        // and directory creation are separate policies; boot must not mutate these paths merely
+        // because a logical mapping exists.
         """;
 
         source = source[..start] + replacement + source[end..];
@@ -602,6 +600,51 @@ static bool RepairStockTestOsStoragePolicy(string output, string projectName, bo
     catch (Exception ex)
     {
         Console.Error.WriteLine($"[FAIL] Unable to refresh stock Test OS storage policy: {ex.Message}");
+        return false;
+    }
+}
+
+static bool RepairStockTestOsLogicalDirectoryProvisioning(string output, string projectName, bool testOs)
+{
+    if (!testOs) return true;
+    string kernelPath = Path.Combine(output, "Kernel", projectName, "Kernel.cs");
+    if (!File.Exists(kernelPath)) return true;
+    try
+    {
+        string source = File.ReadAllText(kernelPath);
+        const string first = "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_DIRECTORIES_ENTER\")) return false;";
+        const string last = "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_DIRECTORIES_OK\")) return false;";
+        int start = source.IndexOf(first, StringComparison.Ordinal);
+        if (start < 0) return true;
+        int end = source.IndexOf(last, start, StringComparison.Ordinal);
+        if (end < 0) return true;
+        end += last.Length;
+        string block = source[start..end];
+        // Only migrate the stock diagnostic block. If the coder has replaced the provisioning
+        // policy, leave the file untouched.
+        string[] stockMarkers =
+        [
+            "OS_POLICY_WRITABLE_USER_DIRECTORY_FAIL",
+            "OS_POLICY_FONTS_DIRECTORY_FAIL",
+            "OS_POLICY_COMMANDS_DIRECTORY_FAIL",
+            "OS_POLICY_APPLICATIONS_DIRECTORY_FAIL",
+            "OS_POLICY_LIBRARIES_DIRECTORY_FAIL",
+            "OS_POLICY_TEMP_DIRECTORY_FAIL"
+        ];
+        foreach (string marker in stockMarkers) if (!block.Contains(marker, StringComparison.Ordinal)) return true;
+        string replacement =
+            "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_DIRECTORIES_ENTER\")) return false;\n" +
+            "        // The stock FAT32 image already contains the default logical folders. Logical-path mapping\n" +
+            "        // and physical directory provisioning are separate OS policies; do not mutate the system disk here.\n" +
+            "        if (!KernelConsole.WriteHostControl(\"OS_POLICY_LOGICAL_DIRECTORIES_OK\")) return false;";
+        source = source[..start] + replacement + source[end..];
+        File.WriteAllText(kernelPath, source);
+        Console.WriteLine($"[ OK ] Migrated stock Test OS logical folders to image-provisioned, non-mutating boot policy: {kernelPath}");
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"[FAIL] Unable to migrate stock Test OS logical-directory provisioning: {ex.Message}");
         return false;
     }
 }
