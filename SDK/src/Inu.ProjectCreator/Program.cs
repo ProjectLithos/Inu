@@ -621,10 +621,16 @@ static bool RepairStockTestOsNonDestructiveStoragePolicy(string output, string p
         int end = source.IndexOf(endAnchor, start, StringComparison.Ordinal);
         if (end < 0) return true;
         ReadOnlySpan<char> candidate = source.AsSpan(start, end - start);
-        // Only migrate the untouched Kath-generated destructive default. Coder-owned storage
-        // policy is preserved if these exact stock markers are no longer present.
-        if (!candidate.Contains("Storage.EnsureGptPartitions(drive, 2U, out createdLayout)", StringComparison.Ordinal) ||
-            !candidate.Contains("String drivePath = \"/Drives/Drive\" + driveOrdinal.ToString();", StringComparison.Ordinal)) return true;
+        // Migrate only untouched Kath-generated storage policy variants. This accepts both the
+        // older destructive two-partition default and the 0.1.121-0.1.130 eager DriveN directory
+        // variant. Coder-owned policy is preserved once these exact stock markers are changed.
+        Boolean destructiveStock = candidate.Contains("Storage.EnsureGptPartitions(drive, 2U, out createdLayout)", StringComparison.Ordinal) &&
+            candidate.Contains("String drivePath = \"/Drives/Drive\" + driveOrdinal.ToString();", StringComparison.Ordinal);
+        Boolean eagerNonDestructiveStock = candidate.Contains("Discovery is non-destructive. Blank disks stay blank", StringComparison.Ordinal) &&
+            candidate.Contains("String drivePath = \"/Drives/Drive\" + additionalDriveOrdinal.ToString();", StringComparison.Ordinal) &&
+            candidate.Contains("if (!FileSystem.EnsureDirectory(drivePath))", StringComparison.Ordinal) &&
+            !candidate.Contains("Boolean driveDirectoryReady = false;", StringComparison.Ordinal);
+        if (!destructiveStock && !eagerNonDestructiveStock) return true;
 
         string replacement = """
         UInt32 detectedDriveCount = Storage.GetDriveCount();
@@ -638,19 +644,26 @@ static bool RepairStockTestOsNonDestructiveStoragePolicy(string output, string p
             // chooses a partition/format policy with EnsureGptPartitions/RepartitionGpt/FormatFat32.
             String drivePath = "/Drives/Drive" + additionalDriveOrdinal.ToString();
             additionalDriveOrdinal++;
-            if (!FileSystem.EnsureDirectory(drivePath))
-            {
-                KernelConsole.WriteHostControl("OS_POLICY_DRIVE_DIRECTORY_FAIL");
-                return false;
-            }
 
-            // Mount only filesystems that already exist on this additional physical drive.
+            // A blank physical drive has no filesystem namespace yet. DRIVES/PARTITION/FORMAT
+            // manage it by physical ordinal; create /Drives/DriveN lazily only when a real
+            // existing filesystem is about to be mounted beneath it.
+            Boolean driveDirectoryReady = false;
             UInt32 volumeCount = Storage.GetVolumeCount();
             for (UInt32 volumeOrdinal = 0U; volumeOrdinal < volumeCount; volumeOrdinal++)
             {
                 if (!Storage.TryGetVolume(volumeOrdinal, out KernelStorageVolumeHandle volume, out KernelStorageDeviceHandle owner, out KernelPartitionInfo partition)) continue;
                 if (owner.Value != drive.Value) continue;
                 if (!FatFs.TryGetFileSystemType(volume, out KernelFileSystemType fileSystemType)) continue;
+                if (!driveDirectoryReady)
+                {
+                    if (!FileSystem.EnsureDirectory(drivePath))
+                    {
+                        KernelConsole.WriteHostControl("OS_POLICY_DRIVE_DIRECTORY_FAIL");
+                        return false;
+                    }
+                    driveDirectoryReady = true;
+                }
                 String mountPath = drivePath + "/Partition" + (partition.Index + 1U).ToString();
                 if (!FileSystem.Mount(volume, fileSystemType, mountPath))
                 {
@@ -663,7 +676,7 @@ static bool RepairStockTestOsNonDestructiveStoragePolicy(string output, string p
 """;
         source = source[..start] + replacement + source[end..];
         File.WriteAllText(kernelPath, source);
-        Console.WriteLine($"[ OK ] Migrated untouched stock Test OS storage policy to non-destructive additional-drive discovery: {kernelPath}");
+        Console.WriteLine($"[ OK ] Migrated untouched stock Test OS storage policy to lazy additional-drive filesystem mounting: {kernelPath}");
         return true;
     }
     catch (Exception ex)

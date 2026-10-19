@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.129",
-  "version": "0.1.130",
-  "changedFiles": 12,
-  "summary": "Replace blocking USB HID keyboard polling with continuously armed asynchronous xHCI interrupt-IN service, deterministic 0.5s/40ms repeat timing, stale-repeat protection, and expanded input diagnostics.",
+  "baseVersion": "0.1.130",
+  "version": "0.1.131",
+  "summary": "Make additional-drive filesystem directories lazy so blank drives do not abort Test OS startup; migrate untouched eager stock storage policy.",
+  "changedFiles": 2,
   "deletedFiles": 0
 }
