@@ -909,8 +909,10 @@ public static unsafe class UserlandRuntimeStartup
         if(frame==null)return (Int64)KernelSystemCallError.InvalidArgument;
         Byte* path=stackalloc Byte[(Int32)PathCapacity];UInt32 pathLength=0U;
         if(!TryCopyResolvedPath(frame,path,out pathLength))return (Int64)KernelSystemCallError.InvalidArgument;
-        if(TryOpenIndexedDirectory(path,pathLength,out UInt64 indexedHandle))return (Int64)indexedHandle;
+        // The mounted VFS is authoritative. The background path index is only an accelerator/fallback:
+        // preferring it here can expose a partially populated snapshot to ordinary DIR/Directory APIs.
         if(KernelVfs.OpenDirectoryAscii(KernelVfs.DefaultNamespace,path,pathLength,out KernelDirectoryHandle handle))return handle.Value;
+        if(TryOpenIndexedDirectory(path,pathLength,out UInt64 indexedHandle))return (Int64)indexedHandle;
         return TryOpenAssetDirectory(path,pathLength,out UInt64 assetHandle)?(Int64)assetHandle:(Int64)KernelSystemCallError.NotFound;
     }
 

@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.135",
-  "version": "0.1.136",
-  "summary": "Existing-image /User preservation now retries the mirrored FAT copy and safely accepts a provably empty legacy directory cluster whose FAT entry was left free.",
-  "changedFiles": 1,
+  "baseVersion": "0.1.136",
+  "version": "0.1.137",
+  "summary": "Mounted VFS directory enumeration is authoritative over the background path index, and asynchronous xHCI HID transfers now have bounded lost-interrupt recovery so keyboard input cannot remain permanently pending.",
+  "changedFiles": 5,
   "deletedFiles": 0
 }

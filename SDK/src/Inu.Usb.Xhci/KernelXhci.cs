@@ -11,10 +11,10 @@ namespace Inu.Usb.Xhci;
 /// <summary>PCI xHCI host-controller implementation with command, event and endpoint transfer rings.</summary>
 public static unsafe partial class KernelXhci
 {
- const UInt32 SpinLimit=40000000U;const UInt64 InterruptWaitTimeoutNanoseconds=2000000000UL;const Int32 MaxControllers=8,MaxSlots=256,MaxEndpoints=2048;
+ const UInt32 SpinLimit=40000000U,AsyncInterruptWatchdogServicePasses=8U;const UInt64 InterruptWaitTimeoutNanoseconds=2000000000UL;const Int32 MaxControllers=8,MaxSlots=256,MaxEndpoints=2048;
  struct Ring{internal KernelPhysicalAllocation Memory;internal UInt16 Enqueue;internal Byte Cycle;}
  struct Slot{internal Byte Used,SlotId,LogicalAddress,RootPort,Depth,SpeedId,HubPorts,ContextEntries,MultiTt,ParentSlot,TtPort;internal UInt32 Route;internal UInt16 Ep0Packet;internal KernelPhysicalAllocation Output,Input;internal Ring Ep0;}
- struct Endpoint{internal Byte Used,SlotId,Dci,Address,Type,Interval,AsyncPending,AsyncCompleted,AsyncOk;internal UInt16 MaxPacket;internal UInt32 AsyncRequested,AsyncActual;internal UInt64 AsyncBuffer;internal KernelPhysicalAllocation AsyncBounce;internal Ring Ring;}
+ struct Endpoint{internal Byte Used,SlotId,Dci,Address,Type,Interval,AsyncPending,AsyncCompleted,AsyncOk;internal UInt16 MaxPacket;internal UInt32 AsyncRequested,AsyncActual,AsyncPendingServicePasses;internal UInt64 AsyncBuffer;internal KernelPhysicalAllocation AsyncBounce;internal Ring Ring;}
  struct Controller
  {
   internal Byte Used,Ports,Slots,ContextSize,State,EventCycle,InterruptConfigured,InterruptPrepared,InterruptDriven;
@@ -26,7 +26,7 @@ public static unsafe partial class KernelXhci
   internal Byte CommandCompletionCode,CommandCompletionSlot,TransferCompletionCode,TransferCompletionSlot,TransferCompletionDci;
   internal UInt32 TransferCompletionRemaining;
  }
- static Controller* _controllers;static KernelHeapAllocation _controllersAllocation;static KernelDriverHandle _driver;static Boolean _initialized,_allowPollingFallback;static UInt32 _controllerCount,_running,_connected;static UInt64 _diagnosticTransfers,_diagnosticInterrupts,_diagnosticAsyncArms,_diagnosticAsyncEvents,_diagnosticAsyncConsumes;
+ static Controller* _controllers;static KernelHeapAllocation _controllersAllocation;static KernelDriverHandle _driver;static Boolean _initialized,_allowPollingFallback;static UInt32 _controllerCount,_running,_connected;static UInt64 _diagnosticTransfers,_diagnosticInterrupts,_diagnosticAsyncArms,_diagnosticAsyncEvents,_diagnosticAsyncConsumes,_diagnosticAsyncWatchdogChecks,_diagnosticAsyncWatchdogRecoveries;
  public static Boolean Initialize(){if(_initialized)return true;if(!KernelUsbBus.Initialize()||!KernelPhysicalMemory.IsInitialized()||!KernelAddressSpace.IsInitialized()||!KernelHeap.IsInitialized()||!KernelDrivers.IsInitialized())return false;if(!KernelHeap.TryAllocate((UInt64)MaxControllers*(UInt64)sizeof(Controller),64,true,out _controllersAllocation))return false;_controllers=(Controller*)(nuint)_controllersAllocation.Address;KernelDriverMatchRule rule=new(KernelDeviceBus.Pci,true,0,false,0,false,0x0C0330U,0xFFFFFFU);KernelDriverCallbacks cb=new(&Probe,&Start,&Stop,&Remove,&Interrupt);KernelDriverCapabilityDeclaration caps=new(KernelDriverCapability.Mmio|KernelDriverCapability.Dma|KernelDriverCapability.PciConfig|KernelDriverCapability.Interrupt|KernelDriverCapability.Msi|KernelDriverCapability.MsiX);if(!KernelDrivers.RegisterDriver("xhci",rule,cb,caps,out _driver))return false;_initialized=true;for(UInt32 i=0;i<KernelPci.GetDeviceCount();i++){if(!KernelPci.TryGetDevice(i,out PciDeviceInfo pci)||pci.ClassCode!=0x0C0330U)continue;KernelDrivers.MatchAndStartDevice(pci.DeviceHandle);}return true;}
  /// <summary>Explicit bring-up/debug escape hatch. Normal Inu boots require broker-managed xHCI interrupts.</summary>
  public static Boolean SetPollingFallback(Boolean enabled){if(_running!=0U)return false;_allowPollingFallback=enabled;return true;}
