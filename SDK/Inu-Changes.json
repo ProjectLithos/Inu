@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.122",
-  "version": "0.1.123",
+  "baseVersion": "0.1.123",
+  "version": "0.1.124",
   "changedFiles": 1,
-  "summary": "Fix the Inu.ProjectCreator stock storage-policy migration string literal so 0.1.122 drive-management projects compile and refresh correctly.",
+  "summary": "Publish large Inu GitHub backlogs in resumable fast-forward commit batches, automatically shrinking failed batches instead of sending the entire multi-gigabyte history in one push.",
   "deletedFiles": 0
 }

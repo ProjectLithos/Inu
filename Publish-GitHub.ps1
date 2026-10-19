@@ -184,15 +184,130 @@ if($hasChanges -or -not $hasHead){
     Write-Host "[INFO] $RepositoryName has no source changes to commit."
 }
 
-# Never force-push.  If someone has changed the remote independently, stop and
-# report it rather than destroying that history.
-Write-Host "[INFO] Pushing $RepositoryName to GitHub (no fixed wall-clock timeout; 5-minute zero-progress transport guard)..."
-# Inu can legitimately need several minutes to pack and upload a large first/backlog push.
-# Do not terminate it merely because compression exceeds 90 seconds. The git http
-# low-speed guard still fails a genuinely stalled HTTPS transfer after five minutes
-# below one byte/second, while authentication remains explicitly non-interactive.
+function Read-SingleGitLine([string[]]$Arguments, [string]$FailureMessage, [int]$TimeoutSeconds=60){
+    $result=Invoke-GitResult -a $Arguments -TimeoutSeconds $TimeoutSeconds
+    if($result.ExitCode -ne 0){
+        foreach($line in $result.Lines){ Write-Host $line }
+        Fail "$FailureMessage (exit $($result.ExitCode))."
+    }
+    return (($result.Lines | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1) -as [string])
+}
+function Get-RemoteMainCommit {
+    $result=Invoke-GitResult -a @('ls-remote','--heads','origin','refs/heads/main') -TimeoutSeconds 60
+    if($result.ExitCode -ne 0){
+        foreach($line in $result.Lines){ Write-Host $line }
+        Fail "Could not inspect origin/main for $RepositoryName (exit $($result.ExitCode))."
+    }
+    $line=($result.Lines | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1)
+    if([string]::IsNullOrWhiteSpace($line)){ return $null }
+    $parts=@($line -split '\s+')
+    if($parts.Count -lt 1 -or $parts[0] -notmatch '^[0-9a-fA-F]{40,64}$'){
+        Fail "GitHub returned an unexpected origin/main reference for ${RepositoryName}: $line"
+    }
+    return $parts[0]
+}
+function Ensure-RemoteCommitAvailable([string]$Commit){
+    if([string]::IsNullOrWhiteSpace($Commit)){ return }
+    $probe=Invoke-GitResult -a @('cat-file','-e',($Commit + '^{commit}'))
+    if($probe.ExitCode -eq 0){ return }
+    Write-Host "[INFO] Remote main commit $Commit is not present locally; fetching origin/main metadata before publishing."
+    $fetch=Invoke-GitLiveResult -a @('-c','http.lowSpeedLimit=1','-c','http.lowSpeedTime=300','fetch','--no-tags','origin','main')
+    if($fetch.ExitCode -ne 0){
+        Fail "Could not fetch origin/main before the incremental $RepositoryName publish (exit $($fetch.ExitCode))."
+    }
+    $probe=Invoke-GitResult -a @('cat-file','-e',($Commit + '^{commit}'))
+    if($probe.ExitCode -ne 0){ Fail "Remote main commit $Commit is still unavailable locally after fetch." }
+}
+function Get-MissingCommits([string]$RemoteCommit, [string]$LocalHead){
+    $arguments=if([string]::IsNullOrWhiteSpace($RemoteCommit)){
+        @('rev-list','--reverse',$LocalHead)
+    } else {
+        @('rev-list','--reverse',("$RemoteCommit..$LocalHead"))
+    }
+    $result=Invoke-GitResult -a $arguments -TimeoutSeconds 120
+    if($result.ExitCode -ne 0){
+        foreach($line in $result.Lines){ Write-Host $line }
+        Fail "Could not calculate commits missing from GitHub for $RepositoryName (exit $($result.ExitCode))."
+    }
+    return @($result.Lines | Where-Object { $_ -match '^[0-9a-fA-F]{40,64}$' })
+}
+function Push-MissingCommitsInBatches([string]$RemoteCommit, [string]$LocalHead){
+    if(-not [string]::IsNullOrWhiteSpace($RemoteCommit)){
+        Ensure-RemoteCommitAvailable $RemoteCommit
+        $ancestor=Invoke-GitResult -a @('merge-base','--is-ancestor',$RemoteCommit,$LocalHead)
+        if($ancestor.ExitCode -eq 1){
+            Fail "origin/main ($RemoteCommit) is not an ancestor of local HEAD ($LocalHead). Refusing to rewrite GitHub history; pull/reconcile the remote branch first."
+        } elseif($ancestor.ExitCode -ne 0){
+            foreach($line in $ancestor.Lines){ Write-Host $line }
+            Fail "Could not verify origin/main ancestry for $RepositoryName (exit $($ancestor.ExitCode))."
+        }
+    }
+
+    $missing=@(Get-MissingCommits -RemoteCommit $RemoteCommit -LocalHead $LocalHead)
+    if($missing.Count -eq 0){
+        Write-Host "[INFO] GitHub already contains every $RepositoryName commit through $LocalHead."
+        return
+    }
+
+    $initialBatchSize=25
+    if(-not [string]::IsNullOrWhiteSpace($env:INU_GITHUB_PUSH_BATCH_SIZE)){
+        $parsed=0
+        if([int]::TryParse($env:INU_GITHUB_PUSH_BATCH_SIZE,[ref]$parsed) -and $parsed -ge 1 -and $parsed -le 1000){
+            $initialBatchSize=$parsed
+        } else {
+            Write-Host "[WARN] Ignoring invalid INU_GITHUB_PUSH_BATCH_SIZE='$($env:INU_GITHUB_PUSH_BATCH_SIZE)'; using $initialBatchSize commits per batch."
+        }
+    }
+
+    Write-Host "[INFO] $($missing.Count) $RepositoryName commit(s) are missing from GitHub; publishing in batches of up to $initialBatchSize commit(s)."
+    $published=0
+    $batchSize=[Math]::Min($initialBatchSize,$missing.Count)
+    while($published -lt $missing.Count){
+        $remaining=$missing.Count-$published
+        $attemptSize=[Math]::Min($batchSize,$remaining)
+        $lastIndex=$published+$attemptSize-1
+        $target=$missing[$lastIndex]
+        $firstDisplay=$published+1
+        $lastDisplay=$lastIndex+1
+        $shortTarget=if($target.Length -gt 12){ $target.Substring(0,12) } else { $target }
+        Write-Host "[INFO] $RepositoryName GitHub batch: commits $firstDisplay-$lastDisplay of $($missing.Count), target $shortTarget (batch size $attemptSize)."
+        $push=Invoke-GitLiveResult -a @('-c','http.lowSpeedLimit=1','-c','http.lowSpeedTime=300','push','origin',("${target}:refs/heads/main"))
+        if($push.ExitCode -eq 0){
+            $published+=$attemptSize
+            Write-Host "[ OK ] $RepositoryName GitHub progress: $published / $($missing.Count) missing commit(s) published."
+            $batchSize=[Math]::Min($initialBatchSize,$missing.Count-$published)
+            continue
+        }
+
+        if($attemptSize -le 1){
+            Fail "GitHub rejected the single remaining $RepositoryName commit $target (exit $($push.ExitCode)). This commit may contain an object larger than GitHub permits, or the remote changed during publication. Earlier successful batches remain safely published."
+        }
+        $batchSize=[Math]::Max(1,[int][Math]::Floor($attemptSize / 2.0))
+        Write-Host "[WARN] $RepositoryName batch $firstDisplay-$lastDisplay failed with exit $($push.ExitCode); retrying the same unpublished range with batch size $batchSize."
+    }
+}
+
+# Never force-push.  Publish backlog history through progressively newer
+# intermediate commits so GitHub never has to receive the whole multi-gigabyte
+# history in one pack. Each successful batch advances main by fast-forward only.
+$localHead=Read-SingleGitLine -Arguments @('rev-parse','HEAD') -FailureMessage "Could not resolve local HEAD for $RepositoryName"
+$remoteMain=Get-RemoteMainCommit
+if([string]::IsNullOrWhiteSpace($remoteMain)){
+    Write-Host "[INFO] GitHub origin/main does not exist yet; incremental publication will begin from the oldest local commit."
+} else {
+    Write-Host "[INFO] GitHub origin/main currently points to $remoteMain."
+}
+Write-Host "[INFO] Pushing $RepositoryName to GitHub in incremental commit batches (no force-push; 5-minute zero-progress transport guard)..."
+Push-MissingCommitsInBatches -RemoteCommit $remoteMain -LocalHead $localHead
+
+# The final push is normally a no-op. It records the upstream relationship and
+# verifies that GitHub main reaches the exact local HEAD after all batches.
 $push=Invoke-GitLiveResult -a @('-c','http.lowSpeedLimit=1','-c','http.lowSpeedTime=300','push','-u','origin','HEAD:main')
 if($push.ExitCode -ne 0){
-    Fail "The build succeeded, but $RepositoryName could not be pushed to $RepositoryUrl (exit $($push.ExitCode)). Check GitHub authentication, connectivity, or remote history."
+    Fail "The incremental batches completed, but the final $RepositoryName HEAD verification push failed (exit $($push.ExitCode)). Check whether origin/main changed concurrently."
 }
-Write-Host "[ OK ] $RepositoryName $Version published to GitHub."
+$publishedRemote=Get-RemoteMainCommit
+if($publishedRemote -ne $localHead){
+    Fail "$RepositoryName GitHub publication ended at $publishedRemote instead of local HEAD $localHead."
+}
+Write-Host "[ OK ] $RepositoryName $Version published to GitHub in incremental batches."
