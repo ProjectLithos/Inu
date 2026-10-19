@@ -38,6 +38,7 @@
     <ProjectReference Include="..\Inu.Kernel.InterruptBroker\Inu.Kernel.InterruptBroker.csproj" />
     <ProjectReference Include="..\Inu.Kernel.TimerDispatch\Inu.Kernel.TimerDispatch.csproj" />
     <ProjectReference Include="..\Inu.Kernel.Storage\Inu.Kernel.Storage.csproj" />
+    <ProjectReference Include="..\Inu.Filesystem.FatFs\Inu.Filesystem.FatFs.csproj" />
     <ProjectReference Include="..\Inu.Kernel.Networking\Inu.Kernel.Networking.csproj" />
     <ProjectReference Include="..\Inu.Kernel.Pci\Inu.Kernel.Pci.csproj" />
     <ProjectReference Include="..\Inu.Kernel.Nvme\Inu.Kernel.Nvme.csproj" />

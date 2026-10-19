@@ -4,6 +4,7 @@ using Inu.Kernel.Console;
 using Inu.Kernel.Internal.X64;
 using Inu.Kernel.Processes;
 using Inu.Kernel.Storage;
+using Inu.Filesystem.FatFs;
 using Inu.Kernel.Smp;
 #if INU_KERNELAREA_DRIVERS
 using Inu.Kernel.Drivers;
@@ -68,6 +69,7 @@ public static unsafe class UserlandRuntimeStartup
     // Zero means no ring-3 console reader is sleeping. Non-zero stores processorIndex+1 so CPU 0 is representable.
     private static UInt64 _inputWaitProcessorPlusOne;
     private static UInt64 _inputQueuedCount,_inputWakeCount,_inputReadCount,_inputWaitCount,_editableSyncCount;
+    private static String[] _managedDriveNames=new String[32];
     private static String[] _consoleHistory=new String[ConsoleHistoryCapacity];
     private static Int32 _consoleHistoryStart,_consoleHistoryCount;
     // Read-only handles over the bootloader-preloaded system asset catalogue. These make the
@@ -130,7 +132,13 @@ public static unsafe class UserlandRuntimeStartup
            !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileSystemPathSeparator,&FileSystemPathSeparatorSet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileSystemCommandsPathCount,&FileSystemCommandsPathCountGet)||
            !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.FileSystemCommandsPath,&FileSystemCommandsPathGet)||
-           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileSystemCommandsPath,&FileSystemCommandsPathSet))return false;
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.FileSystemCommandsPath,&FileSystemCommandsPathSet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.StorageDriveCount,&StorageDriveCountGet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.StorageDriveInfo,&StorageDriveInfoGet)||
+           !KernelSystemCalls.RegisterGet(KernelSystemCallMessages.StorageDriveName,&StorageDriveNameGet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.StorageDriveName,&StorageDriveNameSet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.StoragePartitionGpt,&StoragePartitionGptSet)||
+           !KernelSystemCalls.RegisterSet(KernelSystemCallMessages.StorageFormatFat32,&StorageFormatFat32Set))return false;
         if(!KernelSystemCalls.RegisterGet("system.device.inspect",&DeviceInspectGet))return false;
         _initialized=true;return true;
     }
@@ -526,6 +534,79 @@ public static unsafe class UserlandRuntimeStartup
     private static Int64 ProcessEnvironmentGet(KernelSystemCallFrame* frame)=>CopyContextToUser(frame,false);
 
 
+
+    private static Boolean TryGetManagedDrive(UInt32 managedOrdinal,out KernelStorageDeviceHandle drive,out KernelStorageDeviceKind kind,out KernelStorageGeometry geometry)
+    {
+        drive=default;kind=KernelStorageDeviceKind.Unknown;geometry=default;UInt32 managed=0U,count=Storage.GetDriveCount();
+        for(UInt32 ordinal=0U;ordinal<count;ordinal++)
+        {
+            if(!Storage.TryGetDrive(ordinal,out KernelStorageDeviceHandle candidate,out KernelStorageDeviceKind candidateKind,out KernelStorageGeometry candidateGeometry))continue;
+            if(Storage.IsSystemDrive(candidate))continue;
+            if(managed==managedOrdinal){drive=candidate;kind=candidateKind;geometry=candidateGeometry;return true;}
+            managed++;
+        }
+        return false;
+    }
+
+    private static UInt32 ManagedDriveCount()
+    {
+        UInt32 result=0U,count=Storage.GetDriveCount();
+        for(UInt32 ordinal=0U;ordinal<count;ordinal++)if(Storage.TryGetDrive(ordinal,out KernelStorageDeviceHandle drive,out _,out _)&&!Storage.IsSystemDrive(drive))result++;
+        return result;
+    }
+
+    private static Int64 StorageDriveCountGet(KernelSystemCallFrame* frame)=>frame==null?(Int64)KernelSystemCallError.InvalidArgument:(Int64)ManagedDriveCount();
+
+    private static Int64 StorageDriveInfoGet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.Value0>UInt32.MaxValue||frame->NativeMessage.OutputCapacity<32UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt32 ordinal=(UInt32)frame->NativeMessage.Value0;
+        if(!TryGetManagedDrive(ordinal,out KernelStorageDeviceHandle drive,out KernelStorageDeviceKind kind,out KernelStorageGeometry geometry))return (Int64)KernelSystemCallError.NotFound;
+        UInt32 partitions=0U;for(UInt32 v=0U;Storage.TryGetVolume(v,out _,out KernelStorageDeviceHandle owner,out KernelPartitionInfo partition);v++)if(owner.Value==drive.Value&&partition.Scheme!=KernelPartitionScheme.Raw)partitions++;
+        Byte* value=stackalloc Byte[32];for(Int32 i=0;i<32;i++)value[i]=0;
+        Write32(value,drive.Value);Write32(value+4,(UInt32)kind);Write32(value+8,geometry.LogicalBlockSize);
+        UInt32 flags=(geometry.ReadOnly?1U:0U)|(geometry.Removable?2U:0U);Write32(value+12,flags);Write64(value+16,geometry.BlockCount);Write32(value+24,partitions);
+        return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)value,32UL)?32L:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 StorageDriveNameGet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.Value0>=32UL||frame->NativeMessage.OutputCapacity==0UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt32 ordinal=(UInt32)frame->NativeMessage.Value0;if(!TryGetManagedDrive(ordinal,out _,out _,out _))return (Int64)KernelSystemCallError.NotFound;
+        String name=_managedDriveNames[(Int32)ordinal]??String.Empty;if(name.Length==0)return 0L;if((UInt64)name.Length>frame->NativeMessage.OutputCapacity)return (Int64)KernelSystemCallError.InvalidArgument;
+        Byte* ascii=stackalloc Byte[name.Length];for(Int32 i=0;i<name.Length;i++)ascii[i]=(Byte)name[i];
+        return KernelSystemCalls.TryCopyToUser(frame->NativeMessage.OutputAddress,(UInt64)(nuint)ascii,(UInt64)name.Length)?name.Length:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 StorageDriveNameSet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.Value0>=32UL||frame->NativeMessage.DataLength==0UL||frame->NativeMessage.DataLength>31UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt32 ordinal=(UInt32)frame->NativeMessage.Value0;if(!TryGetManagedDrive(ordinal,out _,out _,out _))return (Int64)KernelSystemCallError.NotFound;
+        UInt32 length=(UInt32)frame->NativeMessage.DataLength;Byte* raw=stackalloc Byte[(Int32)length];if(!KernelSystemCalls.TryCopyFromUser(frame->NativeMessage.DataAddress,(UInt64)(nuint)raw,length))return (Int64)KernelSystemCallError.Fault;
+        StringBuilder name=new StringBuilder((Int32)length);for(UInt32 i=0U;i<length;i++){Byte b=raw[i];if(!((b>=(Byte)'A'&&b<=(Byte)'Z')||(b>=(Byte)'a'&&b<=(Byte)'z')||(b>=(Byte)'0'&&b<=(Byte)'9')||b==(Byte)'_'||b==(Byte)'-'||b==(Byte)' '))return (Int64)KernelSystemCallError.InvalidArgument;name.Append((Char)b);}
+        _managedDriveNames[(Int32)ordinal]=name.ToString();return 0L;
+    }
+
+    private static Int64 StoragePartitionGptSet(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.Value0>UInt32.MaxValue||frame->NativeMessage.Value1==0UL||frame->NativeMessage.Value1>16UL)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt32 ordinal=(UInt32)frame->NativeMessage.Value0,count=(UInt32)frame->NativeMessage.Value1;Boolean replace=frame->NativeMessage.Value2!=0UL;
+        if(!TryGetManagedDrive(ordinal,out KernelStorageDeviceHandle drive,out _,out KernelStorageGeometry geometry))return (Int64)KernelSystemCallError.NotFound;if(geometry.ReadOnly)return (Int64)KernelSystemCallError.NotPermitted;
+        for(UInt32 v=0U;Storage.TryGetVolume(v,out KernelStorageVolumeHandle volume,out KernelStorageDeviceHandle owner,out _);v++)if(owner.Value==drive.Value&&KernelVfs.IsVolumeMounted(volume))return (Int64)KernelSystemCallError.Busy;
+        Boolean ok=replace?Storage.RepartitionGpt(drive,count):Storage.EnsureGptPartitions(drive,count,out _);return ok?0L:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static Int64 StorageFormatFat32Set(KernelSystemCallFrame* frame)
+    {
+        if(frame==null||frame->NativeMessage.Value0>UInt32.MaxValue||frame->NativeMessage.Value1==0UL||frame->NativeMessage.Value1>UInt32.MaxValue)return (Int64)KernelSystemCallError.InvalidArgument;
+        UInt32 ordinal=(UInt32)frame->NativeMessage.Value0,partition=(UInt32)frame->NativeMessage.Value1;
+        if(!TryGetManagedDrive(ordinal,out KernelStorageDeviceHandle drive,out _,out KernelStorageGeometry geometry))return (Int64)KernelSystemCallError.NotFound;if(geometry.ReadOnly)return (Int64)KernelSystemCallError.NotPermitted;
+        if(!Storage.TryGetPartition(drive,partition,out KernelStorageVolumeHandle volume))return (Int64)KernelSystemCallError.NotFound;if(KernelVfs.IsVolumeMounted(volume))return (Int64)KernelSystemCallError.Busy;
+        return FatFs.FormatFat32(volume)?0L:(Int64)KernelSystemCallError.Fault;
+    }
+
+    private static void Write32(Byte* p,UInt32 v){p[0]=(Byte)v;p[1]=(Byte)(v>>8);p[2]=(Byte)(v>>16);p[3]=(Byte)(v>>24);}
+    private static void Write64(Byte* p,UInt64 v){Write32(p,(UInt32)v);Write32(p+4,(UInt32)(v>>32));}
 
     private static Int64 FileSystemPathSeparatorGet(KernelSystemCallFrame* frame)
     {

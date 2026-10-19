@@ -1,0 +1,9 @@
+PARTITION
+
+Creates an equal-sized GPT layout on an additional data drive. Existing layouts are preserved unless replacement is explicitly confirmed.
+
+Usage:
+    partition <drive-number> <count>
+    partition <drive-number> <count> --replace --yes
+
+The --replace form destroys the existing partition table and data.

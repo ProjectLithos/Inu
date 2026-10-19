@@ -1,0 +1,8 @@
+FORMAT
+
+Formats one partition of an additional data drive as FAT32.
+
+Usage:
+    format <drive-number> <partition-number> fat32 --yes
+
+Formatting destroys existing filesystem data on the selected partition. Mounted partitions are refused.

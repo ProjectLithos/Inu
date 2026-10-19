@@ -89,17 +89,9 @@ static int MainEntry(string[] args)
         Directory.CreateDirectory(Path.Combine(visibleSystemRoot, "APPLICATIONS"));
         Directory.CreateDirectory(Path.Combine(visibleSystemRoot, "LIBRARIES"));
 
-        // Drive mount points are namespace structure, not user data. Pre-stage the system
-        // drive plus one slot for each selected persistent data controller so boot does not
-        // require a FAT mutation merely to construct the mount namespace.
-        int visibleDriveSlots = 1 + selectedStorageControllers.Where(value => value is "nvme" or "ahci").Distinct(StringComparer.OrdinalIgnoreCase).Count();
-        for (int driveIndex = 0; driveIndex < visibleDriveSlots; driveIndex++)
-        {
-            string driveRoot = Path.Combine(visibleDrivesRoot, "DRIVE" + driveIndex.ToString());
-            Directory.CreateDirectory(driveRoot);
-            Directory.CreateDirectory(Path.Combine(driveRoot, "PARTITION1"));
-            Directory.CreateDirectory(Path.Combine(driveRoot, "PARTITION2"));
-        }
+        // /Drives is only the namespace root. Physical drive and partition mount points are
+        // created by the running OS after real hardware/filesystem discovery; the image builder
+        // must never manufacture directory names that merely look like detected partitions.
 
         File.Copy(bootLoaderPath, stagedLoader, true);
         File.WriteAllText(startupScript, "@echo -off\r\nfs0:\r\n\\EFI\\BOOT\\BOOTX64.EFI\r\n", Encoding.ASCII);
@@ -145,18 +137,22 @@ static int MainEntry(string[] args)
         if (preservedUserState) Console.WriteLine("[ OK ] Existing /USERS account, Home and personal settings preserved from the previous image.");
 
         string dataDiskDirectory = Path.Combine(outputDirectory, "DataDisks", project.Name);
+        string manifestPath = Path.Combine(outputDirectory, "Inu.Image.json");
         List<object> dataDisks = new();
         foreach (string controller in selectedStorageControllers.Where(value => value is "nvme" or "ahci").Distinct(StringComparer.OrdinalIgnoreCase))
         {
             string diskPath = Path.Combine(dataDiskDirectory, controller.ToLowerInvariant() + "-0.img");
-            if (!DataDiskImage.TryEnsure(diskPath, controller, out bool created, out error)) throw Fail(error);
-            Console.WriteLine(created
-                ? $"[ OK ] Created persistent raw {controller.ToUpperInvariant()} data disk: {diskPath} (kernel will create 2 GPT partitions and format them)"
-                : $"[ OK ] Preserved persistent {controller.ToUpperInvariant()} data disk: {diskPath}");
-            dataDisks.Add(new { controller, imagePath = diskPath, partitions = 2, filesystem = "FAT32", writable = true, partitionedBy = "kernel", formattedBy = "kernel" });
+            bool migrateLegacyEmptyLayout = DataDiskImage.WasLegacyAutoProvisionedByPreviousManifest(manifestPath, controller);
+            if (!DataDiskImage.TryEnsure(diskPath, controller, migrateLegacyEmptyLayout, out bool created, out bool resetLegacyEmptyLayout, out error)) throw Fail(error);
+            if (resetLegacyEmptyLayout)
+                Console.WriteLine($"[ OK ] Reset legacy empty auto-provisioned {controller.ToUpperInvariant()} test disk to a blank raw disk: {diskPath}");
+            else if (created)
+                Console.WriteLine($"[ OK ] Created persistent raw {controller.ToUpperInvariant()} data disk: {diskPath} (left blank; OS policy owns partitioning and formatting)");
+            else
+                Console.WriteLine($"[ OK ] Preserved persistent {controller.ToUpperInvariant()} data disk exactly as it exists: {diskPath}");
+            dataDisks.Add(new { controller, imagePath = diskPath, partitions = 0, filesystem = "unprovisioned", writable = true, partitionedBy = "os-policy", formattedBy = "os-policy" });
         }
 
-        string manifestPath = Path.Combine(outputDirectory, "Inu.Image.json");
         using FileStream image = File.OpenRead(imagePath);
         string imageSha256 = Convert.ToHexString(SHA256.HashData(image)).ToLowerInvariant();
         int commandCount = Directory.GetFiles(Path.Combine(novaRoot, "SYSTEM", "COMMANDS")).Length;

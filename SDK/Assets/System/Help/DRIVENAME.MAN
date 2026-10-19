@@ -1,0 +1,9 @@
+DRIVENAME
+
+Assigns a user-friendly logical name to an additional drive for the current boot session.
+
+Usage:
+    drivename <drive-number> <name>
+
+Example:
+    drivename 0 Data

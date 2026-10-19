@@ -1,5 +1,5 @@
 {
-  "version": "0.1.120",
+  "version": "0.1.122",
   "files": [
     {
       "path": "Assets/Fonts/LinuxKernel/LinuxKernelFonts.json",
@@ -242,8 +242,16 @@
       "sha256": "f186f2f5873b58dc5119a41fb3a517099832760eb795298c98d914f5cd1b9039"
     },
     {
+      "path": "Assets/System/Help/DRIVENAME.MAN",
+      "sha256": "418050e61c4d99b0bd0a1f1e8f4f638b269fe3481c6392f5bd6a9e9aeab23870"
+    },
+    {
       "path": "Assets/System/Help/DRIVERS.MAN",
       "sha256": "dd2433cbb3ffdde091f7a2cbffb06d1f23fe209fe6107edf6d7345d82b452391"
+    },
+    {
+      "path": "Assets/System/Help/DRIVES.MAN",
+      "sha256": "986a04fa4bea590ddea989361d04cf91620c45c7a052ea25148efd6f5578f79a"
     },
     {
       "path": "Assets/System/Help/ECHO.MAN",
@@ -260,6 +268,10 @@
     {
       "path": "Assets/System/Help/FONT.MAN",
       "sha256": "d0392f3558522450bc8af5da442df40aebf716f0dcfcd5a37f15dd19b7d0be6d"
+    },
+    {
+      "path": "Assets/System/Help/FORMAT.MAN",
+      "sha256": "c41fa2f80b1aa850160d8c1cda4cac900ea218c506310aefe57536e49488dde7"
     },
     {
       "path": "Assets/System/Help/GRAPHICS.MAN",
@@ -308,6 +320,10 @@
     {
       "path": "Assets/System/Help/NETWORK.MAN",
       "sha256": "c813a58cd3f9f05ee12da38c37ea48d0aa2e656399a5b669d9c1cab4382aafb2"
+    },
+    {
+      "path": "Assets/System/Help/PARTITION.MAN",
+      "sha256": "f6ab519a9346693407ac5fbaeda51efe7ef7d90ed7c8c609662dc4111f7c23c9"
     },
     {
       "path": "Assets/System/Help/POWER.MAN",
@@ -823,7 +839,7 @@
     },
     {
       "path": "Directory.Build.props",
-      "sha256": "f64ade2d99c5e5a3b00e565fc2346dc17f4a6406d0880b3ac51393f6ddb15a23"
+      "sha256": "cd79c0406c301c20752b34da99676dc064d8e8a8dfafe70ef8d5f8026d23d5ef"
     },
     {
       "path": "Directory.Build.targets",
@@ -3231,7 +3247,7 @@
     },
     {
       "path": "Help/Inu.Documentation.json",
-      "sha256": "d2118ac0cba18a772c29b89d86d6304ab630dca177a611abb52c1782e6d5a2f4"
+      "sha256": "20163478100b4ec249a5ff6ebc5a1c890251c755ae57eb16ad579f4b80fab221"
     },
     {
       "path": "Help/search-index.json",
@@ -3263,7 +3279,7 @@
     },
     {
       "path": "Inu-Changes.json",
-      "sha256": "e09b21a1d710519efe91812e086116d8a6f74dbe33f94549f57b8fff52af7d72"
+      "sha256": "7f48c1be3d5a9762446875a46ebc6fd0df6410472fe17f9737a820d1c33bf380"
     },
     {
       "path": "Inu-Package.bat",
@@ -3307,7 +3323,7 @@
     },
     {
       "path": "Inu.SdkManifest.json",
-      "sha256": "d3ccbdd71fe6427e5c9da0e64ff5717c3416173bc97f1863af493421d8ee0d4a"
+      "sha256": "bbb68d4c7745380ba6409b5c8b17146bfedc81c03093d76979fce49f64a5a885"
     },
     {
       "path": "Inu.SubsystemContracts.json",
@@ -3819,7 +3835,7 @@
     },
     {
       "path": "src/Inu.Core/InuSdkContract.cs",
-      "sha256": "9c5dcf0034ae136186b75a6e1e640c05b12b1810e89f124d15b1cd9c8c5938ab"
+      "sha256": "7f7fe223c580f1c002cfb0eff6115074905c9a8f5ea73694eb715fc515da7bbb"
     },
     {
       "path": "src/Inu.Core/KernelAttributes.cs",
@@ -3923,7 +3939,7 @@
     },
     {
       "path": "src/Inu.ImageBuilder/DataDiskImage.cs",
-      "sha256": "810ea29f2eaf6537923a36af926308f02060bd54231940e09ae6c768a0d7c9e6"
+      "sha256": "99dae74835c281d544c3346ab69efa23ce1e8f624b1e18e685d7041161a9ba1d"
     },
     {
       "path": "src/Inu.ImageBuilder/EfiDiskImage.cs",
@@ -3935,7 +3951,7 @@
     },
     {
       "path": "src/Inu.ImageBuilder/Program.cs",
-      "sha256": "5d54b5caceb0cd31d205fd681dd3022355bc332b0bc875d72be7cc6504c70341"
+      "sha256": "9a30de3cc004e5b2c1d5a05666d35629da71ac7f09bafade9709cf55dfa82021"
     },
     {
       "path": "src/Inu.InterruptControllers.Contracts/InterruptControllerContracts.cs",
@@ -4147,7 +4163,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/Inu.Kernel.Bootstrap.csproj",
-      "sha256": "37b655e474085ceb2f275c50eb12c4d300299f5c504b2bf5761a0b986c1bb14a"
+      "sha256": "eae08001945ab7362f751c0bf2a174dbb4df30d60b5295f82f79d7d57c690cb4"
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/InuProject.json",
@@ -4291,7 +4307,7 @@
     },
     {
       "path": "src/Inu.Kernel.Bootstrap/UserlandRuntimeStartup.cs",
-      "sha256": "767b409cde80564beafb7b1a68cfbc9a526f763ed308945028736a984fa86cb0"
+      "sha256": "2ad344653134d0e8d4c9eb40b725f6ba4103eed828bc0fdf811deb0f32cbe36f"
     },
     {
       "path": "src/Inu.Kernel.Console/BitmapFont.cs",
@@ -5579,7 +5595,7 @@
     },
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCallContracts.cs",
-      "sha256": "debf58b9f306c0cbf6f2f170a4f19d4ac51f232bec24c77b318f8759ef4689ac"
+      "sha256": "b597c06fa25c6d2fdd1ffd3d353160bb55839dba5a865445d8c2f3ffb19f6775"
     },
     {
       "path": "src/Inu.Kernel.SystemCalls/KernelSystemCallMath.cs",
@@ -5991,7 +6007,7 @@
     },
     {
       "path": "src/Inu.ProjectCreator/Program.cs",
-      "sha256": "966bef7e6b2212fcd3c7ee3807c53c242a400d58c6cfd2992ffe7e4f273a2ad6"
+      "sha256": "ab984080ed9acf7b585205e7515eb692f21c77d018c72bb29bc8481e83a46816"
     },
     {
       "path": "src/Inu.ProjectModel/Inu.ProjectModel.csproj",
@@ -6182,6 +6198,10 @@
       "sha256": "3d335c2f7575520592897728d143dac06817a8764eba2c01f5a74168d098116c"
     },
     {
+      "path": "src/Inu.Userland.Runtime/StorageManagement.cs",
+      "sha256": "681c8f99f94d5f448b982ffaf939e96cc4065234efebe8107edb09e2d925ed1b"
+    },
+    {
       "path": "src/Inu.Userland.Runtime/SystemInformation.cs",
       "sha256": "432d63850e7b602d93e3bf55546ef79af60c6ef1e2803db34ed1195cef1fe289"
     },
@@ -6238,6 +6258,14 @@
       "sha256": "9dd3f8265127fafeda5d0347aae6bc63af9315aa01d6487dc2b686a042482dc9"
     },
     {
+      "path": "src/Userland/Commands/DriveName.cs",
+      "sha256": "ca6828177cde9948e5d10c9b3635e25648009d4bd122d8511df91e940b807150"
+    },
+    {
+      "path": "src/Userland/Commands/Drives.cs",
+      "sha256": "d57172dba785a724770d3985875172eae14247ee0052021205826e31c3a864ce"
+    },
+    {
       "path": "src/Userland/Commands/Echo.cs",
       "sha256": "018c28784a863d44618fafb42632c365453afc7861ef7c33020ca5eda29160b6"
     },
@@ -6246,8 +6274,16 @@
       "sha256": "47eb79c4a6d4682fa658f413fa8c19c57d6d01847af45da08e15469493febd04"
     },
     {
+      "path": "src/Userland/Commands/Format.cs",
+      "sha256": "60070c17fd827ba36f3d0755728a4422224a38684cc6db7aef757c30d8e2176c"
+    },
+    {
       "path": "src/Userland/Commands/Mkdir.cs",
       "sha256": "d018daad75323291668ea4c19eb4bf30a4e6ec75a21c94d04af34dd77e4a8649"
+    },
+    {
+      "path": "src/Userland/Commands/Partition.cs",
+      "sha256": "ec537074a69ec4155ed53cbcd36204cfbd6676ce2f1f18e4e985c1b6f8078118"
     },
     {
       "path": "src/Userland/Commands/Pwd.cs",

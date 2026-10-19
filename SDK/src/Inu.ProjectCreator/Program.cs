@@ -197,6 +197,7 @@ static int MainEntry(string[] args)
     if (!RepairTestOsKernelStorageImport(output, projectName, testOs)) throw new InvalidOperationException("Could not repair the Test OS kernel storage import.");
     if (!RepairStockTestOsBootImports(output, projectName, testOs)) throw new InvalidOperationException("Could not repair the stock Test OS boot imports.");
     if (!RepairStockTestOsStoragePolicy(output, projectName, testOs)) throw new InvalidOperationException("Could not refresh the stock Test OS storage policy.");
+    if (!RepairStockTestOsNonDestructiveStoragePolicy(output, projectName, testOs)) throw new InvalidOperationException("Could not migrate the stock Test OS storage policy to non-destructive drive discovery.");
     if (!InstrumentStockTestOsPolicyDiagnostics(output, projectName, testOs)) throw new InvalidOperationException("Could not instrument the stock Test OS policy diagnostics.");
     if (!MaterializeCoderCommands(sdkRoot, output, projectName)) throw new InvalidOperationException("Could not materialize coder commands.");
     // Shell.cs is coder-owned. Never rewrite it during compile/run preparation, even when it
@@ -601,6 +602,73 @@ static bool RepairStockTestOsStoragePolicy(string output, string projectName, bo
     catch (Exception ex)
     {
         Console.Error.WriteLine($"[FAIL] Unable to refresh stock Test OS storage policy: {ex.Message}");
+        return false;
+    }
+}
+
+static bool RepairStockTestOsNonDestructiveStoragePolicy(string output, string projectName, bool testOs)
+{
+    if (!testOs) return true;
+    string kernelPath = Path.Combine(output, "Kernel", projectName, "Kernel.cs");
+    if (!File.Exists(kernelPath)) return true;
+    try
+    {
+        string source = File.ReadAllText(kernelPath);
+        const string startAnchor = "        UInt32 detectedDriveCount = Storage.GetDriveCount();";
+        const string endAnchor = "        // Logical folders are created only after the system filesystem and every additional";
+        int start = source.IndexOf(startAnchor, StringComparison.Ordinal);
+        if (start < 0) return true;
+        int end = source.IndexOf(endAnchor, start, StringComparison.Ordinal);
+        if (end < 0) return true;
+        ReadOnlySpan<char> candidate = source.AsSpan(start, end - start);
+        // Only migrate the untouched Kath-generated destructive default. Coder-owned storage
+        // policy is preserved if these exact stock markers are no longer present.
+        if (!candidate.Contains("Storage.EnsureGptPartitions(drive, 2U, out createdLayout)", StringComparison.Ordinal) ||
+            !candidate.Contains("String drivePath = "/Drives/Drive" + driveOrdinal.ToString();", StringComparison.Ordinal)) return true;
+
+        string replacement = """
+        UInt32 detectedDriveCount = Storage.GetDriveCount();
+        UInt32 additionalDriveOrdinal = 0U;
+        for (UInt32 driveOrdinal = 0U; driveOrdinal < detectedDriveCount; driveOrdinal++)
+        {
+            if (!Storage.TryGetDrive(driveOrdinal, out KernelStorageDeviceHandle drive, out KernelStorageDeviceKind driveKind, out KernelStorageGeometry geometry)) continue;
+            if (Storage.IsSystemDrive(drive)) continue;
+
+            // Discovery is non-destructive. Blank disks stay blank until the OS author explicitly
+            // chooses a partition/format policy with EnsureGptPartitions/RepartitionGpt/FormatFat32.
+            String drivePath = "/Drives/Drive" + additionalDriveOrdinal.ToString();
+            additionalDriveOrdinal++;
+            if (!FileSystem.EnsureDirectory(drivePath))
+            {
+                KernelConsole.WriteHostControl("OS_POLICY_DRIVE_DIRECTORY_FAIL");
+                return false;
+            }
+
+            // Mount only filesystems that already exist on this additional physical drive.
+            UInt32 volumeCount = Storage.GetVolumeCount();
+            for (UInt32 volumeOrdinal = 0U; volumeOrdinal < volumeCount; volumeOrdinal++)
+            {
+                if (!Storage.TryGetVolume(volumeOrdinal, out KernelStorageVolumeHandle volume, out KernelStorageDeviceHandle owner, out KernelPartitionInfo partition)) continue;
+                if (owner.Value != drive.Value) continue;
+                if (!FatFs.TryGetFileSystemType(volume, out KernelFileSystemType fileSystemType)) continue;
+                String mountPath = drivePath + "/Partition" + (partition.Index + 1U).ToString();
+                if (!FileSystem.Mount(volume, fileSystemType, mountPath))
+                {
+                    KernelConsole.WriteHostControl("OS_POLICY_DATA_MOUNT_FAIL");
+                    return false;
+                }
+            }
+        }
+
+""";
+        source = source[..start] + replacement + source[end..];
+        File.WriteAllText(kernelPath, source);
+        Console.WriteLine($"[ OK ] Migrated untouched stock Test OS storage policy to non-destructive additional-drive discovery: {kernelPath}");
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"[FAIL] Unable to migrate stock Test OS storage policy: {ex.Message}");
         return false;
     }
 }

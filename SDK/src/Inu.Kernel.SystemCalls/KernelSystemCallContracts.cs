@@ -78,6 +78,11 @@ public static class KernelSystemCallMessages
     public const String FileSystemPathSeparator = "filesystem.path-separator";
     public const String FileSystemCommandsPathCount = "filesystem.commands-path.count";
     public const String FileSystemCommandsPath = "filesystem.commands-path";
+    public const String StorageDriveCount = "storage.drive.count";
+    public const String StorageDriveInfo = "storage.drive.info";
+    public const String StorageDriveName = "storage.drive.name";
+    public const String StoragePartitionGpt = "storage.partition.gpt";
+    public const String StorageFormatFat32 = "storage.format.fat32";
 }
 
 /// <summary><inu.api>

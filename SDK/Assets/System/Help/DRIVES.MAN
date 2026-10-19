@@ -1,0 +1,9 @@
+DRIVES
+
+Lists additional data drives that may be managed by the user.
+The boot/system drive is intentionally excluded.
+
+Usage:
+    drives
+
+Use the displayed Drive number with DRIVENAME, PARTITION and FORMAT.
