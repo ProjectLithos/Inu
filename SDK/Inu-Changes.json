@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.134",
-  "version": "0.1.135",
-  "summary": "Existing-image preservation now recognises structurally valid FAT32 BPBs without relying on the optional FAT32 label and can safely scan historical sector-aligned layouts.",
+  "baseVersion": "0.1.135",
+  "version": "0.1.136",
+  "summary": "Existing-image /User preservation now retries the mirrored FAT copy and safely accepts a provably empty legacy directory cluster whose FAT entry was left free.",
   "changedFiles": 1,
   "deletedFiles": 0
 }
