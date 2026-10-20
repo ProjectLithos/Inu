@@ -1,7 +1,7 @@
 {
-  "baseVersion": "0.1.137",
-  "version": "0.1.138",
-  "summary": "GPT repartitioning now verifies every on-disk structure, treats completed/read-back NVMe writes as authoritative even when Flush is unsupported, and installs the verified partition geometry transactionally when generic rediscovery cannot complete.",
+  "baseVersion": "0.1.138",
+  "version": "0.1.139",
+  "summary": "Filesystem mount publication no longer wakes the background path-index scanner synchronously; mounted roots are indexed only after INTERACTIVE_READY so OS policy mount cannot be stalled by background directory scanning.",
   "changedFiles": 2,
   "deletedFiles": 0
 }

@@ -376,6 +376,10 @@ public static unsafe class UserlandRuntimeStartup
         {
             if(!KernelConsole.WriteHostControl("INTERACTIVE_READY"))return (Int64)KernelSystemCallError.Fault;
             _interactiveReadyPublished=true;
+            // The path index is an accelerator, not a mount prerequisite. Starting its storage-role
+            // scan only after INTERACTIVE_READY prevents filesystem mount from being coupled to a
+            // background directory walk while preserving boot-time indexing for the live shell.
+            KernelPathIndex.StartBackgroundScanning();
         }
         // SYSCALL enters with IF clear. Check the queue before STI;HLT, then
         // mask interrupts again before inspecting it. IRQ handlers queue input;

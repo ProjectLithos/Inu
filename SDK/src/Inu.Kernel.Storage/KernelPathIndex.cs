@@ -25,7 +25,7 @@ public static unsafe class KernelPathIndex
     private static Entry[] _entries=new Entry[(Int32)MaximumEntries];
     private static UInt32[] _queue=new UInt32[(Int32)MaximumEntries];
     private static UInt32 _queueRead,_queueWrite,_queueCount,_count;
-    private static Boolean _initialized;
+    private static Boolean _initialized,_backgroundScanStarted;
 
     internal static Boolean Initialize(){_initialized=true;return true;}
     public static Boolean IsInitialized()=>_initialized;
@@ -36,7 +36,24 @@ public static unsafe class KernelPathIndex
     {
         if(!_initialized||ns.Value==0U||path==null||path.Length==0||path.Length>MaximumPathBytes)return;
         Byte* ascii=stackalloc Byte[path.Length];for(Int32 i=0;i<path.Length;i++){Char c=path[i];if(c>0x7F)return;ascii[i]=(Byte)c;}
-        Int32 slot=AddOrUpdate(ns,ascii,(UInt32)path.Length,KernelFileType.Directory,false);if(slot>=0)Queue((UInt32)slot);
+        Int32 slot=AddOrUpdate(ns,ascii,(UInt32)path.Length,KernelFileType.Directory,false);
+        // Mount publication is part of the synchronous boot/storage policy and must never wake
+        // the Storage-role scanner before KernelVfs.Mount has returned to its caller. Before
+        // INTERACTIVE_READY, simply remember the root. Once background scanning has explicitly
+        // started, later mounts may be queued immediately.
+        if(slot>=0&&_backgroundScanStarted)Queue((UInt32)slot);
+    }
+
+    /// <summary>Starts best-effort indexing only after the interactive session is live.</summary>
+    public static void StartBackgroundScanning()
+    {
+        if(!_initialized||_backgroundScanStarted)return;_backgroundScanStarted=true;
+        for(UInt32 i=0U;i<MaximumEntries;i++)
+        {
+            Entry e=_entries[(Int32)i];
+            if(e.Used==0U||e.Type!=(Byte)KernelFileType.Directory||e.Scanned!=0U||e.Queued!=0U)continue;
+            Queue(i);
+        }
     }
 
     internal static void NotifyCreated(KernelMountNamespaceHandle ns,Byte* path,UInt32 length,KernelFileType type)
